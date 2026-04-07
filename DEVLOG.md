@@ -81,3 +81,15 @@ genera un tour navegable → los clientes lo visitan escaneando un QR.
 - git push desde local a GitHub
 - git pull en el servidor para desplegar
 - El servidor siempre tiene la versión actualizada
+
+**Paso 6 - Base de datos MySQL**
+- Creada base de datos: `oxphyre` (utf8mb4)
+- Creado usuario: `oxphyre`@`localhost` con permisos completos sobre la BD
+- Seguridad aplicada: sin usuarios anónimos, sin acceso root remoto, BD test eliminada
+
+**Paso 7 - Microservicio Python**
+- Entorno virtual creado en `/var/www/oxphyre/python-service/venv`
+- Librerías instaladas: Flask 3.1.3, Pillow 12.2.0
+- Flask: framework para crear la API REST del microservicio
+- Pillow: librería para procesar y optimizar imágenes 360°
+- El venv está en .gitignore (no se sube a GitHub, se crea en cada servidor)
