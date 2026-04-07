@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # SSH Keys
 *.pem
+
+# Python virtual environment
+python-service/venv/
