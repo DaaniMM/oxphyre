@@ -64,4 +64,20 @@ genera un tour navegable → los clientes lo visitan escaneando un QR.
 - `docs/` → documentación y memoria del TFG
 - `DEVLOG.md` → este archivo, diario de desarrollo
 
+**Paso 4 - Configurar servidor AWS EC2**
+- Instancia: t3.micro, Ubuntu 22.04 LTS, 20GB
+- IP elástica asignada: 13.62.93.7 (fija, no cambia aunque se reinicie)
+- Stack instalado: Nginx, PHP 8.1 + PHP-FPM, MySQL 8.0, Python 3 + pip + venv
+- Motivo IP elástica: garantiza que el QR y los enlaces no se rompan si la instancia se reinicia
+- Nginx configurado en /etc/nginx/sites-available/oxphyre
+  - Puerto 80, root en /var/www/oxphyre/public
+  - Rutas / → archivos estáticos (Three.js, HTML, CSS)
+  - Rutas /api → PHP
+- Repo clonado en /var/www/oxphyre
+- Verificado: http://13.62.93.7 sirve correctamente
 
+**Paso 5 - Flujo de trabajo establecido**
+- Desarrollo en local (VSCode)
+- git push desde local a GitHub
+- git pull en el servidor para desplegar
+- El servidor siempre tiene la versión actualizada
