@@ -1,38 +1,139 @@
-# DEVLOG - Oxphyre
+---
 
-## ¿Qué es Oxphyre?
-Plataforma SaaS de tours virtuales 360° para pequeños negocios locales
-(gimnasios, restaurantes, tiendas, peluquerías...).
-
-El dueño del negocio sube fotos 360° → Python las optimiza → Three.js
-genera un tour navegable → los clientes lo visitan escaneando un QR.
+### Seguridad (nivel producción)
+- Passwords con password_hash() bcrypt
+- Sesiones con regeneración de ID tras login
+- CSRF tokens en todos los formularios
+- Prepared statements en todas las queries (sin SQL injection)
+- Rate limiting en login (máx 5 intentos, bloqueo temporal)
+- Verificación de email al registrarse
+- Recuperación de contraseña con token de un solo uso
+- Headers de seguridad en Nginx (X-Frame-Options, CSP, HSTS)
+- Sanitización de inputs en cliente y servidor
 
 ---
 
-## Stack técnico
-- **Frontend:** HTML5 + CSS3 + JavaScript vanilla + Three.js
-- **Backend:** PHP 8 puro (sin frameworks)
-- **Base de datos:** MySQL
-- **Microservicio IA:** Python + Flask + Pillow (optimización imágenes)
-- **Automatización:** n8n
-- **Despliegue:** AWS EC2 (Ubuntu + Nginx)
-- **Control de versiones:** Git + GitHub
+### UX/UI
+- CSS custom con variables, sin frameworks pesados (demuestra dominio real)
+- Animaciones con CSS + JavaScript Intersection Observer
+- Fuente: Inter o Plus Jakarta Sans (Google Fonts)
+- Paleta: oscura y futurista con acento naranja/ámbar (acorde con Oxphyre)
+- Three.js integrado directamente en la hero de la landing
+- Micro-interacciones en botones, inputs y transiciones
+- Loading states y skeleton loaders
+- 100% responsive para todos los dispositivos
 
 ---
 
-## Decisiones importantes
-- Sin frameworks JS (React, Vue...) porque el TFG debe demostrar dominio puro
-- Three.js es la única librería externa permitida, es el core del proyecto
-- AWS en vez de Webempresa porque soporta Python nativamente y ya hay créditos disponibles (126$)
-- Repo público para que el tribunal pueda verlo
-- La app estará desplegada online → los profesores pueden probarla desde
-  sus portátiles durante la exposición escaneando un QR
+### Performance y SEO (puntuado por el tribunal)
+- Imágenes en WebP con lazy loading
+- CSS y JS minificados
+- Gzip activado en Nginx
+- Cache headers configurados
+- Sin librerías innecesarias
+- Meta tags completos
+- Open Graph para redes sociales
+- sitemap.xml y robots.txt optimizados
+- Objetivo: PageSpeed 100 en mobile y desktop
+
+---
+
+### Multiidioma
+- Español e inglés como idiomas base
+- Arquitectura preparada para añadir más idiomas en el futuro
+- Selector de idioma visible en header y footer
+
+---
+
+### Legal y RGPD
+- Banner de cookies obligatorio (RGPD = Reglamento General de Protección de Datos europeo)
+- Política de privacidad real
+- Términos y condiciones
+- Todo visible desde el footer
+
+---
+
+### PWA (Progressive Web App)
+Orientada principalmente a los visitantes que escanean el QR desde móvil.
+- manifest.json → nombre, icono, colores de la app
+- service-worker.js → cachea recursos para carga rápida con mala conexión
+- Si en el futuro hay demanda real, se desarrolla app nativa
+
+---
+
+### Gestión de imágenes 360°
+**Flujo:** Usuario sube foto → Python la procesa y optimiza (Pillow) → se guarda en servidor → Three.js la carga en el tour.
+- Para el TFG: almacenamiento directo en el servidor EC2
+- Para producción futura: migrar a AWS S3 (más escalable)
+- Pendiente definir: formatos aceptados, tamaño máximo, resolución mínima recomendada
+
+---
+
+### Sistema de emails transaccionales
+- Librería: PHPMailer + Gmail SMTP
+- Gratuito, profesional, sin dependencias externas complejas
+- Casos de uso: verificación de email, bienvenida, recuperar contraseña, notificación de contacto
+- Instalación: Composer en el backend
+
+---
+
+### n8n - Automatización
+- Herramienta de automatización visual self-hosted (gratuita)
+- Casos de uso previstos: email bienvenida automático, alerta nuevos registros, notificación escaneos QR, recordatorio usuarios inactivos
+- ⚠️ IMPORTANTE: verificar que la instancia EC2 t3.micro aguanta n8n junto al resto del stack antes de implementar. Si no hay RAM suficiente, dejar como integración futura documentada.
+- Decisión: implementar al final si hay tiempo y recursos
+
+---
+
+### Esquema de base de datos
+
+**users** → id, name, email, password, role, email_verified, verification_token, reset_token, reset_token_expires, created_at, updated_at
+
+**businesses** → id, user_id, name, slug, logo, description, phone, address, plan_id, plan_expires_at, is_active, created_at, updated_at
+
+**plans** → id, name, max_tours, max_photos_per_tour, watermark, analytics, price_monthly, created_at
+
+**tours** → id, business_id, title, description, slug, is_published, views_count, created_at, updated_at
+
+**photos** → id, tour_id, filename, original_filename, order_index, is_360, processed, created_at
+
+**hotspots** → id, photo_id, type, title, description, target_photo_id, position_x, position_y, position_z, created_at
+
+**qr_codes** → id, tour_id, filename, total_scans, created_at
+
+**qr_scans** → id, qr_code_id, ip_address, user_agent, device_type, country, scanned_at
+
+**contact_messages** → id, name, email, subject, message, is_read, created_at
+
+**cookies_consent** → id, session_id, accepted, created_at
+
+---
+
+### Prioridad de desarrollo
+1. Arquitectura MVC + router + estructura de carpetas backend
+2. Esquema BD → crear todas las tablas en MySQL
+3. Landing page impactante con Three.js en hero
+4. Auth completa y segura (registro, login, verificación email, recuperar password)
+5. Dashboard con creación y gestión de tours
+6. Vista del tour 360° con hotspots navegables
+7. QR descargable con analíticas básicas de escaneos
+8. Onboarding wizard para nuevos negocios
+9. Página de precios con los tres planes
+10. Formulario de contacto con PHPMailer
+11. Panel de administración (admin)
+12. 404/500 personalizadas
+13. Legal: cookies, términos, privacidad, RGPD
+14. Multiidioma (español/inglés)
+15. PWA (manifest.json + service-worker.js)
+16. Optimización PageSpeed (minificación, WebP, gzip, cache)
+17. SEO técnico (sitemap.xml, robots.txt, meta tags, Open Graph)
+18. n8n (solo si hay tiempo y RAM suficiente)
 
 ---
 
 ## Registro de pasos
 
-### [07/04/2025] Día 1 - Setup inicial
+### [07/04/2026] Día 1 - Setup inicial
 
 **Paso 1 - Crear repositorio GitHub**
 - Nombre: `oxphyre`
@@ -93,7 +194,6 @@ genera un tour navegable → los clientes lo visitan escaneando un QR.
 - Flask: framework para crear la API REST del microservicio
 - Pillow: librería para procesar y optimizar imágenes 360°
 - El venv está en .gitignore (no se sube a GitHub, se crea en cada servidor)
-
 
 ### [09/04/2026] Día 2 - Dominio y HTTPS
 
