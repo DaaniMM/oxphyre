@@ -93,3 +93,22 @@ genera un tour navegable → los clientes lo visitan escaneando un QR.
 - Flask: framework para crear la API REST del microservicio
 - Pillow: librería para procesar y optimizar imágenes 360°
 - El venv está en .gitignore (no se sube a GitHub, se crea en cada servidor)
+
+
+### [09/04/2026] Día 2 - Dominio y HTTPS
+
+**Paso 8 - Dominio oxphyre.com**
+- Comprado en IONOS: oxphyre.com + oxphyre.es + oxphyre.org + oxphyre.store por 1€/año
+- Renovación automática desactivada en todos (expiran 07/04/2027)
+- Dominio principal: oxphyre.com
+
+**Paso 9 - Configuración DNS**
+- Registro A @ → 13.62.93.7 (servidor AWS)
+- Registro A www → 13.62.93.7
+- Los cambios propagaron en minutos
+
+**Paso 10 - HTTPS con Let's Encrypt**
+- Certbot instalado en el servidor
+- Certificado SSL gratuito para oxphyre.com y www.oxphyre.com
+- Renovación automática configurada (expira 08/07/2026)
+- La app ya es accesible en https://oxphyre.com
