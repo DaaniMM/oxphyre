@@ -255,3 +255,10 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - Actualizado esquema de BD con tablas positions y photos rediseñadas
 - Definidos los 3 planes SaaS con sus funcionalidades específicas
 - Definida la prioridad de desarrollo completa
+
+**Paso 12 - Claude Code configurado**
+- Instalado Claude Code globalmente: `npm install -g @anthropic-ai/claude-code`
+- Autenticado con cuenta Claude Pro
+- Creado CLAUDE.md → contexto del proyecto para Claude Code (stack, estructura, rutas, planes SaaS)
+- Creado AGENTS.md → instrucciones de comportamiento (reglas absolutas, ahorro de tokens, estilo de código, seguridad)
+- Motivo: Claude Code leerá ambos archivos al inicio de cada sesión y trabajará autónomamente sin necesidad de explicar el proyecto cada vez
