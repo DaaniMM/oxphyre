@@ -262,3 +262,10 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - Creado CLAUDE.md → contexto del proyecto para Claude Code (stack, estructura, rutas, planes SaaS)
 - Creado AGENTS.md → instrucciones de comportamiento (reglas absolutas, ahorro de tokens, estilo de código, seguridad)
 - Motivo: Claude Code leerá ambos archivos al inicio de cada sesión y trabajará autónomamente sin necesidad de explicar el proyecto cada vez
+
+**Paso 13 - Estructura de carpetas MVC definitiva**
+- Reorganizada la estructura completa del proyecto para reflejar el patrón MVC
+- Eliminado: src/, public/360/, public/models/, backend/api/
+- Añadido: backend/controllers/, backend/views/, backend/routes/, backend/middleware/
+- Añadido: public/css/, public/js/, public/uploads/, python-service/
+- La estructura es idéntica en local y en el servidor AWS
