@@ -300,3 +300,10 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - Creada backend/views/home.php → vista placeholder
 - Verificado flujo completo: Nginx → index.php → Router → HomeController → Vista
 - https://oxphyre.com responde correctamente con el MVC funcionando
+
+**Decisión - Compartir tours: QR + Embed**
+- Los tours no se comparten únicamente por QR
+- También mediante código iframe embebible en la web propia del negocio
+- El dueño copia un snippet de código y lo pega en su web → el tour aparece directamente
+- Elimina la barrera del QR para clientes que ya están visitando la web del negocio
+- Pendiente añadir al dashboard: sección "Compartir tour" con QR descargable + código embed copiable
