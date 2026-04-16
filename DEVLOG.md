@@ -290,3 +290,13 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
   - `backend/middleware/AuthMiddleware.php` → Métodos estáticos check() (bloquea no autenticados → /login, guarda redirect_after_login) y guest() (bloquea autenticados → /dashboard)
 - Todos los archivos con comentarios en español explicando QUÉ hace cada sección y POR QUÉ (requisito para TFG)
 - Seguridad: sin credenciales hardcodeadas, headers HTTP en cada respuesta, sesión con todos los flags de seguridad, validated session_id type (int > 0)
+
+**Paso 16 - Nginx configurado para MVC + prueba end-to-end**
+- Actualizada configuración Nginx: try_files ahora redirige a index.php (Front Controller)
+- Eliminado index.html estático que sobreescribía el router
+- Creado .env en el servidor con credenciales reales (no en GitHub)
+- APP_KEY generada con bin2hex(random_bytes(32))
+- Creado HomeController.php → método index() carga la vista home.php
+- Creada backend/views/home.php → vista placeholder
+- Verificado flujo completo: Nginx → index.php → Router → HomeController → Vista
+- https://oxphyre.com responde correctamente con el MVC funcionando
