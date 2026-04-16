@@ -279,3 +279,14 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - price_yearly añadido a plans para el toggle mensual/anual en la página de precios
 - Foreign keys con ON DELETE CASCADE para evitar datos huérfanos
 - Precios anuales con ~20% de descuento sobre el mensual (ajustar cuando se definan los planes al 100%)
+
+**Paso 15 - Arquitectura base del backend MVC**
+- Creados 6 archivos que forman el núcleo del sistema MVC:
+  - `public/index.php` → Front Controller: carga .env, configura sesión segura (HttpOnly, Secure, SameSite=Strict, strict_mode), emite headers de seguridad (X-Frame-Options, X-Content-Type-Options, CSP, Referrer-Policy, HSTS en producción) e incluye los archivos base en el orden correcto
+  - `backend/config/database.php` → Clase Database con patrón Singleton, PDO con utf8mb4, ERRMODE_EXCEPTION, FETCH_ASSOC y EMULATE_PREPARES=false (prepared statements reales). Credenciales solo desde $_ENV
+  - `backend/config/config.php` → Constantes globales: APP_NAME, APP_VERSION, APP_URL, APP_ENV, rutas de sistema (BASE_PATH, BACKEND_PATH, VIEWS_PATH, UPLOADS_PATH), MAX_UPLOAD_SIZE (10MB), ALLOWED_MIME_TYPES, SESSION_LIFETIME, IDs de planes SaaS (PLAN_FREE/PRO/BUSINESS)
+  - `backend/routes/web.php` → Mini-router que mapea [método HTTP][URI] → [Controller, método, guard]. Soporta guards 'auth' y 'guest'. Parsea URI con parse_url(), normaliza slashes, carga controllers dinámicamente, responde 404 limpio para rutas no encontradas
+  - `.env.example` → Plantilla completa con secciones: BD, aplicación (APP_KEY con instrucción de generación), correo (PHPMailer + Gmail SMTP), Python service. Sin valores reales
+  - `backend/middleware/AuthMiddleware.php` → Métodos estáticos check() (bloquea no autenticados → /login, guarda redirect_after_login) y guest() (bloquea autenticados → /dashboard)
+- Todos los archivos con comentarios en español explicando QUÉ hace cada sección y POR QUÉ (requisito para TFG)
+- Seguridad: sin credenciales hardcodeadas, headers HTTP en cada respuesta, sesión con todos los flags de seguridad, validated session_id type (int > 0)
