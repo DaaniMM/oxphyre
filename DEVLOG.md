@@ -269,3 +269,13 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - Añadido: backend/controllers/, backend/views/, backend/routes/, backend/middleware/
 - Añadido: public/css/, public/js/, public/uploads/, python-service/
 - La estructura es idéntica en local y en el servidor AWS
+
+### [16/04/2026] Día 4 - Base de datos completa
+
+**Paso 14 - Creación de todas las tablas MySQL**
+- Creadas 12 tablas: plans, users, businesses, tours, positions, photos, hotspots, qr_codes, qr_scans, contact_messages, cookies_consent, login_attempts
+- Insertados los 3 planes iniciales: Free (0€), Pro (19€/mes, 182€/año), Business (49€/mes, 470€/año)
+- login_attempts con índices en email e ip_address para rate limiting eficiente
+- price_yearly añadido a plans para el toggle mensual/anual en la página de precios
+- Foreign keys con ON DELETE CASCADE para evitar datos huérfanos
+- Precios anuales con ~20% de descuento sobre el mensual (ajustar cuando se definan los planes al 100%)
