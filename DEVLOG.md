@@ -280,6 +280,15 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - Foreign keys con ON DELETE CASCADE para evitar datos huérfanos
 - Precios anuales con ~20% de descuento sobre el mensual (ajustar cuando se definan los planes al 100%)
 
+**Paso 16 - Landing page completa**
+- Creados 4 archivos: `backend/views/home.php`, `public/css/main.css`, `public/js/main.js`, `public/js/i18n.js`
+- `home.php`: landing completa con 11 secciones (nav, hero, logos, cómo funciona, características, demo, precios, testimonios, FAQ, CTA final, footer). SEO completo: title + meta description + canonical + OG + Twitter Card + Schema.org SoftwareApplication + FAQPage en JSON-LD. H1 único con keyword "tours virtuales 3D". aria-labels en todas las secciones. Sin inline event handlers.
+- `main.css`: variables CSS para tema oscuro/claro, glassmorphism con backdrop-filter, animaciones solo con transform+opacity (GPU, sin reflow), responsive hasta 480px, noise texture como SVG data URI
+- `main.js`: 8 módulos — tema día/noche (localStorage + prefers-color-scheme), idioma (delega en i18n.js), nav glassmorphism con IntersectionObserver (no scroll listener), menú móvil, animaciones scroll con IntersectionObserver, acordeón FAQ con max-height animado, toggle precios mensual/anual desde data attributes, Three.js (esfera + wireframe dorado + anillo + luces)
+- `i18n.js`: traducciones completas ES/EN con ~100 keys, applyLang() recorre data-i18n, initLang() detecta localStorage → prefers-language → fallback ES
+- CSP actualizada en index.php: añadido `https://unpkg.com` a script-src para Three.js CDN
+- Three.js cargado con defer desde unpkg.com (no bloquea render)
+
 **Paso 15 - Arquitectura base del backend MVC**
 - Creados 6 archivos que forman el núcleo del sistema MVC:
   - `public/index.php` → Front Controller: carga .env, configura sesión segura (HttpOnly, Secure, SameSite=Strict, strict_mode), emite headers de seguridad (X-Frame-Options, X-Content-Type-Options, CSP, Referrer-Policy, HSTS en producción) e incluye los archivos base en el orden correcto
