@@ -2,17 +2,17 @@
 /* Las variables en :root definen el tema oscuro por defecto.
    body.light sobreescribe solo las variables que cambian, sin duplicar reglas. */
 :root {
-  --bg:          #08080A;
-  --bg-2:        #111009;
-  --bg-3:        #1A1710;
+  --bg:          #050505;
+  --bg-2:        #0A0A0A;
+  --bg-3:        #111111;
   --accent:      #FEB354;
-  --accent-dim:  rgba(254,179,84,0.15);
-  --accent-glow: rgba(254,179,84,0.08);
-  --text-1:      #F5F0E8;
-  --text-2:      #A89880;
-  --text-3:      #7A7060;
-  --border:      rgba(254,179,84,0.12);
-  --border-2:    rgba(255,255,255,0.06);
+  --accent-dim:  rgba(254,179,84,0.08);
+  --accent-glow: rgba(254,179,84,0.04);
+  --text-1:      #F0EDE8;
+  --text-2:      #6B6560;
+  --text-3:      #3D3A36;
+  --border:      rgba(255,255,255,0.06);
+  --border-2:    rgba(255,255,255,0.03);
   --radius:      14px;
   --radius-lg:   22px;
   --shadow:      0 8px 40px rgba(0,0,0,0.5);
@@ -29,10 +29,10 @@ body.light {
   --text-1:      #1A1710;
   --text-2:      #5A5040;
   --text-3:      #9A8870;
-  --border:      rgba(254,179,84,0.25);
-  --border-2:    rgba(0,0,0,0.08);
-  --accent-dim:  rgba(254,179,84,0.2);
-  --accent-glow: rgba(254,179,84,0.12);
+  --border:      rgba(0,0,0,0.08);
+  --border-2:    rgba(0,0,0,0.04);
+  --accent-dim:  rgba(254,179,84,0.12);
+  --accent-glow: rgba(254,179,84,0.06);
   --shadow:      0 8px 40px rgba(0,0,0,0.12);
 }
 
@@ -284,7 +284,7 @@ body.light #nav.nav-scrolled {
   padding-top: var(--nav-h);
   overflow: hidden;
   /* Luz cálida atmosférica desde el centro — evoca una cámara oscura con luz dorada */
-  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(254,179,84,0.07) 0%, transparent 70%), var(--bg);
+  background: radial-gradient(ellipse 60% 40% at 50% 60%, rgba(254,179,84,0.05) 0%, transparent 60%), var(--bg);
 }
 
 .hero-inner {
