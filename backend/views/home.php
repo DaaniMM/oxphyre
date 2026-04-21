@@ -701,7 +701,7 @@
 
 <!-- ── SCRIPTS (al final del body para no bloquear el render) ────────────────── -->
 <!-- Three.js desde CDN unpkg con defer: se descarga en paralelo, se ejecuta tras parsear el DOM -->
-<script defer src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+<script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <!-- i18n primero: main.js lo llama en DOMContentLoaded -->
 <script defer src="/js/i18n.js"></script>
 <script defer src="/js/main.js"></script>
