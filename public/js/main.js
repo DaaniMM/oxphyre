@@ -201,11 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // El emisivo simula calor interno: la superficie parece iluminada desde dentro.
     const geo = new THREE.SphereGeometry(1.4, 64, 64);
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x080401,
-      roughness: 0.92,
-      metalness: 0.03,
-      emissive: 0xFEB354,
-      emissiveIntensity: 0.04  // Muy bajo: brasa interior, no color en superficie
+      color: 0x050300,
+      roughness: 0.95,
+      metalness: 0.0,
+      emissive: 0x000000,
+      emissiveIntensity: 0
     });
     const sphere = new THREE.Mesh(geo, mat);
     // Ligeramente derecha y abajo para composición más interesante con el texto centrado
@@ -221,12 +221,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Luz puntual ámbar bajo la esfera: genera el highlight inferior, efecto ember-orb.
     // La posición por debajo de la geometría crea luz desde el suelo hacia arriba.
-    const emberLight = new THREE.PointLight(0xFEB354, 6, 5);
-    emberLight.position.set(0.5, -2.8, 0.5);
+    const emberLight = new THREE.PointLight(0xFEB354, 8, 4);
+    emberLight.position.set(0.5, -2.2, 0.8);
     scene.add(emberLight);
 
     // Halo más difuso y lejano: extiende el glow alrededor de la silueta inferior
-    const haloLight = new THREE.PointLight(0xFF7A20, 2, 9);
+    const haloLight = new THREE.PointLight(0xFF7A20, 3, 7);
     haloLight.position.set(0.5, -3.5, 1.5);
     scene.add(haloLight);
 
