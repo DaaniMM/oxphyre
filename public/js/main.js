@@ -168,88 +168,132 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ── 8. THREE.JS — ESFERA FLOTANTE ─────────────────────────────────────────
-  // Three.js se carga desde CDN con defer y está disponible como global THREE.
-  // Usamos requestAnimationFrame para la animación; no bloqueamos el hilo principal.
-  // El canvas es transparente: el fondo lo gestiona el CSS (radial-gradient cálido).
+  // ── 8. THREE.JS — ESFERA EMBER INMERSIVA ─────────────────────────────────
+  // Hero fullscreen: el canvas ocupa toda la ventana como fondo animado.
+  // Solo se inicia en > 768px. En móvil el glow CSS ya da el efecto visual.
+  // Inspirado en ember-orb de Lovable: esfera oscura con luz ámbar interior desde abajo.
   function initThreeJS() {
+    // En móvil ahorramos batería y recursos — el CSS hace de fallback visual
+    if (window.innerWidth <= 768) return;
+
     const canvas = document.getElementById('hero-canvas');
     if (!canvas || typeof THREE === 'undefined') return;
 
     const scene = new THREE.Scene();
 
-    // Cámara perspectiva con relación de aspecto 1:1 (el canvas es cuadrado)
-    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
-    camera.position.set(0, 0, 3.2);
+    // Cámara con aspecto de toda la ventana (el canvas es fullscreen, no cuadrado)
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 4.5);
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0); // Fondo transparente
+    renderer.setClearColor(0x000000, 0); // Transparente — el negro y el glow vienen del CSS
 
     function resize() {
-      const size = Math.min(canvas.parentElement.clientWidth, 520);
-      renderer.setSize(size, size);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
     }
     resize();
     window.addEventListener('resize', resize);
 
-    // Esfera interior: material oscuro cálido con emisivo sutil
-    const geo = new THREE.SphereGeometry(1, 48, 48);
+    // Esfera principal: muy oscura con emisivo ámbar muy bajo.
+    // El emisivo simula calor interno: la superficie parece iluminada desde dentro.
+    const geo = new THREE.SphereGeometry(1.8, 64, 64);
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x1A1710,
-      roughness: 0.85,
-      metalness: 0.15,
-      emissive: 0x3D2A08,
-      emissiveIntensity: 0.4
+      color: 0x080401,
+      roughness: 0.92,
+      metalness: 0.03,
+      emissive: 0xFEB354,
+      emissiveIntensity: 0.10  // Muy bajo: brasa interior, no color en superficie
     });
     const sphere = new THREE.Mesh(geo, mat);
+    // Ligeramente derecha y abajo para composición más interesante con el texto centrado
+    sphere.position.set(0.5, -0.2, 0);
     scene.add(sphere);
 
-    // Wireframe dorado superpuesto — evoca la estructura de un tour 360
-    const wGeo = new THREE.WireframeGeometry(geo);
-    const wMat = new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.25 });
-    const wireframe = new THREE.LineSegments(wGeo, wMat);
+    // Wireframe sutil parented a sphere — rota y flota con ella sin cálculos extra
+    const wireframe = new THREE.LineSegments(
+      new THREE.WireframeGeometry(geo),
+      new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.055 })
+    );
     sphere.add(wireframe);
 
-    // Anillo ecuatorial para dar sensación de profundidad
-    const ringGeo = new THREE.TorusGeometry(1.3, 0.006, 8, 80);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.18 });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2.5;
-    scene.add(ring);
+    // Luz puntual ámbar bajo la esfera: genera el highlight inferior, efecto ember-orb.
+    // La posición por debajo de la geometría crea luz desde el suelo hacia arriba.
+    const emberLight = new THREE.PointLight(0xFEB354, 10, 5);
+    emberLight.position.set(0.5, -2.8, 0.5);
+    scene.add(emberLight);
 
-    // Luz ambiental cálida: ilumina la escena uniformemente
-    scene.add(new THREE.AmbientLight(0xFEB354, 0.6));
+    // Halo más difuso y lejano: extiende el glow alrededor de la silueta inferior
+    const haloLight = new THREE.PointLight(0xFF7A20, 4, 9);
+    haloLight.position.set(0.5, -3.5, 1.5);
+    scene.add(haloLight);
 
-    // Punto de luz frontal-superior: crea el highlight en la esfera
-    const pointLight = new THREE.PointLight(0xFFD580, 2.5, 12);
-    pointLight.position.set(2.5, 2, 2.5);
-    scene.add(pointLight);
+    // Ambient mínima: solo para que la silueta superior sea legible (no negro plano)
+    scene.add(new THREE.AmbientLight(0x0A0604, 8));
 
-    // Luz trasera fría para contraste y profundidad
-    const backLight = new THREE.PointLight(0x4444AA, 0.8, 10);
-    backLight.position.set(-2, -1, -2);
-    scene.add(backLight);
+    // ── Drag para rotar la esfera ──────────────────────────────────────────────
+    // El usuario arrastra el ratón sobre el canvas → rota la esfera en X e Y.
+    // Al soltar, esperamos 1.5s y reanudamos el auto-rotate suavemente.
+    // Usamos deltas relativos para que el movimiento sea siempre proporcional al arrastre.
+    let isDragging  = false;
+    let prevX = 0, prevY = 0;
+    let rotY = 0,  rotX = 0;
+    let autoRotating = true;
+    let resumeTimer  = null;
 
-    // Loop de animación: rotación suave + oscilación vertical sinusoidal
-    // Solo transform, no modificamos posición con top/left (sin reflow)
+    canvas.addEventListener('mousedown', e => {
+      isDragging   = true;
+      autoRotating = false;
+      prevX = e.clientX;
+      prevY = e.clientY;
+      if (resumeTimer) clearTimeout(resumeTimer);
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      rotY += (e.clientX - prevX) * 0.006;
+      rotX += (e.clientY - prevY) * 0.004;
+      rotX  = Math.max(-0.7, Math.min(0.7, rotX)); // Evita que quede cabeza abajo
+      prevX = e.clientX;
+      prevY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging  = false;
+      resumeTimer = setTimeout(() => { autoRotating = true; }, 1500);
+    });
+
+    // Loop de animación: auto-rotate lento + flotación sinusoidal vertical.
+    // Las luces siguen la posición Y de la esfera para que el glow sea coherente.
     let t = 0;
     function animate() {
       requestAnimationFrame(animate);
       t += 0.004;
-      sphere.rotation.y = t;
-      sphere.rotation.x = Math.sin(t * 0.35) * 0.18;
-      ring.rotation.z = t * 0.3;
-      // Movimiento vertical sutil de toda la escena (oscilación atmosférica)
-      sphere.position.y = Math.sin(t * 0.6) * 0.06;
-      ring.position.y = sphere.position.y;
+
+      if (autoRotating) {
+        rotY += 0.004;                       // Rotación automática lenta
+        rotX  = Math.sin(t * 0.3) * 0.07;  // Oscilación sutil en X
+      }
+
+      sphere.rotation.y = rotY;
+      sphere.rotation.x = rotX;
+
+      // Flotación vertical atmosférica: la esfera respira suavemente
+      const floatY = Math.sin(t * 0.5) * 0.07;
+      sphere.position.y     = -0.2 + floatY;
+      emberLight.position.y = -2.8 + floatY;
+      haloLight.position.y  = -3.5 + floatY;
+
       renderer.render(scene, camera);
     }
     animate();
   }
 
-  // Si Three.js ya cargó (defer puede ejecutarse antes), lo iniciamos directamente.
-  // Si no, esperamos al evento load del script.
+  // Si Three.js ya cargó (defer puede adelantarse a DOMContentLoaded),
+  // lo iniciamos directamente. Si no, esperamos al evento load del script.
   if (typeof THREE !== 'undefined') {
     initThreeJS();
   } else {

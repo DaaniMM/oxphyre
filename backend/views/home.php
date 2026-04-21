@@ -209,54 +209,64 @@
 </header>
 
 <!-- ════════════════════════════════════════════════════════════════════════════
-     HERO
-     H1 único en la página con la keyword principal "tours virtuales 3D".
-     El canvas de Three.js ocupa la mitad derecha — fallback elegante si JS falla.
+     HERO — Inmersivo fullscreen
+     El canvas Three.js cubre todo el hero como fondo absoluto.
+     Texto y stats flotan encima (z-index 10). Sin columnas, todo en capas.
+     En móvil (≤768px) main.js no inicia Three.js — el glow CSS actúa de fallback.
      ════════════════════════════════════════════════════════════════════════════ -->
 <main>
 <section id="hero" aria-label="Propuesta de valor principal">
-  <div class="hero-inner">
 
-    <div class="hero-content">
-      <span class="eyebrow" data-i18n="hero.eyebrow">Tours virtuales 3D para negocios locales</span>
+  <!-- Canvas fullscreen: position absolute, detrás de todo.
+       main.js lo inicializa solo en > 768px para no gastar batería en móvil. -->
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
 
-      <!-- H1: keyword principal, único en la página -->
-      <h1 data-i18n="hero.h1">Haz que tus clientes visiten tu negocio antes de llegar</h1>
+  <!-- Glow ámbar desde abajo — siempre visible, CSS puro, independiente de WebGL.
+       Inspirado en ember-glow-bottom: luz de brasa emergiendo del suelo. -->
+  <div class="hero-glow-bottom" aria-hidden="true"></div>
+  <div class="hero-glow-floor"  aria-hidden="true"></div>
 
-      <p data-i18n="hero.subtitle">
-        Sube fotos de tu local, construye el tour en minutos y compártelo con un QR.
-        Sin instalaciones ni hardware especial.
-      </p>
+  <!-- Grano cinematográfico con mix-blend-mode overlay.
+       Solo afecta tonos medios: no oscurece el negro ni el blanco. -->
+  <div class="hero-grain" aria-hidden="true"></div>
 
-      <div class="hero-ctas">
-        <a href="/registro" class="btn-primary" data-i18n="hero.cta_primary">Empezar gratis</a>
-        <a href="#demo"     class="btn-ghost"   data-i18n="hero.cta_secondary">Ver demo</a>
-      </div>
+  <!-- Viñeta oscura en bordes: concentra la mirada hacia el centro. -->
+  <div class="hero-vignette" aria-hidden="true"></div>
 
-      <!-- Estadísticas flotantes: transmiten actividad y confianza -->
-      <div class="hero-stats" aria-label="Estadísticas en tiempo real">
-        <div class="stat-card">
-          <span class="stat-value mono" data-i18n="hero.stat1_value">En vivo</span>
-          <span class="stat-label"     data-i18n="hero.stat1_label">Tour activo</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value mono" data-i18n="hero.stat2_value">4:32 min</span>
-          <span class="stat-label"     data-i18n="hero.stat2_label">Tiempo medio</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value mono" data-i18n="hero.stat3_value">127</span>
-          <span class="stat-label"     data-i18n="hero.stat3_label">Visitantes hoy</span>
-        </div>
-      </div>
+  <!-- Contenido flotante centrado sobre el canvas -->
+  <div class="hero-content">
+    <span class="eyebrow" data-i18n="hero.eyebrow">Tours virtuales 3D para negocios locales</span>
+
+    <!-- H1 único en la página — keyword "tour 3D inmersivo" para SEO -->
+    <h1>Cuando todo se apaga,<br>tu negocio brilla.</h1>
+
+    <p data-i18n="hero.subtitle">
+      Transforma tu local en un tour 3D inmersivo.<br>
+      Tus clientes lo visitan antes de llegar.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="/registro" class="btn-primary" data-i18n="hero.cta_primary">Empezar gratis →</a>
+      <a href="#demo"     class="btn-ghost"   data-i18n="hero.cta_secondary">Ver demo</a>
     </div>
-
-    <!-- Visual: esfera Three.js que evoca la estructura de un tour 360 -->
-    <div class="hero-visual" aria-hidden="true">
-      <div class="hero-glow"></div>
-      <canvas id="hero-canvas" width="480" height="480" aria-label="Visualización 3D interactiva"></canvas>
-    </div>
-
   </div>
+
+  <!-- Stats ancladas al fondo del hero, centradas -->
+  <div class="hero-stats" aria-label="Estadísticas en tiempo real">
+    <div class="stat-card">
+      <span class="stat-value" data-i18n="hero.stat1_value">En vivo</span>
+      <span class="stat-label" data-i18n="hero.stat1_label">Tour activo</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" data-i18n="hero.stat2_value">4:32 min</span>
+      <span class="stat-label" data-i18n="hero.stat2_label">Tiempo medio</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" data-i18n="hero.stat3_value">127</span>
+      <span class="stat-label" data-i18n="hero.stat3_label">Visitantes hoy</span>
+    </div>
+  </div>
+
 </section>
 
 <!-- ════════════════════════════════════════════════════════════════════════════

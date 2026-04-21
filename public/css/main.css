@@ -277,101 +277,177 @@ body.light #nav.nav-scrolled {
 #mobile-menu a:hover { background: var(--accent-dim); color: var(--accent); }
 
 /* ─── HERO ──────────────────────────────────────────────────────────────────── */
+/* Hero fullscreen inmersivo: todo el contenido flota sobre el canvas Three.js.
+   100svh en lugar de 100vh para respetar la barra de dirección en Safari móvil. */
 #hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding-top: var(--nav-h);
-  overflow: hidden;
-  /* Luz cálida atmosférica desde el centro — evoca una cámara oscura con luz dorada */
-  background: radial-gradient(ellipse 60% 40% at 50% 60%, rgba(254,179,84,0.05) 0%, transparent 60%), var(--bg);
-}
-
-.hero-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: center;
-  padding: 80px 24px;
-  max-width: 1160px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.hero-content { max-width: 560px; }
-
-.hero-content h1 {
-  margin-bottom: 18px;
-  /* Gradiente sutil en el texto para dar carácter visual */
-  background: linear-gradient(135deg, var(--text-1) 60%, rgba(254,179,84,0.7));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hero-content p {
-  font-size: 1.08rem;
-  color: var(--text-2);
-  margin-bottom: 32px;
-  line-height: 1.7;
-  max-width: 480px;
-}
-
-.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
-
-/* Cards de estadísticas flotantes en el hero */
-.hero-stats {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.stat-card {
-  padding: 14px 20px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: rgba(17,16,9,0.7);
-  backdrop-filter: blur(12px);
-}
-
-.stat-card .stat-value {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: var(--accent);
-}
-
-.stat-card .stat-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-3);
-  margin-top: 2px;
-}
-
-/* Contenedor del canvas Three.js */
-.hero-visual {
   position: relative;
+  min-height: 100svh;
+  background: #000;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Luz atmosférica detrás de la esfera — degradado radial cálido */
-.hero-glow {
+/* Canvas Three.js: fullscreen absoluto, detrás de todo el contenido.
+   El drag de ratón llega al canvas aunque el contenido esté encima
+   porque hero-content no tiene pointer-events:none (los links deben ser clickables). */
+#hero-canvas {
   position: absolute;
-  width: 420px; height: 420px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(254,179,84,0.12) 0%, rgba(254,120,30,0.06) 40%, transparent 70%);
-  pointer-events: none;
-  filter: blur(40px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
-#hero-canvas {
-  position: relative;
+/* Glow ámbar desde abajo — siempre visible, incluso sin WebGL.
+   Inspirado en ember-glow-bottom de Lovable: luz de brasa emergiendo del suelo.
+   El gradiente arranca por debajo del hero (110%) para que la luz venga de fuera. */
+.hero-glow-bottom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   z-index: 1;
-  max-width: 100%;
-  /* El tamaño real lo gestiona Three.js con renderer.setSize() */
+  background: radial-gradient(
+    ellipse 70% 50% at 50% 110%,
+    rgba(254,179,84,0.55) 0%,
+    rgba(200,100,20,0.25) 25%,
+    rgba(100,50,10,0.10) 50%,
+    transparent 75%
+  );
+}
+
+/* Segunda capa de glow: más concentrada en el borde inferior.
+   Juntas crean el efecto de profundidad del ember-glow-floor de Lovable. */
+.hero-glow-floor {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 40%;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 90% 30% at 50% 100%,
+    rgba(254,179,84,0.18) 0%,
+    transparent 60%
+  );
+}
+
+/* Grano cinematográfico: mix-blend-mode overlay aplica la textura solo en tonos medios.
+   No afecta al negro puro (#000) ni al blanco — añade profundidad sin ruido visual. */
+.hero-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Viñeta: oscurece los cuatro bordes para empujar la atención hacia el centro.
+   El gradiente radial desde transparent crea la ilusión de "sala oscura con luz central". */
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.55) 70%, #000 100%);
+}
+
+/* Contenido flotante: centrado, sobre el canvas (z-index 10).
+   padding-top acomodado al nav fijo + espacio visual suficiente. */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: calc(var(--nav-h) + 72px) 24px 180px;
+  max-width: 720px;
+  width: 100%;
+}
+
+.hero-content .eyebrow {
+  /* Acento muy tenue: luz lejana, no color dominante */
+  color: rgba(254,179,84,0.65);
+  border-color: rgba(254,179,84,0.12);
+  background: rgba(254,179,84,0.04);
+}
+
+.hero-content h1 {
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 22px;
+}
+
+.hero-content p {
+  font-size: clamp(0.95rem, 1.4vw, 1.08rem);
+  color: rgba(255,255,255,0.58);
+  margin-bottom: 36px;
+  line-height: 1.75;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Stats ancladas al fondo del hero.
+   position absolute + bottom evita que empujen el contenido hacia arriba. */
+.hero-stats {
+  position: absolute;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: max-content;
+  max-width: calc(100vw - 48px);
+}
+
+/* ember-card style: casi negro, borde ámbar imperceptible, backdrop-blur.
+   Coherente con el .ember-card de Lovable — mismo concepto, sin Tailwind. */
+.stat-card {
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(254,179,84,0.12);
+  background: rgba(8,6,2,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  text-align: center;
+}
+
+.stat-card .stat-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: rgba(254,179,84,0.85);
+  letter-spacing: 0.02em;
+}
+
+.stat-card .stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .hero-content { padding-top: calc(var(--nav-h) + 48px); padding-bottom: 160px; }
+  .hero-stats { bottom: 28px; gap: 8px; }
+  .stat-card { padding: 10px 16px; }
 }
 
 /* ─── LOGOS ─────────────────────────────────────────────────────────────────── */
