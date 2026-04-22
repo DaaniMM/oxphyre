@@ -316,3 +316,21 @@ Orientada principalmente a los visitantes que escanean el QR desde móvil.
 - El dueño copia un snippet de código y lo pega en su web → el tour aparece directamente
 - Elimina la barrera del QR para clientes que ya están visitando la web del negocio
 - Pendiente añadir al dashboard: sección "Compartir tour" con QR descargable + código embed copiable
+
+
+## 2026-04-22 — Rediseño completo landing page
+
+### Lo que se hizo
+Reescritura completa de los 4 archivos de la landing:
+- `i18n.js` — traducciones ES/EN completas sin testimonios
+- `main.css` — sistema de diseño #000000 + acento #FEB354, cursor personalizado, loader, hero two-phase, carrusel 3D, aro de luz S3, bento grid spotlight, precios, FAQ, CTA final
+- `main.js` — loader animado (beam + letras + explosión), hero Two-Phase Three.js (esfera BackSide + 300 partículas + drag orbital + frases por ángulo + scroll lerp cameraZ), carrusel autoavance + drag, spotlight características, FAQ acordeón, toggle precios, esfera CTA decorativa
+- `home.php` — HTML completo 9 secciones, SEO completo, Schema.org SoftwareApplication + FAQPage
+
+### Estado actual
+Landing desplegada en https://oxphyre.com. Pendiente revisar visualmente y ajustar lo que no quede bien.
+
+### Pendientes inmediatos
+- Ver resultado en navegador y detectar bugs/ajustes visuales
+- Ajustar posición/tamaño esfera en Phase 2 del hero (ensayo-error)
+- Actualizar DEVLOG con resultado visual
