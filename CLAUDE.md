@@ -221,6 +221,5 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 ### Pendientes
 - Logo y favicon: diseñar cuando la página esté terminada
 - Modo claro: implementar cuando modo oscuro esté completamente cerrado
-- i18n ES/EN: actualizar con todos los textos nuevos
 - Video demo real: grabar y sustituir placeholder de S4
 - Responsive: verificar todas las secciones en móvil y tablet tras implementar

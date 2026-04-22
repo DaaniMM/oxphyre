@@ -17,13 +17,14 @@
 ## Reglas absolutas de código (nunca las rompas)
 - NUNCA frameworks JS (React, Vue, Angular). Solo vanilla JS + Three.js.
 - NUNCA frameworks PHP (Laravel, Symfony). PHP puro con MVC.
-- NUNCA Bootstrap ni librerías CSS. Tailwind + CSS custom con variables.
+- NUNCA Bootstrap ni librerías CSS. CSS custom puro en la landing. Tailwind en páginas internas.
 - NUNCA SQL sin prepared statements. Sin excepción, ni una sola query directa.
 - NUNCA credenciales en código. Siempre en .env, nunca en GitHub.
 - NUNCA subas .env, .pem, ni credenciales a GitHub.
 - NUNCA localStorage para tokens de sesión o datos sensibles.
 - NUNCA confíes en extensión de archivo para validar uploads. Valida MIME real.
 - NUNCA dejes XSS posible. htmlspecialchars() en toda salida, strip_tags() en entrada.
+- SIEMPRE usa Lucide Icons para iconos. Nunca Font Awesome, nunca emojis como iconos, nunca SVGs ad-hoc sin justificación.
 
 ## Seguridad (prioridad máxima)
 - Prepared statements en el 100% de queries MySQL.
@@ -55,14 +56,17 @@ Tipos de commit: feat, fix, docs, style, refactor, chore
 - Comentarios solo cuando el código no es autoexplicativo.
 
 ## Estilo CSS
-- Variables CSS globales en :root para tema, colores, tipografía.
-- Tailwind para layout y utilidades.
-- CSS custom para: modo día/noche, animaciones, componentes específicos.
+- Variables CSS globales en :root para tema día/noche, colores de marca, tipografía.
+- Tailwind para layout, espaciados y utilidades. CSS custom para animaciones, efectos visuales complejos, glassmorphism, modo día/noche y todo lo que Tailwind no puede hacer.
 - Animaciones con transform y opacity (GPU), nunca con propiedades que causan reflow.
 
 ## Prioridad de desarrollo actual
-1. Reorganizar estructura MVC del proyecto
-2. Crear todas las tablas en MySQL
-3. Landing page con Three.js en hero + SEO completo
-4. Auth completa y segura
-5. Ver DEVLOG.md para lista completa de 23 puntos
+1. Landing desplegada en https://oxphyre.com — revisar visualmente y ajustar bugs visuales pendientes
+2. Auth completa: registro, verificación email, login, recuperar contraseña
+3. Dashboard base con navegación y layout
+4. Onboarding wizard para nuevos negocios
+5. Subida de fotos + procesado Python + MiDaS
+6. Editor canvas drag & drop
+7. Vista tour Three.js con hotspots y minimapa
+8. QR descargable con analíticas
+9. Ver DEVLOG.md para historial completo
