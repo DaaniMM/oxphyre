@@ -1,32 +1,102 @@
 /**
- * main.js — Lógica de interacción de la landing page.
+ * main.js — Lógica completa de la landing page Oxphyre.
  *
  * Módulos:
- *  1. Tema día/noche
- *  2. Idioma (delega en i18n.js)
- *  3. Nav glassmorphism al hacer scroll
- *  4. Menú móvil
- *  5. IntersectionObserver para animaciones al entrar en viewport
- *  6. Acordeón FAQ
- *  7. Toggle de precios mensual/anual
- *  8. Three.js — esfera flotante en el hero
+ *  1.  Cursor personalizado
+ *  2.  Loader (foco de luz + letras OXPHYRE)
+ *  3.  Tema día/noche
+ *  4.  Idioma (delega en i18n.js)
+ *  5.  Nav glassmorphism al scroll
+ *  6.  Menú móvil
+ *  7.  Hero Three.js — Phase 1 (dentro de la esfera)
+ *  8.  Hero Three.js — Phase 2 (fuera de la esfera)
+ *  9.  Scroll hint
+ *  10. Carrusel negocios
+ *  11. IntersectionObserver animaciones de scroll
+ *  12. Cursor spotlight en Características
+ *  13. Acordeón FAQ
+ *  14. Toggle precios mensual/anual
+ *  15. Three.js — esfera decorativa en CTA Final
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── 1. TEMA DÍA/NOCHE ─────────────────────────────────────────────────────
-  // Primera visita: respetamos prefers-color-scheme del sistema operativo.
-  // Visitas siguientes: aplicamos la preferencia guardada en localStorage.
-  // La clase 'light' en body activa las variables CSS del modo claro.
+  // ── 1. CURSOR PERSONALIZADO ──────────────────────────────────────────────
+  // Solo en dispositivos con puntero fino (desktop). En táctil el CSS ya lo oculta.
+  const cursorRing = document.getElementById('cursor-ring');
+
+  if (cursorRing && window.matchMedia('(pointer: fine)').matches) {
+    let cursorX = -100, cursorY = -100;
+
+    // Usamos transform en lugar de top/left para evitar reflow del layout
+    window.addEventListener('mousemove', e => {
+      cursorX = e.clientX;
+      cursorY = e.clientY;
+      cursorRing.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+    });
+
+    // Agrandar el cursor al hover sobre interactivos
+    document.querySelectorAll('a, button, [role="button"], input, label, .carousel-card').forEach(el => {
+      el.addEventListener('mouseenter', () => cursorRing.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => cursorRing.classList.remove('cursor-hover'));
+    });
+  }
+
+
+  // ── 2. LOADER ────────────────────────────────────────────────────────────
+  // Timing:  0.0s inicio · 0.5s empieza beam · 1.5s letras · 3.0s completo · 4.0s desaparece
+  const loader = document.getElementById('loader');
+  const beam   = document.getElementById('loader-beam');
+  const letters = document.querySelectorAll('.loader-letter');
+
+  function runLoader() {
+    if (!loader || !beam) {
+      document.body.classList.add('phase-2');
+      return;
+    }
+
+    // El beam barre de izquierda a derecha en 2.5s
+    setTimeout(() => {
+      beam.style.transition = 'transform 2.5s linear';
+      beam.style.transform  = `translateX(${window.innerWidth + 200}px)`;
+    }, 500);
+
+    // Las letras se revelan escalonadas entre t=1.5s y t=3.0s
+    letters.forEach((letter, i) => {
+      setTimeout(() => {
+        letter.classList.add('revealed');
+      }, 1500 + i * 200);
+    });
+
+    // A t=3.5s las letras explotan hacia afuera (scale + opacity)
+    setTimeout(() => {
+      letters.forEach((letter, i) => {
+        setTimeout(() => {
+          letter.classList.add('explode');
+        }, i * 60);
+      });
+    }, 3500);
+
+    // A t=4.0s el loader se desvanece y se revela la escena
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      // Iniciamos en Phase 2 directamente (la Phase 1 three.js necesita pantalla limpia)
+      startHeroThreeJS();
+    }, 4000);
+  }
+
+  runLoader();
+
+
+  // ── 3. TEMA DÍA/NOCHE ───────────────────────────────────────────────────
   const themeBtn = document.getElementById('theme-toggle');
-  const saved = localStorage.getItem('oxphyre-theme');
+  const saved    = localStorage.getItem('oxphyre-theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const initTheme = saved ?? (prefersDark ? 'dark' : 'light');
 
   function setTheme(theme) {
     document.body.classList.toggle('light', theme === 'light');
     localStorage.setItem('oxphyre-theme', theme);
-    // Actualiza el aria-label para lectores de pantalla
     if (themeBtn) {
       themeBtn.setAttribute('aria-label', theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro');
       themeBtn.dataset.theme = theme;
@@ -43,14 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ── 2. IDIOMA ─────────────────────────────────────────────────────────────
-  // i18n.js se carga antes que main.js (orden de scripts en home.php).
-  // initLang() aplica el idioma guardado o detecta el del navegador.
+  // ── 4. IDIOMA ────────────────────────────────────────────────────────────
   if (window.i18n) {
     window.i18n.initLang();
   }
 
-  // Botones de cambio de idioma (nav y footer)
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const lang = btn.dataset.lang;
@@ -60,11 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  // ── 3. NAV GLASSMORPHISM AL SCROLL ────────────────────────────────────────
-  // Sin scroll: nav transparente integrado con el hero.
-  // Con scroll: fondo con glassmorphism para que los links sean legibles
-  // sobre cualquier contenido de la página. Usamos IntersectionObserver
-  // en lugar de un listener 'scroll' para evitar thrashing del layout.
+  // ── 5. NAV GLASSMORPHISM AL SCROLL ──────────────────────────────────────
   const nav = document.getElementById('nav');
   if (nav) {
     const sentinel = document.createElement('div');
@@ -77,17 +140,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ── 4. MENÚ MÓVIL ─────────────────────────────────────────────────────────
-  // En móvil el nav colapsa. El botón hamburguesa abre/cierra el menú.
-  // Cerramos también al hacer click en cualquier enlace del menú.
-  const menuBtn = document.getElementById('menu-toggle');
+  // ── 6. MENÚ MÓVIL ────────────────────────────────────────────────────────
+  const menuBtn    = document.getElementById('menu-toggle');
   const mobileMenu = document.getElementById('mobile-menu');
+  const menuClose  = document.getElementById('mobile-menu-close');
 
   if (menuBtn && mobileMenu) {
     menuBtn.addEventListener('click', () => {
       const open = mobileMenu.classList.toggle('open');
       menuBtn.setAttribute('aria-expanded', open);
     });
+
+    if (menuClose) {
+      menuClose.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      });
+    }
 
     mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
@@ -98,96 +167,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ── 5. ANIMACIONES AL SCROLL (IntersectionObserver) ───────────────────────
-  // Los elementos con clase 'animate-on-scroll' empiezan invisibles (opacity:0, translateY:24px).
-  // Cuando entran en el viewport, se añade 'is-visible' que activa la transición CSS.
-  // Usamos IntersectionObserver en lugar de escuchar el evento scroll
-  // porque es asíncrono, no bloquea el hilo principal y es más eficiente.
-  const animObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        // Una vez visible, dejamos de observarlo para no procesar eventos innecesarios
-        animObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  // ── 7 & 8. HERO THREE.JS — DOS FASES ────────────────────────────────────
+  // Phase 1: cámara dentro de una esfera invertida (BackSide) con partículas ámbar.
+  //          El usuario arrastra para girar. Frases aparecen según el ángulo de vista.
+  // Phase 2: al hacer scroll la cámara sale hacia atrás (eje Z). Cuando cameraZ > 8
+  //          se activa body.phase-2: aparece el nav y el contenido del hero.
 
-  document.querySelectorAll('.animate-on-scroll').forEach((el, i) => {
-    // Delay escalonado para elementos hermanos (ej: 3 cards aparecen en cascada)
-    el.style.transitionDelay = `${i * 0.07}s`;
-    animObserver.observe(el);
-  });
-
-
-  // ── 6. ACORDEÓN FAQ ───────────────────────────────────────────────────────
-  // Cada item FAQ tiene un botón .faq-question y un div .faq-answer.
-  // Al hacer click abrimos el activo y cerramos el anterior (solo uno abierto).
-  // Animamos con max-height (de 0 a el scrollHeight real) + opacity.
-  // Evitamos usar display:none porque no se puede animar.
-  document.querySelectorAll('.faq-item').forEach(item => {
-    const question = item.querySelector('.faq-question');
-    const answer = item.querySelector('.faq-answer');
-    if (!question || !answer) return;
-
-    question.addEventListener('click', () => {
-      const isOpen = item.classList.contains('open');
-
-      // Cerramos todos antes de abrir el seleccionado
-      document.querySelectorAll('.faq-item.open').forEach(open => {
-        open.classList.remove('open');
-        open.querySelector('.faq-answer').style.maxHeight = '0';
-      });
-
-      if (!isOpen) {
-        item.classList.add('open');
-        // scrollHeight da la altura real del contenido sin overflow
-        answer.style.maxHeight = answer.scrollHeight + 'px';
-      }
-    });
-  });
-
-
-  // ── 7. TOGGLE PRECIOS MENSUAL / ANUAL ─────────────────────────────────────
-  // El botón toggle cambia la clase 'annual' en la sección de precios.
-  // Los precios mensuales y anuales están en data-monthly y data-annual
-  // para no depender de llamadas al servidor al cambiar el toggle.
-  const billingToggle = document.getElementById('billing-toggle');
-  const pricingSection = document.getElementById('precios');
-
-  if (billingToggle && pricingSection) {
-    billingToggle.addEventListener('click', () => {
-      const isAnnual = pricingSection.classList.toggle('annual');
-      billingToggle.setAttribute('aria-checked', isAnnual);
-
-      // Actualizamos los precios visibles con los valores del data attribute
-      pricingSection.querySelectorAll('[data-monthly]').forEach(el => {
-        el.textContent = isAnnual ? el.dataset.annual : el.dataset.monthly;
-      });
-    });
-  }
-
-
-  // ── 8. THREE.JS — ESFERA EMBER INMERSIVA ─────────────────────────────────
-  // Hero fullscreen: el canvas ocupa toda la ventana como fondo animado.
-  // Solo se inicia en > 768px. En móvil el glow CSS ya da el efecto visual.
-  // Inspirado en ember-orb de Lovable: esfera oscura con luz ámbar interior desde abajo.
-  function initThreeJS() {
-    // En móvil ahorramos batería y recursos — el CSS hace de fallback visual
-    if (window.innerWidth <= 768) return;
+  function startHeroThreeJS() {
+    // En móvil saltamos directamente a Phase 2 — el CSS gestiona la presentación visual
+    if (window.innerWidth <= 768) {
+      document.body.classList.add('phase-2');
+      return;
+    }
 
     const canvas = document.getElementById('hero-canvas');
-    if (!canvas || typeof THREE === 'undefined') return;
+    if (!canvas || typeof THREE === 'undefined') {
+      document.body.classList.add('phase-2');
+      return;
+    }
 
-    const scene = new THREE.Scene();
-
-    // Cámara con aspecto de toda la ventana (el canvas es fullscreen, no cuadrado)
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 0, 5.5);
-
+    // ── Setup renderer ──
+    const scene    = new THREE.Scene();
+    const camera   = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.01, 100);
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0); // Transparente — el negro y el glow vienen del CSS
+    renderer.setClearColor(0x000000, 0);
+
+    let cameraZ = 0.01; // Empieza dentro de la esfera
+    camera.position.set(0, 0, cameraZ);
+    camera.lookAt(0, 0, 0);
 
     function resize() {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -197,9 +205,466 @@ document.addEventListener('DOMContentLoaded', () => {
     resize();
     window.addEventListener('resize', resize);
 
-    // Esfera principal: muy oscura con emisivo ámbar muy bajo.
-    // El emisivo simula calor interno: la superficie parece iluminada desde dentro.
-    const geo = new THREE.SphereGeometry(1.4, 64, 64);
+    // ── Esfera BackSide (sala negra interior) ──
+    // BackSide hace que la superficie interior sea visible desde dentro.
+    const innerGeo = new THREE.SphereGeometry(8, 32, 32);
+    const innerMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+    const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+    scene.add(innerSphere);
+
+    // ── Partículas ámbar ──
+    // 300 puntos distribuidos aleatoriamente dentro del volumen de la esfera.
+    const PARTICLE_COUNT = 300;
+    const pPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const pOffsets   = new Float32Array(PARTICLE_COUNT); // fase de oscilación por partícula
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      // Distribución uniforme dentro de la esfera (coordenadas esféricas aleatorias)
+      const r     = 5 + Math.random() * 2.5;
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      pPositions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+      pPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      pPositions[i * 3 + 2] = r * Math.cos(phi);
+      pOffsets[i] = Math.random() * Math.PI * 2;
+    }
+
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pPositions.slice(), 3));
+
+    const pMat = new THREE.PointsMaterial({
+      color: 0xFEB354,
+      size: 0.06,
+      transparent: true,
+      opacity: 0.7,
+      sizeAttenuation: true
+    });
+    const particles = new THREE.Points(pGeo, pMat);
+    scene.add(particles);
+
+    // ── Drag para rotar la vista (esférico) ──
+    // El usuario arrastra y la cámara orbita alrededor del centro de la esfera.
+    let spherical = { theta: 0, phi: Math.PI / 2 };
+    let isDragging = false;
+    let prevX = 0, prevY = 0;
+    let targetTheta = 0, targetPhi = Math.PI / 2;
+
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      prevX = e.clientX;
+      prevY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      targetTheta -= (e.clientX - prevX) * 0.005;
+      targetPhi   -= (e.clientY - prevY) * 0.003;
+      targetPhi    = Math.max(0.3, Math.min(Math.PI - 0.3, targetPhi));
+      prevX = e.clientX;
+      prevY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    // Touch events para móvil (aunque en móvil el hero tiene fallback CSS)
+    canvas.addEventListener('touchstart', e => {
+      isDragging = true;
+      prevX = e.touches[0].clientX;
+      prevY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', e => {
+      if (!isDragging) return;
+      targetTheta -= (e.touches[0].clientX - prevX) * 0.005;
+      targetPhi   -= (e.touches[0].clientY - prevY) * 0.003;
+      targetPhi    = Math.max(0.3, Math.min(Math.PI - 0.3, targetPhi));
+      prevX = e.touches[0].clientX;
+      prevY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => { isDragging = false; });
+
+    // ── Frases según ángulo de rotación ──
+    const phrases = document.querySelectorAll('.phrase');
+    const phraseAngles = [0, 90, 180, 270, 350]; // en grados
+
+    function updatePhrases() {
+      const thetaDeg = ((targetTheta * 180 / Math.PI) % 360 + 360) % 360;
+      phrases.forEach((phrase, i) => {
+        const angleDiff = Math.abs(thetaDeg - phraseAngles[i]);
+        const wrapped   = Math.min(angleDiff, 360 - angleDiff);
+        phrase.classList.toggle('active', wrapped < 35);
+      });
+    }
+
+    // ── Scroll: cámara sale de la esfera ──
+    let scrollAccum = 0;
+    let isPhase2    = false;
+    let targetCamZ  = 0.01;
+    let lerpingOut  = false;
+
+    window.addEventListener('wheel', e => {
+      if (isPhase2) return;
+      scrollAccum += e.deltaY * 0.01;
+      scrollAccum  = Math.max(0, scrollAccum);
+
+      if (scrollAccum > 3) {
+        targetCamZ = 12;
+        lerpingOut = true;
+      }
+    }, { passive: true });
+
+    // ── Loop de animación ──
+    let t = 0;
+    const pPos = pGeo.attributes.position;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.008;
+
+      // Auto-rotate lento si no está arrastrando
+      if (!isDragging) {
+        targetTheta += 0.003;
+      }
+
+      // Lerp suave de la rotación esférica
+      spherical.theta += (targetTheta - spherical.theta) * 0.08;
+      spherical.phi   += (targetPhi - spherical.phi) * 0.08;
+
+      if (!isPhase2) {
+        // Phase 1: cámara en el centro, mirando hacia el perímetro
+        const r = cameraZ;
+        camera.position.set(
+          r * Math.sin(spherical.phi) * Math.cos(spherical.theta),
+          r * Math.cos(spherical.phi),
+          r * Math.sin(spherical.phi) * Math.sin(spherical.theta)
+        );
+        camera.lookAt(0, 0, 0);
+
+        // Oscilación de partículas
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const base = pPositions;
+          const ox = base[i * 3];
+          const oy = base[i * 3 + 1];
+          const oz = base[i * 3 + 2];
+          const wave = Math.sin(t + pOffsets[i]) * 0.06;
+          pPos.setXYZ(i, ox + wave, oy + wave * 0.5, oz + wave);
+        }
+        pPos.needsUpdate = true;
+
+        updatePhrases();
+
+        // Lerp de la cámara hacia afuera al hacer scroll
+        if (lerpingOut) {
+          cameraZ += (targetCamZ - cameraZ) * 0.04;
+
+          if (cameraZ > 8 && !isPhase2) {
+            isPhase2 = true;
+            document.body.classList.add('phase-2');
+            // Eliminamos la esfera interior y partículas del render
+            // y añadimos la esfera externa de Phase 2
+            scene.remove(innerSphere);
+            scene.remove(particles);
+            setupPhase2();
+          }
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // ── Phase 2: esfera externa ──
+    let extSphere, extEmber, extHalo, extRotY = 0, extAutoRotate = true, extResumeTimer = null;
+
+    function setupPhase2() {
+      // Reposicionamos la cámara para ver la escena desde fuera
+      camera.position.set(0, 0, 5.5);
+      camera.lookAt(0, 0, 0);
+      camera.fov = 55;
+      camera.updateProjectionMatrix();
+
+      // Esfera externa — mismos materiales que el ember-orb anterior
+      const geo = new THREE.SphereGeometry(1.4, 64, 64);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x050300,
+        roughness: 0.95,
+        metalness: 0.0,
+        emissive: 0x000000,
+        emissiveIntensity: 0
+      });
+      extSphere = new THREE.Mesh(geo, mat);
+      extSphere.position.set(2, -0.5, 0);
+      scene.add(extSphere);
+
+      // Wireframe parented a la esfera
+      const wire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(geo),
+        new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.05 })
+      );
+      extSphere.add(wire);
+
+      // Luz ámbar desde abajo
+      extEmber = new THREE.PointLight(0xFEB354, 8, 5);
+      extEmber.position.set(2, -2.8, 0.8);
+      scene.add(extEmber);
+
+      extHalo = new THREE.PointLight(0xFF7A20, 3, 8);
+      extHalo.position.set(2, -4, 1.5);
+      scene.add(extHalo);
+
+      scene.add(new THREE.AmbientLight(0x080503, 6));
+
+      // Drag para rotar la esfera externa
+      canvas.addEventListener('mousedown', extMouseDown);
+      window.addEventListener('mousemove', extMouseMove);
+      window.addEventListener('mouseup', extMouseUp);
+
+      // Reemplazamos el loop
+      requestAnimationFrame(animatePhase2);
+    }
+
+    let ext_isDragging = false;
+    let ext_prevX = 0, ext_prevY = 0;
+    let ext_rotY = 0, ext_rotX = 0;
+
+    function extMouseDown(e) {
+      ext_isDragging  = true;
+      extAutoRotate   = false;
+      ext_prevX = e.clientX;
+      ext_prevY = e.clientY;
+      if (extResumeTimer) clearTimeout(extResumeTimer);
+    }
+
+    function extMouseMove(e) {
+      if (!ext_isDragging) return;
+      ext_rotY += (e.clientX - ext_prevX) * 0.006;
+      ext_rotX += (e.clientY - ext_prevY) * 0.004;
+      ext_rotX  = Math.max(-0.7, Math.min(0.7, ext_rotX));
+      ext_prevX = e.clientX;
+      ext_prevY = e.clientY;
+    }
+
+    function extMouseUp() {
+      if (!ext_isDragging) return;
+      ext_isDragging  = false;
+      extResumeTimer  = setTimeout(() => { extAutoRotate = true; }, 1500);
+    }
+
+    let t2 = 0;
+
+    function animatePhase2() {
+      requestAnimationFrame(animatePhase2);
+      t2 += 0.004;
+
+      if (extAutoRotate) {
+        ext_rotY += 0.004;
+        ext_rotX  = Math.sin(t2 * 0.3) * 0.07;
+      }
+
+      if (extSphere) {
+        extSphere.rotation.y = ext_rotY;
+        extSphere.rotation.x = ext_rotX;
+
+        const floatY = Math.sin(t2 * 0.5) * 0.07;
+        extSphere.position.y = -0.5 + floatY;
+        if (extEmber) extEmber.position.y = -2.8 + floatY;
+        if (extHalo)  extHalo.position.y  = -4.0 + floatY;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+  }
+
+  // Si Three.js ya está disponible al DOMContentLoaded, esperamos al loader.
+  // El loader llama a startHeroThreeJS() a t=4.0s.
+  // Si Three.js no cargó aún (defer), lo escuchamos.
+  if (typeof THREE === 'undefined') {
+    const threeScript = document.querySelector('script[src*="three"]');
+    if (threeScript) {
+      threeScript.addEventListener('load', () => {
+        // startHeroThreeJS ya se llamará desde el loader
+      });
+    }
+  }
+
+
+  // ── 9. SCROLL HINT ──────────────────────────────────────────────────────
+  const scrollHint = document.getElementById('scroll-hint');
+  if (scrollHint) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        scrollHint.classList.add('hide');
+      }
+    }, { once: true, passive: true });
+  }
+
+
+  // ── 10. CARRUSEL NEGOCIOS ────────────────────────────────────────────────
+  // 8 cards con efecto 3D CSS (rotateY en laterales). Autoavance cada 4s.
+  // Drag: si el delta horizontal supera 50px se avanza/retrocede.
+  const carousel = document.getElementById('carousel');
+  const cards    = carousel ? Array.from(carousel.querySelectorAll('.carousel-card')) : [];
+  const dots     = document.querySelectorAll('.carousel-dot');
+  const prevBtn  = document.getElementById('carousel-prev');
+  const nextBtn  = document.getElementById('carousel-next');
+  const TOTAL    = cards.length;
+  let   current  = 0;
+  let   autoTimer = null;
+
+  const POSITIONS = ['prev-2', 'prev-1', 'active', 'next-1', 'next-2'];
+
+  function setCarousel(index) {
+    cards.forEach((card, i) => {
+      card.className = 'carousel-card';
+      const rel = ((i - index) % TOTAL + TOTAL) % TOTAL;
+      if      (rel === 0)        card.classList.add('active');
+      else if (rel === 1)        card.classList.add('next-1');
+      else if (rel === 2)        card.classList.add('next-2');
+      else if (rel === TOTAL - 1) card.classList.add('prev-1');
+      else if (rel === TOTAL - 2) card.classList.add('prev-2');
+      else                        card.classList.add('c-hidden');
+    });
+
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+    current = index;
+  }
+
+  function carouselNext() { setCarousel((current + 1) % TOTAL); }
+  function carouselPrev() { setCarousel((current - 1 + TOTAL) % TOTAL); }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(carouselNext, 4000);
+  }
+
+  if (TOTAL > 0) {
+    setCarousel(0);
+    resetAuto();
+
+    if (nextBtn) nextBtn.addEventListener('click', () => { carouselNext(); resetAuto(); });
+    if (prevBtn) prevBtn.addEventListener('click', () => { carouselPrev(); resetAuto(); });
+
+    // Drag horizontal en el carrusel
+    let dragStart = 0;
+    carousel.addEventListener('mousedown', e => { dragStart = e.clientX; });
+    carousel.addEventListener('mouseup', e => {
+      const delta = e.clientX - dragStart;
+      if (Math.abs(delta) > 50) {
+        delta < 0 ? carouselNext() : carouselPrev();
+        resetAuto();
+      }
+    });
+
+    carousel.addEventListener('touchstart', e => {
+      dragStart = e.touches[0].clientX;
+    }, { passive: true });
+    carousel.addEventListener('touchend', e => {
+      const delta = e.changedTouches[0].clientX - dragStart;
+      if (Math.abs(delta) > 50) {
+        delta < 0 ? carouselNext() : carouselPrev();
+        resetAuto();
+      }
+    }, { passive: true });
+  }
+
+
+  // ── 11. ANIMACIONES DE SCROLL (IntersectionObserver) ────────────────────
+  const animObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        animObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.animate-on-scroll').forEach((el, i) => {
+    el.style.transitionDelay = `${i * 0.07}s`;
+    animObserver.observe(el);
+  });
+
+
+  // ── 12. CURSOR SPOTLIGHT EN CARACTERÍSTICAS ──────────────────────────────
+  // Cuando el cursor se mueve sobre la sección, las CSS vars --mx y --my
+  // de cada .feature-card::before se actualizan para seguir el puntero.
+  // En móvil (pointer:coarse) el CSS ya desactiva el efecto.
+  const featSection = document.getElementById('caracteristicas');
+  if (featSection && window.matchMedia('(pointer: fine)').matches) {
+    featSection.addEventListener('mousemove', e => {
+      const rect = featSection.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Propagamos la posición relativa a cada card para que ::before sea correcto
+      featSection.querySelectorAll('.feature-card').forEach(card => {
+        const cr = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - cr.left}px`);
+        card.style.setProperty('--my', `${e.clientY - cr.top}px`);
+      });
+    });
+  }
+
+
+  // ── 13. ACORDEÓN FAQ ─────────────────────────────────────────────────────
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const question = item.querySelector('.faq-question');
+    const answer   = item.querySelector('.faq-answer');
+    if (!question || !answer) return;
+
+    question.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+
+      document.querySelectorAll('.faq-item.open').forEach(open => {
+        open.classList.remove('open');
+        open.querySelector('.faq-answer').style.maxHeight = '0';
+      });
+
+      if (!isOpen) {
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+      }
+    });
+  });
+
+
+  // ── 14. TOGGLE PRECIOS MENSUAL / ANUAL ───────────────────────────────────
+  const billingToggle  = document.getElementById('billing-toggle');
+  const pricingSection = document.getElementById('precios');
+
+  if (billingToggle && pricingSection) {
+    billingToggle.addEventListener('click', () => {
+      const isAnnual = pricingSection.classList.toggle('annual');
+      billingToggle.setAttribute('aria-checked', isAnnual);
+
+      pricingSection.querySelectorAll('[data-monthly]').forEach(el => {
+        el.textContent = isAnnual ? el.dataset.annual : el.dataset.monthly;
+      });
+    });
+  }
+
+
+  // ── 15. THREE.JS — ESFERA DECORATIVA CTA FINAL ───────────────────────────
+  // Pequeña esfera ember-orb en el CTA final. Solo auto-rotate, sin drag.
+  // Solo en desktop (> 768px).
+  function initCtaSphere() {
+    if (window.innerWidth <= 768) return;
+
+    const ctaCanvas = document.getElementById('cta-canvas');
+    if (!ctaCanvas || typeof THREE === 'undefined') return;
+
+    const ctaScene    = new THREE.Scene();
+    const ctaCamera   = new THREE.PerspectiveCamera(55, 1, 0.1, 50);
+    const ctaRenderer = new THREE.WebGLRenderer({ canvas: ctaCanvas, alpha: true, antialias: true });
+
+    ctaCamera.position.set(0, 0, 3.5);
+    ctaRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    ctaRenderer.setSize(200, 200);
+    ctaRenderer.setClearColor(0x000000, 0);
+
+    const geo = new THREE.SphereGeometry(0.8, 32, 32);
     const mat = new THREE.MeshStandardMaterial({
       color: 0x050300,
       roughness: 0.95,
@@ -208,99 +673,41 @@ document.addEventListener('DOMContentLoaded', () => {
       emissiveIntensity: 0
     });
     const sphere = new THREE.Mesh(geo, mat);
-    // Ligeramente derecha y abajo para composición más interesante con el texto centrado
-    sphere.position.set(0.5, -0.2, 0);
-    scene.add(sphere);
+    ctaScene.add(sphere);
 
-    // Wireframe sutil parented a sphere — rota y flota con ella sin cálculos extra
-    const wireframe = new THREE.LineSegments(
+    const wire = new THREE.LineSegments(
       new THREE.WireframeGeometry(geo),
-      new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.055 })
+      new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.06 })
     );
-    sphere.add(wireframe);
+    sphere.add(wire);
 
-    // Luz puntual ámbar bajo la esfera: genera el highlight inferior, efecto ember-orb.
-    // La posición por debajo de la geometría crea luz desde el suelo hacia arriba.
-    const emberLight = new THREE.PointLight(0xFEB354, 8, 4);
-    emberLight.position.set(0.5, -2.2, 0.8);
-    scene.add(emberLight);
+    const light = new THREE.PointLight(0xFEB354, 10, 4);
+    light.position.set(0, -1.5, 0.5);
+    ctaScene.add(light);
 
-    // Halo más difuso y lejano: extiende el glow alrededor de la silueta inferior
-    const haloLight = new THREE.PointLight(0xFF7A20, 3, 7);
-    haloLight.position.set(0.5, -3.5, 1.5);
-    scene.add(haloLight);
+    ctaScene.add(new THREE.AmbientLight(0x080503, 5));
 
-    // Ambient mínima: solo para que la silueta superior sea legible (no negro plano)
-    scene.add(new THREE.AmbientLight(0x0A0604, 8));
+    let tCta = 0;
 
-    // ── Drag para rotar la esfera ──────────────────────────────────────────────
-    // El usuario arrastra el ratón sobre el canvas → rota la esfera en X e Y.
-    // Al soltar, esperamos 1.5s y reanudamos el auto-rotate suavemente.
-    // Usamos deltas relativos para que el movimiento sea siempre proporcional al arrastre.
-    let isDragging  = false;
-    let prevX = 0, prevY = 0;
-    let rotY = 0,  rotX = 0;
-    let autoRotating = true;
-    let resumeTimer  = null;
+    function animateCta() {
+      requestAnimationFrame(animateCta);
+      tCta += 0.005;
+      sphere.rotation.y += 0.006;
+      sphere.rotation.x = Math.sin(tCta * 0.4) * 0.06;
+      ctaRenderer.render(ctaScene, ctaCamera);
+    }
 
-    canvas.addEventListener('mousedown', e => {
-      isDragging   = true;
-      autoRotating = false;
-      prevX = e.clientX;
-      prevY = e.clientY;
-      if (resumeTimer) clearTimeout(resumeTimer);
-    });
-
-    window.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      rotY += (e.clientX - prevX) * 0.006;
-      rotX += (e.clientY - prevY) * 0.004;
-      rotX  = Math.max(-0.7, Math.min(0.7, rotX)); // Evita que quede cabeza abajo
-      prevX = e.clientX;
-      prevY = e.clientY;
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (!isDragging) return;
-      isDragging  = false;
-      resumeTimer = setTimeout(() => { autoRotating = true; }, 1500);
-    });
-
-    // Loop de animación: auto-rotate lento + flotación sinusoidal vertical.
-    // Las luces siguen la posición Y de la esfera para que el glow sea coherente.
-    let t = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-      t += 0.004;
-
-      if (autoRotating) {
-        rotY += 0.004;                       // Rotación automática lenta
-        rotX  = Math.sin(t * 0.3) * 0.07;  // Oscilación sutil en X
+    // Usamos IntersectionObserver para iniciar el render solo cuando el canvas es visible
+    const ctaObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        animateCta();
+        ctaObserver.disconnect();
       }
-
-      sphere.rotation.y = rotY;
-      sphere.rotation.x = rotX;
-
-      // Flotación vertical atmosférica: la esfera respira suavemente
-      const floatY = Math.sin(t * 0.5) * 0.07;
-      sphere.position.y     = -0.2 + floatY;
-      emberLight.position.y = -2.8 + floatY;
-      haloLight.position.y  = -3.5 + floatY;
-
-      renderer.render(scene, camera);
-    }
-    animate();
+    });
+    ctaObserver.observe(ctaCanvas);
   }
 
-  // Si Three.js ya cargó (defer puede adelantarse a DOMContentLoaded),
-  // lo iniciamos directamente. Si no, esperamos al evento load del script.
-  if (typeof THREE !== 'undefined') {
-    initThreeJS();
-  } else {
-    const threeScript = document.querySelector('script[src*="three"]');
-    if (threeScript) {
-      threeScript.addEventListener('load', initThreeJS);
-    }
-  }
+  // La esfera CTA se puede iniciar después del loader
+  setTimeout(initCtaSphere, 4200);
 
 });
