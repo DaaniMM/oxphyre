@@ -1,42 +1,39 @@
 /**
  * main.js — Lógica completa de la landing page Oxphyre.
  *
+ * Arquitectura: canvas Three.js position:fixed activo durante todo el scroll.
+ * Un único loop de animación. El scrollY se mapea a estados de la esfera con lerp.
+ *
  * Módulos:
  *  1.  Cursor personalizado
- *  2.  Loader (foco de luz + letras OXPHYRE)
+ *  2.  Loader (beam exacto sobre texto + letras + explosión)
  *  3.  Tema día/noche
  *  4.  Idioma (delega en i18n.js)
  *  5.  Nav glassmorphism al scroll
  *  6.  Menú móvil
- *  7.  Hero Three.js — Phase 1 (dentro de la esfera)
- *  8.  Hero Three.js — Phase 2 (fuera de la esfera)
- *  9.  Scroll hint
- *  10. Carrusel negocios
- *  11. IntersectionObserver animaciones de scroll
- *  12. Cursor spotlight en Características
- *  13. Acordeón FAQ
- *  14. Toggle precios mensual/anual
- *  15. Three.js — esfera decorativa en CTA Final
+ *  7.  Hero Three.js — Phase 1 (dentro de la esfera, BackSide + partículas + drag)
+ *  8.  Hero Three.js — Phase 2 (scroll libera, cámara sale, esfera centrada como fondo)
+ *  9.  Scroll state machine — esfera sigue el scroll por todas las secciones
+ *  10. Scroll hint (mouse SVG, desaparece al primer scroll)
+ *  11. Carrusel negocios (5s autoavance, drag, hover preview)
+ *  12. IntersectionObserver animaciones de scroll
+ *  13. Cursor spotlight en Características
+ *  14. S3 tilt hover + línea conector SVG
+ *  15. Acordeón FAQ
+ *  16. Toggle precios mensual/anual
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
   // ── 1. CURSOR PERSONALIZADO ──────────────────────────────────────────────
-  // Solo en dispositivos con puntero fino (desktop). En táctil el CSS ya lo oculta.
   const cursorRing = document.getElementById('cursor-ring');
 
   if (cursorRing && window.matchMedia('(pointer: fine)').matches) {
-    let cursorX = -100, cursorY = -100;
-
-    // Usamos transform en lugar de top/left para evitar reflow del layout
     window.addEventListener('mousemove', e => {
-      cursorX = e.clientX;
-      cursorY = e.clientY;
-      cursorRing.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+      cursorRing.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
     });
 
-    // Agrandar el cursor al hover sobre interactivos
-    document.querySelectorAll('a, button, [role="button"], input, label, .carousel-card').forEach(el => {
+    document.querySelectorAll('a, button, [role="button"], input, label, .carousel-card, .step-card, .feature-card, .pricing-card').forEach(el => {
       el.addEventListener('mouseenter', () => cursorRing.classList.add('cursor-hover'));
       el.addEventListener('mouseleave', () => cursorRing.classList.remove('cursor-hover'));
     });
@@ -44,9 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ── 2. LOADER ────────────────────────────────────────────────────────────
-  // Timing:  0.0s inicio · 0.5s empieza beam · 1.5s letras · 3.0s completo · 4.0s desaparece
-  const loader = document.getElementById('loader');
-  const beam   = document.getElementById('loader-beam');
+  const loader  = document.getElementById('loader');
+  const beam    = document.getElementById('loader-beam');
   const letters = document.querySelectorAll('.loader-letter');
 
   function runLoader() {
@@ -55,33 +51,34 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // El beam barre de izquierda a derecha en 2.5s
+    // El beam se posiciona exactamente sobre el texto OXPHYRE
     setTimeout(() => {
-      beam.style.transition = 'transform 2.5s linear';
-      beam.style.transform  = `translateX(${window.innerWidth + 200}px)`;
+      const textEl = document.getElementById('loader-text');
+      if (textEl) {
+        const rect = textEl.getBoundingClientRect();
+        beam.style.top    = rect.top    + 'px';
+        beam.style.height = rect.height + 'px';
+      }
+      beam.style.transition = 'transform 2.2s linear';
+      beam.style.transform  = `translateX(${window.innerWidth + 120}px)`;
     }, 500);
 
-    // Las letras se revelan escalonadas entre t=1.5s y t=3.0s
+    // Letras reveladas escalonadas desde t=1.5s
     letters.forEach((letter, i) => {
-      setTimeout(() => {
-        letter.classList.add('revealed');
-      }, 1500 + i * 200);
+      setTimeout(() => letter.classList.add('revealed'), 1500 + i * 200);
     });
 
-    // A t=3.5s las letras explotan hacia afuera (scale + opacity)
+    // Explosión a t=3.5s
     setTimeout(() => {
       letters.forEach((letter, i) => {
-        setTimeout(() => {
-          letter.classList.add('explode');
-        }, i * 60);
+        setTimeout(() => letter.classList.add('explode'), i * 60);
       });
     }, 3500);
 
-    // A t=4.0s el loader se desvanece y se revela la escena
+    // Loader desaparece a t=4.0s → inicia Three.js
     setTimeout(() => {
       loader.classList.add('hidden');
-      // Iniciamos en Phase 2 directamente (la Phase 1 three.js necesita pantalla limpia)
-      startHeroThreeJS();
+      startThreeJS();
     }, 4000);
   }
 
@@ -89,10 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ── 3. TEMA DÍA/NOCHE ───────────────────────────────────────────────────
-  const themeBtn = document.getElementById('theme-toggle');
-  const saved    = localStorage.getItem('oxphyre-theme');
+  const themeBtn    = document.getElementById('theme-toggle');
+  const saved       = localStorage.getItem('oxphyre-theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initTheme = saved ?? (prefersDark ? 'dark' : 'light');
+  const initTheme   = saved ?? (prefersDark ? 'dark' : 'light');
 
   function setTheme(theme) {
     document.body.classList.toggle('light', theme === 'light');
@@ -114,9 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ── 4. IDIOMA ────────────────────────────────────────────────────────────
-  if (window.i18n) {
-    window.i18n.initLang();
-  }
+  if (window.i18n) window.i18n.initLang();
 
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -127,13 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  // ── 5. NAV GLASSMORPHISM AL SCROLL ──────────────────────────────────────
+  // ── 5. NAV GLASSMORPHISM ─────────────────────────────────────────────────
   const nav = document.getElementById('nav');
   if (nav) {
     const sentinel = document.createElement('div');
     sentinel.style.cssText = 'position:absolute;top:80px;height:1px;width:1px;pointer-events:none;';
     document.body.prepend(sentinel);
-
     new IntersectionObserver(([entry]) => {
       nav.classList.toggle('nav-scrolled', !entry.isIntersecting);
     }, { threshold: 0 }).observe(sentinel);
@@ -150,14 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const open = mobileMenu.classList.toggle('open');
       menuBtn.setAttribute('aria-expanded', open);
     });
-
     if (menuClose) {
       menuClose.addEventListener('click', () => {
         mobileMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
       });
     }
-
     mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         mobileMenu.classList.remove('open');
@@ -167,14 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ── 7 & 8. HERO THREE.JS — DOS FASES ────────────────────────────────────
-  // Phase 1: cámara dentro de una esfera invertida (BackSide) con partículas ámbar.
-  //          El usuario arrastra para girar. Frases aparecen según el ángulo de vista.
-  // Phase 2: al hacer scroll la cámara sale hacia atrás (eje Z). Cuando cameraZ > 8
-  //          se activa body.phase-2: aparece el nav y el contenido del hero.
+  // ── 7, 8, 9. THREE.JS — CANVAS FIXED + SCROLL STATE MACHINE ─────────────
+  // Un único canvas position:fixed activo en toda la página.
+  // Phase 1: cámara dentro de la esfera (BackSide + partículas + drag).
+  // Phase 2: cámara fuera, esfera centrada como fondo de hero.
+  // Scroll state machine: scrollY mapea a estados de la esfera por sección.
 
-  function startHeroThreeJS() {
-    // En móvil saltamos directamente a Phase 2 — el CSS gestiona la presentación visual
+  function startThreeJS() {
     if (window.innerWidth <= 768) {
       document.body.classList.add('phase-2');
       return;
@@ -186,16 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // ── Setup renderer ──
     const scene    = new THREE.Scene();
-    const camera   = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.01, 100);
+    const camera   = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 200);
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
 
-    let cameraZ = 0.01; // Empieza dentro de la esfera
-    camera.position.set(0, 0, cameraZ);
-    camera.lookAt(0, 0, 0);
+    // FIX 8: pixelRatio máximo 1.5 para rendimiento en Chrome
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0);
 
     function resize() {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -205,36 +193,52 @@ document.addEventListener('DOMContentLoaded', () => {
     resize();
     window.addEventListener('resize', resize);
 
-    // ── Esfera BackSide (sala negra interior) ──
-    // BackSide hace que la superficie interior sea visible desde dentro.
-    const innerGeo = new THREE.SphereGeometry(8, 32, 32);
+    // ── Esfera principal (usada en Phase 1 BackSide y Phase 2 frontal) ──
+    const sphereGeo = new THREE.SphereGeometry(4, 48, 48);
+
+    // Material interno (Phase 1: negro BackSide)
     const innerMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
-    const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+    const innerSphere = new THREE.Mesh(sphereGeo, innerMat);
     scene.add(innerSphere);
 
+    // Material externo (Phase 2: ember dark)
+    const outerMat = new THREE.MeshStandardMaterial({
+      color: 0x050300,
+      roughness: 0.95,
+      metalness: 0.0,
+      emissive: 0x000000,
+      emissiveIntensity: 0
+    });
+    const outerSphere = new THREE.Mesh(sphereGeo, outerMat);
+    outerSphere.visible = false;
+    scene.add(outerSphere);
+
+    // Wireframe
+    const wireMat = new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.04 });
+    const wireframe = new THREE.LineSegments(new THREE.WireframeGeometry(sphereGeo), wireMat);
+    outerSphere.add(wireframe);
+
     // ── Partículas ámbar ──
-    // 300 puntos distribuidos aleatoriamente dentro del volumen de la esfera.
     const PARTICLE_COUNT = 300;
-    const pPositions = new Float32Array(PARTICLE_COUNT * 3);
-    const pOffsets   = new Float32Array(PARTICLE_COUNT); // fase de oscilación por partícula
+    const pBasePos = new Float32Array(PARTICLE_COUNT * 3);
+    const pOffsets = new Float32Array(PARTICLE_COUNT);
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-      // Distribución uniforme dentro de la esfera (coordenadas esféricas aleatorias)
-      const r     = 5 + Math.random() * 2.5;
+      const r     = 2.5 + Math.random() * 1.2;
       const theta = Math.random() * Math.PI * 2;
       const phi   = Math.acos(2 * Math.random() - 1);
-      pPositions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-      pPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      pPositions[i * 3 + 2] = r * Math.cos(phi);
+      pBasePos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+      pBasePos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      pBasePos[i * 3 + 2] = r * Math.cos(phi);
       pOffsets[i] = Math.random() * Math.PI * 2;
     }
 
     const pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pPositions.slice(), 3));
+    pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pBasePos.slice(), 3));
 
     const pMat = new THREE.PointsMaterial({
       color: 0xFEB354,
-      size: 0.06,
+      size: 0.04,
       transparent: true,
       opacity: 0.7,
       sizeAttenuation: true
@@ -242,17 +246,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const particles = new THREE.Points(pGeo, pMat);
     scene.add(particles);
 
-    // ── Drag para rotar la vista (esférico) ──
-    // El usuario arrastra y la cámara orbita alrededor del centro de la esfera.
+    // ── Luces ──
+    const emberLight = new THREE.PointLight(0xFEB354, 8, 10);
+    emberLight.position.set(0, -5, 1);
+    scene.add(emberLight);
+
+    const haloLight = new THREE.PointLight(0xFF7A20, 3, 14);
+    haloLight.position.set(0, -7, 2);
+    scene.add(haloLight);
+
+    const ambientLight = new THREE.AmbientLight(0x080503, 5);
+    scene.add(ambientLight);
+
+    // ── Phase 1: drag para girar la vista ──
     let spherical = { theta: 0, phi: Math.PI / 2 };
+    let targetTheta = 0, targetPhi = Math.PI / 2;
     let isDragging = false;
     let prevX = 0, prevY = 0;
-    let targetTheta = 0, targetPhi = Math.PI / 2;
 
-    canvas.addEventListener('mousedown', e => {
+    const heroCanvas = canvas;
+
+    heroCanvas.addEventListener('mousedown', e => {
       isDragging = true;
-      prevX = e.clientX;
-      prevY = e.clientY;
+      prevX = e.clientX; prevY = e.clientY;
+      // FIX 3: ocultar indicador drag al primer mousedown
+      document.getElementById('phase1-drag-hint')?.classList.add('hide');
     });
 
     window.addEventListener('mousemove', e => {
@@ -260,17 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
       targetTheta -= (e.clientX - prevX) * 0.005;
       targetPhi   -= (e.clientY - prevY) * 0.003;
       targetPhi    = Math.max(0.3, Math.min(Math.PI - 0.3, targetPhi));
-      prevX = e.clientX;
-      prevY = e.clientY;
+      prevX = e.clientX; prevY = e.clientY;
     });
 
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // Touch events para móvil (aunque en móvil el hero tiene fallback CSS)
-    canvas.addEventListener('touchstart', e => {
+    heroCanvas.addEventListener('touchstart', e => {
       isDragging = true;
-      prevX = e.touches[0].clientX;
-      prevY = e.touches[0].clientY;
+      prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
     }, { passive: true });
 
     window.addEventListener('touchmove', e => {
@@ -278,62 +293,146 @@ document.addEventListener('DOMContentLoaded', () => {
       targetTheta -= (e.touches[0].clientX - prevX) * 0.005;
       targetPhi   -= (e.touches[0].clientY - prevY) * 0.003;
       targetPhi    = Math.max(0.3, Math.min(Math.PI - 0.3, targetPhi));
-      prevX = e.touches[0].clientX;
-      prevY = e.touches[0].clientY;
+      prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
     }, { passive: true });
 
     window.addEventListener('touchend', () => { isDragging = false; });
 
-    // ── Frases según ángulo de rotación ──
+    // ── Frases según ángulo ──
     const phrases = document.querySelectorAll('.phrase');
-    const phraseAngles = [0, 90, 180, 270, 350]; // en grados
+    const phraseAngles = [0, 90, 180, 270, 350];
 
     function updatePhrases() {
       const thetaDeg = ((targetTheta * 180 / Math.PI) % 360 + 360) % 360;
       phrases.forEach((phrase, i) => {
-        const angleDiff = Math.abs(thetaDeg - phraseAngles[i]);
-        const wrapped   = Math.min(angleDiff, 360 - angleDiff);
+        const diff    = Math.abs(thetaDeg - phraseAngles[i]);
+        const wrapped = Math.min(diff, 360 - diff);
         phrase.classList.toggle('active', wrapped < 35);
       });
     }
 
-    // ── Scroll: cámara sale de la esfera ──
+    // ── FIX 4: bloqueo de scroll durante Phase 1 ──
+    document.body.style.overflow = 'hidden';
+
+    let isPhase1   = true;
+    let isPhase2   = false;
     let scrollAccum = 0;
-    let isPhase2    = false;
     let targetCamZ  = 0.01;
-    let lerpingOut  = false;
+    let camZ        = 0.01;
 
-    window.addEventListener('wheel', e => {
-      if (isPhase2) return;
-      scrollAccum += e.deltaY * 0.01;
+    // FIX 3: wheel listener en Phase 1
+    function onPhase1Wheel(e) {
+      if (!isPhase1) return;
+      // Ocultar indicador scroll al primer wheel
+      document.getElementById('phase1-scroll-hint')?.classList.add('hide');
+      scrollAccum += e.deltaY * 0.015;
       scrollAccum  = Math.max(0, scrollAccum);
-
       if (scrollAccum > 3) {
         targetCamZ = 12;
-        lerpingOut = true;
       }
-    }, { passive: true });
+    }
+    window.addEventListener('wheel', onPhase1Wheel, { passive: true });
 
-    // ── Loop de animación ──
+    function activatePhase2() {
+      if (isPhase2) return;
+      isPhase2 = true;
+      isPhase1 = false;
+
+      // FIX 4: liberar scroll y resetear posición
+      document.body.style.overflow = '';
+      window.scrollTo(0, 0);
+      document.body.classList.add('phase-2');
+
+      // Eliminar el wheel listener de Phase 1 — no se puede volver a entrar
+      window.removeEventListener('wheel', onPhase1Wheel);
+
+      // Cambiar visibilidad: BackSide out, outer sphere in
+      innerSphere.visible = false;
+      outerSphere.visible = true;
+
+      // La esfera externa ocupa ~60-70% del viewport centrada como fondo del hero
+      outerSphere.position.set(0, 0, 0);
+      outerSphere.scale.setScalar(1);
+
+      camera.position.set(0, 0, 5.5);
+      camera.fov = 55;
+      camera.updateProjectionMatrix();
+      camera.lookAt(0, 0, 0);
+
+      // Luces ajustadas para Phase 2
+      emberLight.position.set(0, -2.8, 1);
+      emberLight.intensity = 8;
+      haloLight.position.set(0, -4, 2);
+    }
+
+    // Estado actual de la esfera para el scroll state machine
+    let sphereScale   = 0;
+    let sphereOpacity = 0;
+    let sphereY       = 0;
+
+    // ── Secciones del DOM para el scroll state machine ──
+    function getSectionMid(id) {
+      const el = document.getElementById(id);
+      if (!el) return Infinity;
+      const r = el.getBoundingClientRect();
+      return window.scrollY + r.top + r.height / 2;
+    }
+
+    // Drag para rotar la esfera en Phase 2
+    let extDragging = false, extPrevX = 0, extPrevY = 0;
+    let extRotY = 0, extRotX = 0;
+    let extAutoRotate = true, extResumeTimer = null;
+
+    canvas.addEventListener('mousedown', e => {
+      if (!isPhase2) return;
+      extDragging  = true;
+      extAutoRotate = false;
+      extPrevX = e.clientX; extPrevY = e.clientY;
+      if (extResumeTimer) clearTimeout(extResumeTimer);
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!extDragging || !isPhase2) return;
+      extRotY += (e.clientX - extPrevX) * 0.006;
+      extRotX += (e.clientY - extPrevY) * 0.004;
+      extRotX  = Math.max(-0.7, Math.min(0.7, extRotX));
+      extPrevX = e.clientX; extPrevY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!extDragging) return;
+      extDragging  = false;
+      extResumeTimer = setTimeout(() => { extAutoRotate = true; }, 1500);
+    });
+
+    // ── FIX 8: pausar loop cuando tab no visible ──
+    let animId;
+    let isTabVisible = !document.hidden;
+    document.addEventListener('visibilitychange', () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) animate();
+    });
+
     let t = 0;
-    const pPos = pGeo.attributes.position;
+    const pAttr = pGeo.attributes.position;
+
+    function lerp(a, b, f) { return a + (b - a) * f; }
 
     function animate() {
-      requestAnimationFrame(animate);
-      t += 0.008;
+      if (!isTabVisible) return;
+      animId = requestAnimationFrame(animate);
+      t += 0.006;
 
-      // Auto-rotate lento si no está arrastrando
-      if (!isDragging) {
-        targetTheta += 0.003;
-      }
+      if (isPhase1) {
+        // ── PHASE 1: dentro de la esfera ──
+        if (!isDragging) targetTheta += 0.003;
+        spherical.theta += (targetTheta - spherical.theta) * 0.08;
+        spherical.phi   += (targetPhi   - spherical.phi)   * 0.08;
 
-      // Lerp suave de la rotación esférica
-      spherical.theta += (targetTheta - spherical.theta) * 0.08;
-      spherical.phi   += (targetPhi - spherical.phi) * 0.08;
+        // Lerp hacia afuera si el usuario scrolleó
+        camZ += (targetCamZ - camZ) * 0.05;
 
-      if (!isPhase2) {
-        // Phase 1: cámara en el centro, mirando hacia el perímetro
-        const r = cameraZ;
+        const r = camZ;
         camera.position.set(
           r * Math.sin(spherical.phi) * Math.cos(spherical.theta),
           r * Math.cos(spherical.phi),
@@ -343,30 +442,118 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Oscilación de partículas
         for (let i = 0; i < PARTICLE_COUNT; i++) {
-          const base = pPositions;
-          const ox = base[i * 3];
-          const oy = base[i * 3 + 1];
-          const oz = base[i * 3 + 2];
-          const wave = Math.sin(t + pOffsets[i]) * 0.06;
-          pPos.setXYZ(i, ox + wave, oy + wave * 0.5, oz + wave);
+          const wave = Math.sin(t + pOffsets[i]) * 0.05;
+          pAttr.setXYZ(
+            i,
+            pBasePos[i * 3]     + wave,
+            pBasePos[i * 3 + 1] + wave * 0.5,
+            pBasePos[i * 3 + 2] + wave
+          );
         }
-        pPos.needsUpdate = true;
+        pAttr.needsUpdate = true;
 
         updatePhrases();
 
-        // Lerp de la cámara hacia afuera al hacer scroll
-        if (lerpingOut) {
-          cameraZ += (targetCamZ - cameraZ) * 0.04;
+        // Activar Phase 2 cuando la cámara sale suficientemente lejos
+        if (camZ > 7) activatePhase2();
 
-          if (cameraZ > 8 && !isPhase2) {
-            isPhase2 = true;
-            document.body.classList.add('phase-2');
-            // Eliminamos la esfera interior y partículas del render
-            // y añadimos la esfera externa de Phase 2
-            scene.remove(innerSphere);
-            scene.remove(particles);
-            setupPhase2();
-          }
+      } else {
+        // ── PHASE 2: esfera external + scroll state machine ──
+        if (extAutoRotate) {
+          extRotY += 0.004;
+          extRotX  = Math.sin(t * 0.3) * 0.06;
+        }
+
+        outerSphere.rotation.y = extRotY;
+        outerSphere.rotation.x = extRotX;
+
+        // Scroll state machine: mapear scrollY a estado de la esfera
+        const sy = window.scrollY;
+        const vh = window.innerHeight;
+
+        // Obtener posiciones de las secciones
+        const heroEl  = document.getElementById('hero');
+        const s2El    = document.getElementById('carousel-section');
+        const s3El    = document.getElementById('como-funciona');
+        const s4El    = document.getElementById('demo');
+        const s5El    = document.getElementById('caracteristicas');
+        const s6El    = document.getElementById('precios');
+        const s7El    = document.getElementById('faq');
+        const ctaEl   = document.getElementById('cta-final');
+
+        const getTop = el => el ? el.getBoundingClientRect().top + sy : Infinity;
+
+        const heroTop = getTop(heroEl);
+        const s2Top   = getTop(s2El);
+        const s3Top   = getTop(s3El);
+        const s4Top   = getTop(s4El);
+        const s5Top   = getTop(s5El);
+        const s6Top   = getTop(s6El);
+        const s7Top   = getTop(s7El);
+        const ctaTop  = getTop(ctaEl);
+        const ctaHeight = ctaEl ? ctaEl.getBoundingClientRect().height + ctaEl.getBoundingClientRect().top + sy - ctaTop : 0;
+
+        // Estados objetivo por sección
+        let tScale = 1.4, tOY = 0, tOpacity = 1, tLI = 8;
+        let tFloatY = 0;
+
+        if (sy >= ctaTop - vh * 0.3) {
+          // S8 CTA: peachweb — esfera crece hasta cubrir la pantalla
+          const progress = Math.min(1, (sy - (ctaTop - vh * 0.3)) / (vh * 0.7));
+          tScale   = lerp(0.5, 9, progress);
+          tOpacity = lerp(0.5, 1, progress);
+          tLI      = lerp(4, 10, progress);
+          tOY      = 0;
+          particles.visible = progress > 0.4;
+        } else if (sy >= s7Top - vh * 0.5) {
+          tScale = 0; tOY = -12; tOpacity = 0; tLI = 0.2;
+          particles.visible = false;
+        } else if (sy >= s6Top - vh * 0.5) {
+          tScale = 0; tOY = -12; tOpacity = 0; tLI = 1;
+          particles.visible = false;
+        } else if (sy >= s5Top - vh * 0.5) {
+          tScale = 0; tOY = -12; tOpacity = 0; tLI = 0.6;
+          particles.visible = false;
+        } else if (sy >= s4Top - vh * 0.5) {
+          tScale = 0; tOY = -12; tOpacity = 0; tLI = 1.5;
+          particles.visible = false;
+        } else if (sy >= s3Top - vh * 0.5) {
+          tScale = 0.35; tOY = 0; tOpacity = 0.25; tLI = 3;
+          particles.visible = false;
+        } else if (sy >= s2Top - vh * 0.5) {
+          tScale = 0; tOY = -12; tOpacity = 0; tLI = 1;
+          particles.visible = false;
+        } else {
+          // Hero Phase 2: esfera centrada grande
+          tScale = 1.4; tOY = 0; tOpacity = 1; tLI = 8;
+          tFloatY = Math.sin(t * 0.5) * 0.07;
+          particles.visible = false;
+        }
+
+        // Lerp suave del estado de la esfera
+        sphereScale   = lerp(sphereScale,   tScale,   0.04);
+        sphereY       = lerp(sphereY,       tOY,      0.04);
+        sphereOpacity = lerp(sphereOpacity, tOpacity, 0.04);
+
+        outerSphere.scale.setScalar(Math.max(0, sphereScale));
+        outerSphere.position.y = sphereY + tFloatY;
+        outerMat.opacity = sphereOpacity;
+        outerMat.transparent = sphereOpacity < 1;
+        outerSphere.visible = sphereScale > 0.02;
+
+        // Luces siguen la esfera
+        const lI = lerp(emberLight.intensity, tLI, 0.04);
+        emberLight.intensity = lI;
+        emberLight.position.y = lerp(emberLight.position.y, sphereY - 2.8, 0.04);
+        haloLight.position.y  = lerp(haloLight.position.y,  sphereY - 4.5, 0.04);
+
+        // Cuando scale > 4 en CTA: activar partículas (usuario "dentro")
+        if (sphereScale > 4) {
+          particles.visible = true;
+          innerSphere.visible = true;
+          innerSphere.scale.setScalar(sphereScale / 4);
+        } else {
+          innerSphere.visible = false;
         }
       }
 
@@ -374,137 +561,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     animate();
-
-    // ── Phase 2: esfera externa ──
-    let extSphere, extEmber, extHalo, extRotY = 0, extAutoRotate = true, extResumeTimer = null;
-
-    function setupPhase2() {
-      // Reposicionamos la cámara para ver la escena desde fuera
-      camera.position.set(0, 0, 5.5);
-      camera.lookAt(0, 0, 0);
-      camera.fov = 55;
-      camera.updateProjectionMatrix();
-
-      // Esfera externa — mismos materiales que el ember-orb anterior
-      const geo = new THREE.SphereGeometry(1.4, 64, 64);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0x050300,
-        roughness: 0.95,
-        metalness: 0.0,
-        emissive: 0x000000,
-        emissiveIntensity: 0
-      });
-      extSphere = new THREE.Mesh(geo, mat);
-      extSphere.position.set(2, -0.5, 0);
-      scene.add(extSphere);
-
-      // Wireframe parented a la esfera
-      const wire = new THREE.LineSegments(
-        new THREE.WireframeGeometry(geo),
-        new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.05 })
-      );
-      extSphere.add(wire);
-
-      // Luz ámbar desde abajo
-      extEmber = new THREE.PointLight(0xFEB354, 8, 5);
-      extEmber.position.set(2, -2.8, 0.8);
-      scene.add(extEmber);
-
-      extHalo = new THREE.PointLight(0xFF7A20, 3, 8);
-      extHalo.position.set(2, -4, 1.5);
-      scene.add(extHalo);
-
-      scene.add(new THREE.AmbientLight(0x080503, 6));
-
-      // Drag para rotar la esfera externa
-      canvas.addEventListener('mousedown', extMouseDown);
-      window.addEventListener('mousemove', extMouseMove);
-      window.addEventListener('mouseup', extMouseUp);
-
-      // Reemplazamos el loop
-      requestAnimationFrame(animatePhase2);
-    }
-
-    let ext_isDragging = false;
-    let ext_prevX = 0, ext_prevY = 0;
-    let ext_rotY = 0, ext_rotX = 0;
-
-    function extMouseDown(e) {
-      ext_isDragging  = true;
-      extAutoRotate   = false;
-      ext_prevX = e.clientX;
-      ext_prevY = e.clientY;
-      if (extResumeTimer) clearTimeout(extResumeTimer);
-    }
-
-    function extMouseMove(e) {
-      if (!ext_isDragging) return;
-      ext_rotY += (e.clientX - ext_prevX) * 0.006;
-      ext_rotX += (e.clientY - ext_prevY) * 0.004;
-      ext_rotX  = Math.max(-0.7, Math.min(0.7, ext_rotX));
-      ext_prevX = e.clientX;
-      ext_prevY = e.clientY;
-    }
-
-    function extMouseUp() {
-      if (!ext_isDragging) return;
-      ext_isDragging  = false;
-      extResumeTimer  = setTimeout(() => { extAutoRotate = true; }, 1500);
-    }
-
-    let t2 = 0;
-
-    function animatePhase2() {
-      requestAnimationFrame(animatePhase2);
-      t2 += 0.004;
-
-      if (extAutoRotate) {
-        ext_rotY += 0.004;
-        ext_rotX  = Math.sin(t2 * 0.3) * 0.07;
-      }
-
-      if (extSphere) {
-        extSphere.rotation.y = ext_rotY;
-        extSphere.rotation.x = ext_rotX;
-
-        const floatY = Math.sin(t2 * 0.5) * 0.07;
-        extSphere.position.y = -0.5 + floatY;
-        if (extEmber) extEmber.position.y = -2.8 + floatY;
-        if (extHalo)  extHalo.position.y  = -4.0 + floatY;
-      }
-
-      renderer.render(scene, camera);
-    }
-
   }
 
-  // Si Three.js ya está disponible al DOMContentLoaded, esperamos al loader.
-  // El loader llama a startHeroThreeJS() a t=4.0s.
-  // Si Three.js no cargó aún (defer), lo escuchamos.
+  // Si Three.js cargó tras DOMContentLoaded, el loader lo llama. Si falló, fallback.
   if (typeof THREE === 'undefined') {
     const threeScript = document.querySelector('script[src*="three"]');
     if (threeScript) {
-      threeScript.addEventListener('load', () => {
-        // startHeroThreeJS ya se llamará desde el loader
-      });
+      threeScript.addEventListener('load', () => { /* loader ya planificado */ });
     }
   }
 
 
-  // ── 9. SCROLL HINT ──────────────────────────────────────────────────────
+  // ── 10. SCROLL HINT ──────────────────────────────────────────────────────
   const scrollHint = document.getElementById('scroll-hint');
   if (scrollHint) {
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 10) {
-        scrollHint.classList.add('hide');
-      }
+      scrollHint.classList.add('hide');
     }, { once: true, passive: true });
   }
 
 
-  // ── 10. CARRUSEL NEGOCIOS ────────────────────────────────────────────────
-  // 8 cards con efecto 3D CSS (rotateY en laterales). Autoavance cada 4s.
-  // Drag: si el delta horizontal supera 50px se avanza/retrocede.
+  // ── 11. CARRUSEL NEGOCIOS ────────────────────────────────────────────────
   const carousel = document.getElementById('carousel');
   const cards    = carousel ? Array.from(carousel.querySelectorAll('.carousel-card')) : [];
   const dots     = document.querySelectorAll('.carousel-dot');
@@ -514,20 +591,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let   current  = 0;
   let   autoTimer = null;
 
-  const POSITIONS = ['prev-2', 'prev-1', 'active', 'next-1', 'next-2'];
-
   function setCarousel(index) {
     cards.forEach((card, i) => {
       card.className = 'carousel-card';
       const rel = ((i - index) % TOTAL + TOTAL) % TOTAL;
-      if      (rel === 0)        card.classList.add('active');
-      else if (rel === 1)        card.classList.add('next-1');
-      else if (rel === 2)        card.classList.add('next-2');
-      else if (rel === TOTAL - 1) card.classList.add('prev-1');
-      else if (rel === TOTAL - 2) card.classList.add('prev-2');
-      else                        card.classList.add('c-hidden');
+      if      (rel === 0)           card.classList.add('active');
+      else if (rel === 1)           card.classList.add('next-1');
+      else if (rel === 2)           card.classList.add('next-2');
+      else if (rel === TOTAL - 1)   card.classList.add('prev-1');
+      else if (rel === TOTAL - 2)   card.classList.add('prev-2');
+      else                          card.classList.add('c-hidden');
     });
-
     dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
     current = index;
   }
@@ -537,7 +611,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resetAuto() {
     clearInterval(autoTimer);
-    autoTimer = setInterval(carouselNext, 4000);
+    // FIX 9: autoavance 5s (era 4s)
+    autoTimer = setInterval(carouselNext, 5000);
   }
 
   if (TOTAL > 0) {
@@ -547,31 +622,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nextBtn) nextBtn.addEventListener('click', () => { carouselNext(); resetAuto(); });
     if (prevBtn) prevBtn.addEventListener('click', () => { carouselPrev(); resetAuto(); });
 
-    // Drag horizontal en el carrusel
     let dragStart = 0;
     carousel.addEventListener('mousedown', e => { dragStart = e.clientX; });
     carousel.addEventListener('mouseup', e => {
       const delta = e.clientX - dragStart;
-      if (Math.abs(delta) > 50) {
-        delta < 0 ? carouselNext() : carouselPrev();
-        resetAuto();
-      }
+      if (Math.abs(delta) > 50) { delta < 0 ? carouselNext() : carouselPrev(); resetAuto(); }
     });
-
-    carousel.addEventListener('touchstart', e => {
-      dragStart = e.touches[0].clientX;
-    }, { passive: true });
+    carousel.addEventListener('touchstart', e => { dragStart = e.touches[0].clientX; }, { passive: true });
     carousel.addEventListener('touchend', e => {
       const delta = e.changedTouches[0].clientX - dragStart;
-      if (Math.abs(delta) > 50) {
-        delta < 0 ? carouselNext() : carouselPrev();
-        resetAuto();
-      }
+      if (Math.abs(delta) > 50) { delta < 0 ? carouselNext() : carouselPrev(); resetAuto(); }
     }, { passive: true });
+
+    // FIX 9: hover preview con placeholder oscuro + parallax
+    cards.forEach(card => {
+      const preview = card.querySelector('.carousel-preview');
+      const circle  = card.querySelector('.preview-circle');
+      if (!preview || !circle) return;
+
+      card.addEventListener('mouseenter', () => {
+        preview.classList.add('visible');
+        cursorRing?.classList.add('cursor-eye');
+      });
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left - rect.width  / 2) * 0.04;
+        const y = (e.clientY - rect.top  - rect.height / 2) * 0.04;
+        circle.style.transform = `translate(${x}px, ${y}px)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        preview.classList.remove('visible');
+        cursorRing?.classList.remove('cursor-eye');
+        circle.style.transform = '';
+      });
+    });
   }
 
 
-  // ── 11. ANIMACIONES DE SCROLL (IntersectionObserver) ────────────────────
+  // ── 12. ANIMACIONES DE SCROLL ────────────────────────────────────────────
   const animObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -579,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         animObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
   document.querySelectorAll('.animate-on-scroll').forEach((el, i) => {
     el.style.transitionDelay = `${i * 0.07}s`;
@@ -587,18 +675,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  // ── 12. CURSOR SPOTLIGHT EN CARACTERÍSTICAS ──────────────────────────────
-  // Cuando el cursor se mueve sobre la sección, las CSS vars --mx y --my
-  // de cada .feature-card::before se actualizan para seguir el puntero.
-  // En móvil (pointer:coarse) el CSS ya desactiva el efecto.
+  // ── 13. CURSOR SPOTLIGHT EN CARACTERÍSTICAS ──────────────────────────────
   const featSection = document.getElementById('caracteristicas');
   if (featSection && window.matchMedia('(pointer: fine)').matches) {
     featSection.addEventListener('mousemove', e => {
-      const rect = featSection.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      // Propagamos la posición relativa a cada card para que ::before sea correcto
       featSection.querySelectorAll('.feature-card').forEach(card => {
         const cr = card.getBoundingClientRect();
         card.style.setProperty('--mx', `${e.clientX - cr.left}px`);
@@ -608,7 +688,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ── 13. ACORDEÓN FAQ ─────────────────────────────────────────────────────
+  // ── 14. S3 TILT HOVER + LÍNEA CONECTOR ──────────────────────────────────
+  // FIX 10: tilt 3D siguiendo el cursor en hover de cada step card
+  document.querySelectorAll('.step-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width  / 2) / r.width  * 12;
+      const y = (e.clientY - r.top  - r.height / 2) / r.height * 12;
+      card.style.transform = `perspective(600px) rotateY(${x}deg) rotateX(${-y}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  // Línea conector: animar el SVG cuando la sección es visible
+  const connectorSvg = document.querySelector('.step-connector');
+  if (connectorSvg) {
+    const paths = connectorSvg.querySelectorAll('path');
+    const connObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        paths.forEach((path, i) => {
+          const length = path.getTotalLength();
+          path.style.strokeDasharray  = length;
+          path.style.strokeDashoffset = length;
+          path.style.transition = `stroke-dashoffset 0.8s ease ${i * 0.3}s`;
+          requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
+        });
+        connObserver.disconnect();
+      }
+    }, { threshold: 0.3 });
+    connObserver.observe(connectorSvg);
+  }
+
+
+  // ── 15. ACORDEÓN FAQ ─────────────────────────────────────────────────────
   document.querySelectorAll('.faq-item').forEach(item => {
     const question = item.querySelector('.faq-question');
     const answer   = item.querySelector('.faq-answer');
@@ -620,17 +734,19 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.faq-item.open').forEach(open => {
         open.classList.remove('open');
         open.querySelector('.faq-answer').style.maxHeight = '0';
+        open.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
       });
 
       if (!isOpen) {
         item.classList.add('open');
         answer.style.maxHeight = answer.scrollHeight + 'px';
+        question.setAttribute('aria-expanded', 'true');
       }
     });
   });
 
 
-  // ── 14. TOGGLE PRECIOS MENSUAL / ANUAL ───────────────────────────────────
+  // ── 16. TOGGLE PRECIOS MENSUAL / ANUAL ───────────────────────────────────
   const billingToggle  = document.getElementById('billing-toggle');
   const pricingSection = document.getElementById('precios');
 
@@ -644,70 +760,5 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-
-
-  // ── 15. THREE.JS — ESFERA DECORATIVA CTA FINAL ───────────────────────────
-  // Pequeña esfera ember-orb en el CTA final. Solo auto-rotate, sin drag.
-  // Solo en desktop (> 768px).
-  function initCtaSphere() {
-    if (window.innerWidth <= 768) return;
-
-    const ctaCanvas = document.getElementById('cta-canvas');
-    if (!ctaCanvas || typeof THREE === 'undefined') return;
-
-    const ctaScene    = new THREE.Scene();
-    const ctaCamera   = new THREE.PerspectiveCamera(55, 1, 0.1, 50);
-    const ctaRenderer = new THREE.WebGLRenderer({ canvas: ctaCanvas, alpha: true, antialias: true });
-
-    ctaCamera.position.set(0, 0, 3.5);
-    ctaRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    ctaRenderer.setSize(200, 200);
-    ctaRenderer.setClearColor(0x000000, 0);
-
-    const geo = new THREE.SphereGeometry(0.8, 32, 32);
-    const mat = new THREE.MeshStandardMaterial({
-      color: 0x050300,
-      roughness: 0.95,
-      metalness: 0.0,
-      emissive: 0x000000,
-      emissiveIntensity: 0
-    });
-    const sphere = new THREE.Mesh(geo, mat);
-    ctaScene.add(sphere);
-
-    const wire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(geo),
-      new THREE.LineBasicMaterial({ color: 0xFEB354, transparent: true, opacity: 0.06 })
-    );
-    sphere.add(wire);
-
-    const light = new THREE.PointLight(0xFEB354, 10, 4);
-    light.position.set(0, -1.5, 0.5);
-    ctaScene.add(light);
-
-    ctaScene.add(new THREE.AmbientLight(0x080503, 5));
-
-    let tCta = 0;
-
-    function animateCta() {
-      requestAnimationFrame(animateCta);
-      tCta += 0.005;
-      sphere.rotation.y += 0.006;
-      sphere.rotation.x = Math.sin(tCta * 0.4) * 0.06;
-      ctaRenderer.render(ctaScene, ctaCamera);
-    }
-
-    // Usamos IntersectionObserver para iniciar el render solo cuando el canvas es visible
-    const ctaObserver = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        animateCta();
-        ctaObserver.disconnect();
-      }
-    });
-    ctaObserver.observe(ctaCanvas);
-  }
-
-  // La esfera CTA se puede iniciar después del loader
-  setTimeout(initCtaSphere, 4200);
 
 });

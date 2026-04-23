@@ -19,6 +19,7 @@ const translations = {
       phase1_180: 'Cada rincón, capturado en su mejor momento.',
       phase1_270: 'No es una foto. Es tu negocio vivo.',
       phase1_360: '↓ Explora la dimensión Oxphyre',
+      drag_hint:  'Arrastra para explorar',
       h1:       'Tours virtuales 3D para negocios que quieren brillar.',
       subtitle: 'Convierte tu local en una experiencia 360° que tus clientes pueden visitar desde cualquier lugar. Sin cámaras especiales, sin técnicos, sin complicaciones.',
       cta_primary:   'Crear mi tour gratis →',
@@ -28,33 +29,39 @@ const translations = {
       pill3: '✓ Funciona en cualquier móvil'
     },
     carousel: {
-      title: 'Tu negocio, en primera persona',
-      c1_title: 'Restaurante',  c1_text: 'Que reserven antes de probar tu cocina.',
-      c2_title: 'Gimnasio',     c2_text: 'Que vean las instalaciones antes de apuntarse.',
-      c3_title: 'Peluquería',   c3_text: 'Que conozcan tu espacio antes de su cita.',
-      c4_title: 'Hotel',        c4_text: 'Que elijan su habitación antes de reservar.',
-      c5_title: 'Tienda',       c5_text: 'Que exploren tu tienda desde el sofá.',
-      c6_title: 'Inmobiliaria', c6_text: 'Que visiten la propiedad sin salir de casa.',
-      c7_title: 'Clínica',      c7_text: 'Que conozcan tu consulta antes de su primera cita.',
-      c8_title: 'Coworking',    c8_text: 'Que sientan el espacio antes de reservar su mesa.'
+      title:    'Tu negocio, en primera persona',
+      subtitle: 'Descubre cómo Oxphyre puede transformar la forma en que los clientes conocen tu negocio.',
+      c1_title: 'Restaurante',  c1_text: 'Tus platos son increíbles, pero tu ambiente es lo que te diferencia. Es hora de que lo vean.',
+      c2_title: 'Gimnasio',     c2_text: 'Muchos no se apuntan por miedo a no saber qué se van a encontrar. Abre tus puertas y rompe esa barrera.',
+      c3_title: 'Peluquería',   c3_text: 'En imágenes muestras el antes/después. Con Oxphyre muestras el dónde, el lugar donde ocurre la magia.',
+      c4_title: 'Hotel',        c4_text: 'Nadie reserva una habitación sin verla. Una experiencia inmersiva para una reserva premium.',
+      c5_title: 'Tienda',       c5_text: 'Tu escaparate es tu mejor vendedor, pero solo para los que pasan por delante. Con Oxphyre, tu escaparate es el mundo entero.',
+      c6_title: 'Inmobiliaria', c6_text: 'Capta la esencia de cada propiedad ofreciendo a los vendedores la tecnología de marketing más avanzada del mercado.',
+      c7_title: 'Clínica',      c7_text: 'Permite a tus pacientes recorrer tus instalaciones. Que conozcan tu consulta antes de entrar cambia todo.',
+      c8_title: 'Coworking',    c8_text: 'El espacio vende solo — si la gente lo ve. Deja que vean dónde va a crecer su próximo proyecto.'
     },
     steps: {
-      title: 'Cómo funciona',
+      title:    'Cómo lo creas',
       subtitle: 'Tu tour virtual en tres pasos. Sin curva de aprendizaje.',
+      hook:     'Sin cursos. Sin técnicos. Sin complicaciones.',
       s1_num: '01', s1_title: 'Fotografías tu local',
-      s1_desc: 'Fotografía cada posición en 4 direcciones (N, S, E, O). Solo necesitas tu móvil.',
+      s1_desc: 'Fotografía cada posición en 4 direcciones. Solo necesitas tu móvil.',
+      s1_detail: '4 fotos por posición · Norte, Sur, Este, Oeste',
       s2_num: '02', s2_title: 'Construyes el tour',
       s2_desc: 'Sube las fotos a Oxphyre y conecta las posiciones en nuestro editor visual drag & drop.',
+      s2_detail: 'Editor drag & drop · Sin conocimientos técnicos',
       s3_num: '03', s3_title: 'Lo compartes',
-      s3_desc: 'Descarga el QR y ponlo donde quieras. Tus clientes escanean y exploran tu negocio en 3D.'
+      s3_desc: 'Descarga el QR y ponlo donde quieras. Tus clientes escanean y exploran tu negocio en 3D.',
+      s3_detail: 'QR descargable · Código embed para tu web'
     },
     demo: {
-      title: 'Mira cómo funciona',
-      subtitle: 'Descubre cómo un negocio real se convierte en un tour virtual 3D navegable. Sin registro.',
+      title:      'Cómo lo viven tus clientes',
+      subtitle:   'Descubre cómo un negocio real se convierte en un tour virtual 3D navegable. Sin registro.',
+      embed_text: '¿Tienes web propia? Embebe el tour directamente con un snippet de código.',
       cta: 'Ver tour en vivo'
     },
     features: {
-      title: 'Todo lo que necesitas',
+      title:    'La tecnología detrás de cada tour',
       subtitle: 'Herramientas pensadas para negocios reales.',
       f1_title: 'Tour 3D navegable',
       f1_desc: 'Renderizado con Three.js. Tus clientes se mueven por el local como si estuvieran allí.',
@@ -70,18 +77,23 @@ const translations = {
       f6_desc: 'Funciona en iOS y Android sin instalar nada. Solo un navegador moderno.'
     },
     pricing: {
-      title: 'Precios transparentes',
+      title:    'Empieza gratis. Crece cuando quieras.',
       subtitle: 'Sin comisiones ocultas. Cancela cuando quieras.',
       toggle_monthly: 'Mensual', toggle_annual: 'Anual',
       badge_save: 'Ahorra 20%',
       free_name: 'Free',     free_price_monthly: '0€',  free_price_annual: '0€',
       free_desc: 'Para probar Oxphyre sin compromiso.',
+      free_note: 'Sin tarjeta. Sin compromiso.',
       pro_name: 'Pro',       pro_price_monthly: '19€',  pro_price_annual: '15€',
       pro_desc: 'Para negocios que quieren destacar.',
+      pro_note: 'Actualiza o cancela en cualquier momento.',
+      pro_annual_total: '182€/año · Ahorras 46€',
       biz_name: 'Business',  biz_price_monthly: '49€',  biz_price_annual: '39€',
       biz_desc: 'Para cadenas y agencias de marketing.',
+      biz_note: 'Acceso completo. Sin límites.',
+      biz_annual_total: '470€/año · Ahorras 118€',
       per_month: '/mes',
-      cta_free: 'Empezar gratis', cta_pro: 'Empezar con Pro', cta_biz: 'Contactar ventas',
+      cta_free: 'Empezar gratis', cta_pro: 'Empezar con Pro', cta_biz: 'Empezar con Business',
       popular: 'Más popular',
       free_f1: '1 tour activo',        free_f2: 'Hasta 5 posiciones',
       free_f3: 'QR descargable',       free_f4: 'Marca de agua Oxphyre',
@@ -91,7 +103,8 @@ const translations = {
       biz_f3: 'Analíticas avanzadas',  biz_f4: 'Dominio personalizado',   biz_f5: 'API access'
     },
     faq: {
-      title: 'Preguntas frecuentes',
+      title:    'Preguntas frecuentes',
+      subtitle: 'Todo lo que necesitas saber antes de empezar.',
       q1: '¿Necesito equipo especial para hacer el tour?',
       a1: 'No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente y genera la profundidad con inteligencia artificial (MiDaS de Intel). Nada de cámaras 360 ni software de edición.',
       q2: '¿Cuánto tiempo tarda en estar listo el tour?',
@@ -103,10 +116,12 @@ const translations = {
       q5: '¿Funciona en móviles y tablets?',
       a5: 'Sí. El tour funciona en cualquier dispositivo con un navegador moderno. No hay que instalar ninguna app. Está optimizado especialmente para la experiencia desde móvil al escanear el QR.',
       q6: '¿Mis fotos y datos están seguros?',
-      a6: 'Sí. Las fotos se almacenan en servidores propios con cifrado. No las compartimos con terceros ni las usamos para entrenar modelos. Cumplimos con el RGPD europeo.'
+      a6: 'Sí. Las fotos se almacenan en servidores propios con cifrado. No las compartimos con terceros ni las usamos para entrenar modelos. Cumplimos con el RGPD europeo.',
+      q7: '¿Puedo probar Oxphyre antes de pagar?',
+      a7: 'Sí. El plan Free es gratuito para siempre, sin tarjeta de crédito. Crea tu primer tour, compártelo y decide si quieres crecer con un plan de pago.'
     },
     cta_final: {
-      title: 'Tu negocio merece ser descubierto.',
+      title:    'Tu negocio merece ser descubierto.',
       subtitle: 'Empieza gratis hoy. Sin tarjeta de crédito.',
       cta: 'Crear mi tour gratis →'
     },
@@ -132,6 +147,7 @@ const translations = {
       phase1_180: 'Every corner, captured at its best.',
       phase1_270: 'Not a photo. Your business, alive.',
       phase1_360: '↓ Explore the Oxphyre dimension',
+      drag_hint:  'Drag to explore',
       h1:       '3D virtual tours for businesses that want to shine.',
       subtitle: 'Turn your space into a 360° experience your customers can visit from anywhere. No special cameras, no technicians, no hassle.',
       cta_primary:   'Create my free tour →',
@@ -141,33 +157,39 @@ const translations = {
       pill3: '✓ Works on any phone'
     },
     carousel: {
-      title: 'Your business, in first person',
-      c1_title: 'Restaurant',  c1_text: 'Let them book before tasting your food.',
-      c2_title: 'Gym',         c2_text: 'Let them see the facilities before joining.',
-      c3_title: 'Hair Salon',  c3_text: 'Let them know your space before their appointment.',
-      c4_title: 'Hotel',       c4_text: 'Let them choose their room before booking.',
-      c5_title: 'Shop',        c5_text: 'Let them browse your store from the sofa.',
-      c6_title: 'Real Estate', c6_text: 'Let them visit the property without leaving home.',
-      c7_title: 'Clinic',      c7_text: 'Let them see your office before their first appointment.',
-      c8_title: 'Coworking',   c8_text: 'Let them feel the space before reserving their desk.'
+      title:    'Your business, in first person',
+      subtitle: 'Discover how Oxphyre can transform the way customers experience your business.',
+      c1_title: 'Restaurant',  c1_text: 'Your food is incredible, but your atmosphere is what sets you apart. It\'s time people saw it.',
+      c2_title: 'Gym',         c2_text: 'Many don\'t join because they fear the unknown. Open your doors and break that barrier.',
+      c3_title: 'Hair Salon',  c3_text: 'Photos show the before/after. Oxphyre shows the where — the place where the magic happens.',
+      c4_title: 'Hotel',       c4_text: 'Nobody books a room without seeing it. An immersive experience for a premium booking.',
+      c5_title: 'Shop',        c5_text: 'Your window is your best salesperson, but only for those walking by. With Oxphyre, your window is the whole world.',
+      c6_title: 'Real Estate', c6_text: 'Capture the essence of each property, offering sellers the most advanced marketing technology on the market.',
+      c7_title: 'Clinic',      c7_text: 'Let your patients tour your facilities. Knowing your office before they arrive changes everything.',
+      c8_title: 'Coworking',   c8_text: 'The space sells itself — if people can see it. Let them see where their next project will grow.'
     },
     steps: {
-      title: 'How it works',
+      title:    'How you create it',
       subtitle: 'Your virtual tour in three steps. No learning curve.',
+      hook:     'No courses. No technicians. No complications.',
       s1_num: '01', s1_title: 'Photograph your space',
-      s1_desc: 'Photograph each position in 4 directions (N, S, E, W). All you need is your phone.',
+      s1_desc: 'Photograph each position in 4 directions. All you need is your phone.',
+      s1_detail: '4 photos per position · N, S, E, W',
       s2_num: '02', s2_title: 'Build the tour',
       s2_desc: 'Upload photos to Oxphyre and connect positions in our drag & drop visual editor.',
+      s2_detail: 'Drag & drop editor · No technical knowledge',
       s3_num: '03', s3_title: 'Share it',
-      s3_desc: 'Download the QR and place it anywhere. Customers scan and explore your business in 3D.'
+      s3_desc: 'Download the QR and place it anywhere. Customers scan and explore your business in 3D.',
+      s3_detail: 'Downloadable QR · Embed code for your site'
     },
     demo: {
-      title: 'See it in action',
-      subtitle: 'Discover how a real business becomes a navigable 3D virtual tour. No sign-up required.',
+      title:      'How your customers experience it',
+      subtitle:   'Discover how a real business becomes a navigable 3D virtual tour. No sign-up required.',
+      embed_text: 'Have your own website? Embed the tour directly with a code snippet.',
       cta: 'View live tour'
     },
     features: {
-      title: 'Everything you need',
+      title:    'The technology behind every tour',
       subtitle: 'Tools built for real businesses.',
       f1_title: '3D navigable tour',
       f1_desc: 'Rendered with Three.js. Customers move through your space as if they were there.',
@@ -183,18 +205,23 @@ const translations = {
       f6_desc: 'Works on iOS and Android without installing anything. Just a modern browser.'
     },
     pricing: {
-      title: 'Transparent pricing',
+      title:    'Start free. Grow whenever you want.',
       subtitle: 'No hidden fees. Cancel anytime.',
       toggle_monthly: 'Monthly', toggle_annual: 'Annual',
       badge_save: 'Save 20%',
       free_name: 'Free',     free_price_monthly: '€0',  free_price_annual: '€0',
       free_desc: 'Try Oxphyre without commitment.',
+      free_note: 'No card. No commitment.',
       pro_name: 'Pro',       pro_price_monthly: '€19',  pro_price_annual: '€15',
       pro_desc: 'For businesses that want to stand out.',
+      pro_note: 'Upgrade or cancel at any time.',
+      pro_annual_total: '€182/year · Save €46',
       biz_name: 'Business',  biz_price_monthly: '€49',  biz_price_annual: '€39',
       biz_desc: 'For chains and marketing agencies.',
+      biz_note: 'Full access. No limits.',
+      biz_annual_total: '€470/year · Save €118',
       per_month: '/mo',
-      cta_free: 'Start for free', cta_pro: 'Start with Pro', cta_biz: 'Contact sales',
+      cta_free: 'Start for free', cta_pro: 'Start with Pro', cta_biz: 'Start with Business',
       popular: 'Most popular',
       free_f1: '1 active tour',        free_f2: 'Up to 5 positions',
       free_f3: 'Downloadable QR',      free_f4: 'Oxphyre watermark',
@@ -204,7 +231,8 @@ const translations = {
       biz_f3: 'Advanced analytics',    biz_f4: 'Custom domain',           biz_f5: 'API access'
     },
     faq: {
-      title: 'Frequently asked questions',
+      title:    'Frequently asked questions',
+      subtitle: 'Everything you need to know before starting.',
       q1: 'Do I need special equipment to create a tour?',
       a1: 'No. You only need a smartphone with a decent camera. Our system processes the photos automatically and generates depth using AI (Intel MiDaS). No 360° cameras or editing software needed.',
       q2: 'How long does it take for the tour to be ready?',
@@ -216,10 +244,12 @@ const translations = {
       q5: 'Does it work on mobile and tablets?',
       a5: 'Yes. The tour works on any device with a modern browser. No app installation needed. It is especially optimized for the mobile scanning experience.',
       q6: 'Are my photos and data safe?',
-      a6: 'Yes. Photos are stored on our own encrypted servers. We do not share them with third parties or use them to train models. We comply with the European GDPR.'
+      a6: 'Yes. Photos are stored on our own encrypted servers. We do not share them with third parties or use them to train models. We comply with the European GDPR.',
+      q7: 'Can I try Oxphyre before paying?',
+      a7: 'Yes. The Free plan is free forever, no credit card required. Create your first tour, share it, and decide if you want to grow with a paid plan.'
     },
     cta_final: {
-      title: 'Your business deserves to be discovered.',
+      title:    'Your business deserves to be discovered.',
       subtitle: 'Start for free today. No credit card required.',
       cta: 'Create my free tour →'
     },

@@ -23,11 +23,11 @@
   <meta name="twitter:description" content="Tours virtuales 3D para negocios locales. Sin hardware especial. Gratis para empezar.">
   <meta name="twitter:image"       content="https://oxphyre.com/assets/og-image.jpg">
 
-  <!-- Preconnect para fuentes -->
+  <!-- Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Google Fonts: Wix Madefor Display + Inter + JetBrains Mono -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- Lucide Icons -->
@@ -60,36 +60,13 @@
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "¿Necesito equipo especial para hacer el tour?",
-        "acceptedAnswer": { "@type": "Answer", "text": "No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente y genera la profundidad con inteligencia artificial (MiDaS de Intel)." }
-      },
-      {
-        "@type": "Question",
-        "name": "¿Cuánto tiempo tarda en estar listo el tour?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Con el plan Free, el tour está listo en minutos. Con los planes Pro y Business, el procesado con IA de profundidad tarda entre 5 y 15 minutos." }
-      },
-      {
-        "@type": "Question",
-        "name": "¿Puedo insertar el tour en mi web existente?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Sí. Todos los planes incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace." }
-      },
-      {
-        "@type": "Question",
-        "name": "¿Qué pasa si cancelo mi suscripción?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Tus tours siguen siendo accesibles en modo Free (1 tour, 5 posiciones). Si tenías más tours, quedan archivados y los puedes reactivar cuando vuelvas a suscribirte." }
-      },
-      {
-        "@type": "Question",
-        "name": "¿Funciona en móviles y tablets?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Sí. El tour funciona en cualquier dispositivo con un navegador moderno. Está optimizado especialmente para la experiencia desde móvil al escanear el QR." }
-      },
-      {
-        "@type": "Question",
-        "name": "¿Mis fotos y datos están seguros?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Sí. Las fotos se almacenan en servidores propios con cifrado. No las compartimos con terceros. Cumplimos con el RGPD europeo." }
-      }
+      { "@type": "Question", "name": "¿Necesito equipo especial para hacer el tour?", "acceptedAnswer": { "@type": "Answer", "text": "No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente y genera la profundidad con inteligencia artificial (MiDaS de Intel)." } },
+      { "@type": "Question", "name": "¿Cuánto tiempo tarda en estar listo el tour?", "acceptedAnswer": { "@type": "Answer", "text": "Con el plan Free, el tour está listo en minutos. Con los planes Pro y Business, el procesado con IA de profundidad tarda entre 5 y 15 minutos." } },
+      { "@type": "Question", "name": "¿Puedo insertar el tour en mi web existente?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Todos los planes incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace." } },
+      { "@type": "Question", "name": "¿Qué pasa si cancelo mi suscripción?", "acceptedAnswer": { "@type": "Answer", "text": "Tus tours siguen siendo accesibles en modo Free (1 tour, 5 posiciones). Si tenías más tours, quedan archivados." } },
+      { "@type": "Question", "name": "¿Funciona en móviles y tablets?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. El tour funciona en cualquier dispositivo con un navegador moderno." } },
+      { "@type": "Question", "name": "¿Mis fotos y datos están seguros?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Las fotos se almacenan en servidores propios con cifrado. Cumplimos con el RGPD europeo." } },
+      { "@type": "Question", "name": "¿Puedo probar Oxphyre antes de pagar?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. El plan Free es gratuito para siempre, sin tarjeta de crédito. Crea tu primer tour, compártelo y decide si quieres crecer con un plan de pago." } }
     ]
   }
   </script>
@@ -97,10 +74,15 @@
 
 <body>
 
-  <!-- Cursor personalizado — solo visible en desktop (CSS oculta en touch) -->
+  <!-- Cursor personalizado -->
   <div id="cursor-ring" aria-hidden="true"></div>
 
-  <!-- Loader: foco de luz revela OXPHYRE letra a letra -->
+  <!-- Canvas Three.js FIXED — permanece activo en todo el scroll -->
+  <div id="three-canvas-container" aria-hidden="true">
+    <canvas id="hero-canvas"></canvas>
+  </div>
+
+  <!-- Loader -->
   <div id="loader" role="status" aria-label="Cargando Oxphyre">
     <div id="loader-beam"></div>
     <div id="loader-text" aria-hidden="true">
@@ -114,10 +96,20 @@
     </div>
   </div>
 
-  <!-- Logo solo: visible durante Phase 1 del hero -->
+  <!-- Indicadores Phase 1 -->
+  <div id="phase1-drag-hint" aria-hidden="true">
+    <i data-lucide="move" width="20" height="20"></i>
+    <span data-i18n="hero.drag_hint">Arrastra para explorar</span>
+  </div>
+  <div id="phase1-scroll-hint" aria-hidden="true">
+    <i data-lucide="chevrons-down" width="24" height="24"></i>
+  </div>
+
+  <!-- Logo standalone (Phase 1) -->
   <div id="nav-logo-solo" aria-hidden="true">Oxphyre</div>
 
-  <!-- ── NAV ───────────────────────────────────────────────────────────── -->
+
+  <!-- ── NAV ─────────────────────────────────────────────────────────── -->
   <nav id="nav" role="navigation" aria-label="Navegación principal">
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
 
@@ -130,28 +122,23 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Toggle tema -->
       <button id="theme-toggle" aria-label="Activar modo claro" data-theme="dark">
         <i data-lucide="sun" width="18" height="18"></i>
       </button>
-
-      <!-- Selector de idioma -->
       <button class="lang-btn active" data-lang="es" aria-label="Español">ES</button>
       <span class="lang-divider">/</span>
       <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
-
       <a href="/login"    class="btn-ghost"   data-i18n="nav.login">Iniciar sesión</a>
       <a href="/registro" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
     </div>
 
-    <!-- Hamburguesa (solo móvil) -->
     <button id="menu-toggle" aria-label="Abrir menú" aria-expanded="false" style="margin-left:auto;">
       <i data-lucide="menu" width="24" height="24"></i>
     </button>
   </nav>
 
-  <!-- Menú móvil overlay -->
-  <div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menú de navegación">
+  <!-- Menú móvil -->
+  <div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menú">
     <button id="mobile-menu-close" aria-label="Cerrar menú" style="position:absolute;top:24px;right:24px;color:var(--text-2);">
       <i data-lucide="x" width="28" height="28"></i>
     </button>
@@ -175,9 +162,7 @@
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="hero" aria-label="Hero">
 
-    <canvas id="hero-canvas" aria-hidden="true"></canvas>
-
-    <!-- Phase 1: frases según ángulo de rotación -->
+    <!-- Phase 1: frases según ángulo de rotación (FIX 2: sin `active` en phrase-cta) -->
     <div id="hero-phrases" aria-hidden="true">
       <p class="phrase active" data-angle="0"   data-i18n="hero.phase1_0">Bienvenido a la profundidad.</p>
       <p class="phrase"        data-angle="90"  data-i18n="hero.phase1_90">Aquí, tu espacio cobra vida.</p>
@@ -205,9 +190,14 @@
       </div>
     </div>
 
-    <!-- Scroll hint -->
+    <!-- Scroll hint: SVG ratón con ruedecilla animada (FIX 6) -->
     <div id="scroll-hint" aria-hidden="true">
-      <div class="scroll-line"></div>
+      <svg class="mouse-icon" viewBox="0 0 24 40" width="24" height="40"
+           fill="none" stroke="#FEB354" stroke-width="1.5">
+        <rect x="1" y="1" width="22" height="38" rx="11"/>
+        <rect class="mouse-wheel" x="10.5" y="8" width="3" height="8" rx="1.5"
+              fill="#FEB354" stroke="none"/>
+      </svg>
     </div>
 
   </section>
@@ -218,6 +208,9 @@
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="carousel-section" aria-label="Sectores">
     <h2 class="carousel-title animate-on-scroll" data-i18n="carousel.title">Tu negocio, en primera persona</h2>
+    <p class="carousel-subtitle animate-on-scroll" data-i18n="carousel.subtitle">
+      Descubre cómo Oxphyre puede transformar la forma en que los clientes conocen tu negocio.
+    </p>
 
     <div id="carousel" role="region" aria-label="Carrusel de negocios" aria-live="polite">
 
@@ -225,67 +218,75 @@
         <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=680&q=80&auto=format" alt="Interior de restaurante atmosférico" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c1_title">Restaurante</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c1_text">Que reserven antes de probar tu cocina.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c1_text">Tus platos son increíbles, pero tu ambiente es lo que te diferencia. Es hora de que lo vean.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=680&q=80&auto=format" alt="Gimnasio moderno con equipamiento" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c2_title">Gimnasio</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c2_text">Que vean las instalaciones antes de apuntarse.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c2_text">Muchos no se apuntan por miedo a no saber qué se van a encontrar. Abre tus puertas y rompe esa barrera.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=680&q=80&auto=format" alt="Peluquería estilosa y moderna" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c3_title">Peluquería</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c3_text">Que conozcan tu espacio antes de su cita.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c3_text">En imágenes muestras el antes/después. Con Oxphyre muestras el dónde, el lugar donde ocurre la magia.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=680&q=80&auto=format" alt="Habitación de hotel de lujo" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c4_title">Hotel</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c4_text">Que elijan su habitación antes de reservar.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c4_text">Nadie reserva una habitación sin verla. Una experiencia inmersiva para una reserva premium.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=680&q=80&auto=format" alt="Tienda boutique con iluminación cálida" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c5_title">Tienda</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c5_text">Que exploren tu tienda desde el sofá.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c5_text">Tu escaparate es tu mejor vendedor, pero solo para los que pasan por delante. Con Oxphyre, tu escaparate es el mundo entero.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=680&q=80&auto=format" alt="Salón de piso luminoso" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c6_title">Inmobiliaria</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c6_text">Que visiten la propiedad sin salir de casa.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c6_text">Capta la esencia de cada propiedad ofreciendo a los vendedores la tecnología de marketing más avanzada del mercado.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=680&q=80&auto=format" alt="Consulta médica limpia y moderna" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c7_title">Clínica</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c7_text">Que conozcan tu consulta antes de su primera cita.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c7_text">Permite a tus pacientes recorrer tus instalaciones. Que conozcan tu consulta antes de entrar cambia todo.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
       <article class="carousel-card">
         <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=680&q=80&auto=format" alt="Espacio de coworking luminoso" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c8_title">Coworking</p>
-          <p class="carousel-card-text"  data-i18n="carousel.c8_text">Que sientan el espacio antes de reservar su mesa.</p>
+          <p class="carousel-card-text"  data-i18n="carousel.c8_text">El espacio vende solo — si la gente lo ve. Deja que vean dónde va a crecer su próximo proyecto.</p>
         </div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
       </article>
 
-    </div><!-- #carousel -->
+    </div>
 
     <div class="carousel-controls">
       <button id="carousel-prev" class="carousel-btn" aria-label="Anterior">
@@ -305,45 +306,49 @@
         <i data-lucide="chevron-right" width="20" height="20"></i>
       </button>
     </div>
-
   </section>
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       S3 — CÓMO FUNCIONA
+       S3 — CÓMO LO CREAS
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="como-funciona" aria-labelledby="steps-h2">
     <div class="section-header">
-      <h2 id="steps-h2" class="section-h2 animate-on-scroll" data-i18n="steps.title">Cómo funciona</h2>
+      <h2 id="steps-h2" class="section-h2 animate-on-scroll" data-i18n="steps.title">Cómo lo creas</h2>
       <p class="section-subtitle animate-on-scroll" data-i18n="steps.subtitle">
         Tu tour virtual en tres pasos. Sin curva de aprendizaje.
       </p>
+      <p class="step-hook animate-on-scroll" data-i18n="steps.hook">
+        Sin cursos. Sin técnicos. Sin complicaciones.
+      </p>
     </div>
 
-    <div class="steps-grid">
+    <div class="steps-grid" style="position:relative;">
+
+      <!-- Línea conector SVG entre las 3 cards -->
+      <svg class="step-connector" viewBox="0 0 960 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M 310 30 L 650 30" stroke="#FEB354" stroke-width="1" stroke-dasharray="4 6" opacity="0.35"/>
+      </svg>
 
       <article class="step-card animate-on-scroll">
         <p class="step-num" data-i18n="steps.s1_num">01</p>
         <h3 class="step-title" data-i18n="steps.s1_title">Fotografías tu local</h3>
-        <p class="step-desc" data-i18n="steps.s1_desc">
-          Fotografía cada posición en 4 direcciones (N, S, E, O). Solo necesitas tu móvil.
-        </p>
+        <p class="step-desc" data-i18n="steps.s1_desc">Fotografía cada posición en 4 direcciones. Solo necesitas tu móvil.</p>
+        <p class="step-detail" data-i18n="steps.s1_detail">4 fotos por posición · Norte, Sur, Este, Oeste</p>
       </article>
 
       <article class="step-card animate-on-scroll">
         <p class="step-num" data-i18n="steps.s2_num">02</p>
         <h3 class="step-title" data-i18n="steps.s2_title">Construyes el tour</h3>
-        <p class="step-desc" data-i18n="steps.s2_desc">
-          Sube las fotos a Oxphyre y conecta las posiciones en nuestro editor visual drag &amp; drop.
-        </p>
+        <p class="step-desc" data-i18n="steps.s2_desc">Sube las fotos a Oxphyre y conecta las posiciones en nuestro editor visual drag &amp; drop.</p>
+        <p class="step-detail" data-i18n="steps.s2_detail">Editor drag & drop · Sin conocimientos técnicos</p>
       </article>
 
       <article class="step-card animate-on-scroll">
         <p class="step-num" data-i18n="steps.s3_num">03</p>
         <h3 class="step-title" data-i18n="steps.s3_title">Lo compartes</h3>
-        <p class="step-desc" data-i18n="steps.s3_desc">
-          Descarga el QR y ponlo donde quieras. Tus clientes escanean y exploran tu negocio en 3D.
-        </p>
+        <p class="step-desc" data-i18n="steps.s3_desc">Descarga el QR y ponlo donde quieras. Tus clientes escanean y exploran tu negocio en 3D.</p>
+        <p class="step-detail" data-i18n="steps.s3_detail">QR descargable · Código embed para tu web</p>
       </article>
 
     </div>
@@ -351,11 +356,11 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       S4 — DEMO VIDEO
+       S4 — CÓMO LO VIVEN TUS CLIENTES
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="demo" aria-labelledby="demo-h2">
     <div class="section-header animate-on-scroll">
-      <h2 id="demo-h2" class="section-h2" data-i18n="demo.title">Mira cómo funciona</h2>
+      <h2 id="demo-h2" class="section-h2" data-i18n="demo.title">Cómo lo viven tus clientes</h2>
       <p class="section-subtitle" data-i18n="demo.subtitle">
         Descubre cómo un negocio real se convierte en un tour virtual 3D navegable. Sin registro.
       </p>
@@ -370,21 +375,19 @@
       </div>
     </div>
 
-    <div class="demo-cta animate-on-scroll">
-      <a href="/registro" class="btn-primary" data-i18n="demo.cta">Ver tour en vivo</a>
-    </div>
+    <p class="demo-embed animate-on-scroll" data-i18n="demo.embed_text">
+      ¿Tienes web propia? Embebe el tour directamente con un snippet de código.
+    </p>
   </section>
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       S5 — CARACTERÍSTICAS (bento grid + cursor spotlight)
+       S5 — LA TECNOLOGÍA DETRÁS DE CADA TOUR
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="caracteristicas" aria-labelledby="features-h2">
     <div class="section-header animate-on-scroll">
-      <h2 id="features-h2" class="section-h2" data-i18n="features.title">Todo lo que necesitas</h2>
-      <p class="section-subtitle" data-i18n="features.subtitle">
-        Herramientas pensadas para negocios reales.
-      </p>
+      <h2 id="features-h2" class="section-h2" data-i18n="features.title">La tecnología detrás de cada tour</h2>
+      <p class="section-subtitle" data-i18n="features.subtitle">Herramientas pensadas para negocios reales.</p>
     </div>
 
     <div class="features-grid">
@@ -392,49 +395,44 @@
       <article class="feature-card animate-on-scroll">
         <i data-lucide="box" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f1_title">Tour 3D navegable</h3>
-        <p class="feature-desc" data-i18n="features.f1_desc">
-          Renderizado con Three.js. Tus clientes se mueven por el local como si estuvieran allí.
-        </p>
+        <p class="feature-desc" data-i18n="features.f1_desc">Renderizado con Three.js. Tus clientes se mueven por el local como si estuvieran allí.</p>
       </article>
 
       <article class="feature-card animate-on-scroll">
         <i data-lucide="map-pin" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f2_title">Hotspots interactivos</h3>
-        <p class="feature-desc" data-i18n="features.f2_desc">
-          Añade puntos de información, precios, productos o links en cualquier punto del tour.
-        </p>
+        <p class="feature-desc" data-i18n="features.f2_desc">Añade puntos de información, precios, productos o links en cualquier punto del tour.</p>
       </article>
 
       <article class="feature-card animate-on-scroll">
         <i data-lucide="qr-code" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f3_title">QR + embed</h3>
-        <p class="feature-desc" data-i18n="features.f3_desc">
-          Un código QR descargable y un snippet para insertar el tour en tu web con una línea.
-        </p>
+        <p class="feature-desc" data-i18n="features.f3_desc">Un código QR descargable y un snippet para insertar el tour en tu web con una línea.</p>
       </article>
 
       <article class="feature-card animate-on-scroll">
         <i data-lucide="bar-chart-2" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f4_title">Analíticas de visitas</h3>
-        <p class="feature-desc" data-i18n="features.f4_desc">
-          Sabe cuántas personas han explorado tu negocio, desde dónde y cuánto tiempo estuvieron.
-        </p>
+        <p class="feature-desc" data-i18n="features.f4_desc">Sabe cuántas personas han explorado tu negocio, desde dónde y cuánto tiempo estuvieron.</p>
       </article>
 
       <article class="feature-card animate-on-scroll">
         <i data-lucide="sun-moon" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f5_title">Modo día/noche</h3>
-        <p class="feature-desc" data-i18n="features.f5_desc">
-          El tour se adapta automáticamente a las preferencias del dispositivo del visitante.
-        </p>
+        <p class="feature-desc" data-i18n="features.f5_desc">El tour se adapta automáticamente a las preferencias del dispositivo del visitante.</p>
       </article>
 
+      <!-- Card 6: ancho completo, layout columna vertical + pills -->
       <article class="feature-card animate-on-scroll">
         <i data-lucide="smartphone" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f6_title">Compatible con cualquier móvil</h3>
-        <p class="feature-desc" data-i18n="features.f6_desc">
-          Funciona en iOS y Android sin instalar nada. Solo un navegador moderno.
-        </p>
+        <p class="feature-desc" data-i18n="features.f6_desc">Funciona en iOS y Android sin instalar nada. Solo un navegador moderno.</p>
+        <div class="feature-pills">
+          <span class="feature-pill">iOS</span>
+          <span class="feature-pill">Android</span>
+          <span class="feature-pill">Sin instalación</span>
+          <span class="feature-pill">Cualquier navegador moderno</span>
+        </div>
       </article>
 
     </div>
@@ -446,10 +444,8 @@
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="precios" aria-labelledby="pricing-h2">
     <div class="section-header animate-on-scroll">
-      <h2 id="pricing-h2" class="section-h2" data-i18n="pricing.title">Precios transparentes</h2>
-      <p class="section-subtitle" data-i18n="pricing.subtitle">
-        Sin comisiones ocultas. Cancela cuando quieras.
-      </p>
+      <h2 id="pricing-h2" class="section-h2" data-i18n="pricing.title">Empieza gratis. Crece cuando quieras.</h2>
+      <p class="section-subtitle" data-i18n="pricing.subtitle">Sin comisiones ocultas. Cancela cuando quieras.</p>
     </div>
 
     <div class="pricing-toggle animate-on-scroll">
@@ -475,6 +471,7 @@
           <li data-i18n="pricing.free_f4">Marca de agua Oxphyre</li>
         </ul>
         <a href="/registro" class="plan-cta" data-i18n="pricing.cta_free">Empezar gratis</a>
+        <p class="plan-micro-note" data-i18n="pricing.free_note">Sin tarjeta. Sin compromiso.</p>
       </article>
 
       <article class="pricing-card featured animate-on-scroll">
@@ -485,6 +482,7 @@
           <span class="price-amount" data-monthly="19€" data-annual="15€">19€</span>
           <span class="price-period" data-i18n="pricing.per_month">/mes</span>
         </div>
+        <p class="plan-annual-total" data-i18n="pricing.pro_annual_total">182€/año · Ahorras 46€</p>
         <ul class="plan-features" aria-label="Características del plan Pro">
           <li data-i18n="pricing.pro_f1">Tours ilimitados</li>
           <li data-i18n="pricing.pro_f2">Hasta 20 posiciones</li>
@@ -493,6 +491,7 @@
           <li data-i18n="pricing.pro_f5">Sin marca de agua</li>
         </ul>
         <a href="/registro" class="plan-cta featured-cta" data-i18n="pricing.cta_pro">Empezar con Pro</a>
+        <p class="plan-micro-note" data-i18n="pricing.pro_note">Actualiza o cancela en cualquier momento.</p>
       </article>
 
       <article class="pricing-card animate-on-scroll">
@@ -502,6 +501,7 @@
           <span class="price-amount" data-monthly="49€" data-annual="39€">49€</span>
           <span class="price-period" data-i18n="pricing.per_month">/mes</span>
         </div>
+        <p class="plan-annual-total" data-i18n="pricing.biz_annual_total">470€/año · Ahorras 118€</p>
         <ul class="plan-features" aria-label="Características del plan Business">
           <li data-i18n="pricing.biz_f1">Todo ilimitado</li>
           <li data-i18n="pricing.biz_f2">MiDaS máxima calidad</li>
@@ -509,7 +509,8 @@
           <li data-i18n="pricing.biz_f4">Dominio personalizado</li>
           <li data-i18n="pricing.biz_f5">API access</li>
         </ul>
-        <a href="/contacto" class="plan-cta" data-i18n="pricing.cta_biz">Contactar ventas</a>
+        <a href="/registro" class="plan-cta" data-i18n="pricing.cta_biz">Empezar con Business</a>
+        <p class="plan-micro-note" data-i18n="pricing.biz_note">Acceso completo. Sin límites.</p>
       </article>
 
     </div>
@@ -522,6 +523,7 @@
   <section id="faq" aria-labelledby="faq-h2">
     <div class="section-header animate-on-scroll">
       <h2 id="faq-h2" class="section-h2" data-i18n="faq.title">Preguntas frecuentes</h2>
+      <p class="section-subtitle" data-i18n="faq.subtitle">Todo lo que necesitas saber antes de empezar.</p>
     </div>
 
     <div class="faq-list" role="list">
@@ -529,7 +531,7 @@
       <div class="faq-item" role="listitem">
         <button class="faq-question" aria-expanded="false">
           <span data-i18n="faq.q1">¿Necesito equipo especial para hacer el tour?</span>
-          <i data-lucide="plus" class="faq-question-icon" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
           <p data-i18n="faq.a1">No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente y genera la profundidad con inteligencia artificial (MiDaS de Intel). Nada de cámaras 360 ni software de edición.</p>
@@ -539,7 +541,7 @@
       <div class="faq-item" role="listitem">
         <button class="faq-question" aria-expanded="false">
           <span data-i18n="faq.q2">¿Cuánto tiempo tarda en estar listo el tour?</span>
-          <i data-lucide="plus" class="faq-question-icon" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
           <p data-i18n="faq.a2">Con el plan Free, el tour está listo en minutos. Con los planes Pro y Business, el procesado con IA de profundidad (MiDaS) tarda entre 5 y 15 minutos según el número de posiciones.</p>
@@ -549,7 +551,7 @@
       <div class="faq-item" role="listitem">
         <button class="faq-question" aria-expanded="false">
           <span data-i18n="faq.q3">¿Puedo insertar el tour en mi web existente?</span>
-          <i data-lucide="plus" class="faq-question-icon" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
           <p data-i18n="faq.a3">Sí. Todos los planes incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace. El plan Business incluye además dominio personalizado.</p>
@@ -559,7 +561,7 @@
       <div class="faq-item" role="listitem">
         <button class="faq-question" aria-expanded="false">
           <span data-i18n="faq.q4">¿Qué pasa si cancelo mi suscripción?</span>
-          <i data-lucide="plus" class="faq-question-icon" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
           <p data-i18n="faq.a4">Tus tours siguen siendo accesibles en modo Free (1 tour, 5 posiciones). Si tenías más tours, quedan archivados y los puedes reactivar cuando vuelvas a suscribirte.</p>
@@ -569,7 +571,7 @@
       <div class="faq-item" role="listitem">
         <button class="faq-question" aria-expanded="false">
           <span data-i18n="faq.q5">¿Funciona en móviles y tablets?</span>
-          <i data-lucide="plus" class="faq-question-icon" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
           <p data-i18n="faq.a5">Sí. El tour funciona en cualquier dispositivo con un navegador moderno. No hay que instalar ninguna app. Está optimizado especialmente para la experiencia desde móvil al escanear el QR.</p>
@@ -579,10 +581,20 @@
       <div class="faq-item" role="listitem">
         <button class="faq-question" aria-expanded="false">
           <span data-i18n="faq.q6">¿Mis fotos y datos están seguros?</span>
-          <i data-lucide="plus" class="faq-question-icon" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
           <p data-i18n="faq.a6">Sí. Las fotos se almacenan en servidores propios con cifrado. No las compartimos con terceros ni las usamos para entrenar modelos. Cumplimos con el RGPD europeo.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false">
+          <span data-i18n="faq.q7">¿Puedo probar Oxphyre antes de pagar?</span>
+          <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
+        </button>
+        <div class="faq-answer" role="region">
+          <p data-i18n="faq.a7">Sí. El plan Free es gratuito para siempre, sin tarjeta de crédito. Crea tu primer tour, compártelo y decide si quieres crecer con un plan de pago.</p>
         </div>
       </div>
 
@@ -591,12 +603,9 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       S8 — CTA FINAL
+       S8 — CTA FINAL (peachweb: la esfera crece desde el scroll)
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="cta-final" aria-labelledby="cta-h2">
-
-    <canvas id="cta-canvas" aria-hidden="true"></canvas>
-
     <h2 id="cta-h2" class="cta-final-h2 animate-on-scroll" data-i18n="cta_final.title">
       Tu negocio merece ser descubierto.
     </h2>
@@ -606,7 +615,6 @@
     <a href="/registro" class="cta-final-btn animate-on-scroll" data-i18n="cta_final.cta">
       Crear mi tour gratis →
     </a>
-
   </section>
 
 
@@ -619,9 +627,7 @@
 
         <div class="footer-brand footer-col">
           <a href="/" class="footer-logo">Oxphyre</a>
-          <p class="footer-tagline" data-i18n="footer.tagline">
-            Tours virtuales 3D para negocios locales.
-          </p>
+          <p class="footer-tagline" data-i18n="footer.tagline">Tours virtuales 3D para negocios locales.</p>
         </div>
 
         <div class="footer-col">
@@ -661,7 +667,7 @@
           </ul>
         </div>
 
-      </div><!-- .footer-top -->
+      </div>
 
       <div class="footer-bottom">
         <p class="footer-copyright" data-i18n="footer.copyright">
@@ -674,16 +680,15 @@
         </div>
       </div>
 
-    </div><!-- .footer-inner -->
+    </div>
   </footer>
 
 
-  <!-- Scripts con defer — Three.js primero para que esté disponible cuando main.js lo necesita -->
+  <!-- Scripts: Three.js primero (necesario antes que main.js) -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js" defer></script>
   <script src="/js/i18n.js" defer></script>
   <script src="/js/main.js" defer></script>
 
-  <!-- Inicializar iconos Lucide tras cargar el DOM -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof lucide !== 'undefined') lucide.createIcons();
