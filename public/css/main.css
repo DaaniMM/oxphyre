@@ -185,62 +185,7 @@ body.light {
 }
 
 
-/* ── 4. INDICADORES PHASE 1 ───────────────────────────────────────────── */
-
-#phase1-drag-hint {
-  position: fixed;
-  right: 32px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  color: var(--accent);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  animation: hint-pulse 2s ease-in-out infinite;
-}
-
-#phase1-drag-hint span {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  writing-mode: vertical-rl;
-  opacity: 0.8;
-}
-
-#phase1-scroll-hint {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  color: var(--accent);
-  opacity: 0.6;
-  animation: scroll-bounce 1.6s ease-in-out infinite;
-}
-
-@keyframes hint-pulse {
-  0%, 100% { opacity: 0.8; }
-  50%       { opacity: 0.35; }
-}
-
-@keyframes scroll-bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%       { transform: translateX(-50%) translateY(6px); }
-}
-
-/* Se ocultan al interactuar o al pasar a Phase 2 */
-#phase1-drag-hint.hide,
-#phase1-scroll-hint.hide,
-body.phase-2 #phase1-drag-hint,
-body.phase-2 #phase1-scroll-hint {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-  animation: none;
-}
+/* BUG 13 + 14: indicadores phase1 eliminados del HTML y CSS */
 
 
 /* ── 5. NAV ────────────────────────────────────────────────────────────── */
@@ -592,6 +537,108 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 @keyframes wheel-scroll {
   0%, 100% { opacity: 1; transform: translateY(0); }
   60%       { opacity: 0; transform: translateY(6px); }
+}
+
+
+/* ── 6b. MODAL CARRUSEL ─────────────────────────────────────────────── */
+/* BUG 17: modal grande con animación scale desde centro */
+
+#carousel-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#carousel-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#carousel-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+#carousel-modal-content {
+  position: relative;
+  width: min(70vw, 900px);
+  max-height: 90vh;
+  background: #0A0A0A;
+  border: 1px solid rgba(254, 179, 84, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  transform: scale(0.85);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center;
+  z-index: 1;
+}
+
+#carousel-modal.open #carousel-modal-content {
+  transform: scale(1);
+}
+
+#carousel-modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  z-index: 10;
+  color: var(--text-2);
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  transition: color var(--transition), background var(--transition);
+}
+#carousel-modal-close:hover {
+  color: var(--text-1);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+#carousel-modal-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  filter: brightness(0.8);
+  display: block;
+}
+
+#carousel-modal-text {
+  padding: 24px 28px 28px;
+}
+
+#carousel-modal-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+#carousel-modal-desc {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 22px);
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1.35;
+}
+
+@media (max-width: 768px) {
+  #carousel-modal { align-items: flex-start; }
+  #carousel-modal-content {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+  }
 }
 
 
@@ -1021,20 +1068,14 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   transform: translateY(-2px);
 }
 
+/* BUG 19: layout 2-3-2 — fila 1: cards 1-2 (span 3), fila 2: cards 3-4-5 (span 2), fila 3: cards 6-7 (span 3) */
 .feature-card:nth-child(1) { grid-column: span 3; }
 .feature-card:nth-child(2) { grid-column: span 3; }
 .feature-card:nth-child(3) { grid-column: span 2; }
 .feature-card:nth-child(4) { grid-column: span 2; }
 .feature-card:nth-child(5) { grid-column: span 2; }
-
-/* Card 6: ancho completo, layout columna vertical (igual que las demás) */
-.feature-card:nth-child(6) {
-  grid-column: span 6;
-  grid-auto-rows: auto;
-  min-height: 180px;
-  flex-direction: column;
-  align-items: flex-start;
-}
+.feature-card:nth-child(6) { grid-column: span 3; } /* Compatible móvil — mitad fila */
+.feature-card:nth-child(7) { grid-column: span 3; } /* Profundidad real con IA */
 
 .feature-icon {
   width: 36px; height: 36px;
@@ -1146,7 +1187,7 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   align-items: end;
 }
 
-/* Precios: fondo sólido (no glassmorphism) */
+/* BUG 18: Free y Business igual de altas entre sí, Pro sobresale por encima */
 .pricing-card {
   background: #0A0A0A;
   border: 1px solid rgba(255,255,255,0.06);
@@ -1155,7 +1196,15 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
+
+/* Free y Business: misma min-height para que sean iguales entre sí */
+.pricing-card:not(.featured) {
+  min-height: 480px;
+}
+
 
 /* Free y Business: hover tenue */
 .pricing-card:hover {
@@ -1249,6 +1298,7 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   flex-direction: column;
   gap: 10px;
   margin-bottom: 28px;
+  flex: 1; /* BUG 18: empuja CTA al fondo de la card */
 }
 
 .plan-features li {
@@ -1556,7 +1606,8 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   .footer-brand { grid-column: span 2; }
   .features-grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: auto; }
   .feature-card:nth-child(n) { grid-column: span 1; min-height: 180px; }
-  .feature-card:nth-child(6) { grid-column: span 3; }
+  .feature-card:nth-child(6) { grid-column: span 2; }
+  .feature-card:nth-child(7) { grid-column: span 1; }
 }
 
 @media (max-width: 768px) {
@@ -1588,7 +1639,8 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 
   .features-grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
   .feature-card:nth-child(n) { grid-column: span 1; padding: 24px; min-height: 0; }
-  .feature-card:nth-child(6) { grid-column: span 1; }
+  .feature-card:nth-child(6),
+  .feature-card:nth-child(7) { grid-column: span 1; }
 
   .pricing-grid { grid-template-columns: 1fr; max-width: 380px; margin-left: auto; margin-right: auto; }
   .pricing-card.featured { order: -1; }

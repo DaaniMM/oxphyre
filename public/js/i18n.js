@@ -74,7 +74,9 @@ const translations = {
       f5_title: 'Modo día/noche',
       f5_desc: 'El tour se adapta automáticamente a las preferencias del dispositivo del visitante.',
       f6_title: 'Compatible con cualquier móvil',
-      f6_desc: 'Funciona en iOS y Android sin instalar nada. Solo un navegador moderno.'
+      f6_desc: 'Funciona en iOS y Android sin instalar nada. Solo un navegador moderno.',
+      f7_title: 'Profundidad real con IA',
+      f7_desc: 'Nuestra IA convierte cada imagen en un espacio con profundidad 3D real. Sin cámaras 360°, sin equipos especiales, sin coste extra.'
     },
     pricing: {
       title:    'Empieza gratis. Crece cuando quieras.',
@@ -202,7 +204,9 @@ const translations = {
       f5_title: 'Light/dark mode',
       f5_desc: "The tour adapts automatically to the visitor's device preferences.",
       f6_title: 'Works on any phone',
-      f6_desc: 'Works on iOS and Android without installing anything. Just a modern browser.'
+      f6_desc: 'Works on iOS and Android without installing anything. Just a modern browser.',
+      f7_title: 'Real AI depth',
+      f7_desc: 'Our AI turns every photo into a real 3D space. No 360° cameras, no special equipment, no extra cost.'
     },
     pricing: {
       title:    'Start free. Grow whenever you want.',

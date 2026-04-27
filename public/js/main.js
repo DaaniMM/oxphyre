@@ -51,16 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // El beam se posiciona exactamente sobre el texto OXPHYRE
+    // BUG 12: beam recorre exactamente la anchura de OXPHYRE (de O a E)
     setTimeout(() => {
-      const textEl = document.getElementById('loader-text');
-      if (textEl) {
-        const rect = textEl.getBoundingClientRect();
-        beam.style.top    = rect.top    + 'px';
-        beam.style.height = rect.height + 'px';
+      const textEl    = document.getElementById('loader-text');
+      const spans     = textEl ? textEl.querySelectorAll('.loader-letter') : [];
+      if (spans.length) {
+        const firstRect = spans[0].getBoundingClientRect();
+        const lastRect  = spans[spans.length - 1].getBoundingClientRect();
+        const beamW     = 80;
+        beam.style.top       = firstRect.top    + 'px';
+        beam.style.height    = firstRect.height + 'px';
+        beam.style.left      = firstRect.left   + 'px';
+        beam.style.transform = `translateX(-${beamW}px)`;
+        const travel = (lastRect.right - firstRect.left) + beamW;
+        beam.style.transition = 'transform 2.2s linear';
+        requestAnimationFrame(() => {
+          beam.style.transform = `translateX(${travel}px)`;
+        });
       }
-      beam.style.transition = 'transform 2.2s linear';
-      beam.style.transform  = `translateX(${window.innerWidth + 80}px)`;
     }, 500);
 
     // Letras reveladas escalonadas desde t=1.5s
@@ -78,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Loader desaparece a t=4.0s → inicia Three.js
     setTimeout(() => {
       loader.classList.add('hidden');
+      document.documentElement.style.scrollBehavior = ''; // BUG 16: restaurar smooth
       startThreeJS();
     }, 4000);
   }
@@ -183,9 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const scene    = new THREE.Scene();
-    const camera   = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 200);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 200);
+    // BUG 11: antialias desactivado en Chrome para mejor rendimiento
+    const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg|Brave/.test(navigator.userAgent);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isChrome });
 
     // FIX 8: pixelRatio máximo 1.5 para rendimiento en Chrome
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -281,58 +292,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const ambientLight = new THREE.AmbientLight(0x080503, 5);
     scene.add(ambientLight);
 
-    // ── Phase 1: drag para girar la vista ──
-    let spherical = { theta: 0, phi: Math.PI / 2 };
-    let targetTheta = 0, targetPhi = Math.PI / 2;
-    let isDragging = false;
-    let prevX = 0, prevY = 0;
+    // BUG 14: drag Phase 1 eliminado — la rotación es solo automática
+    // BUG 15: frases rotan automáticamente cada 3.6s con fade in/out
+    const phrasesEl  = document.querySelectorAll('#hero-phrases .phrase');
+    let phraseIndex  = 0;
+    let phraseTimer  = null;
 
-    const heroCanvas = canvas;
-
-    heroCanvas.addEventListener('mousedown', e => {
-      isDragging = true;
-      prevX = e.clientX; prevY = e.clientY;
-      // FIX 3: ocultar indicador drag al primer mousedown
-      document.getElementById('phase1-drag-hint')?.classList.add('hide');
-    });
-
-    window.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      targetTheta -= (e.clientX - prevX) * 0.005;
-      targetPhi   -= (e.clientY - prevY) * 0.003;
-      targetPhi    = Math.max(0.3, Math.min(Math.PI - 0.3, targetPhi));
-      prevX = e.clientX; prevY = e.clientY;
-    });
-
-    window.addEventListener('mouseup', () => { isDragging = false; });
-
-    heroCanvas.addEventListener('touchstart', e => {
-      isDragging = true;
-      prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchmove', e => {
-      if (!isDragging) return;
-      targetTheta -= (e.touches[0].clientX - prevX) * 0.005;
-      targetPhi   -= (e.touches[0].clientY - prevY) * 0.003;
-      targetPhi    = Math.max(0.3, Math.min(Math.PI - 0.3, targetPhi));
-      prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchend', () => { isDragging = false; });
-
-    // ── Frases según ángulo ──
-    const phrases = document.querySelectorAll('.phrase');
-    const phraseAngles = [0, 90, 180, 270, 350];
-
-    function updatePhrases() {
-      const thetaDeg = ((targetTheta * 180 / Math.PI) % 360 + 360) % 360;
-      phrases.forEach((phrase, i) => {
-        const diff    = Math.abs(thetaDeg - phraseAngles[i]);
-        const wrapped = Math.min(diff, 360 - diff);
-        phrase.classList.toggle('active', wrapped < 35);
-      });
+    function showPhrase(idx) {
+      phrasesEl.forEach(p => p.classList.remove('active'));
+      if (phrasesEl[idx]) phrasesEl[idx].classList.add('active');
     }
+
+    function startPhraseRotation() {
+      showPhrase(0);
+      phraseTimer = setInterval(() => {
+        phraseIndex = (phraseIndex + 1) % phrasesEl.length;
+        showPhrase(phraseIndex);
+      }, 3600); // 0.8s fade-in + 2s hold + 0.8s fade-out
+    }
+
+    function stopPhraseRotation() {
+      clearInterval(phraseTimer);
+      phrasesEl.forEach(p => p.classList.remove('active'));
+    }
+
+    startPhraseRotation();
 
     // El overflow ya fue bloqueado al inicio de startThreeJS() (BUG 1)
 
@@ -342,11 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let targetCamZ  = 0.01;
     let camZ        = 0.01;
 
-    // FIX 3: wheel listener en Phase 1
     function onPhase1Wheel(e) {
       if (!isPhase1) return;
-      // Ocultar indicador scroll al primer wheel
-      document.getElementById('phase1-scroll-hint')?.classList.add('hide');
       scrollAccum += e.deltaY * 0.015;
       scrollAccum  = Math.max(0, scrollAccum);
       if (scrollAccum > 3) {
@@ -359,6 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isPhase2) return;
       isPhase2 = true;
       isPhase1 = false;
+      stopPhraseRotation(); // BUG 15: detener ciclo de frases al salir
 
       // FIX 4: liberar scroll y resetear posición
       document.body.style.overflow = '';
@@ -473,8 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
           );
         }
         pAttr.needsUpdate = true;
-
-        updatePhrases();
 
         // Activar Phase 2 cuando la cámara sale suficientemente lejos
         if (camZ > 7) activatePhase2();
@@ -645,28 +625,55 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Math.abs(delta) > 50) { delta < 0 ? carouselNext() : carouselPrev(); resetAuto(); }
     }, { passive: true });
 
-    // FIX 9: hover preview con placeholder oscuro + parallax
-    cards.forEach(card => {
-      const preview = card.querySelector('.carousel-preview');
-      const circle  = card.querySelector('.preview-circle');
-      if (!preview || !circle) return;
+    // BUG 17: modal en lugar de preview — solo en la card activa
+    const modal        = document.getElementById('carousel-modal');
+    const modalImg     = document.getElementById('carousel-modal-img');
+    const modalTitle   = document.getElementById('carousel-modal-title');
+    const modalDesc    = document.getElementById('carousel-modal-desc');
+    const modalClose   = document.getElementById('carousel-modal-close');
+    const modalOverlay = document.getElementById('carousel-modal-overlay');
 
-      card.addEventListener('mouseenter', () => {
-        preview.classList.add('visible');
-        cursorRing?.classList.add('cursor-eye');
+    function openCarouselModal(card) {
+      const img   = card.querySelector('img');
+      const title = card.querySelector('.carousel-card-title');
+      const desc  = card.querySelector('.carousel-card-text');
+      if (modalImg)   { modalImg.src = img?.src || ''; modalImg.alt = img?.alt || ''; }
+      if (modalTitle) modalTitle.textContent = title?.textContent || '';
+      if (modalDesc)  modalDesc.textContent  = desc?.textContent  || '';
+      modal?.classList.add('open');
+      modal?.setAttribute('aria-hidden', 'false');
+      clearInterval(autoTimer);
+    }
+
+    function closeCarouselModal() {
+      modal?.classList.remove('open');
+      modal?.setAttribute('aria-hidden', 'true');
+      resetAuto();
+    }
+
+    if (modal) {
+      modalClose?.addEventListener('click', closeCarouselModal);
+      modalOverlay?.addEventListener('click', closeCarouselModal);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeCarouselModal();
       });
-      card.addEventListener('mousemove', e => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left - rect.width  / 2) * 0.04;
-        const y = (e.clientY - rect.top  - rect.height / 2) * 0.04;
-        circle.style.transform = `translate(${x}px, ${y}px)`;
+
+      // Desktop: hover en card activa abre el modal
+      carousel.addEventListener('mouseover', e => {
+        const card = e.target.closest('.carousel-card.active');
+        if (card && window.matchMedia('(pointer: fine)').matches && !modal.classList.contains('open')) {
+          openCarouselModal(card);
+        }
       });
-      card.addEventListener('mouseleave', () => {
-        preview.classList.remove('visible');
-        cursorRing?.classList.remove('cursor-eye');
-        circle.style.transform = '';
+
+      // Móvil: click en card activa abre el modal
+      carousel.addEventListener('click', e => {
+        const card = e.target.closest('.carousel-card.active');
+        if (card && window.matchMedia('(pointer: coarse)').matches) {
+          openCarouselModal(card);
+        }
       });
-    });
+    }
   }
 
 

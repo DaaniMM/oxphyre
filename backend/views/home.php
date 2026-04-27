@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -70,6 +70,13 @@
     ]
   }
   </script>
+
+  <!-- BUG 16: evitar scroll visual al hacer F5 en sección que no es el hero -->
+  <script>
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+    document.body.style.overflow = 'hidden';
+  </script>
 </head>
 
 <body>
@@ -94,15 +101,6 @@
       <span class="loader-letter">R</span>
       <span class="loader-letter">E</span>
     </div>
-  </div>
-
-  <!-- Indicadores Phase 1 -->
-  <div id="phase1-drag-hint" aria-hidden="true">
-    <i data-lucide="move" width="20" height="20"></i>
-    <span data-i18n="hero.drag_hint">Arrastra para explorar</span>
-  </div>
-  <div id="phase1-scroll-hint" aria-hidden="true">
-    <i data-lucide="chevrons-down" width="24" height="24"></i>
   </div>
 
   <!-- Logo standalone (Phase 1) -->
@@ -208,6 +206,22 @@
        S2 — CARRUSEL NEGOCIOS
        ═══════════════════════════════════════════════════════════════════ -->
   <section id="carousel-section" aria-label="Sectores">
+
+    <!-- BUG 17: modal grande (desktop 70vw / móvil 100%) — solo en card activa -->
+    <div id="carousel-modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div id="carousel-modal-overlay"></div>
+      <div id="carousel-modal-content">
+        <button id="carousel-modal-close" aria-label="Cerrar">
+          <i data-lucide="x" width="20" height="20"></i>
+        </button>
+        <img id="carousel-modal-img" src="" alt="" loading="lazy">
+        <div id="carousel-modal-text">
+          <p id="carousel-modal-title"></p>
+          <p id="carousel-modal-desc"></p>
+        </div>
+      </div>
+    </div>
+
     <h2 class="carousel-title animate-on-scroll" data-i18n="carousel.title">Tu negocio, en primera persona</h2>
     <p class="carousel-subtitle animate-on-scroll" data-i18n="carousel.subtitle">
       Descubre cómo Oxphyre puede transformar la forma en que los clientes conocen tu negocio.
@@ -221,7 +235,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c1_title">Restaurante</p>
           <p class="carousel-card-text"  data-i18n="carousel.c1_text">Tus platos son increíbles, pero tu ambiente es lo que te diferencia. Es hora de que lo vean.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -230,7 +243,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c2_title">Gimnasio</p>
           <p class="carousel-card-text"  data-i18n="carousel.c2_text">Muchos no se apuntan por miedo a no saber qué se van a encontrar. Abre tus puertas y rompe esa barrera.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -239,7 +251,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c3_title">Peluquería</p>
           <p class="carousel-card-text"  data-i18n="carousel.c3_text">En imágenes muestras el antes/después. Con Oxphyre muestras el dónde, el lugar donde ocurre la magia.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -248,7 +259,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c4_title">Hotel</p>
           <p class="carousel-card-text"  data-i18n="carousel.c4_text">Nadie reserva una habitación sin verla. Una experiencia inmersiva para una reserva premium.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -257,7 +267,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c5_title">Tienda</p>
           <p class="carousel-card-text"  data-i18n="carousel.c5_text">Tu escaparate es tu mejor vendedor, pero solo para los que pasan por delante. Con Oxphyre, tu escaparate es el mundo entero.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -266,7 +275,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c6_title">Inmobiliaria</p>
           <p class="carousel-card-text"  data-i18n="carousel.c6_text">Capta la esencia de cada propiedad ofreciendo a los vendedores la tecnología de marketing más avanzada del mercado.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -275,7 +283,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c7_title">Clínica</p>
           <p class="carousel-card-text"  data-i18n="carousel.c7_text">Permite a tus pacientes recorrer tus instalaciones. Que conozcan tu consulta antes de entrar cambia todo.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -284,7 +291,6 @@
           <p class="carousel-card-title" data-i18n="carousel.c8_title">Coworking</p>
           <p class="carousel-card-text"  data-i18n="carousel.c8_text">El espacio vende solo — si la gente lo ve. Deja que vean dónde va a crecer su próximo proyecto.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
     </div>
@@ -434,6 +440,15 @@
           <span class="feature-pill">Sin instalación</span>
           <span class="feature-pill">Cualquier navegador moderno</span>
         </div>
+      </article>
+
+      <!-- BUG 19: 7ª card — Profundidad real con IA (grid 2-3-2, span 3) -->
+      <article class="feature-card animate-on-scroll">
+        <i data-lucide="cpu" class="feature-icon" aria-hidden="true"></i>
+        <h3 class="feature-title" data-i18n="features.f7_title">Profundidad real con IA</h3>
+        <p class="feature-desc" data-i18n="features.f7_desc">
+          Nuestra IA convierte cada imagen en un espacio con profundidad 3D real. Sin cámaras 360°, sin equipos especiales, sin coste extra.
+        </p>
       </article>
 
     </div>
@@ -701,3 +716,4 @@
 
 </body>
 </html>
+
