@@ -68,6 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(() => {
           beam.style.transform = `translateX(${travel}px)`;
         });
+        // Fade out del beam al terminar el recorrido
+        setTimeout(() => {
+          beam.style.transition = 'opacity 0.4s ease';
+          beam.style.opacity = '0';
+        }, 2200 + 50); // 2.2s del translateX + pequeño margen
       }
     }, 500);
 
@@ -663,12 +668,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && modal.classList.contains('open')) closeCarouselModal();
       });
 
-      // Desktop: hover en card activa abre el modal
+      // Desktop: hover en card activa abre el modal + cursor-eye solo en activa
       carousel.addEventListener('mouseover', e => {
-        const card = e.target.closest('.carousel-card.active');
-        if (card && window.matchMedia('(pointer: fine)').matches && !modal.classList.contains('open')) {
-          openCarouselModal(card);
+        const activeCard = e.target.closest('.carousel-card.active');
+        if (window.matchMedia('(pointer: fine)').matches) {
+          if (activeCard) {
+            cursorRing?.classList.add('cursor-eye');
+            if (!modal.classList.contains('open')) openCarouselModal(activeCard);
+          } else {
+            cursorRing?.classList.remove('cursor-eye');
+          }
         }
+      });
+
+      carousel.addEventListener('mouseleave', () => {
+        cursorRing?.classList.remove('cursor-eye');
       });
 
       // Móvil: click en card activa abre el modal

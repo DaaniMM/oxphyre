@@ -434,12 +434,6 @@
         <i data-lucide="smartphone" class="feature-icon" aria-hidden="true"></i>
         <h3 class="feature-title" data-i18n="features.f6_title">Compatible con cualquier móvil</h3>
         <p class="feature-desc" data-i18n="features.f6_desc">Funciona en iOS y Android sin instalar nada. Solo un navegador moderno.</p>
-        <div class="feature-pills">
-          <span class="feature-pill">iOS</span>
-          <span class="feature-pill">Android</span>
-          <span class="feature-pill">Sin instalación</span>
-          <span class="feature-pill">Cualquier navegador moderno</span>
-        </div>
       </article>
 
       <!-- BUG 19: 7ª card — Profundidad real con IA (grid 2-3-2, span 3) -->

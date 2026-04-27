@@ -1099,21 +1099,6 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   line-height: 1.65;
 }
 
-.feature-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.feature-pill {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--accent);
-  border: 1px solid rgba(254, 179, 84, 0.25);
-  border-radius: 20px;
-  padding: 3px 10px;
-}
 
 @media (pointer: coarse) {
   .feature-card::before { display: none; }
