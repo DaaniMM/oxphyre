@@ -292,6 +292,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const ambientLight = new THREE.AmbientLight(0x080503, 5);
     scene.add(ambientLight);
 
+    // Variables de orientación de la cámara Phase 1 (necesarias para el loop)
+    let spherical   = { theta: 0, phi: Math.PI / 2 };
+    let targetTheta = 0;
+    let targetPhi   = Math.PI / 2;
+
     // BUG 14: drag Phase 1 eliminado — la rotación es solo automática
     // BUG 15: frases rotan automáticamente cada 3.6s con fade in/out
     const phrasesEl  = document.querySelectorAll('#hero-phrases .phrase');
