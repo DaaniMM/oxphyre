@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (isPhase1) {
         // ── PHASE 1: dentro de la esfera ──
-        if (!isDragging) targetTheta += 0.002; // BUG 4: velocidad reducida al 75%
+        targetTheta += 0.002; // BUG 4: auto-rotación siempre activa (drag eliminado en BUG 14)
         spherical.theta += (targetTheta - spherical.theta) * 0.08;
         spherical.phi   += (targetPhi   - spherical.phi)   * 0.08;
 
