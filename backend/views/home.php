@@ -168,7 +168,8 @@
       <p class="phrase"        data-angle="90"  data-i18n="hero.phase1_90">Aquí, tu espacio cobra vida.</p>
       <p class="phrase"        data-angle="180" data-i18n="hero.phase1_180">Cada rincón, capturado en su mejor momento.</p>
       <p class="phrase"        data-angle="270" data-i18n="hero.phase1_270">No es una foto. Es tu negocio vivo.</p>
-      <p class="phrase phrase-cta" data-angle="350" data-i18n="hero.phase1_360">↓ Explora la dimensión Oxphyre</p>
+      <!-- BUG 3: fija al fondo, siempre visible, sin data-angle -->
+      <p class="phrase-cta-fixed" data-i18n="hero.phase1_360">↓ Explora la dimensión Oxphyre</p>
     </div>
 
     <!-- Phase 2: contenido del hero -->
@@ -220,7 +221,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c1_title">Restaurante</p>
           <p class="carousel-card-text"  data-i18n="carousel.c1_text">Tus platos son increíbles, pero tu ambiente es lo que te diferencia. Es hora de que lo vean.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -229,7 +230,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c2_title">Gimnasio</p>
           <p class="carousel-card-text"  data-i18n="carousel.c2_text">Muchos no se apuntan por miedo a no saber qué se van a encontrar. Abre tus puertas y rompe esa barrera.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -238,7 +239,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c3_title">Peluquería</p>
           <p class="carousel-card-text"  data-i18n="carousel.c3_text">En imágenes muestras el antes/después. Con Oxphyre muestras el dónde, el lugar donde ocurre la magia.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -247,7 +248,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c4_title">Hotel</p>
           <p class="carousel-card-text"  data-i18n="carousel.c4_text">Nadie reserva una habitación sin verla. Una experiencia inmersiva para una reserva premium.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -256,7 +257,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c5_title">Tienda</p>
           <p class="carousel-card-text"  data-i18n="carousel.c5_text">Tu escaparate es tu mejor vendedor, pero solo para los que pasan por delante. Con Oxphyre, tu escaparate es el mundo entero.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -265,7 +266,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c6_title">Inmobiliaria</p>
           <p class="carousel-card-text"  data-i18n="carousel.c6_text">Capta la esencia de cada propiedad ofreciendo a los vendedores la tecnología de marketing más avanzada del mercado.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -274,7 +275,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c7_title">Clínica</p>
           <p class="carousel-card-text"  data-i18n="carousel.c7_text">Permite a tus pacientes recorrer tus instalaciones. Que conozcan tu consulta antes de entrar cambia todo.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
       <article class="carousel-card">
@@ -283,7 +284,7 @@
           <p class="carousel-card-title" data-i18n="carousel.c8_title">Coworking</p>
           <p class="carousel-card-text"  data-i18n="carousel.c8_text">El espacio vende solo — si la gente lo ve. Deja que vean dónde va a crecer su próximo proyecto.</p>
         </div>
-        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"></div></div>
+        <div class="carousel-preview" aria-hidden="true"><div class="preview-circle"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70&auto=format" alt="" loading="lazy"></div></div>
       </article>
 
     </div>
@@ -464,6 +465,8 @@
           <span class="price-amount" data-monthly="0€" data-annual="0€">0€</span>
           <span class="price-period" data-i18n="pricing.per_month">/mes</span>
         </div>
+        <!-- BUG 8: espacio reservado siempre visible aunque Free no tenga ahorro anual -->
+        <p class="plan-annual-total" aria-hidden="true">&nbsp;</p>
         <ul class="plan-features" aria-label="Características del plan Free">
           <li data-i18n="pricing.free_f1">1 tour activo</li>
           <li data-i18n="pricing.free_f2">Hasta 5 posiciones</li>
@@ -603,8 +606,11 @@
 
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       S8 — CTA FINAL (peachweb: la esfera crece desde el scroll)
+       S8 + S9 — CTA FINAL + FOOTER (bloque 100vh conjunto)
+       BUG 10: wireframe de la esfera es el fondo, sin partículas flotantes
        ═══════════════════════════════════════════════════════════════════ -->
+  <div id="cta-footer-block">
+
   <section id="cta-final" aria-labelledby="cta-h2">
     <h2 id="cta-h2" class="cta-final-h2 animate-on-scroll" data-i18n="cta_final.title">
       Tu negocio merece ser descubierto.
@@ -617,10 +623,6 @@
     </a>
   </section>
 
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       S9 — FOOTER
-       ═══════════════════════════════════════════════════════════════════ -->
   <footer id="footer" role="contentinfo">
     <div class="footer-inner">
       <div class="footer-top">
@@ -682,6 +684,8 @@
 
     </div>
   </footer>
+
+  </div><!-- #cta-footer-block -->
 
 
   <!-- Scripts: Three.js primero (necesario antes que main.js) -->

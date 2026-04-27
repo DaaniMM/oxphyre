@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         beam.style.height = rect.height + 'px';
       }
       beam.style.transition = 'transform 2.2s linear';
-      beam.style.transform  = `translateX(${window.innerWidth + 120}px)`;
+      beam.style.transform  = `translateX(${window.innerWidth + 80}px)`;
     }, 500);
 
     // Letras reveladas escalonadas desde t=1.5s
@@ -166,13 +166,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Scroll state machine: scrollY mapea a estados de la esfera por sección.
 
   function startThreeJS() {
+    // BUG 1: forzar scroll a top antes de que el navegador restaure la posición (F5)
+    window.scrollTo(0, 0);
+    document.body.style.overflow = 'hidden';
+
     if (window.innerWidth <= 768) {
+      document.body.style.overflow = '';
       document.body.classList.add('phase-2');
       return;
     }
 
     const canvas = document.getElementById('hero-canvas');
     if (!canvas || typeof THREE === 'undefined') {
+      document.body.style.overflow = '';
       document.body.classList.add('phase-2');
       return;
     }
@@ -236,12 +242,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const pGeo = new THREE.BufferGeometry();
     pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pBasePos.slice(), 3));
 
+    // BUG 5: textura circular con gradiente radial — puntos de luz difusos, no cuadrados
+    function createParticleTexture() {
+      const size = 32;
+      const cvs  = document.createElement('canvas');
+      cvs.width = cvs.height = size;
+      const ctx = cvs.getContext('2d');
+      const g   = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+      g.addColorStop(0,   'rgba(254, 179, 84, 1)');
+      g.addColorStop(0.3, 'rgba(254, 179, 84, 0.6)');
+      g.addColorStop(1,   'rgba(254, 179, 84, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, size, size);
+      return new THREE.CanvasTexture(cvs);
+    }
+
     const pMat = new THREE.PointsMaterial({
-      color: 0xFEB354,
-      size: 0.04,
+      map: createParticleTexture(),
+      size: 0.05,
       transparent: true,
-      opacity: 0.7,
-      sizeAttenuation: true
+      opacity: 0.8,
+      sizeAttenuation: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
     });
     const particles = new THREE.Points(pGeo, pMat);
     scene.add(particles);
@@ -311,8 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // ── FIX 4: bloqueo de scroll durante Phase 1 ──
-    document.body.style.overflow = 'hidden';
+    // El overflow ya fue bloqueado al inicio de startThreeJS() (BUG 1)
 
     let isPhase1   = true;
     let isPhase2   = false;
@@ -425,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (isPhase1) {
         // ── PHASE 1: dentro de la esfera ──
-        if (!isDragging) targetTheta += 0.003;
+        if (!isDragging) targetTheta += 0.002; // BUG 4: velocidad reducida al 75%
         spherical.theta += (targetTheta - spherical.theta) * 0.08;
         spherical.phi   += (targetPhi   - spherical.phi)   * 0.08;
 
@@ -493,41 +515,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctaTop  = getTop(ctaEl);
         const ctaHeight = ctaEl ? ctaEl.getBoundingClientRect().height + ctaEl.getBoundingClientRect().top + sy - ctaTop : 0;
 
-        // Estados objetivo por sección
+        // BUG 6: estado simplificado — hero grande, S2-S7 pequeña constante, CTA peachweb
+        // BUG 10: wireMat.opacity crece en CTA; partículas NUNCA en Phase 2
         let tScale = 1.4, tOY = 0, tOpacity = 1, tLI = 8;
         let tFloatY = 0;
+        particles.visible = false;
 
         if (sy >= ctaTop - vh * 0.3) {
-          // S8 CTA: peachweb — esfera crece hasta cubrir la pantalla
-          const progress = Math.min(1, (sy - (ctaTop - vh * 0.3)) / (vh * 0.7));
-          tScale   = lerp(0.5, 9, progress);
-          tOpacity = lerp(0.5, 1, progress);
-          tLI      = lerp(4, 10, progress);
+          // S8 CTA + Footer: peachweb — esfera crece hasta cubrir la pantalla
+          const p = Math.min(1, (sy - (ctaTop - vh * 0.3)) / (vh * 0.7));
+          tScale   = lerp(0.3, 8, p);
+          tOpacity = lerp(0.3, 1, p);
+          tLI      = lerp(3, 10, p);
           tOY      = 0;
-          particles.visible = progress > 0.4;
-        } else if (sy >= s7Top - vh * 0.5) {
-          tScale = 0; tOY = -12; tOpacity = 0; tLI = 0.2;
-          particles.visible = false;
-        } else if (sy >= s6Top - vh * 0.5) {
-          tScale = 0; tOY = -12; tOpacity = 0; tLI = 1;
-          particles.visible = false;
-        } else if (sy >= s5Top - vh * 0.5) {
-          tScale = 0; tOY = -12; tOpacity = 0; tLI = 0.6;
-          particles.visible = false;
-        } else if (sy >= s4Top - vh * 0.5) {
-          tScale = 0; tOY = -12; tOpacity = 0; tLI = 1.5;
-          particles.visible = false;
-        } else if (sy >= s3Top - vh * 0.5) {
-          tScale = 0.35; tOY = 0; tOpacity = 0.25; tLI = 3;
-          particles.visible = false;
+          // Wireframe más visible al entrar — crea el efecto de grid sutil (BUG 10)
+          wireMat.opacity = lerp(0.04, 0.18, p);
         } else if (sy >= s2Top - vh * 0.5) {
-          tScale = 0; tOY = -12; tOpacity = 0; tLI = 1;
-          particles.visible = false;
+          // S2-S7: esfera pequeña constante de fondo (BUG 6)
+          tScale   = 0.3;
+          tOpacity = 0.2;
+          tLI      = 2;
+          tOY      = 0;
+          wireMat.opacity = 0.04;
         } else {
-          // Hero Phase 2: esfera centrada grande
-          tScale = 1.4; tOY = 0; tOpacity = 1; tLI = 8;
-          tFloatY = Math.sin(t * 0.5) * 0.07;
-          particles.visible = false;
+          // Hero Phase 2: esfera grande centrada con flotación
+          tScale   = 1.4;
+          tOpacity = 1;
+          tLI      = 8;
+          tFloatY  = Math.sin(t * 0.5) * 0.07;
+          tOY      = 0;
+          wireMat.opacity = 0.04;
         }
 
         // Lerp suave del estado de la esfera
@@ -547,14 +564,8 @@ document.addEventListener('DOMContentLoaded', () => {
         emberLight.position.y = lerp(emberLight.position.y, sphereY - 2.8, 0.04);
         haloLight.position.y  = lerp(haloLight.position.y,  sphereY - 4.5, 0.04);
 
-        // Cuando scale > 4 en CTA: activar partículas (usuario "dentro")
-        if (sphereScale > 4) {
-          particles.visible = true;
-          innerSphere.visible = true;
-          innerSphere.scale.setScalar(sphereScale / 4);
-        } else {
-          innerSphere.visible = false;
-        }
+        // BUG 10: sin partículas en Phase 2 — el wireframe da el efecto de fondo
+        innerSphere.visible = false;
       }
 
       renderer.render(scene, camera);
@@ -667,10 +678,12 @@ document.addEventListener('DOMContentLoaded', () => {
         animObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' }); // BUG 9: rootMargin reducido
 
   document.querySelectorAll('.animate-on-scroll').forEach((el, i) => {
-    el.style.transitionDelay = `${i * 0.07}s`;
+    // BUG 9: elementos del FAQ sin delay escalonado para que entren sincronizados
+    const inFaq = el.closest('#faq');
+    el.style.transitionDelay = inFaq ? '0s' : `${i * 0.07}s`;
     animObserver.observe(el);
   });
 
