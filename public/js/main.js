@@ -672,6 +672,9 @@ document.addEventListener('DOMContentLoaded', () => {
           tex.colorSpace = THREE.SRGBColorSpace;
           material.map   = tex;
           material.color.set(0xffffff);
+          tex.minFilter = THREE.LinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.generateMipmaps = false;
           material.needsUpdate = true;
         });
       }
