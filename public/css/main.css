@@ -568,7 +568,7 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 
 #carousel-modal-content {
   position: relative;
-  width: min(70vw, 900px);
+  width: min(92vw, 1400px);
   max-height: 90vh;
   background: #0A0A0A;
   border: 1px solid rgba(254, 179, 84, 0.15);
@@ -603,6 +603,7 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 #carousel-modal-canvas {
   width: 100%;
   aspect-ratio: 16 / 9;
+  max-height: 80vh;
   display: block;
   touch-action: none;
 }
