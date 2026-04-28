@@ -635,27 +635,124 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Math.abs(delta) > 50) { delta < 0 ? carouselNext() : carouselPrev(); resetAuto(); }
     }, { passive: true });
 
-    // BUG 17: modal en lugar de preview — solo en la card activa
+    // Modal 360° con visor Three.js inmersivo — solo en la card activa
     const modal        = document.getElementById('carousel-modal');
-    const modalImg     = document.getElementById('carousel-modal-img');
+    const modalCanvas  = document.getElementById('carousel-modal-canvas');
     const modalTitle   = document.getElementById('carousel-modal-title');
     const modalDesc    = document.getElementById('carousel-modal-desc');
     const modalClose   = document.getElementById('carousel-modal-close');
     const modalOverlay = document.getElementById('carousel-modal-overlay');
 
+    let modalViewer = null;
+
+    function createModalViewer(src) {
+      if (!modalCanvas) return null;
+      const w = modalCanvas.clientWidth  || 800;
+      const h = modalCanvas.clientHeight || Math.round(w * 9 / 16);
+
+      const renderer = new THREE.WebGLRenderer({ canvas: modalCanvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(w, h, false); // false = no tocar CSS width/height
+
+      const scene    = new THREE.Scene();
+      const camera   = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+      camera.position.set(0, 0, 0);
+
+      const geometry = new THREE.SphereGeometry(500, 60, 40);
+      const material = new THREE.MeshBasicMaterial({ side: THREE.BackSide, color: 0x111111 });
+      scene.add(new THREE.Mesh(geometry, material));
+
+      if (src) {
+        new THREE.TextureLoader().load(src, tex => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          material.map   = tex;
+          material.color.set(0xffffff);
+          material.needsUpdate = true;
+        });
+      }
+
+      let lon = 0, lat = 0, isDown = false, prevX = 0, prevY = 0;
+
+      function onMD(e) { isDown = true; prevX = e.clientX; prevY = e.clientY; }
+      function onMM(e) {
+        if (!isDown) return;
+        lon -= (e.clientX - prevX) * 0.3;
+        lat += (e.clientY - prevY) * 0.3;
+        prevX = e.clientX; prevY = e.clientY;
+      }
+      function onMU() { isDown = false; }
+
+      function onTS(e) { isDown = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; }
+      function onTM(e) {
+        if (!isDown) return;
+        lon -= (e.touches[0].clientX - prevX) * 0.3;
+        lat += (e.touches[0].clientY - prevY) * 0.3;
+        prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+        e.preventDefault();
+      }
+      function onTE() { isDown = false; }
+
+      modalCanvas.addEventListener('mousedown',  onMD);
+      modalCanvas.addEventListener('mousemove',  onMM);
+      modalCanvas.addEventListener('mouseup',    onMU);
+      modalCanvas.addEventListener('mouseleave', onMU);
+      modalCanvas.addEventListener('touchstart', onTS, { passive: false });
+      modalCanvas.addEventListener('touchmove',  onTM, { passive: false });
+      modalCanvas.addEventListener('touchend',   onTE);
+
+      const target = new THREE.Vector3();
+      let rafId = null;
+
+      function animate() {
+        rafId = requestAnimationFrame(animate);
+        if (!isDown) lon += 0.03;
+        lat = Math.max(-85, Math.min(85, lat));
+        const phi   = THREE.MathUtils.degToRad(90 - lat);
+        const theta = THREE.MathUtils.degToRad(lon);
+        target.set(
+          500 * Math.sin(phi) * Math.cos(theta),
+          500 * Math.cos(phi),
+          500 * Math.sin(phi) * Math.sin(theta)
+        );
+        camera.lookAt(target);
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      return {
+        dispose() {
+          cancelAnimationFrame(rafId);
+          modalCanvas.removeEventListener('mousedown',  onMD);
+          modalCanvas.removeEventListener('mousemove',  onMM);
+          modalCanvas.removeEventListener('mouseup',    onMU);
+          modalCanvas.removeEventListener('mouseleave', onMU);
+          modalCanvas.removeEventListener('touchstart', onTS);
+          modalCanvas.removeEventListener('touchmove',  onTM);
+          modalCanvas.removeEventListener('touchend',   onTE);
+          geometry.dispose();
+          material.dispose();
+          if (material.map) material.map.dispose();
+          renderer.dispose();
+        }
+      };
+    }
+
     function openCarouselModal(card) {
-      const img   = card.querySelector('img');
       const title = card.querySelector('.carousel-card-title');
       const desc  = card.querySelector('.carousel-card-text');
-      if (modalImg)   { modalImg.src = img?.src || ''; modalImg.alt = img?.alt || ''; }
       if (modalTitle) modalTitle.textContent = title?.textContent || '';
       if (modalDesc)  modalDesc.textContent  = desc?.textContent  || '';
       modal?.classList.add('open');
       modal?.setAttribute('aria-hidden', 'false');
       clearInterval(autoTimer);
+      if (modalViewer) { modalViewer.dispose(); modalViewer = null; }
+      requestAnimationFrame(() => {
+        modalViewer = createModalViewer(card.dataset.modalSrc || '');
+      });
     }
 
     function closeCarouselModal() {
+      if (modalViewer) { modalViewer.dispose(); modalViewer = null; }
       modal?.classList.remove('open');
       modal?.setAttribute('aria-hidden', 'true');
       resetAuto();

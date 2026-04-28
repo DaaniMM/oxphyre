@@ -143,3 +143,7 @@ vite.config.ts.timestamp-*
 
 # Python virtual environment
 python-service/venv/
+
+# png and jpg 
+public/assets/img/carousel/*.jpg
+public/assets/img/carousel/*.png
