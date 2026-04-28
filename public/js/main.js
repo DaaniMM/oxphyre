@@ -648,13 +648,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function createModalViewer(src) {
       if (!modalCanvas) return null;
       const content = document.getElementById('carousel-modal-content');
-      const w = content?.clientWidth  || modalCanvas.clientWidth  || 800;
-      const h = Math.round(w * 9 / 16);
-      modalCanvas.width  = w;
-      modalCanvas.height = h;
+      const rect    = content?.getBoundingClientRect() || modalCanvas.getBoundingClientRect();
+      const w       = rect.width  || 800;
+      const h       = Math.round(w * 9 / 16);
+      const dpr     = window.devicePixelRatio || 1;
+      modalCanvas.width  = Math.round(w * dpr);
+      modalCanvas.height = Math.round(h * dpr);
 
       const renderer = new THREE.WebGLRenderer({ canvas: modalCanvas, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(dpr);
       renderer.setSize(w, h, false); // false = no tocar CSS width/height
 
       const scene    = new THREE.Scene();
@@ -779,11 +781,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (card.classList.contains('active')) {
           openCarouselModal(card);
         } else {
-          const allCards  = [...carousel.querySelectorAll('.carousel-card')];
-          const activeIdx = allCards.findIndex(c => c.classList.contains('active'));
-          const clickIdx  = allCards.indexOf(card);
-          if (clickIdx < activeIdx) carouselPrev(); else carouselNext();
-          resetAuto();
+          const allCards = [...carousel.querySelectorAll('.carousel-card')];
+          const clickIdx = allCards.indexOf(card);
+          if (clickIdx !== -1) { setCarousel(clickIdx); resetAuto(); }
         }
       });
     }
