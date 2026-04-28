@@ -92,6 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       loader.classList.add('hidden');
       document.documentElement.style.scrollBehavior = ''; // BUG 16: restaurar smooth
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.scrollbarWidth = '';
       startThreeJS();
     }, 4000);
   }

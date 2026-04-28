@@ -74,6 +74,8 @@
   <!-- BUG 16: evitar scroll visual al hacer F5 en sección que no es el hero -->
   <script>
     document.documentElement.style.scrollBehavior = 'auto';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.scrollbarWidth = 'none';
     window.scrollTo(0, 0);
     document.body.style.overflow = 'hidden';
   </script>
