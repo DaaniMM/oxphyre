@@ -112,6 +112,7 @@
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
 
     <div class="nav-links">
+      <a href="#carousel-section" data-i18n="nav.carousel">Negocios</a>
       <a href="#como-funciona"   data-i18n="nav.how">Cómo funciona</a>
       <a href="#demo"            data-i18n="nav.demo">Demo</a>
       <a href="#caracteristicas" data-i18n="nav.features">Características</a>
@@ -140,6 +141,7 @@
     <button id="mobile-menu-close" aria-label="Cerrar menú" style="position:absolute;top:24px;right:24px;color:var(--text-2);">
       <i data-lucide="x" width="28" height="28"></i>
     </button>
+    <a href="#carousel-section" data-i18n="nav.carousel">Negocios</a>
     <a href="#como-funciona"   data-i18n="nav.how">Cómo funciona</a>
     <a href="#demo"            data-i18n="nav.demo">Demo</a>
     <a href="#caracteristicas" data-i18n="nav.features">Características</a>
@@ -226,6 +228,8 @@
     <p class="carousel-subtitle animate-on-scroll" data-i18n="carousel.subtitle">
       Descubre cómo Oxphyre puede transformar la forma en que los clientes conocen tu negocio.
     </p>
+
+    <p class="carousel-tour-hint animate-on-scroll" data-i18n="carousel.tour_hint">Click para ver el tour 360°</p>
 
     <div id="carousel" role="region" aria-label="Carrusel de negocios" aria-live="polite">
 

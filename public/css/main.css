@@ -652,6 +652,18 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   justify-content: center;
   padding: var(--section-pad) 40px;
   overflow: hidden;
+  scroll-margin-top: var(--nav-h);
+}
+
+.carousel-tour-hint {
+  border: 1px solid rgba(254, 179, 84, 0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--accent);
+  background: transparent;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .carousel-title {

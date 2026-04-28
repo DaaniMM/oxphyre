@@ -647,8 +647,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createModalViewer(src) {
       if (!modalCanvas) return null;
-      const w = modalCanvas.clientWidth  || 800;
-      const h = modalCanvas.clientHeight || Math.round(w * 9 / 16);
+      const content = document.getElementById('carousel-modal-content');
+      const w = content?.clientWidth  || modalCanvas.clientWidth  || 800;
+      const h = Math.round(w * 9 / 16);
+      modalCanvas.width  = w;
+      modalCanvas.height = h;
 
       const renderer = new THREE.WebGLRenderer({ canvas: modalCanvas, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -744,10 +747,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalDesc)  modalDesc.textContent  = desc?.textContent  || '';
       modal?.classList.add('open');
       modal?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
       clearInterval(autoTimer);
       if (modalViewer) { modalViewer.dispose(); modalViewer = null; }
       requestAnimationFrame(() => {
-        modalViewer = createModalViewer(card.dataset.modalSrc || '');
+        setTimeout(() => {
+          modalViewer = createModalViewer(card.dataset.modalSrc || '');
+        }, 50);
       });
     }
 
@@ -755,6 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalViewer) { modalViewer.dispose(); modalViewer = null; }
       modal?.classList.remove('open');
       modal?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
       resetAuto();
     }
 
@@ -765,28 +772,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && modal.classList.contains('open')) closeCarouselModal();
       });
 
-      // Desktop: hover en card activa abre el modal + cursor-eye solo en activa
-      carousel.addEventListener('mouseover', e => {
-        const activeCard = e.target.closest('.carousel-card.active');
-        if (window.matchMedia('(pointer: fine)').matches) {
-          if (activeCard) {
-            cursorRing?.classList.add('cursor-eye');
-            if (!modal.classList.contains('open')) openCarouselModal(activeCard);
-          } else {
-            cursorRing?.classList.remove('cursor-eye');
-          }
-        }
-      });
-
-      carousel.addEventListener('mouseleave', () => {
-        cursorRing?.classList.remove('cursor-eye');
-      });
-
-      // Móvil: click en card activa abre el modal
+      // Click en card activa → modal; click en card lateral → prev/next
       carousel.addEventListener('click', e => {
-        const card = e.target.closest('.carousel-card.active');
-        if (card && window.matchMedia('(pointer: coarse)').matches) {
+        const card = e.target.closest('.carousel-card');
+        if (!card) return;
+        if (card.classList.contains('active')) {
           openCarouselModal(card);
+        } else {
+          const allCards  = [...carousel.querySelectorAll('.carousel-card')];
+          const activeIdx = allCards.findIndex(c => c.classList.contains('active'));
+          const clickIdx  = allCards.indexOf(card);
+          if (clickIdx < activeIdx) carouselPrev(); else carouselNext();
+          resetAuto();
         }
       });
     }
