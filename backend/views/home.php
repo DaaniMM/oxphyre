@@ -235,7 +235,7 @@
 
     <div id="carousel" role="region" aria-label="Carrusel de negocios" aria-live="polite">
 
-      <article class="carousel-card active" data-modal-src="/assets/img/carousel/restaurante_360.png">
+      <article class="carousel-card active" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/restaurante_360.png">
         <img src="/assets/img/carousel/restaurante_card.webp" alt="Interior de restaurante atmosférico" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c1_title">Restaurante</p>
@@ -243,7 +243,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/gym_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/gym_360.jpg">
         <img src="/assets/img/carousel/gym_card.webp" alt="Gimnasio moderno con equipamiento" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c2_title">Gimnasio</p>
@@ -251,7 +251,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/peluqueria_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/peluqueria_360.jpg">
         <img src="/assets/img/carousel/peluqueria_card.webp" alt="Peluquería estilosa y moderna" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c3_title">Peluquería</p>
@@ -259,7 +259,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/hotel_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/hotel_360.png">
         <img src="/assets/img/carousel/hotel_card.webp" alt="Habitación de hotel de lujo" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c4_title">Hotel</p>
@@ -267,7 +267,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/tienda_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/tienda_360.jpg">
         <img src="/assets/img/carousel/tienda_card.webp" alt="Tienda boutique con iluminación cálida" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c5_title">Tienda</p>
@@ -275,7 +275,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/immobiliaria_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/immobiliaria_360.jpg">
         <img src="/assets/img/carousel/immobiliaria_card.webp" alt="Salón de piso luminoso" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c6_title">Inmobiliaria</p>
@@ -283,7 +283,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/clinica_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/clinica_360.png">
         <img src="/assets/img/carousel/clinica_card.webp" alt="Consulta médica limpia y moderna" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c7_title">Clínica</p>
@@ -291,7 +291,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="/assets/img/carousel/coworking_360.png">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/coworking_360.png">
         <img src="/assets/img/carousel/coworking_card.webp" alt="Espacio de coworking luminoso" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c8_title">Coworking</p>
