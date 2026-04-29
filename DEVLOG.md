@@ -334,3 +334,68 @@ Landing desplegada en https://oxphyre.com. Pendiente revisar visualmente y ajust
 - Ver resultado en navegador y detectar bugs/ajustes visuales
 - Ajustar posición/tamaño esfera en Phase 2 del hero (ensayo-error)
 - Actualizar DEVLOG con resultado visual
+
+
+## 2026-04-22 al 2026-04-29 — Pulido completo de la landing page
+
+### Reescritura arquitectural (fixes.md)
+- Canvas Three.js movido a `position:fixed` a nivel de body (`#three-canvas-container`), permitiendo que la esfera persista durante todo el scroll sin recrearse
+- Scroll state machine con `lerp()`: la esfera transiciona suavemente entre Phase 1 (dentro, escala 1.4), secciones intermedias (escala 0.3, opacidad 0.2) y CTA final (escala 0→8, explosión de luz)
+- Phase 1 bloqueada con `overflow:hidden` en `<html>` durante la experiencia dentro de la esfera; el primer wheel event dispara la transición a Phase 2
+- Nav: transparent en Phase 1, glassmorphism (`backdrop-filter: blur(12px)`) al salir
+- Carrusel: 8 cards con perspectiva 3D, card central iluminada, autoavance + drag + touch
+- Bento grid características: cursor spotlight por proximidad con `--mx`/`--my` CSS vars
+- Cards glassmorphism en S3 (Cómo funciona) y S5 (Características)
+- Precios: `align-items: end` para que Pro sobresalga; `min-height: 480px` en Free y Business; `visibility:hidden` para totales anuales cuando está en modo mensual
+- Esfera CTA decorativa: escena Three.js separada, sin interacción, giro automático
+
+### 10 bugs corregidos (bugs.md — BUG 1-10)
+- BUG 1: F5 en cualquier sección mostraba scroll visual al hero → `window.scrollTo(0,0)` + `overflow:hidden` al inicio de `startThreeJS()`
+- BUG 2: Loader beam recorría toda la pantalla → travel calculado desde `firstRect.left` hasta `lastRect.right` con fade out al terminar
+- BUG 3: Frase CTA "↓ Explora" no era visible → `position:absolute; bottom:48px` fija al fondo de la esfera, con animación `pulse-cta`
+- BUG 4: Auto-rotación de la esfera demasiado rápida → reducida de 0.005 a 0.002 rad/frame
+- BUG 5: Partículas sin textura, se veían como cuadrados → `createParticleTexture()` con gradiente radial ámbar en canvas 32×32 + `AdditiveBlending`
+- BUG 6: Esfera Phase 2 desaparecía al hacer scroll → scroll state machine basada en `scrollY` ranges con lerp, sin destruir la escena
+- BUG 7: Preview carrusel con efecto parallax roto → eliminado y sustituido por placeholder hasta BUG 17
+- BUG 8: Cards Free y Business más pequeñas que Pro → `min-height: 480px` + `flex:1` en lista de features empuja CTA al fondo
+- BUG 9: Elementos FAQ entraban con delay acumulado → `transitionDelay: 0s` para elementos dentro de `#faq`; `rootMargin` reducido a `-20px`
+- BUG 10: Partículas Phase 1 visibles en Phase 2 → `innerSphere.visible = false` desde el primer frame de Phase 2
+
+### 9 mejoras adicionales (nuevos_bugs.md — BUG 11-19)
+- BUG 11: Antialias activado en Chrome causaba stuttering → `antialias: !isChrome` detectando Chrome con userAgent (excluye Edge y Brave)
+- BUG 12: Beam del loader mal posicionado → `getBoundingClientRect()` sobre primer y último span para calcular travel exacto
+- BUG 13: Chevron de scroll visible dentro de la esfera → eliminado `#phase1-scroll-hint` del HTML y sus estilos
+- BUG 14: Drag Phase 1 giraba la vista → eliminados todos los listeners mousedown/mousemove/mouseup/touch del canvas; solo auto-rotación
+- BUG 15: Frases Phase 1 dependían del ángulo de drag → sustituido por `setInterval(3600ms)` secuencial: 0.8s fade in + 2s hold + 0.8s fade out
+- BUG 16: F5 mostraba scroll visual antes del loader → script síncrono en `<head>` pone `scrollBehavior:auto` + `overflow:hidden` antes del primer render; se restaura al terminar el loader
+- BUG 17: Preview carrusel reemplazado por modal 360° → `#carousel-modal` con overlay + animación scale `cubic-bezier(0.34,1.56,0.64,1)`; abre solo en card activa
+- BUG 18: Precios Free y Business de distinto tamaño → `align-items: end` + `min-height: 480px` en no-featured + `flex:1` en lista de features
+- BUG 19: Grid características 2-3-2 con 7ª card "Profundidad real con IA" → `nth-child` spans 3/3/2/2/2/3/3; nueva card con icono `cpu`; claves `f7_title`/`f7_desc` en i18n.js
+
+### Visor Three.js 360° inmersivo en modal del carrusel
+- `createModalViewer(src)` crea escena Three.js aislada sobre `#carousel-modal-canvas`
+- `SphereGeometry(500, 60, 40)` con `MeshBasicMaterial({ side: THREE.BackSide })`
+- Textura cargada con `THREE.TextureLoader` + `tex.colorSpace = THREE.SRGBColorSpace` + `LinearFilter` sin mipmaps
+- Cámara en `(0,0,0)`, FOV 75; drag mouse y touch modifican `lon`/`lat`; auto-rotación `lon += 0.03` cuando no hay drag
+- `renderer.setPixelRatio(window.devicePixelRatio)` sin límite; dimensiones leídas con `getBoundingClientRect()` sobre el contenedor
+- `dispose()` completo al cerrar: `cancelAnimationFrame` + `renderer.dispose()` + limpieza de listeners; ningún loop queda activo
+- Scroll bloqueado (`document.body.style.overflow = 'hidden'`) mientras el modal está abierto
+- Click en card activa → abre modal; click en card lateral → `setCarousel(clickIdx)` directo sin prev/next
+- Pill informativa "Click para ver el tour 360°" encima del carrusel con estilo de feature-pill
+
+### Imágenes 360° y CDN
+- 8 imágenes panorámicas equirectangulares generadas con Gemini AI (una por sector: restaurante, gimnasio, peluquería, hotel, tienda, inmobiliaria, clínica, coworking)
+- Almacenadas en Cloudflare R2 (`pub-b9106d772d3349409c0b98f07f931aa0.r2.dev`) como CDN de assets estáticos
+- CSP `img-src` actualizada en `index.php` para permitir el dominio R2
+- 8 imágenes card del carrusel convertidas a WebP con Pillow (calidad 85) y servidas localmente desde el servidor EC2
+- `data-modal-src` en cada `<article>` del carrusel apunta a R2; `src` de las cards apunta a WebP local
+
+### Estado final de la landing
+- Completa visualmente. Todas las secciones implementadas: loader, hero two-phase, carrusel 360°, cómo funciona, demo, características, precios, FAQ, CTA final, footer
+- SEO: Schema.org SoftwareApplication + FAQPage, 7 preguntas, canonical, OG, Twitter Card
+- i18n: ES/EN completo con ~120 claves
+- Enlace "Negocios" añadido al nav desktop y móvil con `scroll-margin-top` en `#carousel-section`
+- Ocultado scrollbar durante el loader
+
+
+**Pendiente:** modo claro (implementar cuando modo oscuro esté totalmente cerrado), revisión final responsiva en móvil y tablet, video demo real
