@@ -242,7 +242,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/gym_360.jpg">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/gym_360.png">
         <img src="/assets/img/carousel/gym_card.webp" alt="Gimnasio moderno con equipamiento" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c2_title">Gimnasio</p>
@@ -250,7 +250,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/peluqueria_360.jpg">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/peluqueria_360.png">
         <img src="/assets/img/carousel/peluqueria_card.webp" alt="Peluquería estilosa y moderna" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c3_title">Peluquería</p>
@@ -266,7 +266,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/tienda_360.jpg">
+      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/tienda_360.png">
         <img src="/assets/img/carousel/tienda_card.webp" alt="Tienda boutique con iluminación cálida" loading="lazy">
         <div class="carousel-card-overlay">
           <p class="carousel-card-title" data-i18n="carousel.c5_title">Tienda</p>
