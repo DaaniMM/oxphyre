@@ -93,7 +93,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // se migren los estilos e inline scripts a archivos externos con nonces.
 // unpkg.com está en script-src para cargar Three.js desde CDN con defer.
 // 'unsafe-inline' en script-src es temporal — se eliminará cuando se añadan nonces por petición.
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self';");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev; connect-src 'self';");
 
 // HSTS: fuerza al navegador a usar HTTPS durante 1 año (31536000 segundos).
 // Una vez recibido, el navegador rechaza cualquier conexión HTTP al dominio.

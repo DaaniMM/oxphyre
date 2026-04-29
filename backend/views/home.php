@@ -77,7 +77,6 @@
     document.documentElement.style.overflow = 'hidden';
     document.documentElement.style.scrollbarWidth = 'none';
     window.scrollTo(0, 0);
-    document.body.style.overflow = 'hidden';
   </script>
 </head>
 
