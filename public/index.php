@@ -23,12 +23,35 @@ define('ROOT_PATH', dirname(__DIR__));
 // El .env NUNCA se sube a GitHub ni al repositorio.
 $envPath = ROOT_PATH . '/.env';
 if (file_exists($envPath)) {
-    $variables = parse_ini_file($envPath, false, INI_SCANNER_RAW);
-    if ($variables) {
-        foreach ($variables as $key => $value) {
-            $_ENV[$key] = $value;
-            putenv("{$key}={$value}");
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || $trimmed[0] === '#') continue;
+        if (strpos($trimmed, '=') === false) continue;
+
+        [$name, $value] = explode('=', $trimmed, 2);
+        $name  = trim($name);
+        $value = trim($value);
+
+        // Handle inline comments: KEY=value # comment
+        if (!in_array($value[0] ?? '', ['"', "'"])) {
+            $hashPos = strpos($value, ' #');
+            if ($hashPos !== false) {
+                $value = trim(substr($value, 0, $hashPos));
+            }
         }
+
+        // Clean surrounding quotes if value is quoted
+        if (strlen($value) >= 2) {
+            $first = $value[0];
+            $last  = $value[-1];
+            if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                $value = substr($value, 1, -1);
+            }
+        }
+
+        $_ENV[$name] = $value;
+        putenv("{$name}={$value}");
     }
 } else {
     error_log('CRÍTICO: archivo .env no encontrado en ' . ROOT_PATH);
