@@ -24,14 +24,16 @@
 $routes = [
     'GET' => [
         '/'          => ['HomeController',      'index'],
-        '/login'     => ['AuthController',      'loginForm',    'guest'],
-        '/registro'  => ['AuthController',      'registerForm', 'guest'],
-        '/logout'    => ['AuthController',      'logout',       'auth'],
+        '/login'     => ['AuthController',      'showLogin',    'guest'],
+        '/register'  => ['AuthController',      'showRegister', 'guest'],
+        '/registro'  => ['AuthController',      'showRegister', 'guest'],
         '/dashboard' => ['DashboardController', 'index',        'auth'],
     ],
     'POST' => [
-        '/login'    => ['AuthController', 'login'],
-        '/registro' => ['AuthController', 'register'],
+        '/login'    => ['AuthController', 'login',    'guest'],
+        '/register' => ['AuthController', 'register', 'guest'],
+        '/registro' => ['AuthController', 'register', 'guest'],
+        '/logout'   => ['AuthController', 'logout',   'auth'],
     ],
 ];
 
