@@ -23,16 +23,14 @@ define('ROOT_PATH', dirname(__DIR__));
 // El .env NUNCA se sube a GitHub ni al repositorio.
 $envPath = ROOT_PATH . '/.env';
 if (file_exists($envPath)) {
-    $envVars = parse_ini_file($envPath);
-    if ($envVars !== false) {
-        foreach ($envVars as $key => $value) {
+    $variables = parse_ini_file($envPath, false, INI_SCANNER_RAW);
+    if ($variables) {
+        foreach ($variables as $key => $value) {
             $_ENV[$key] = $value;
             putenv("{$key}={$value}");
         }
     }
 } else {
-    // Si no existe .env en producción, algo está muy mal — paramos de inmediato.
-    // En desarrollo local, copia .env.example a .env y rellena los valores.
     error_log('CRÍTICO: archivo .env no encontrado en ' . ROOT_PATH);
     http_response_code(500);
     exit('Error de configuración del servidor.');
