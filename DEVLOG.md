@@ -398,4 +398,22 @@ Landing desplegada en https://oxphyre.com. Pendiente revisar visualmente y ajust
 - Ocultado scrollbar durante el loader
 
 
+## 2026-04-30 — Sistema auth completo + rediseño visual auth pages
+
+### Auth backend (29/04)
+- `AuthController.php`: CSRF con `hash_equals()` + regeneración tras cada POST, rate limiting (5/15min login, 3/IP/hora registro), bcrypt `password_hash(cost:12)`, anti-timing attack (dummy hash siempre ejecuta `password_verify`), `session_regenerate_id(true)` tras login, destrucción completa de sesión en logout
+- `UserModel.php`: `findByEmail`, `emailExists`, `create` — 100% prepared statements
+- `LoginAttemptModel.php`: `record`, `countRecent` (email+IP), `countRecentByIp` (solo IP para registro), `clearOld`
+- `web.php` actualizado: 5 rutas nuevas, métodos renombrados a `showLogin`/`showRegister`, POST `/logout` con guard auth, `/register` como alias de `/registro`, guards guest en POST login/registro
+- `public/index.php`: loader `.env` sustituido por parser manual con `file()` + manejo de comentarios inline y valores entre comillas, `INI_SCANNER_RAW` eliminado, `putenv()` mantenido
+
+### Auth frontend — rediseño visual (30/04)
+- **Esfera Three.js** (`auth-sphere.js`): 4 meshes apilados (glow BackSide size×1.4 respira con `sin()`, wireframe 64 segmentos, core oscuro, núcleo central sólido); `size=2.2`, `fov=50`, cámara en `z=5`; rotación con `THREE.Clock.getDelta()` → `delta×0.08` (Y) y `delta×0.02` (X); parallax vía CSS custom properties `--ox-sx`/`--ox-sy` en el canvas; `ResizeObserver` en lugar de `window.resize`; ningún listener de drag/touch en el canvas
+- **Canvas cuadrado** (`100vh × 100vh`, `position:absolute`): garantiza esfera siempre circular; `translate3d(calc(-18vh + var(--ox-sx)), var(--ox-sy), 0)` centra visualmente la esfera; `transition 400ms cubic-bezier(0.22,1,0.36,1)` en el parallax
+- **Glow + fade de fusión**: dos divs `pointer-events:none` — glow radial `oklch(0.78 0.16 65/0.18)` centrado en 32vh; fade lineal 20vw en el borde hacia el panel del formulario
+- **Layout**: `display:flex` (no grid), `height:100vh`, `overflow:hidden`; login → esfera izquierda; register → `auth-layout--mirror` (row-reverse) esfera derecha, fade invertido
+- **Checkbox personalizado**: `appearance:none`, cuadrado 16px, `border 1.5px solid rgba(254,179,84,0.4)`, `:checked` → fondo ámbar + checkmark SVG inline blanco
+- **Tooltip botones sociales**: `::before` absoluto centrado arriba, `opacity:0→1` en hover, `cursor:not-allowed`
+
+
 **Pendiente:** modo claro (implementar cuando modo oscuro esté totalmente cerrado), revisión final responsiva en móvil y tablet, video demo real
