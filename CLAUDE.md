@@ -223,3 +223,5 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Modo claro: implementar cuando modo oscuro esté completamente cerrado
 - Video demo real: grabar y sustituir placeholder de S4
 - Responsive: verificar todas las secciones en móvil y tablet tras implementar
+- API externa obligatoria (requisito tribunal): integrar Google Maps o Mapbox para mostrar ubicación del negocio en el dashboard/tour. Sin esto el proyecto no cumple los requisitos mínimos.
+- Roles documentados (requisito tribunal): documentar explícitamente en la memoria qué puede hacer cada rol (admin, business_owner, viewer) tanto en frontend como en backend. Los roles ya existen en BD pero no están documentados.
