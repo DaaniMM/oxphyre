@@ -417,3 +417,20 @@ Landing desplegada en https://oxphyre.com. Pendiente revisar visualmente y ajust
 
 
 **Pendiente:** modo claro (implementar cuando modo oscuro esté totalmente cerrado), revisión final responsiva en móvil y tablet, video demo real
+
+
+## 2026-05-01 — Rediseño definitivo vistas auth (login + register)
+
+Motivo: las iteraciones anteriores no alcanzaban la referencia visual ni la legibilidad requerida para la defensa del TFG. Se rehace desde cero el diseño de las páginas de auth.
+
+### Cambios implementados
+- **Variables CSS OKLCH** (`--ox-bg`, `--ox-bg-elevated`, `--ox-border`, `--ox-text`, `--ox-amber`, etc.) — paleta de color perceptualmente uniforme sustituyendo los RGBA anteriores
+- **Tipografías**: Instrument Serif (titular serif itálico del panel izquierdo), Inter (UI/form), JetBrains Mono (logo, eyebrow, dominio)
+- **Panel izquierdo brand**: layout flex `justify-content:space-between`, tres bloques (logo, central con eyebrow+H2+subtítulo, dominio inferior); Three.js canvas `position:absolute; inset:0; width:100%; height:100%`; tres overlays independientes (glow radial, fade inferior, stage oscuro detrás del H2 para legibilidad)
+- **H2 serif + italic**: Instrument Serif 5rem, parte em en `var(--ox-amber-bright)` itálica; separado en `<span>` + `<em>` para compatibilidad con `applyLang()` de i18n
+- **Panel derecho formulario**: fondo `--ox-bg-elevated`, bleed ámbar 8rem en borde izquierdo, animación `ox-float-up` en el card interno
+- **Botones sociales**: tooltip `::after` CSS puro con `opacity:0→1`, `cursor:not-allowed`, sin JS
+- **Checkbox**: `appearance:none`, borde ámbar, `:checked::after` con checkmark via `border-right + border-bottom + rotate(45deg)` (sin SVG externo)
+- **Esfera Three.js** (`auth-sphere.js`): id del panel cambiado a `#auth-brand-panel`, tamaño `size=2.0`, `clock.elapsedTime` para la respiración del glow, canvas llena el panel con `camera.aspect = panel.clientWidth / panel.clientHeight`
+- **i18n**: namespace `auth` añadido a ES y EN con todas las claves del panel y formulario; vistas cargan `i18n.js` y llaman `initLang()` en `DOMContentLoaded`
+- **Móvil**: panel brand oculto (`display:none`), fondo CSS estático con tres capas (radial gradients + SVG grid data URI sin JS ni canvas), formulario como card con `backdrop-filter:blur(12px)`, logo solo visible en móvil dentro del card
