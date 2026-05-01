@@ -4,7 +4,7 @@
 > Lee DEVLOG.md para historial completo de decisiones y avances.
 
 ## Qué es Oxphyre
-SaaS de tours virtuales inmersivos para pequeños negocios locales. El dueño sube fotos de su local (4 por posición: N,S,E,O) → Python + MiDaS genera mapas de profundidad reales → editor canvas drag&drop permite construir la estructura de navegación del local → Three.js renderiza el tour inmersivo con hotspots y minimapa → clientes visitan escaneando un QR o mediante embed en su web.
+SaaS de tours virtuales inmersivos para pequeños negocios locales. El dueño sube fotos de su local (4 por posición: N,S,E,O) → Python + MiDaS genera mapas de profundidad reales (disponible en Pro y Business) → editor canvas drag&drop permite construir la estructura de navegación del local → Three.js renderiza el tour inmersivo con hotspots, minimapa (Pro/Business) y tour guiado (Pro/Business) → clientes visitan escaneando un QR o mediante embed en su web (Pro/Business). Plan Free incluye 1 posición con MiDaS de prueba y 4 posiciones con esfera Three.js navegable sin profundidad IA.
 
 ## Stack técnico
 - **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js
@@ -49,10 +49,52 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Certbot: `/etc/letsencrypt/live/oxphyre.com/`
 - Python venv: `/var/www/oxphyre/python-service/venv`
 
-## Planes SaaS
-- **Free:** 1 tour, 5 posiciones, sin MiDaS, sin minimapa, con marca de agua
-- **Pro (~19€/mes):** tours ilimitados, 20 posiciones, MiDaS activado, minimapa, sin marca de agua, analíticas básicas
-- **Business (~49€/mes):** todo ilimitado, MiDaS máxima calidad, analíticas avanzadas, dominio personalizado, API access
+## Planes SaaS — Definición técnica y comercial
+
+### FREE (0€)
+- 1 tour, 1 negocio (no se pueden crear más tours ni negocios adicionales)
+- Hasta 5 posiciones por tour
+- 1 posición con MiDaS real incluida como crédito de prueba permanente
+- Las otras 4 posiciones: esfera Three.js navegable con efecto parallax/giroscopio, sin profundidad IA (foto plana dentro de la esfera)
+- Todas las posiciones conectadas con hotspots navegables (misma estructura que Pro)
+- Sin minimapa
+- Sin embed/iframe — solo enlace público oxphyre.com/[slug-negocio]
+- Marca de agua Oxphyre visible dentro del visor
+- URL siempre bajo dominio oxphyre.com (nunca dominio propio)
+- Objetivo estratégico: el contraste entre la posición MiDaS y las 4 planas genera disonancia que impulsa el upgrade a Pro
+
+### PRO (19€/mes — 182€/año)
+- MiDaS activado en todas las posiciones (profundidad 3D real)
+- Hasta 5 negocios, 20 posiciones por tour, tours ilimitados
+- Minimapa automático generado desde el canvas
+- Sin marca de agua
+- Embed/iframe para incrustar el tour en la web propia del negocio
+- QR descargable
+- Hotspots informativos: el dueño añade pines sobre el espacio con texto, descripción o precio
+- Tour guiado automático: el dueño define el orden de posiciones y un mensaje por posición; la cámara va sola y muestra los mensajes al visitante
+- Compartir en redes sociales: botón para compartir directamente en WhatsApp, Instagram y Google Maps
+- Foto de portada personalizable: imagen Open Graph propia al compartir el enlace
+- Idioma del tour elegido por el dueño (español o inglés), sin traducción automática
+- Chatbot básico precargado: el dueño configura hasta 60 preguntas frecuentes y respuestas (horario, precios, ubicación, reservas...); basado en palabras clave, sin IA, se ejecuta en el navegador del visitante
+- Analíticas básicas: visitas totales, escaneos QR, dispositivo (móvil/desktop/tablet), visitas por día
+- Analíticas Business visibles pero bloqueadas con candado + CTA de upgrade
+- URL bajo oxphyre.com/negocio (sin dominio propio)
+- Soporte por email, respuesta en 48h, acceso a documentación y tutoriales
+
+### BUSINESS (49€/mes — 470€/año)
+- Todo lo incluido en Pro, más:
+- Negocios ilimitados, posiciones ilimitadas por tour
+- Dominio personalizado (tour.tunegocio.com) — marca blanca total, sin rastro de Oxphyre en URL ni visor
+- Tours privados con contraseña — acceso restringido a compradores o clientes cualificados
+- Historial de versiones del tour — posibilidad de restaurar versiones anteriores
+- Integración con Google My Business — publicar el tour directamente en la ficha de Google del negocio
+- Traducción automática IA de todos los textos del tour (hotspots, tour guiado, descripciones)
+- Hotspots enriquecidos: además de texto, permiten vídeo embebido, botón de reserva directa y formulario de contacto
+- Múltiples usuarios con acceso al dashboard (dueño + empleados con roles diferenciados)
+- API access para integrar el tour en sistemas propios del negocio
+- Agente IA completo (OpenClaw/Make/n8n): responde con lenguaje natural, recoge leads, detecta intención del visitante, crea perfil del visitante, notifica al dueño por WhatsApp/email/Telegram, conecta con calendario para reservas directas — IMPLEMENTACIÓN PREVISTA EN ROADMAP, marcado como "próximamente" en la UI hasta su despliegue
+- Analíticas avanzadas completas: mapa de calor de posiciones más visitadas, tiempo medio por posición, país y ciudad del visitante, fuente de tráfico (QR/embed/enlace directo), tasa de rebote por posición, comparativa entre tours, exportación CSV, alertas de pico de visitas
+- Soporte prioritario por email + chat, respuesta en 24h, onboarding personalizado (llamada de configuración inicial incluida)
 
 ## Contexto TFG
 - Estudiante DAW (Desarrollo de Aplicaciones Web), 2º año

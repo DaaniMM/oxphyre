@@ -434,3 +434,22 @@ Motivo: las iteraciones anteriores no alcanzaban la referencia visual ni la legi
 - **Esfera Three.js** (`auth-sphere.js`): id del panel cambiado a `#auth-brand-panel`, tamaño `size=2.0`, `clock.elapsedTime` para la respiración del glow, canvas llena el panel con `camera.aspect = panel.clientWidth / panel.clientHeight`
 - **i18n**: namespace `auth` añadido a ES y EN con todas las claves del panel y formulario; vistas cargan `i18n.js` y llaman `initLang()` en `DOMContentLoaded`
 - **Móvil**: panel brand oculto (`display:none`), fondo CSS estático con tres capas (radial gradients + SVG grid data URI sin JS ni canvas), formulario como card con `backdrop-filter:blur(12px)`, logo solo visible en móvil dentro del card
+
+
+## 2026-05-01 — Definición completa de planes SaaS y preparación entrega TFG
+
+### Planes SaaS cerrados definitivamente
+
+Tras análisis exhaustivo se han definido los tres planes con sus funcionalidades exactas. Decisiones clave:
+
+**FREE:** 1 tour, 1 negocio, 5 posiciones. Incluye 1 posición con MiDaS real como crédito de prueba permanente. Las otras 4 usan esfera Three.js con parallax/giroscopio sin profundidad IA. Sin embed, sin minimapa, con marca de agua, URL solo bajo oxphyre.com. Estrategia freemium basada en "efecto disonancia": el contraste entre la posición MiDaS y las planas genera la necesidad de upgrade por sí solo.
+
+**PRO:** MiDaS en todas las posiciones, hasta 5 negocios, 20 posiciones por tour, tours ilimitados. Incluye minimapa, embed/iframe, QR descargable, hotspots informativos, tour guiado automático, compartir en redes, foto de portada Open Graph personalizable, chatbot básico precargado (hasta 60 preguntas/respuestas por palabras clave, sin IA), analíticas básicas con candado visual en features Business, soporte email 48h. Es el plan estrella — aparece remarcado en la landing.
+
+**BUSINESS:** Todo lo de Pro más negocios y posiciones ilimitadas, dominio personalizado con marca blanca total, tours privados con contraseña, historial de versiones, integración Google My Business, traducción automática IA, hotspots enriquecidos (vídeo/reserva/formulario), múltiples usuarios con roles, API access, analíticas avanzadas completas, soporte prioritario 24h con onboarding personalizado. Agente IA completo (OpenClaw/Make/n8n) previsto en roadmap — marcado como "próximamente" en UI hasta su implementación.
+
+### Preparación entrega TFG para el lunes 04/05/2026
+
+Generados dos documentos para la entrega académica:
+- Word: Fase 1 (Identificación de necesidades) + Fase 2 (Diseño del proyecto) con datos de mercado reales referenciados (Grand View Research, Allied Market Research, Visiting Media, Google), forma jurídica SL documentada, análisis DAFO implícito en la contextualización, viabilidad económica completa.
+- Excel: 5 tablas financieras encadenadas con fórmulas (Plan de Inversiones, Plan de Financiación, Plan de Ingresos y Gastos, Plan de Tesorería, Plan Financiero) con desglose trimestral T1-T4 + Año 1/2/3. Todas las tablas coherentes entre sí mediante referencias directas — ningún valor duplicado a mano entre tablas.
