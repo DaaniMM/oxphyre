@@ -27,12 +27,17 @@ $routes = [
         '/login'     => ['AuthController',      'showLogin',    'guest'],
         '/register'  => ['AuthController',      'showRegister', 'guest'],
         '/registro'  => ['AuthController',      'showRegister', 'guest'],
+        '/recover'   => ['AuthController',      'showRecover',  'guest'],
+        '/reset'     => ['AuthController',      'showReset',    'guest'],
+        '/verify'    => ['AuthController',      'verifyEmail'],
         '/dashboard' => ['DashboardController', 'index',        'auth'],
     ],
     'POST' => [
         '/login'    => ['AuthController', 'login',    'guest'],
         '/register' => ['AuthController', 'register', 'guest'],
         '/registro' => ['AuthController', 'register', 'guest'],
+        '/recover'  => ['AuthController', 'recover',  'guest'],
+        '/reset'    => ['AuthController', 'reset',    'guest'],
         '/logout'   => ['AuthController', 'logout',   'auth'],
     ],
 ];

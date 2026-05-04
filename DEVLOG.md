@@ -453,3 +453,42 @@ Tras análisis exhaustivo se han definido los tres planes con sus funcionalidade
 Generados dos documentos para la entrega académica:
 - Word: Fase 1 (Identificación de necesidades) + Fase 2 (Diseño del proyecto) con datos de mercado reales referenciados (Grand View Research, Allied Market Research, Visiting Media, Google), forma jurídica SL documentada, análisis DAFO implícito en la contextualización, viabilidad económica completa.
 - Excel: 5 tablas financieras encadenadas con fórmulas (Plan de Inversiones, Plan de Financiación, Plan de Ingresos y Gastos, Plan de Tesorería, Plan Financiero) con desglose trimestral T1-T4 + Año 1/2/3. Todas las tablas coherentes entre sí mediante referencias directas — ningún valor duplicado a mano entre tablas.
+
+
+## 2026-05-04 — Sistema de autenticación completo end-to-end
+
+### Archivos creados/modificados
+- **`BaseController.php`** (nuevo): clase base con `ensureCsrfToken()` y `flash()` compartidos. `AuthController` y `DashboardController` extienden esta clase eliminando duplicación
+- **`UserModel.php`**: añadidos `verifyEmail(token)`, `findByResetToken(token)`, `updatePassword(userId, hash)`, `saveResetToken(email, token, expires)`. `findByEmail` incluye ahora `email_verified`. `create()` acepta `verification_token` e inserta `email_verified=0`
+- **`AuthController.php`**: añadidos `showRecover()`, `showReset()`, `verifyEmail()` (GET), `recover()` (POST), `reset()` (POST). `login()` bloquea usuarios con email no verificado. `register()` genera token con `bin2hex(random_bytes(32))` y llama EmailService. `logout()` redirige a `/` en fallo CSRF (antes `/dashboard` — podía causar redirect loop)
+- **`EmailService.php`** (nuevo, `backend/services/`): PHPMailer + Gmail SMTP desde `$_ENV`. `sendVerification()` y `sendPasswordReset()` con templates HTML tabla-based (fondo `#0a0800`, acento `#FEB354`). Fallo silencioso con `error_log`
+- **`web.php`**: añadidas rutas `GET/POST /recover`, `GET/POST /reset`, `GET /verify`
+- **`recover.php`**: formulario email, mismo diseño que login/register
+- **`reset.php`**: formulario nueva contraseña con indicador de fuerza, token en hidden input
+- **`verify.php`**: página de confirmación éxito/error. `$verified = $verified ?? false` al inicio para compatibilidad con linters estáticos
+- **`DashboardController.php`** (nuevo): placeholder con guard auth
+- **`dashboard/index.php`** (nuevo): muestra nombre, email, rol, 3 métricas placeholder, form logout con CSRF
+- **`auth.css`**: `text-align:center` añadido a `.auth-form-inner`; `.auth-form-inner .form-sub` con márgenes; `.btn-submit` con `display:block; text-decoration:none; text-align:center`; clases `.verify-icon`, `.verify-icon--success`, `.verify-icon--error`
+
+### Flujo completo
+1. `/registro` → crea cuenta + envía email verificación → `/login` con flash
+2. `/verify?token=xxx` → `verifyEmail()` → `verify.php` éxito/error
+3. `/login` → comprueba `email_verified` → `session_regenerate_id(true)` → `/dashboard`
+4. `/dashboard` → guard auth → datos de sesión + logout
+5. POST `/logout` → CSRF validado → sesión destruida completamente → `/`
+6. `/recover` → genera reset_token 1h → email → mismo mensaje siempre (anti-enumeración)
+7. `/reset?token=xxx` → token validado en GET antes de mostrar formulario → POST → contraseña actualizada, token invalidado
+
+### Seguridad
+- CSRF en todos los POST, `hash_equals()`, token consumido tras cada uso
+- Anti timing attack: `password_verify` siempre ejecuta aunque el email no exista
+- Rate limiting: 5 intentos login/15min, 3 registros/IP/hora
+- Email verificado obligatorio antes de login
+- `logout()` fallback CSRF a `/` — evita redirect loop en sesión inconsistente
+- Nginx en producción: `fastcgi_param HTTP_X_FORWARDED_FOR ""` y `HTTP_CF_CONNECTING_IP ""` fuerzan `getClientIp()` a usar `REMOTE_ADDR` (no falsificable)
+
+### Deuda técnica registrada
+- `UserModel::create()` tiene el rol "user" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar `$role` como parámetro o usar constante `ROLE_USER` desde config.php
+- `dashboard/index.php` tiene `<style>` inline — externalizar a `dashboard.css` cuando empiece el dashboard real
+- Métricas del dashboard (tours, negocios, escaneos) hardcodeadas a 0 — conectar a BD en el paso del dashboard completo
+- Gmail SMTP requiere App Password en `.env`, no la contraseña de cuenta. `MAIL_USERNAME` y `MAIL_FROM` deben ser el mismo email

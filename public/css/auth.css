@@ -199,6 +199,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   width: 100%;
   position: relative;
   z-index: 1;
+  text-align: center;
   animation: ox-float-up 0.7s var(--ox-ease) both;
 }
 
@@ -221,6 +222,8 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   color: var(--ox-text-muted);
   margin-top: 0.5rem;
 }
+
+.auth-form-inner .form-sub { margin-top: 0.5rem; margin-bottom: 2rem; }
 
 
 /* ══ Flash ═════════════════════════════════════════════════════════════════ */
@@ -465,6 +468,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 /* ══ Botón submit ═══════════════════════════════════════════════════════════ */
 
 .btn-submit {
+  display: block;
   width: 100%;
   margin-top: 1.25rem;
   background: var(--ox-gradient-amber);
@@ -476,6 +480,8 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   border-radius: 8px;
   border: none;
   cursor: pointer;
+  text-align: center;
+  text-decoration: none;
   transition: transform 0.3s var(--ox-ease), box-shadow 0.3s var(--ox-ease);
   letter-spacing: 0.01em;
 }
@@ -485,6 +491,29 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   box-shadow: 0 10px 30px -10px oklch(0.78 0.16 65 / 0.6);
 }
 .btn-submit:active { transform: translateY(0); }
+
+
+/* ══ Icono de estado en verify.php ════════════════════════════════════════ */
+
+.verify-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.verify-icon--success {
+  background: oklch(0.35 0.10 145 / 0.25);
+  border: 1px solid oklch(0.55 0.12 145 / 0.4);
+}
+
+.verify-icon--error {
+  background: oklch(0.35 0.12 25 / 0.25);
+  border: 1px solid oklch(0.55 0.15 25 / 0.4);
+}
 
 
 /* ══ Toggle signin/signup ═══════════════════════════════════════════════════ */
