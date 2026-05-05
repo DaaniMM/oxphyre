@@ -260,10 +260,15 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Nunca oscuridad total, siempre algo de luz durante la transición
 - Implementado con IntersectionObserver + transition: opacity 1.2s ease en glows CSS
 
-### Pendientes
+### Pendientes y deuda técnica
 - Logo y favicon: diseñar cuando la página esté terminada
 - Modo claro: implementar cuando modo oscuro esté completamente cerrado
 - Video demo real: grabar y sustituir placeholder de S4
 - Responsive: verificar todas las secciones en móvil y tablet tras implementar
 - API externa obligatoria (requisito tribunal): integrar Google Maps o Mapbox para mostrar ubicación del negocio en el dashboard/tour. Sin esto el proyecto no cumple los requisitos mínimos.
 - Roles documentados (requisito tribunal): documentar explícitamente en la memoria qué puede hacer cada rol (admin, business_owner, viewer) tanto en frontend como en backend. Los roles ya existen en BD pero no están documentados.
+- Emails transaccionales: actualmente PHPMailer + Gmail personal (válido para TFG). En producción real migrar a Resend, SendGrid o Mailgun con dominio propio (noreply@oxphyre.com). Gmail tiene límite de ~500 emails/día y el remitente muestra la cuenta personal, no una dirección de marca.
+- UserModel::create() tiene el rol "business_free" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar $role como parámetro o definir constante ROLE_DEFAULT en config.php
+- dashboard/index.php tiene <style> inline en el head — externalizar a dashboard.css cuando empiece el dashboard real
+- Métricas del dashboard (tours, negocios, escaneos) hardcodeadas a 0 — conectar a BD en el paso del dashboard completo
+- Gmail SMTP requiere App Password en .env, no la contraseña de cuenta. MAIL_USERNAME y MAIL_FROM deben ser el mismo email o Gmail rechazará la conexión

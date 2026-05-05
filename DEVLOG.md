@@ -487,8 +487,4 @@ Generados dos documentos para la entrega académica:
 - `logout()` fallback CSRF a `/` — evita redirect loop en sesión inconsistente
 - Nginx en producción: `fastcgi_param HTTP_X_FORWARDED_FOR ""` y `HTTP_CF_CONNECTING_IP ""` fuerzan `getClientIp()` a usar `REMOTE_ADDR` (no falsificable)
 
-### Deuda técnica registrada
-- `UserModel::create()` tiene el rol "user" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar `$role` como parámetro o usar constante `ROLE_USER` desde config.php
-- `dashboard/index.php` tiene `<style>` inline — externalizar a `dashboard.css` cuando empiece el dashboard real
-- Métricas del dashboard (tours, negocios, escaneos) hardcodeadas a 0 — conectar a BD en el paso del dashboard completo
-- Gmail SMTP requiere App Password en `.env`, no la contraseña de cuenta. `MAIL_USERNAME` y `MAIL_FROM` deben ser el mismo email
+→ Deuda técnica consolidada en sección 'Pendientes y deuda técnica' de CLAUDE.md
