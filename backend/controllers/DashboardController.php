@@ -11,6 +11,14 @@ class DashboardController extends BaseController
         'admin'             => 'Admin',
     ];
 
+    // Máximo de negocios por rol. -1 = ilimitado.
+    private static array $businessLimits = [
+        'business_free'     => 1,
+        'business_pro'      => 5,
+        'business_business' => -1,
+        'admin'             => -1,
+    ];
+
     public function index(): void
     {
         $this->ensureCsrfToken();
@@ -31,6 +39,9 @@ class DashboardController extends BaseController
         $planLabel   = self::$planLabels[$userRole] ?? 'Free';
         $userInitial = mb_strtoupper(mb_substr($userName, 0, 1));
         $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+
+        $businessLimit    = self::$businessLimits[$userRole] ?? 1;
+        $atBusinessLimit  = $businessLimit !== -1 && $stats['businesses'] >= $businessLimit;
 
         require_once VIEWS_PATH . '/dashboard/index.php';
     }

@@ -134,7 +134,35 @@
           </div>
           <h3>Crea tu primer tour</h3>
           <p>Fotografía tu negocio, sube las fotos y en minutos tendrás un tour virtual 3D listo para compartir con un QR.</p>
-          <a href="/dashboard/tours/nuevo" class="db-btn-primary">Empezar ahora →</a>
+          <?php if ($atBusinessLimit): ?>
+            <button type="button" class="db-btn-primary" id="btn-limit-trigger">Empezar ahora →</button>
+          <?php else: ?>
+            <a href="/dashboard/tours/nuevo" class="db-btn-primary">Empezar ahora →</a>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+
+      <!-- Modal: límite de negocios alcanzado -->
+      <?php if ($atBusinessLimit): ?>
+        <div class="db-modal-overlay" id="limit-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="limit-modal-title">
+          <div class="db-modal">
+            <button class="db-modal-close" id="btn-limit-close" aria-label="Cerrar">
+              <i data-lucide="x" width="18" height="18" aria-hidden="true"></i>
+            </button>
+            <div class="db-modal-icon" aria-hidden="true">
+              <i data-lucide="lock" width="28" height="28"></i>
+            </div>
+            <h3 class="db-modal-title" id="limit-modal-title">Límite del plan <?= htmlspecialchars($planLabel) ?></h3>
+            <p class="db-modal-body">
+              Has alcanzado el límite de tu plan <?= htmlspecialchars($planLabel) ?>
+              (<?= (int) $businessLimit ?> negocio<?= $businessLimit === 1 ? '' : 's' ?>).
+              Mejora a Pro para crear hasta 5 negocios con tours ilimitados y sin marca de agua.
+            </p>
+            <div class="db-modal-actions">
+              <a href="/precios" class="db-btn-primary">Ver planes →</a>
+              <button type="button" class="db-btn-ghost" id="btn-limit-cancel">Cerrar</button>
+            </div>
+          </div>
         </div>
       <?php endif; ?>
 
@@ -147,32 +175,36 @@
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
 
-  const sidebar  = document.getElementById('db-sidebar');
-  const overlay  = document.getElementById('db-overlay');
+  // ── Sidebar móvil ──────────────────────────────────────────────────────────
+  const sidebar   = document.getElementById('db-sidebar');
+  const overlay   = document.getElementById('db-overlay');
   const hamburger = document.getElementById('db-hamburger');
-  const closeBtn = document.getElementById('db-sidebar-close');
+  const closeBtn  = document.getElementById('db-sidebar-close');
 
-  function openSidebar() {
-    sidebar.classList.add('is-open');
-    overlay.classList.add('is-visible');
-    hamburger.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('is-open');
-    overlay.classList.remove('is-visible');
-    hamburger.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-  }
+  const openSidebar  = () => { sidebar.classList.add('is-open'); overlay.classList.add('is-visible'); hamburger.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; };
+  const closeSidebar = () => { sidebar.classList.remove('is-open'); overlay.classList.remove('is-visible'); hamburger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; };
 
   hamburger.addEventListener('click', openSidebar);
   closeBtn.addEventListener('click', closeSidebar);
   overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar(); });
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar();
-  });
+  // ── Modal: límite de negocios ──────────────────────────────────────────────
+  const limitModal   = document.getElementById('limit-modal');
+  const btnTrigger   = document.getElementById('btn-limit-trigger');
+  const btnClose     = document.getElementById('btn-limit-close');
+  const btnCancel    = document.getElementById('btn-limit-cancel');
+
+  if (limitModal && btnTrigger) {
+    const openModal  = () => { limitModal.classList.add('is-visible'); limitModal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; };
+    const closeModal = () => { limitModal.classList.remove('is-visible'); limitModal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
+
+    btnTrigger.addEventListener('click', openModal);
+    btnClose.addEventListener('click', closeModal);
+    btnCancel.addEventListener('click', closeModal);
+    limitModal.addEventListener('click', e => { if (e.target === limitModal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && limitModal.classList.contains('is-visible')) closeModal(); });
+  }
 });
 </script>
 

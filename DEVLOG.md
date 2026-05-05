@@ -548,3 +548,20 @@ La cuenta digitechfp.com se descartó — SMTP capado por el centro educativo.
 - Guard plan Free en `showCreate()` y `store()`: si ya tiene ≥1 negocio → redirect con flash de error
 - `strip_tags()` en todos los campos de texto, `mb_strlen()` para límites, slug con regex `[^a-z0-9-]+`
 - Variables extraídas directamente en cada método público (no con `extract()`) — compatibilidad con análisis estático
+
+
+## 2026-05-05 — Fix: modal límite de negocios en dashboard + pendientes documentados
+
+### Bug corregido
+El botón "Empezar ahora" del dashboard llevaba siempre al wizard aunque el usuario ya hubiera alcanzado el límite de negocios de su plan (plan Free = 1 negocio). Flujo incorrecto: el wizard sí lo bloqueaba con flash, pero la UX era mala — el usuario entraba en el wizard, rellenaba datos y solo entonces recibía el error.
+
+### Corrección implementada
+- **`DashboardController.php`**: añadida propiedad estática `$businessLimits` (Free=1, Pro=5, Business/Admin=-1). En `index()`, se calculan `$businessLimit` y `$atBusinessLimit` (bool) usando `$stats['businesses']` ya disponible — sin query extra.
+- **`dashboard/index.php`**: el botón "Empezar ahora" es ahora condicional — `<a href="/dashboard/tours/nuevo">` si no está al límite, `<button id="btn-limit-trigger">` si está al límite. El modal `#limit-modal` se renderiza solo cuando `$atBusinessLimit` es true (sin nodo DOM innecesario). JS vanilla gestiona apertura/cierre (click trigger, botón X, botón Cerrar, click en overlay, Escape). El modal muestra el plan actual y el límite exacto con enlace a `/precios`.
+- **`dashboard.css`**: añadidos `.db-modal-overlay`, `.db-modal`, `.db-modal-close`, `.db-modal-icon`, `.db-modal-title`, `.db-modal-body`, `.db-modal-actions`, `.db-btn-ghost`. Animación de entrada con `scale(0.94) → scale(1)` + `cubic-bezier` spring. Overlay con `backdrop-filter:blur(4px)`.
+
+### Pendientes añadidos a CLAUDE.md
+- `/precios`: página propia con las 3 cards de planes para SEO y CTAs de upgrade del dashboard
+- Wizard paso 2: 3 planes en cards en lugar del plan Free solo con link discreto
+- Dashboard y wizard: contraste insuficiente en inputs/labels/texto secundario — mejorar visibilidad
+- CTAs de upgrade: verificar consistencia cuando se cree `/precios`
