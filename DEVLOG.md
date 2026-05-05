@@ -488,3 +488,18 @@ Generados dos documentos para la entrega académica:
 - Nginx en producción: `fastcgi_param HTTP_X_FORWARDED_FOR ""` y `HTTP_CF_CONNECTING_IP ""` fuerzan `getClientIp()` a usar `REMOTE_ADDR` (no falsificable)
 
 → Deuda técnica consolidada en sección 'Pendientes y deuda técnica' de CLAUDE.md
+
+
+## 2026-05-05 — Auth probado end-to-end en producción
+
+Flujo completo verificado en https://oxphyre.com:
+- Registro → email de verificación recibido en bandeja (diseño HTML de marca correcto)
+- Clic en enlace → email verificado → redirect a /login
+- Login → session_regenerate_id → /dashboard
+- Dashboard muestra nombre, email, rol (business_free) y métricas placeholder
+- Logout → sesión destruida → redirect a /
+
+PHPMailer funcionando con Gmail SMTP (danimm3097@gmail.com + App Password).
+La cuenta digitechfp.com se descartó — SMTP capado por el centro educativo.
+
+→ Deuda técnica consolidada en sección 'Pendientes y deuda técnica' de CLAUDE.md
