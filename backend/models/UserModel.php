@@ -32,7 +32,7 @@ class UserModel
     {
         $stmt = $this->db->prepare(
             'INSERT INTO users (name, email, password, role, email_verified, verification_token, created_at, updated_at)
-             VALUES (?, ?, ?, "user", 0, ?, NOW(), NOW())'
+             VALUES (?, ?, ?, "business_free", 0, ?, NOW(), NOW())'
         );
         $stmt->execute([$name, $email, $hashedPassword, $verificationToken]);
         return (int) $this->db->lastInsertId();
