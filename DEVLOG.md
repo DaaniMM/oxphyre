@@ -565,3 +565,18 @@ El botón "Empezar ahora" del dashboard llevaba siempre al wizard aunque el usua
 - Wizard paso 2: 3 planes en cards en lugar del plan Free solo con link discreto
 - Dashboard y wizard: contraste insuficiente en inputs/labels/texto secundario — mejorar visibilidad
 - CTAs de upgrade: verificar consistencia cuando se cree `/precios`
+
+
+## 2026-05-05 — Fix modal límite negocios + pendientes UX
+
+### Bug corregido
+El modal de límite de negocios tenía dos problemas de implementación:
+1. El botón "Empezar ahora" cambiaba de `<a>` a `<button>` visualmente según `$atBusinessLimit` — la card no se veía igual en ambos casos.
+2. El modal solo se renderizaba en el DOM cuando `$atBusinessLimit` era true, lo que hacía que `btnClose` y `btnCancel` fueran null si el modal no estaba presente, con riesgo de error JS.
+
+### Corrección
+- **`dashboard/index.php`**: botón unificado como `<button type="button" id="btn-start-tour" data-at-limit="0|1">` siempre con el mismo HTML y clase `db-btn-primary`. El modal `#limit-modal` siempre en el DOM (sin `<?php if ($atBusinessLimit): ?>`). JS lee `btnStart.dataset.atLimit`: si `'1'` → abre modal, si `'0'` → `window.location.href = '/dashboard/tours/nuevo'`. Los listeners de cierre (btnClose, btnCancel, overlay, Escape) ya no dependen de que el modal sea condicional.
+
+### Pendientes añadidos a CLAUDE.md
+- Dashboard: tooltips de ayuda contextual en métricas (jerarquía del producto para usuario no técnico)
+- Editor canvas: tutorial/onboarding en el primer acceso, con botón para volver a verlo
