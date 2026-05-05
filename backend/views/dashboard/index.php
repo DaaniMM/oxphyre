@@ -1,9 +1,3 @@
-<?php
-$userName  = htmlspecialchars($_SESSION['user_name']  ?? '');
-$userEmail = htmlspecialchars($_SESSION['user_email'] ?? '');
-$userRole  = htmlspecialchars($_SESSION['user_role']  ?? '');
-$csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '');
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,175 +8,173 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '');
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --ox-bg:          oklch(0.08 0.005 60);
-      --ox-elevated:    oklch(0.12 0.008 60);
-      --ox-border:      oklch(0.25 0.015 60 / 0.5);
-      --ox-text:        oklch(0.97 0.01  80);
-      --ox-text-muted:  oklch(0.65 0.02  70);
-      --ox-amber:       oklch(0.78 0.16  65);
-    }
-    html, body {
-      height: 100%;
-      background: var(--ox-bg);
-      color: var(--ox-text);
-      font-family: 'Inter', sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    .shell {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 3rem;
-    }
-    .logo {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3em;
-      color: var(--ox-amber);
-      text-decoration: none;
-    }
-    .card {
-      background: var(--ox-elevated);
-      border: 1px solid var(--ox-border);
-      border-radius: 14px;
-      padding: 2rem;
-      margin-bottom: 1.5rem;
-    }
-    .card-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.25em;
-      color: oklch(0.45 0.015 65);
-      margin-bottom: 1rem;
-    }
-    .welcome-name {
-      font-family: 'Instrument Serif', Georgia, serif;
-      font-size: clamp(1.8rem, 4vw, 2.5rem);
-      font-weight: 400;
-      line-height: 1.1;
-      margin-bottom: 0.5rem;
-    }
-    .welcome-name em { font-style: italic; color: var(--ox-amber); }
-    .user-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-top: 1.25rem;
-      font-size: 0.875rem;
-      color: oklch(0.65 0.02 70);
-    }
-    .user-row span + span::before { content: '·'; margin-right: 0.75rem; }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      background: oklch(0.78 0.16 65 / 0.12);
-      border: 1px solid oklch(0.78 0.16 65 / 0.3);
-      color: var(--ox-amber);
-    }
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .info-card {
-      background: var(--ox-elevated);
-      border: 1px solid var(--ox-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-    }
-    .info-card-label {
-      font-size: 11px;
-      color: oklch(0.45 0.015 65);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      margin-bottom: 0.5rem;
-    }
-    .info-card-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--ox-text);
-    }
-    .info-card-note {
-      font-size: 12px;
-      color: oklch(0.45 0.015 65);
-      margin-top: 4px;
-    }
-    .btn-logout {
-      background: transparent;
-      border: 1px solid var(--ox-border);
-      border-radius: 8px;
-      padding: 0.6rem 1.2rem;
-      color: oklch(0.65 0.02 70);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .btn-logout:hover { border-color: var(--ox-amber); color: var(--ox-amber); }
-    .roadmap-note {
-      font-size: 0.8125rem;
-      color: oklch(0.45 0.015 65);
-      text-align: center;
-      margin-top: 2rem;
-    }
-  </style>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
 
-<div class="shell">
-  <header>
-    <a href="/" class="logo">◉ Oxphyre</a>
-    <form action="/logout" method="POST">
-      <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
-      <button type="submit" class="btn-logout">Cerrar sesión</button>
-    </form>
+<div class="db-overlay" id="db-overlay" aria-hidden="true"></div>
+
+<div class="db-layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="db-sidebar" id="db-sidebar" role="navigation" aria-label="Navegación principal">
+
+    <div class="db-sidebar-header">
+      <a href="/" class="db-logo" aria-label="Oxphyre inicio">◉ Oxphyre</a>
+      <button class="db-sidebar-close" id="db-sidebar-close" aria-label="Cerrar menú">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+
+    <nav class="db-nav" aria-label="Secciones del dashboard">
+      <a href="/dashboard"               class="db-nav-item active" aria-current="page">
+        <i data-lucide="home"            width="18" height="18" aria-hidden="true"></i>
+        <span>Inicio</span>
+      </a>
+      <a href="/dashboard/tours"         class="db-nav-item">
+        <i data-lucide="play-circle"     width="18" height="18" aria-hidden="true"></i>
+        <span>Mis tours</span>
+      </a>
+      <a href="/dashboard/negocios"      class="db-nav-item">
+        <i data-lucide="building-2"      width="18" height="18" aria-hidden="true"></i>
+        <span>Negocios</span>
+      </a>
+      <a href="/dashboard/analiticas"    class="db-nav-item">
+        <i data-lucide="bar-chart-2"     width="18" height="18" aria-hidden="true"></i>
+        <span>Analíticas</span>
+      </a>
+      <a href="/dashboard/configuracion" class="db-nav-item">
+        <i data-lucide="settings"        width="18" height="18" aria-hidden="true"></i>
+        <span>Configuración</span>
+      </a>
+    </nav>
+
+    <div class="db-sidebar-footer">
+      <div class="db-plan-badge" aria-label="Plan actual: <?= htmlspecialchars($planLabel) ?>">
+        <span class="db-plan-label">Plan</span>
+        <span class="db-plan-name"><?= htmlspecialchars($planLabel) ?></span>
+        <?php if ($planLabel !== 'Business'): ?>
+          <a href="/precios" class="db-upgrade-link">Mejorar →</a>
+        <?php endif; ?>
+      </div>
+      <form action="/logout" method="POST">
+        <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+        <button type="submit" class="db-logout-btn">
+          <i data-lucide="log-out" width="16" height="16" aria-hidden="true"></i>
+          <span>Cerrar sesión</span>
+        </button>
+      </form>
+    </div>
+
+  </aside>
+
+  <!-- ── Topbar ── -->
+  <header class="db-topbar">
+    <button class="db-hamburger" id="db-hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="db-sidebar">
+      <i data-lucide="menu" width="20" height="20" aria-hidden="true"></i>
+    </button>
+    <h1 class="db-topbar-title">Inicio</h1>
+    <div class="db-avatar" aria-label="Usuario: <?= $userName ?>" title="<?= $userName ?> · <?= $userEmail ?>">
+      <?= $userInitial ?>
+    </div>
   </header>
 
-  <div class="card">
-    <p class="card-label">Panel de control</p>
-    <h1 class="welcome-name">Hola, <em><?= $userName ?>.</em></h1>
-    <div class="user-row">
-      <span><?= $userEmail ?></span>
-      <span><span class="badge"><?= $userRole ?></span></span>
-    </div>
-  </div>
+  <!-- ── Contenido principal ── -->
+  <main class="db-main" id="db-main">
+    <div class="db-page">
 
-  <div class="info-grid">
-    <div class="info-card">
-      <p class="info-card-label">Tours activos</p>
-      <p class="info-card-value">0</p>
-      <p class="info-card-note">Plan Free · máx 1</p>
-    </div>
-    <div class="info-card">
-      <p class="info-card-label">Negocios</p>
-      <p class="info-card-value">0</p>
-      <p class="info-card-note">Plan Free · máx 1</p>
-    </div>
-    <div class="info-card">
-      <p class="info-card-label">Escaneos QR</p>
-      <p class="info-card-value">0</p>
-      <p class="info-card-note">Últimos 30 días</p>
-    </div>
-  </div>
+      <!-- Saludo -->
+      <div class="db-welcome">
+        <h2 class="db-welcome-heading">Hola, <em><?= $userName ?>.</em></h2>
+        <p class="db-welcome-sub">Aquí tienes un resumen de tu actividad en Oxphyre.</p>
+      </div>
 
-  <p class="roadmap-note">Dashboard completo en desarrollo — próximas semanas.</p>
+      <!-- Métricas reales desde BD -->
+      <div class="db-metrics" role="region" aria-label="Métricas">
+
+        <div class="db-metric-card">
+          <div class="db-metric-icon" aria-hidden="true">
+            <i data-lucide="play-circle" width="20" height="20"></i>
+          </div>
+          <div class="db-metric-value"><?= (int) $stats['tours'] ?></div>
+          <div class="db-metric-label">Tours activos</div>
+          <div class="db-metric-note">
+            <?= $planLabel === 'Free' ? 'Plan Free · máx 1' : ($planLabel === 'Pro' ? 'Plan Pro · tours ilimitados' : 'Business · ilimitados') ?>
+          </div>
+        </div>
+
+        <div class="db-metric-card">
+          <div class="db-metric-icon" aria-hidden="true">
+            <i data-lucide="building-2" width="20" height="20"></i>
+          </div>
+          <div class="db-metric-value"><?= (int) $stats['businesses'] ?></div>
+          <div class="db-metric-label">Negocios</div>
+          <div class="db-metric-note">
+            <?= $planLabel === 'Free' ? 'Plan Free · máx 1' : ($planLabel === 'Pro' ? 'Plan Pro · máx 5' : 'Business · ilimitados') ?>
+          </div>
+        </div>
+
+        <div class="db-metric-card">
+          <div class="db-metric-icon" aria-hidden="true">
+            <i data-lucide="scan-line" width="20" height="20"></i>
+          </div>
+          <div class="db-metric-value"><?= (int) $stats['qr_scans'] ?></div>
+          <div class="db-metric-label">Escaneos QR</div>
+          <div class="db-metric-note">Últimos 30 días</div>
+        </div>
+
+      </div>
+
+      <!-- CTA si no tiene tours -->
+      <?php if ((int) $stats['tours'] === 0): ?>
+        <div class="db-cta-card" role="region" aria-label="Crear primer tour">
+          <div class="db-cta-card-icon" aria-hidden="true">
+            <i data-lucide="plus-circle" width="32" height="32"></i>
+          </div>
+          <h3>Crea tu primer tour</h3>
+          <p>Fotografía tu negocio, sube las fotos y en minutos tendrás un tour virtual 3D listo para compartir con un QR.</p>
+          <a href="/dashboard/tours/nuevo" class="db-btn-primary">Empezar ahora →</a>
+        </div>
+      <?php endif; ?>
+
+    </div>
+  </main>
+
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+
+  const sidebar  = document.getElementById('db-sidebar');
+  const overlay  = document.getElementById('db-overlay');
+  const hamburger = document.getElementById('db-hamburger');
+  const closeBtn = document.getElementById('db-sidebar-close');
+
+  function openSidebar() {
+    sidebar.classList.add('is-open');
+    overlay.classList.add('is-visible');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-visible');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  hamburger.addEventListener('click', openSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar();
+  });
+});
+</script>
 
 </body>
 </html>

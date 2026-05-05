@@ -269,6 +269,4 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Roles documentados (requisito tribunal): documentar explícitamente en la memoria qué puede hacer cada rol (admin, business_owner, viewer) tanto en frontend como en backend. Los roles ya existen en BD pero no están documentados.
 - Emails transaccionales: actualmente PHPMailer + Gmail SMTP con cuenta danimm3097@gmail.com (válido para TFG). La cuenta digitechfp.com se descartó porque el centro educativo tiene SMTP capado. En producción real migrar a Resend, SendGrid o Mailgun con dominio propio noreply@oxphyre.com — Gmail muestra la cuenta del remitente en lugar de una dirección de marca y tiene límite de ~500 emails/día.
 - UserModel::create() tiene el rol "business_free" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar $role como parámetro o definir constante ROLE_DEFAULT en config.php
-- dashboard/index.php tiene <style> inline en el head — externalizar a dashboard.css cuando empiece el dashboard real
-- Métricas del dashboard (tours, negocios, escaneos) hardcodeadas a 0 — conectar a BD en el paso del dashboard completo
 - Gmail SMTP requiere App Password en .env, no la contraseña de cuenta. MAIL_USERNAME y MAIL_FROM deben ser el mismo email o Gmail rechazará la conexión

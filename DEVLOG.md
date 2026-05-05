@@ -503,3 +503,24 @@ PHPMailer funcionando con Gmail SMTP (danimm3097@gmail.com + App Password).
 La cuenta digitechfp.com se descartó — SMTP capado por el centro educativo.
 
 → Deuda técnica consolidada en sección 'Pendientes y deuda técnica' de CLAUDE.md
+
+
+## 2026-05-05 — Dashboard base con navegación y layout
+
+### Archivos creados/modificados
+- **`DashboardModel.php`** (nuevo): 3 métodos con prepared statements — `countTours(userId)`, `countBusinesses(userId)`, `countQrScansLast30Days(userId)`. Queries con JOINs correctos a través de businesses → user_id
+- **`DashboardController.php`**: añadido DashboardModel, extrae y pasa a la vista: `$stats` (array con 3 métricas reales), `$userName`, `$userEmail`, `$planLabel` (mapeado desde rol a Free/Pro/Business/Admin), `$userInitial` (primera letra para avatar), `$csrfToken`
+- **`dashboard.css`** (nuevo): variables OKLCH idénticas a auth.css, layout grid `240px 1fr` en desktop con sidebar sticky, topbar sticky, main area. Sidebar colapsable en móvil con `transform: translateX(-100%)` + clase `.is-open`
+- **`dashboard/index.php`**: reescritura completa — sidebar con nav (Inicio/Mis tours/Negocios/Analíticas/Configuración con Lucide Icons), badge del plan con link "Mejorar →" si no es Business, topbar con hamburguesa + título + avatar con inicial, métricas reales desde BD con notas según plan, CTA "Crea tu primer tour" condicional si tours === 0; JS vanilla para abrir/cerrar sidebar en móvil con overlay y Escape
+
+### Decisiones
+- `<style>` inline del placeholder eliminado — externalizado a `dashboard.css`
+- Métricas con notas contextuales según plan (Free/Pro/Business) sin hardcodear strings
+- Avatar muestra la inicial del nombre desde sesión — sin imagen necesaria
+- Sidebar: `position:sticky; height:100vh` en desktop (sin JS), `position:fixed` en móvil (con JS para overlay)
+
+### Deuda técnica resuelta en este paso
+- **`<style>` inline en dashboard**: externalizado a `public/css/dashboard.css` con variables OKLCH y diseño completo del layout
+- **Métricas hardcodeadas a 0**: conectadas a BD mediante `DashboardModel` con 3 prepared statements reales (tours, negocios, escaneos QR últimos 30 días vía JOINs businesses→user_id)
+
+→ Deuda técnica consolidada en sección 'Pendientes y deuda técnica' de CLAUDE.md

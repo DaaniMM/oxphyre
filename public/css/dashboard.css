@@ -1,0 +1,417 @@
+/* ── Oxphyre Dashboard ─────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ox-bg:             oklch(0.08 0.005 60);
+  --ox-bg-elevated:    oklch(0.12 0.008 60);
+  --ox-bg-hover:       oklch(0.16 0.010 60);
+  --ox-border:         oklch(0.25 0.015 60 / 0.5);
+  --ox-border-strong:  oklch(0.35 0.02  60 / 0.7);
+  --ox-text:           oklch(0.97 0.01  80);
+  --ox-text-muted:     oklch(0.65 0.02  70);
+  --ox-text-dim:       oklch(0.45 0.015 65);
+  --ox-amber:          oklch(0.78 0.16  65);
+  --ox-amber-bright:   oklch(0.85 0.18  75);
+  --ox-ease:           cubic-bezier(0.22, 1, 0.36, 1);
+  --sidebar-w:         240px;
+  --topbar-h:          56px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--ox-bg);
+  color: var(--ox-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; border: none; background: none; cursor: pointer; }
+
+
+/* ══ Layout raíz ═══════════════════════════════════════════════════════════ */
+
+.db-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr;
+  min-height: 100vh;
+}
+
+
+/* ══ Sidebar ════════════════════════════════════════════════════════════════ */
+
+.db-sidebar {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  background: var(--ox-bg-elevated);
+  border-right: 1px solid var(--ox-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.db-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--ox-border);
+  flex-shrink: 0;
+}
+
+.db-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--ox-amber);
+}
+
+.db-sidebar-close {
+  display: none;
+  color: var(--ox-text-muted);
+  padding: 4px;
+  transition: color 0.2s;
+}
+.db-sidebar-close:hover { color: var(--ox-text); }
+
+
+/* ── Nav links ── */
+
+.db-nav {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.db-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--ox-text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.db-nav-item:hover {
+  background: var(--ox-bg-hover);
+  color: var(--ox-text);
+}
+
+.db-nav-item.active {
+  background: oklch(0.78 0.16 65 / 0.1);
+  color: var(--ox-amber);
+}
+
+.db-nav-item svg { flex-shrink: 0; }
+
+
+/* ── Sidebar footer: plan badge + logout ── */
+
+.db-sidebar-footer {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid var(--ox-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.db-plan-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: oklch(0.78 0.16 65 / 0.06);
+  border: 1px solid oklch(0.78 0.16 65 / 0.2);
+  border-radius: 8px;
+}
+
+.db-plan-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ox-text-dim);
+}
+
+.db-plan-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ox-amber);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.db-upgrade-link {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ox-amber-bright);
+  white-space: nowrap;
+}
+.db-upgrade-link:hover { text-decoration: underline; }
+
+.db-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--ox-text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.db-logout-btn:hover { background: var(--ox-bg-hover); color: var(--ox-text); }
+
+
+/* ══ Topbar ═════════════════════════════════════════════════════════════════ */
+
+.db-topbar {
+  grid-column: 2;
+  grid-row: 1;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid var(--ox-border);
+  position: sticky;
+  top: 0;
+  background: var(--ox-bg);
+  z-index: 10;
+}
+
+.db-hamburger {
+  display: none;
+  color: var(--ox-text-muted);
+  padding: 4px;
+  transition: color 0.2s;
+}
+.db-hamburger:hover { color: var(--ox-text); }
+
+.db-topbar-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ox-text);
+  flex: 1;
+}
+
+.db-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: oklch(0.78 0.16 65 / 0.15);
+  border: 1px solid oklch(0.78 0.16 65 / 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ox-amber);
+  flex-shrink: 0;
+}
+
+
+/* ══ Área de contenido ══════════════════════════════════════════════════════ */
+
+.db-main {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+}
+
+.db-page { max-width: 900px; }
+
+
+/* ── Saludo ── */
+
+.db-welcome { margin-bottom: 2rem; }
+
+.db-welcome-heading {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ox-text);
+}
+
+.db-welcome-heading em { font-style: italic; color: var(--ox-amber); }
+
+.db-welcome-sub {
+  font-size: 0.875rem;
+  color: var(--ox-text-muted);
+  margin-top: 0.375rem;
+}
+
+
+/* ── Grid de métricas ── */
+
+.db-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.db-metric-card {
+  background: var(--ox-bg-elevated);
+  border: 1px solid var(--ox-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.db-metric-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: oklch(0.78 0.16 65 / 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ox-amber);
+  margin-bottom: 0.25rem;
+}
+
+.db-metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ox-text);
+  line-height: 1;
+}
+
+.db-metric-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ox-text-muted);
+}
+
+.db-metric-note {
+  font-size: 11px;
+  color: var(--ox-text-dim);
+}
+
+
+/* ── CTA primer tour ── */
+
+.db-cta-card {
+  background: var(--ox-bg-elevated);
+  border: 1px solid oklch(0.78 0.16 65 / 0.25);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.db-cta-card-icon {
+  color: var(--ox-amber);
+}
+
+.db-cta-card h3 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--ox-text);
+}
+
+.db-cta-card p {
+  font-size: 0.875rem;
+  color: var(--ox-text-muted);
+  max-width: 42ch;
+  line-height: 1.6;
+}
+
+.db-btn-primary {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  background: linear-gradient(135deg, oklch(0.78 0.16 65), oklch(0.85 0.18 80));
+  color: oklch(0.15 0.02 50);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: transform 0.2s var(--ox-ease), box-shadow 0.2s var(--ox-ease);
+}
+
+.db-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -6px oklch(0.78 0.16 65 / 0.6);
+}
+
+
+/* ══ Overlay móvil ══════════════════════════════════════════════════════════ */
+
+.db-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+  backdrop-filter: blur(2px);
+}
+
+.db-overlay.is-visible { display: block; }
+
+
+/* ══ Responsive ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .db-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .db-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s var(--ox-ease);
+    z-index: 100;
+    height: 100vh;
+  }
+
+  .db-sidebar.is-open { transform: translateX(0); }
+
+  .db-sidebar-close { display: flex; }
+
+  .db-topbar {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .db-hamburger { display: flex; }
+
+  .db-main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .db-metrics { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .db-metrics { grid-template-columns: 1fr; }
+  .db-main    { padding: 1.25rem 1rem; }
+}
