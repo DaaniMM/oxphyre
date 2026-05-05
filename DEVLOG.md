@@ -524,3 +524,27 @@ La cuenta digitechfp.com se descartó — SMTP capado por el centro educativo.
 - **Métricas hardcodeadas a 0**: conectadas a BD mediante `DashboardModel` con 3 prepared statements reales (tours, negocios, escaneos QR últimos 30 días vía JOINs businesses→user_id)
 
 → Deuda técnica consolidada en sección 'Pendientes y deuda técnica' de CLAUDE.md
+
+
+## 2026-05-05 — Onboarding wizard para nuevos negocios
+
+### Archivos creados/modificados
+- **`BusinessModel.php`** (nuevo): 3 métodos — `slugExists(slug)`, `countByUser(userId)`, `create(userId, name, slug, description, phone, address)`. Inserta con `PLAN_FREE` (constante de `config.php`), `is_active=1`, timestamps `NOW()`. 100% prepared statements.
+- **`BusinessController.php`** (nuevo): extiende `BaseController`. Métodos: `showCreate()` (guard plan Free ≥1 negocio → redirect), `store()` (POST: CSRF, validación, slug único, guard plan, insert → redirect), `showSuccess()` (lee `$_SESSION['created_business']`, elimina tras leer). `go()` con return type `never` (PHP 8.1) para que el análisis estático reconozca el `exit()` y no emita falso positivo sobre `$userId` declarado pero "no usado".
+- **`dashboard.css`**: añadidos estilos del wizard — `.wizard-header`, `.wizard-title`, `.wizard-steps`, `.wizard-step`, `.step-bubble`, `.step-label`, `.wizard-connector` (+ variante `.is-done` para la vista de éxito), `.wizard-panel`, `.wizard-card`, `.db-form-group/label/input/textarea/error`, `.slug-row`, `.slug-prefix`, `.char-counter`, `.plan-features-list`, `.plan-feature-item`, `.wizard-nav`, `.wizard-btn-back/next/submit`, `.wizard-success` y sus hijos.
+- **`dashboard/business/create.php`** (nuevo): layout completo con sidebar+topbar idéntico al dashboard. Indicador de 3 pasos con burbujas. Panel 1: formulario con nombre (char counter + autogeneración de slug), slug (prefijo `oxphyre.com/`), descripción, teléfono, dirección. Panel 2: lista de features del plan Free con íconos check/x. Un único `<form>` con POST a `/dashboard/business/store` — el cambio paso 1→2 es JS puro sin recarga. Validación client-side en `validateStep1()` antes de avanzar.
+- **`dashboard/business/success.php`** (nuevo): paso 3 de éxito. Indicador con pasos 1 y 2 marcados como `is-done` (burbuja verde con check), paso 3 activo. Card centrada con ícono check, nombre del negocio en itálica ámbar, URL pública en `JetBrains Mono`, dos CTA: "Crear mi primer tour" y "Volver al dashboard".
+- **`web.php`**: añadidas 3 rutas con guard `auth` — `GET /dashboard/tours/nuevo → BusinessController::showCreate`, `POST /dashboard/business/store → BusinessController::store`, `GET /dashboard/business/created → BusinessController::showSuccess`.
+
+### Flujo completo
+1. Dashboard → botón "Crea tu primer tour" → `GET /dashboard/tours/nuevo`
+2. Paso 1: rellena nombre + slug (autocompletado) + datos opcionales → JS valida → avanza a paso 2
+3. Paso 2: confirma plan Free → `POST /dashboard/business/store`
+4. Controller valida CSRF + datos + unicidad del slug + límite plan → inserta en BD → guarda `$_SESSION['created_business']` → redirect a `/dashboard/business/created`
+5. `showSuccess()` lee y elimina `$_SESSION['created_business']` → muestra paso 3 con nombre y URL del negocio
+
+### Seguridad
+- CSRF validado en POST con `hash_equals()`; token consumido tras uso (`unset $_SESSION['csrf_token']`)
+- Guard plan Free en `showCreate()` y `store()`: si ya tiene ≥1 negocio → redirect con flash de error
+- `strip_tags()` en todos los campos de texto, `mb_strlen()` para límites, slug con regex `[^a-z0-9-]+`
+- Variables extraídas directamente en cada método público (no con `extract()`) — compatibilidad con análisis estático

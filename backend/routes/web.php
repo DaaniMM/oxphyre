@@ -30,7 +30,9 @@ $routes = [
         '/recover'   => ['AuthController',      'showRecover',  'guest'],
         '/reset'     => ['AuthController',      'showReset',    'guest'],
         '/verify'    => ['AuthController',      'verifyEmail'],
-        '/dashboard' => ['DashboardController', 'index',        'auth'],
+        '/dashboard'                  => ['DashboardController', 'index',       'auth'],
+        '/dashboard/tours/nuevo'      => ['BusinessController',  'showCreate',  'auth'],
+        '/dashboard/business/created' => ['BusinessController',  'showSuccess', 'auth'],
     ],
     'POST' => [
         '/login'    => ['AuthController', 'login',    'guest'],
@@ -38,7 +40,8 @@ $routes = [
         '/registro' => ['AuthController', 'register', 'guest'],
         '/recover'  => ['AuthController', 'recover',  'guest'],
         '/reset'    => ['AuthController', 'reset',    'guest'],
-        '/logout'   => ['AuthController', 'logout',   'auth'],
+        '/logout'                   => ['AuthController',    'logout', 'auth'],
+        '/dashboard/business/store' => ['BusinessController', 'store',  'auth'],
     ],
 ];
 
