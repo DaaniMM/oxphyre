@@ -11,6 +11,36 @@ class BusinessController extends BaseController
         'admin'             => 'Admin',
     ];
 
+    private static array $businessLimits = [
+        'business_free'     => 1,
+        'business_pro'      => 5,
+        'business_business' => -1,
+        'admin'             => -1,
+    ];
+
+    public function showList(): void
+    {
+        $this->ensureCsrfToken();
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        $model  = new BusinessModel();
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+        $businesses = $model->getByUser($userId);
+
+        $userRole        = $_SESSION['user_role'] ?? 'business_free';
+        $businessLimit   = self::$businessLimits[$userRole] ?? 1;
+        $atBusinessLimit = $businessLimit !== -1 && count($businesses) >= $businessLimit;
+
+        $userName    = htmlspecialchars($_SESSION['user_name']  ?? '');
+        $userEmail   = htmlspecialchars($_SESSION['user_email'] ?? '');
+        $planLabel   = self::$planLabels[$userRole] ?? 'Free';
+        $userInitial = mb_strtoupper(mb_substr($_SESSION['user_name'] ?? 'U', 0, 1));
+        $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+
+        require_once VIEWS_PATH . '/dashboard/negocios/index.php';
+    }
+
     public function showCreate(): void
     {
         require_once BACKEND_PATH . '/models/BusinessModel.php';

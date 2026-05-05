@@ -24,6 +24,18 @@ class BusinessModel
         return (int) $stmt->fetchColumn();
     }
 
+    public function getByUser(int $userId): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT id, name, slug, description, phone, address, plan_id, created_at
+             FROM businesses
+             WHERE user_id = ? AND deleted_at IS NULL
+             ORDER BY created_at DESC'
+        );
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll();
+    }
+
     public function softDelete(int $id): void
     {
         $stmt = $this->db->prepare('UPDATE businesses SET deleted_at = NOW() WHERE id = ?');

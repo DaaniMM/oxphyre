@@ -610,3 +610,24 @@ Las tablas `users`, `plans`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messag
 
 ### Regla global documentada en CLAUDE.md
 Nueva sección "Regla global: Soft delete" con la norma completa: NUNCA DELETE FROM en businesses/tours/positions/photos, siempre UPDATE SET deleted_at = NOW(), todos los SELECT con deleted_at IS NULL.
+
+
+## 2026-05-05 — Listado de negocios y tours
+
+### Archivos creados/modificados
+
+**`BusinessModel.php`** — nuevo método `getByUser(int $userId): array`: SELECT id, name, slug, description, phone, address, plan_id, created_at WHERE user_id = ? AND deleted_at IS NULL ORDER BY created_at DESC.
+
+**`TourModel.php`** (nuevo) — `getByBusiness(int $businessId): array`: SELECT id, title, description, slug, is_published, created_at WHERE business_id = ? AND deleted_at IS NULL ORDER BY created_at DESC. 100% prepared statements.
+
+**`BusinessController.php`** — añadida propiedad estática `$businessLimits` (mismo que DashboardController, necesaria para el modal de límite en la vista de negocios). Nuevo método `showList()`: llama a `getByUser()`, calcula `$atBusinessLimit` y `$businessLimit`, pasa todo a `dashboard/negocios/index.php`.
+
+**`TourController.php`** (nuevo) — extiende BaseController. `showList()`: carga todos los negocios del usuario con `getByUser()`, añade los tours de cada negocio con `getByBusiness()` (bucle foreach + unset de referencia), y reutiliza `DashboardModel` para las 3 métricas. Pasa `$businesses` (array con clave `tours` añadida) y `$stats` a la vista.
+
+**`web.php`** — 2 nuevas rutas con guard auth: `GET /dashboard/negocios → BusinessController::showList`, `GET /dashboard/tours → TourController::showList`.
+
+**`dashboard.css`** — añadidos bloques: `.db-list-header/title`, `.db-biz-grid/card` (con top, name, url, desc, meta, meta-row, actions), `.db-badge` (variantes plan/published/draft), `.db-btn-secondary`, `.db-stat-bar` (con nums y sep), `.db-tour-section` (con header, title, hr), `.db-tour-grid/card` (con title, desc, footer, date), `.db-empty` (con icon, title, sub).
+
+**`dashboard/negocios/index.php`** (nuevo) — sidebar con "Negocios" activo. Si sin negocios: empty state. Si tiene negocios: header con título + botón "Nuevo negocio →" (data-at-limit para modal/nav). Grid de cards con nombre, URL monospace, descripción opcional, teléfono/dirección con iconos Lucide solo si están rellenos, badge de plan, botones "Gestionar →" y "Ver tours →". Modal de límite siempre en DOM.
+
+**`dashboard/tours/index.php`** (nuevo) — sidebar con "Mis tours" activo. Mini-navbar con 3 estadísticas + botón "Nuevo tour →" (apunta a # pendiente de implementar). Si sin negocios: empty state con link a negocios. Si hay negocios pero 0 tours: empty state. Si hay tours: secciones por negocio (header con nombre + hr) con grid de cards (título, descripción, fecha, badge publicado/borrador). Negocios sin tours muestran "Sin tours aún. Crear tour →".

@@ -31,6 +31,8 @@ $routes = [
         '/reset'     => ['AuthController',      'showReset',    'guest'],
         '/verify'    => ['AuthController',      'verifyEmail'],
         '/dashboard'                  => ['DashboardController', 'index',       'auth'],
+        '/dashboard/negocios'         => ['BusinessController',  'showList',    'auth'],
+        '/dashboard/tours'            => ['TourController',      'showList',    'auth'],
         '/dashboard/tours/nuevo'      => ['BusinessController',  'showCreate',  'auth'],
         '/dashboard/business/created' => ['BusinessController',  'showSuccess', 'auth'],
     ],
