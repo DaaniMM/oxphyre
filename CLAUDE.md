@@ -260,6 +260,13 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Nunca oscuridad total, siempre algo de luz durante la transición
 - Implementado con IntersectionObserver + transition: opacity 1.2s ease en glows CSS
 
+### Regla global: Soft delete
+
+Soft delete activo en `businesses`, `tours`, `positions`, `photos`.
+- **NUNCA usar `DELETE FROM`** en estos modelos — siempre `UPDATE ... SET deleted_at = NOW() WHERE id = ?`
+- **Todos los `SELECT`** de estos modelos deben incluir `WHERE deleted_at IS NULL` (o `AND deleted_at IS NULL` si ya hay `WHERE`)
+- Las tablas `users`, `plans`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent` y `login_attempts` **no tienen soft delete** — en ellas sí se puede usar `DELETE FROM`
+
 ### Pendientes y deuda técnica
 - Logo y favicon: diseñar cuando la página esté terminada
 - Modo claro: implementar cuando modo oscuro esté completamente cerrado

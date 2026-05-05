@@ -580,3 +580,33 @@ El modal de límite de negocios tenía dos problemas de implementación:
 ### Pendientes añadidos a CLAUDE.md
 - Dashboard: tooltips de ayuda contextual en métricas (jerarquía del producto para usuario no técnico)
 - Editor canvas: tutorial/onboarding en el primer acceso, con botón para volver a verlo
+
+
+## 2026-05-05 — Soft delete implementado
+
+### Contexto
+Borrado lógico para que los datos nunca se eliminen físicamente de la BD. Permite recuperar contenido borrado por error, mantener integridad referencial y cumplir RGPD (derecho al olvido se gestiona por separado con anonimización, no con DELETE).
+
+### BD — columnas añadidas (ejecutar manualmente en servidor via SSH)
+```sql
+ALTER TABLE businesses ADD COLUMN deleted_at DATETIME NULL DEFAULT NULL;
+ALTER TABLE tours      ADD COLUMN deleted_at DATETIME NULL DEFAULT NULL;
+ALTER TABLE positions  ADD COLUMN deleted_at DATETIME NULL DEFAULT NULL;
+ALTER TABLE photos     ADD COLUMN deleted_at DATETIME NULL DEFAULT NULL;
+```
+Las tablas `users`, `plans`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent` y `login_attempts` no tienen soft delete.
+
+### Modelos actualizados
+
+**`BusinessModel.php`**
+- `slugExists()`: añadido `AND deleted_at IS NULL` — los slugs de negocios borrados quedan liberados para reutilización
+- `countByUser()`: añadido `AND deleted_at IS NULL` — los negocios borrados no cuentan contra el límite del plan
+- `softDelete(int $id): void` (nuevo): `UPDATE businesses SET deleted_at = NOW() WHERE id = ?`
+
+**`DashboardModel.php`**
+- `countTours()`: añadido `AND t.deleted_at IS NULL AND b.deleted_at IS NULL`
+- `countBusinesses()`: añadido `AND deleted_at IS NULL`
+- `countQrScansLast30Days()`: añadido `AND t.deleted_at IS NULL AND b.deleted_at IS NULL`
+
+### Regla global documentada en CLAUDE.md
+Nueva sección "Regla global: Soft delete" con la norma completa: NUNCA DELETE FROM en businesses/tours/positions/photos, siempre UPDATE SET deleted_at = NOW(), todos los SELECT con deleted_at IS NULL.
