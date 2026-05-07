@@ -10,7 +10,7 @@
 
 ## Ahorro de tokens sin sacrificar calidad
 - Lee DEVLOG.md y CLAUDE.md al inicio de cada sesión, no pidas que te expliquen el proyecto.
-- No uses comentarios obvios en el código. Solo comenta lo que no es evidente.
+- Utiliza comentarios para explicar de forma intuitiva lo qué se pretende/se hace con cada bloque de código
 - No generes código de ejemplo o placeholders. Solo código real y funcional.
 - Si necesitas contexto de un archivo, léelo directamente en vez de preguntar.
 

@@ -802,3 +802,95 @@ OpenCV guarda PNG → Three.js usa el resultado para efecto 3D
   dpt.embeddings.position_embeddings,
   dpt.embeddings.backbone.bit.embedder.convolution.weight
 - Arquitectura DPT confirmada — listo para escribir el microservicio Flask
+
+
+## — Microservicio Flask MiDaS implementado
+
+### Archivos creados
+- `python-service/app.py` — microservicio completo
+- `python-service/start.sh` — script de arranque vía gunicorn
+
+### Instalación de gunicorn (ejecutar en servidor)
+```bash
+cd /var/www/oxphyre/python-service
+source venv/bin/activate
+pip install gunicorn
+chmod +x start.sh
+```
+
+### Descripción del microservicio
+Flask app con un worker gunicorn en 127.0.0.1:5000. El modelo DPT-Hybrid-MiDaS se carga una sola vez al arrancar (no en cada request). Si existe `python-service/dpt_hybrid.pt` se carga desde ahí; si no, desde la caché de Hugging Face. El servicio no es accesible desde el exterior — solo desde localhost.
+
+### Endpoint POST /process
+**Request:** `multipart/form-data` con campo `image` (imagen JPG/PNG, máx 20MB)
+**Headers requeridos:** `X-Service-Token: <PYTHON_SERVICE_TOKEN del .env>`
+
+**Response éxito:**
+```json
+{ "success": true, "depth_map": "<base64 PNG>" }
+```
+**Response error:**
+```json
+{ "success": false, "error": "<mensaje>" }
+```
+
+**Códigos HTTP:** 200 OK · 400 Bad Request · 401 Unauthorized · 403 Forbidden · 500 Internal Server Error
+
+### Seguridad
+- `_is_localhost()`: rechaza 403 cualquier request que no venga de 127.0.0.1 o ::1
+- `_token_valid()`: compara X-Service-Token con `PYTHON_SERVICE_TOKEN` env var usando `hmac.compare_digest` (timing-safe). Si el token no está configurado, rechaza siempre.
+- `MAX_CONTENT_LENGTH = 20MB`: Flask rechaza automáticamente uploads mayores con 413
+- `Image.verify()` + `convert("RGB")`: valida que el archivo es una imagen real, no solo por extensión
+
+### Flujo de inferencia
+1. `DPTImageProcessor` prepara la imagen (normalización, resize según modelo)
+2. `torch.no_grad()` evita acumulación de gradientes — ahorra memoria en CPU
+3. `predicted_depth` interpolado a tamaño original con bicúbica
+4. Normalizado a [0, 255] como PNG escala de grises (modo "L")
+5. Guardado en `BytesIO` → base64 → JSON
+
+### GET /health
+Devuelve `{"status": "ok"}` — accesible públicamente para checks básicos. Desde localhost incluye además el `model` ID.
+
+### Configurar servicio systemd (ejecutar en servidor)
+```bash
+# 1. Crear el archivo de unidad
+sudo nano /etc/systemd/system/oxphyre-midas.service
+```
+Contenido del archivo:
+```ini
+[Unit]
+Description=Oxphyre MiDaS Python Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/var/www/oxphyre/python-service
+EnvironmentFile=/var/www/oxphyre/.env
+ExecStart=/var/www/oxphyre/python-service/start.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+```bash
+# 2. Activar y arrancar
+sudo systemctl daemon-reload
+sudo systemctl enable oxphyre-midas
+sudo systemctl start oxphyre-midas
+
+# 3. Verificar estado
+sudo systemctl status oxphyre-midas
+journalctl -u oxphyre-midas -f
+```
+
+### Añadir token al .env (servidor)
+```bash
+# Generar token seguro
+python3 -c "import secrets; print(secrets.token_hex(32))"
+# Añadir al .env:
+echo "PYTHON_SERVICE_TOKEN=<token-generado>" >> /var/www/oxphyre/.env
+```
+El mismo token debe configurarse en el `.env` para que PHP lo use al llamar al microservicio.
