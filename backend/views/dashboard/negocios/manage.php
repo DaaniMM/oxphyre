@@ -143,6 +143,10 @@
             <i data-lucide="pencil" width="14" height="14" aria-hidden="true"></i>
             Editar
           </button>
+          <button type="button" class="db-btn-danger" id="btn-delete-biz">
+            <i data-lucide="trash-2" width="14" height="14" aria-hidden="true"></i>
+            Eliminar
+          </button>
         </div>
       </div>
 
@@ -232,11 +236,17 @@
                     <?= $tour['is_published'] ? 'Publicado' : 'Borrador' ?>
                   </span>
                 </div>
-                <div style="margin-top:0.75rem;">
+                <div class="db-tour-card-actions">
                   <a href="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>"
-                     class="db-btn-secondary" style="font-size:0.8125rem;width:100%;justify-content:center;">
+                     class="db-btn-secondary" style="font-size:0.8125rem;flex:1;justify-content:center;">
                     Gestionar
                   </a>
+                  <button type="button" class="db-btn-danger btn-delete-tour"
+                    data-tour-slug="<?= htmlspecialchars($tour['slug']) ?>"
+                    data-tour-title="<?= htmlspecialchars($tour['title']) ?>"
+                    aria-label="Eliminar tour">
+                    <i data-lucide="trash-2" width="13" height="13" aria-hidden="true"></i>
+                  </button>
                 </div>
               </article>
             <?php endforeach; ?>
@@ -244,6 +254,49 @@
         <?php endif; ?>
 
       </section>
+
+      <!-- ── Modal: eliminar negocio ── -->
+      <div class="db-modal-overlay" id="modal-delete-biz" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="delete-biz-title">
+        <div class="db-modal">
+          <button class="db-modal-close" id="btn-close-delete-biz" aria-label="Cerrar">
+            <i data-lucide="x" width="18" height="18" aria-hidden="true"></i>
+          </button>
+          <div class="db-modal-icon db-modal-icon--danger" aria-hidden="true">
+            <i data-lucide="trash-2" width="28" height="28"></i>
+          </div>
+          <h3 class="db-modal-title" id="delete-biz-title">¿Eliminar este negocio?</h3>
+          <p class="db-modal-body">Se eliminarán también todos los tours asociados. Esta acción no se puede deshacer.</p>
+          <form method="POST" action="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/delete">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <div class="db-modal-actions">
+              <button type="submit" class="db-btn-danger">Eliminar negocio</button>
+              <button type="button" class="db-btn-ghost" id="btn-cancel-delete-biz">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── Modal: eliminar tour (compartido, acción dinámica) ── -->
+      <div class="db-modal-overlay" id="modal-delete-tour" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="delete-tour-title">
+        <div class="db-modal">
+          <button class="db-modal-close" id="btn-close-delete-tour" aria-label="Cerrar">
+            <i data-lucide="x" width="18" height="18" aria-hidden="true"></i>
+          </button>
+          <div class="db-modal-icon db-modal-icon--danger" aria-hidden="true">
+            <i data-lucide="trash-2" width="28" height="28"></i>
+          </div>
+          <h3 class="db-modal-title" id="delete-tour-title">¿Eliminar este tour?</h3>
+          <p class="db-modal-body" id="delete-tour-body">Esta acción no se puede deshacer. El tour y todas sus posiciones y fotos quedarán eliminados.</p>
+          <form id="delete-tour-form" method="POST" action="">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <input type="hidden" name="biz_slug"   value="<?= htmlspecialchars($business['slug']) ?>">
+            <div class="db-modal-actions">
+              <button type="submit" class="db-btn-danger">Eliminar tour</button>
+              <button type="button" class="db-btn-ghost" id="btn-cancel-delete-tour">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
     </div>
   </main>
@@ -301,6 +354,48 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // ── Modal: eliminar negocio ───────────────────────────────────────────────
+  const modalDeleteBiz    = document.getElementById('modal-delete-biz');
+  const btnDeleteBiz      = document.getElementById('btn-delete-biz');
+  const btnCloseDeleteBiz = document.getElementById('btn-close-delete-biz');
+  const btnCancelBiz      = document.getElementById('btn-cancel-delete-biz');
+
+  const openBizModal  = () => { modalDeleteBiz.classList.add('is-visible'); modalDeleteBiz.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; };
+  const closeBizModal = () => { modalDeleteBiz.classList.remove('is-visible'); modalDeleteBiz.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
+
+  btnDeleteBiz?.addEventListener('click', openBizModal);
+  btnCloseDeleteBiz?.addEventListener('click', closeBizModal);
+  btnCancelBiz?.addEventListener('click', closeBizModal);
+  modalDeleteBiz?.addEventListener('click', e => { if (e.target === modalDeleteBiz) closeBizModal(); });
+
+  // ── Modal: eliminar tour (dinámico) ───────────────────────────────────────
+  const modalDeleteTour    = document.getElementById('modal-delete-tour');
+  const deleteTourForm     = document.getElementById('delete-tour-form');
+  const deleteTourBody     = document.getElementById('delete-tour-body');
+  const btnCloseDeleteTour = document.getElementById('btn-close-delete-tour');
+  const btnCancelTour      = document.getElementById('btn-cancel-delete-tour');
+
+  const openTourModal  = () => { modalDeleteTour.classList.add('is-visible'); modalDeleteTour.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; };
+  const closeTourModal = () => { modalDeleteTour.classList.remove('is-visible'); modalDeleteTour.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
+
+  document.querySelectorAll('.btn-delete-tour').forEach(btn => {
+    btn.addEventListener('click', () => {
+      deleteTourForm.action = `/dashboard/tours/${btn.dataset.tourSlug}/delete`;
+      deleteTourBody.textContent = `Esta acción no se puede deshacer. El tour "${btn.dataset.tourTitle}" y todas sus posiciones y fotos quedarán eliminados.`;
+      openTourModal();
+    });
+  });
+
+  btnCloseDeleteTour?.addEventListener('click', closeTourModal);
+  btnCancelTour?.addEventListener('click', closeTourModal);
+  modalDeleteTour?.addEventListener('click', e => { if (e.target === modalDeleteTour) closeTourModal(); });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (modalDeleteBiz?.classList.contains('is-visible'))  closeBizModal();
+    if (modalDeleteTour?.classList.contains('is-visible')) closeTourModal();
+  });
 });
 </script>
 

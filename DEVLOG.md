@@ -690,4 +690,34 @@ Los dos enlaces en manage.php que ya apuntaban a `/dashboard/tours/nuevo?negocio
 
 ### tours/create.php (nuevo)
 Breadcrumb en topbar: Negocios / {nombre} / Nuevo tour. Formulario con título (char counter, slug autogenerado via JS), slug editable con prefijo `oxphyre.com/{biz-slug}/`, descripción opcional (max 500). Validación client-side en submit. Mismos estilos wizard de dashboard.css.
+
+
+## 2026-05-07 — Eliminación de tours y negocios + texto informativo en create
+
+### 1. Texto informativo en tours/create.php
+Párrafo con icono `info` de Lucide debajo del campo descripción: "Una vez creado el tour podrás añadir posiciones, subir fotos 360°, configurar hotspots y mucho más." Estilo `var(--ox-text-muted)`.
+
+### 2. Eliminar tour (soft delete)
+**`TourModel.php`** — nuevos métodos: `getBySlugAndBusiness(string $slug, int $businessId): ?array` (SELECT * WHERE slug + business_id + deleted_at IS NULL), `softDelete(int $id): void` (UPDATE SET deleted_at=NOW()), `softDeleteByBusiness(int $businessId): void` (UPDATE WHERE business_id + deleted_at IS NULL — para cascade).
+
+**`TourController::delete()`** — extrae tourSlug de `$routeSlug` global, valida CSRF inline, lee `biz_slug` de POST, verifica ownership business→user con `getBySlug`, verifica ownership tour→business con `getBySlugAndBusiness`, soft delete, flash success, redirect a /dashboard/negocios/{bizSlug}.
+
+**`web.php`** — `POST /dashboard/tours/([a-z0-9-]+)/delete` → `TourController::delete` con guard auth.
+
+**`negocios/manage.php`** — botón "Eliminar" con clase `btn-delete-tour` + `data-tour-slug` + `data-tour-title` en cada card de tour. Modal compartido `#modal-delete-tour` con form action y body text poblados dinámicamente por JS al hacer click. CSRF y `biz_slug` en inputs hidden.
+
+### 3. Eliminar negocio (soft delete en cascada)
+**`BusinessController::delete()`** — valida CSRF, verifica ownership, cascade: `TourModel::softDeleteByBusiness()` primero, luego `BusinessModel::softDelete()`, flash success, redirect a /dashboard/negocios.
+
+**`web.php`** — `POST /dashboard/negocios/([a-z0-9-]+)/delete` → `BusinessController::delete` con guard auth.
+
+**`negocios/manage.php`** — botón "Eliminar" junto a "Editar" en el header del negocio. Modal `#modal-delete-biz` con form action fija, CSRF en input hidden.
+
+### 4. CSS — dashboard.css
+`.db-btn-danger` — botón rojo semi-transparente para acciones destructivas. `.db-modal-icon--danger` — variante del icono modal en rojo. `.db-tour-card-actions` — flex row con gap para los botones de cada card de tour.
+
+### Seguridad
+- Ownership verificado en dos niveles: user→business, business→tour — ningún usuario puede borrar recursos ajenos aunque conozca el slug
+- CSRF en ambas rutas de borrado
+- Soft delete conforme a la regla global de CLAUDE.md (nunca DELETE FROM)
 - Slug sanitizado antes de usarse en cualquier query o redirect

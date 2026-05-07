@@ -139,6 +139,11 @@
 
         </div>
 
+        <p style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:var(--ox-text-muted);margin-top:1rem;">
+          <i data-lucide="info" width="15" height="15" style="flex-shrink:0;margin-top:1px;color:var(--ox-text-dim);" aria-hidden="true"></i>
+          Una vez creado el tour podrás añadir posiciones, subir fotos 360°, configurar hotspots y mucho más.
+        </p>
+
         <div class="wizard-nav">
           <a href="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>"
              class="wizard-btn-back">

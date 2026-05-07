@@ -115,6 +115,18 @@ if (isset($routes[$method][$uri])) {
     require_once BACKEND_PATH . '/controllers/BusinessController.php';
     (new BusinessController())->update();
 
+} elseif ($method === 'POST' && preg_match('#^/dashboard/negocios/([a-z0-9-]+)/delete$#', $uri, $m)) {
+    AuthMiddleware::check();
+    $routeSlug = $m[1];
+    require_once BACKEND_PATH . '/controllers/BusinessController.php';
+    (new BusinessController())->delete();
+
+} elseif ($method === 'POST' && preg_match('#^/dashboard/tours/([a-z0-9-]+)/delete$#', $uri, $m)) {
+    AuthMiddleware::check();
+    $routeSlug = $m[1];
+    require_once BACKEND_PATH . '/controllers/TourController.php';
+    (new TourController())->delete();
+
 } else {
     // La combinación método + URI no existe en la tabla de rutas.
     // Respondemos con 404 en lugar de dejar que PHP muestre un error genérico.

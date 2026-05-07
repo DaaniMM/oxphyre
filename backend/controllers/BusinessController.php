@@ -122,6 +122,37 @@ class BusinessController extends BaseController
         $this->go("/dashboard/negocios/{$slug}");
     }
 
+    public function delete(): void
+    {
+        global $routeSlug;
+        $slug = preg_replace('/[^a-z0-9-]/', '', $routeSlug ?? '');
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->flash('error', 'Token de seguridad inválido.');
+            $this->go('/dashboard/negocios');
+        }
+        unset($_SESSION['csrf_token']);
+
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+
+        $model    = new BusinessModel();
+        $business = $model->getBySlug($slug, $userId);
+
+        if (!$business) {
+            $this->go('/dashboard/negocios');
+        }
+
+        (new TourModel())->softDeleteByBusiness((int) $business['id']);
+        $model->softDelete((int) $business['id']);
+
+        $this->flash('success', 'Negocio eliminado correctamente.');
+        $this->go('/dashboard/negocios');
+    }
+
     public function showCreate(): void
     {
         require_once BACKEND_PATH . '/models/BusinessModel.php';

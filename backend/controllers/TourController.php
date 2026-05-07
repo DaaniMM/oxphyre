@@ -156,6 +156,43 @@ class TourController extends BaseController
         $this->go("/dashboard/negocios/{$bizSlug}");
     }
 
+    public function delete(): void
+    {
+        global $routeSlug;
+        $tourSlug = preg_replace('/[^a-z0-9-]/', '', $routeSlug ?? '');
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->flash('error', 'Token de seguridad inválido.');
+            $this->go('/dashboard/negocios');
+        }
+        unset($_SESSION['csrf_token']);
+
+        $bizSlug = preg_replace('/[^a-z0-9-]/', '', $_POST['biz_slug'] ?? '');
+        $userId  = (int) ($_SESSION['user_id'] ?? 0);
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+
+        $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
+        if (!$business) {
+            $this->go('/dashboard/negocios');
+        }
+
+        $tourModel = new TourModel();
+        $tour      = $tourModel->getBySlugAndBusiness($tourSlug, (int) $business['id']);
+
+        if (!$tour) {
+            $this->flash('error', 'Tour no encontrado.');
+            $this->go("/dashboard/negocios/{$bizSlug}");
+        }
+
+        $tourModel->softDelete((int) $tour['id']);
+
+        $this->flash('success', "Tour \"{$tour['title']}\" eliminado correctamente.");
+        $this->go("/dashboard/negocios/{$bizSlug}");
+    }
+
     // ── Helpers privados ──────────────────────────────────────────────────────
 
     private function slugify(string $str): string

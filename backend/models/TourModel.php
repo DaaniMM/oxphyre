@@ -22,6 +22,18 @@ class TourModel
         return $stmt->fetchAll();
     }
 
+    public function getBySlugAndBusiness(string $slug, int $businessId): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT * FROM tours
+             WHERE slug = ? AND business_id = ? AND deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->execute([$slug, $businessId]);
+        $row = $stmt->fetch();
+        return $row !== false ? $row : null;
+    }
+
     public function countByBusiness(int $businessId): int
     {
         $stmt = $this->db->prepare(
@@ -49,5 +61,19 @@ class TourModel
         );
         $stmt->execute([$businessId, $title, $description, $slug]);
         return (int) $this->db->lastInsertId();
+    }
+
+    public function softDelete(int $id): void
+    {
+        $stmt = $this->db->prepare('UPDATE tours SET deleted_at = NOW() WHERE id = ?');
+        $stmt->execute([$id]);
+    }
+
+    public function softDeleteByBusiness(int $businessId): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE tours SET deleted_at = NOW() WHERE business_id = ? AND deleted_at IS NULL'
+        );
+        $stmt->execute([$businessId]);
     }
 }
