@@ -749,3 +749,56 @@ Las rutas `GET /dashboard/negocios/{biz}/tours/{tour}` y `POST .../edit` usan `$
 
 ### Lógica de publicación
 El toggle "Publicar/Despublicar" en el header es una mini-form independiente que reutiliza el endpoint `/edit`. Envía title + description actuales como hidden inputs y el valor `is_published` invertido. No requiere un endpoint separado ni JS — funciona como un POST estándar.
+
+## — Upgrade instancia EC2 t3.micro → t3.small
+
+### Motivo
+MiDaS (modelo de IA para mapas de profundidad) requiere ~500MB de RAM para cargar el modelo. La instancia t3.micro tenía 914MB totales y solo 148MB disponibles con el stack completo corriendo (Nginx + PHP-FPM + MySQL). Insuficiente para ejecutar MiDaS sin riesgo de OOM (out of memory).
+
+### Cambio realizado
+- Instancia parada desde consola AWS
+- Tipo cambiado de t3.micro a t3.small (misma zona eu-north-1b, mismo disco EBS de 20GB, misma IP elástica 13.62.93.7)
+- Instancia arrancada
+- Verificado con free -m: 1910MB totales, 1187MB disponibles
+
+### Comparativa
+| | t3.micro | t3.small |
+|---|---|---|
+| RAM | 1024MB | 2048MB |
+| vCPU | 2 | 2 |
+| Precio | 0.0108$/hora | 0.0216$/hora |
+| Nivel gratuito | ✓ | ✓ |
+
+### Impacto
+- Sin cambios en código, configuración Nginx, PHP ni MySQL
+- IP elástica mantenida — oxphyre.com sin interrupción prolongada
+- Créditos AWS restantes: ~113$ (102 días) — suficiente para ~5000 horas de t3.small
+- MiDaS ahora viable con ~1187MB disponibles
+
+## 2026-05-07 — Instalación MiDaS + dependencias Python
+
+### Dependencias instaladas en venv
+- torch 2.11.0+cpu — motor de deep learning (Meta/PyTorch)
+- torchvision 0.26.0+cpu — procesado de imágenes para PyTorch
+- timm 1.0.26 — arquitecturas de redes neuronales preentrenadas
+- opencv-python-headless 4.13.0 — visión por computador sin interfaz gráfica
+
+### Modelo descargado
+- DPT-Hybrid (Intel MiDaS) — 400MB
+- Ruta: /var/www/oxphyre/python-service/dpt_hybrid.pt
+- Fuente: huggingface.co/Intel/dpt-hybrid-midas
+- Elección: equilibrio óptimo calidad/velocidad en CPU. 
+  En producción con GPU se migrará a Depth Anything V2.
+  El código soporta el cambio con una sola línea.
+
+### Flujo de procesado previsto
+Foto JPG/PNG → OpenCV prepara imagen → PyTorch + timm 
+ejecutan MiDaS → mapa de profundidad en escala de grises → 
+OpenCV guarda PNG → Three.js usa el resultado para efecto 3D
+
+### Verificación
+- torch.load() confirma que el modelo carga correctamente en CPU
+- Claves iniciales: dpt.embeddings.cls_token, 
+  dpt.embeddings.position_embeddings,
+  dpt.embeddings.backbone.bit.embedder.convolution.weight
+- Arquitectura DPT confirmada — listo para escribir el microservicio Flask
