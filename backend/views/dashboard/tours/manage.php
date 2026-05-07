@@ -181,7 +181,7 @@
                 maxlength="500" rows="2"><?= htmlspecialchars($tour['description'] ?? '') ?></textarea>
             </div>
 
-            <div class="db-form-group" style="margin-bottom:0;display:flex;align-items:center;gap:0.625rem;">
+            <div class="db-form-group db-manage-edit-full" style="margin-bottom:0;display:flex;align-items:center;gap:0.625rem;">
               <input type="checkbox" id="edit-published" name="is_published" value="1"
                 <?= $isPublished ? 'checked' : '' ?>
                 style="width:16px;height:16px;accent-color:var(--ox-amber);cursor:pointer;">

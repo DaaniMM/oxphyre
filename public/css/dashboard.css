@@ -775,9 +775,12 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 .db-manage-actions {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+.db-manage-actions .db-btn-primary { margin-top: 0; }
 
 /* Tours section below the header */
 .db-manage-tours-section { margin-top: 0.5rem; }
