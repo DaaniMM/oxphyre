@@ -663,4 +663,31 @@ Layout 1fr/2fr reemplazado por patrón header-arriba + contenido-abajo (estánda
 - `getBySlug` incluye `user_id = ?` — un usuario no puede ver ni editar negocios de otro aunque conozca el slug
 - CSRF validado en update() con fallback correcto al slug dinámico
 - `strip_tags()` en todos los campos de entrada
+
+
+## 2026-05-07 — Creación de tours
+
+### Migración de rutas
+`GET /dashboard/tours/nuevo` apuntaba al wizard de negocio (BusinessController::showCreate). Se separan en dos rutas distintas:
+- `GET /dashboard/negocios/nuevo` → `BusinessController::showCreate` (wizard creación de negocio)
+- `GET /dashboard/tours/nuevo?negocio={slug}` → `TourController::showCreate` (formulario creación de tour)
+- `POST /dashboard/tours/store` → `TourController::store`
+
+Todos los enlaces que apuntaban a `/dashboard/tours/nuevo` como wizard de negocio se actualizaron a `/dashboard/negocios/nuevo`: BusinessController::store() (verifyCsrf + redirects de error × 3), dashboard/index.php (JS), negocios/index.php (empty state + JS), business/success.php (CTA "Crear mi primer tour" — también corregido de `?business={id}` a `?negocio={slug}`).
+
+Los dos enlaces en manage.php que ya apuntaban a `/dashboard/tours/nuevo?negocio={slug}` se mantienen igual (ahora correctos).
+
+### TourModel.php — métodos añadidos
+- `countByBusiness(int $businessId): int` — count WHERE business_id = ? AND deleted_at IS NULL
+- `slugExistsInBusiness(int $businessId, string $slug): bool` — unicidad de slug dentro del negocio
+- `create(int $businessId, string $title, ?string $description, string $slug): int` — INSERT con is_published=0, views_count=0, devuelve lastInsertId()
+
+### TourController.php — métodos añadidos
+- `showCreate()`: lee `?negocio` de $_GET, sanitiza, verifica business pertenece al usuario, aplica límites de plan (Free: máx 1 tour total via DashboardModel::countTours; Pro: máx 20 por negocio via TourModel::countByBusiness; Business/Admin: ilimitado), ensureCsrfToken, carga vista.
+- `store()`: verifyCsrf inline (fallback /dashboard/negocios), verifica propiedad del negocio, valida title+description, genera slug desde título con `slugify()` PHP (soporte diacríticos), resuelve colisiones añadiendo `-2`/`-3`, inserta tour, flash success, redirect a /dashboard/negocios/{slug}.
+- `slugify(string $str): string` — private, normaliza UTF-8, elimina diacríticos ES, convierte a kebab-case.
+- `go(string $url): never` — private, igual que BusinessController (pendiente unificar en BaseController).
+
+### tours/create.php (nuevo)
+Breadcrumb en topbar: Negocios / {nombre} / Nuevo tour. Formulario con título (char counter, slug autogenerado via JS), slug editable con prefijo `oxphyre.com/{biz-slug}/`, descripción opcional (max 500). Validación client-side en submit. Mismos estilos wizard de dashboard.css.
 - Slug sanitizado antes de usarse en cualquier query o redirect

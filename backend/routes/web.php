@@ -31,10 +31,11 @@ $routes = [
         '/reset'     => ['AuthController',      'showReset',    'guest'],
         '/verify'    => ['AuthController',      'verifyEmail'],
         '/dashboard'                  => ['DashboardController', 'index',       'auth'],
-        '/dashboard/negocios'         => ['BusinessController',  'showList',    'auth'],
-        '/dashboard/tours'            => ['TourController',      'showList',    'auth'],
-        '/dashboard/tours/nuevo'      => ['BusinessController',  'showCreate',  'auth'],
-        '/dashboard/business/created' => ['BusinessController',  'showSuccess', 'auth'],
+        '/dashboard/negocios'         => ['BusinessController', 'showList',    'auth'],
+        '/dashboard/negocios/nuevo'   => ['BusinessController', 'showCreate',  'auth'],
+        '/dashboard/tours'            => ['TourController',     'showList',    'auth'],
+        '/dashboard/tours/nuevo'      => ['TourController',     'showCreate',  'auth'],
+        '/dashboard/business/created' => ['BusinessController', 'showSuccess', 'auth'],
     ],
     'POST' => [
         '/login'    => ['AuthController', 'login',    'guest'],
@@ -44,6 +45,7 @@ $routes = [
         '/reset'    => ['AuthController', 'reset',    'guest'],
         '/logout'                   => ['AuthController',    'logout', 'auth'],
         '/dashboard/business/store' => ['BusinessController', 'store',  'auth'],
+        '/dashboard/tours/store'    => ['TourController',     'store',  'auth'],
     ],
 ];
 

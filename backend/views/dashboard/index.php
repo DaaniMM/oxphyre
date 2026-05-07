@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnStart.dataset.atLimit === '1') {
         openModal();
       } else {
-        window.location.href = '/dashboard/tours/nuevo';
+        window.location.href = '/dashboard/negocios/nuevo';
       }
     });
   }

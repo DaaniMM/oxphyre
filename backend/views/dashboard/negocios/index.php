@@ -93,7 +93,7 @@
           </div>
           <p class="db-empty-title">Aún no tienes ningún negocio.</p>
           <p class="db-empty-sub">Crea tu primer negocio para empezar a construir tours virtuales.</p>
-          <a href="/dashboard/tours/nuevo" class="db-btn-primary">Crear mi primer negocio →</a>
+          <a href="/dashboard/negocios/nuevo" class="db-btn-primary">Crear mi primer negocio →</a>
         </div>
 
       <?php else: ?>
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnNuevo) {
     btnNuevo.addEventListener('click', () => {
-      btnNuevo.dataset.atLimit === '1' ? openModal() : window.location.href = '/dashboard/tours/nuevo';
+      btnNuevo.dataset.atLimit === '1' ? openModal() : window.location.href = '/dashboard/negocios/nuevo';
     });
   }
 

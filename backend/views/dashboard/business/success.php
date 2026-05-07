@@ -123,7 +123,7 @@
           <p class="wizard-success-url">oxphyre.com/<?= htmlspecialchars($business['slug']) ?></p>
 
           <div class="wizard-success-actions">
-            <a href="/dashboard/tours/nuevo?business=<?= (int) $business['id'] ?>" class="wizard-btn-submit" style="text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;">
+            <a href="/dashboard/tours/nuevo?negocio=<?= htmlspecialchars($business['slug']) ?>" class="wizard-btn-submit" style="text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;">
               <i data-lucide="plus" width="16" height="16" aria-hidden="true"></i>
               Crear mi primer tour
             </a>

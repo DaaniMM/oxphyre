@@ -149,7 +149,7 @@ class BusinessController extends BaseController
 
     public function store(): void
     {
-        $this->verifyCsrf('/dashboard/tours/nuevo');
+        $this->verifyCsrf('/dashboard/negocios/nuevo');
 
         $userId   = (int) ($_SESSION['user_id']   ?? 0);
         $userRole = $_SESSION['user_role'] ?? 'business_free';
@@ -174,7 +174,7 @@ class BusinessController extends BaseController
 
         if (!empty($errors)) {
             $this->flash('error', implode(' ', $errors));
-            $this->go('/dashboard/tours/nuevo');
+            $this->go('/dashboard/negocios/nuevo');
         }
 
         require_once BACKEND_PATH . '/models/BusinessModel.php';
@@ -187,7 +187,7 @@ class BusinessController extends BaseController
 
         if ($model->slugExists($slug)) {
             $this->flash('error', 'Ese slug ya está en uso. Elige otro nombre para la URL del negocio.');
-            $this->go('/dashboard/tours/nuevo');
+            $this->go('/dashboard/negocios/nuevo');
         }
 
         $businessId = $model->create(
