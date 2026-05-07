@@ -631,3 +631,33 @@ Nueva sección "Regla global: Soft delete" con la norma completa: NUNCA DELETE F
 **`dashboard/negocios/index.php`** (nuevo) — sidebar con "Negocios" activo. Si sin negocios: empty state. Si tiene negocios: header con título + botón "Nuevo negocio →" (data-at-limit para modal/nav). Grid de cards con nombre, URL monospace, descripción opcional, teléfono/dirección con iconos Lucide solo si están rellenos, badge de plan, botones "Gestionar →" y "Ver tours →". Modal de límite siempre en DOM.
 
 **`dashboard/tours/index.php`** (nuevo) — sidebar con "Mis tours" activo. Mini-navbar con 3 estadísticas + botón "Nuevo tour →" (apunta a # pendiente de implementar). Si sin negocios: empty state con link a negocios. Si hay negocios pero 0 tours: empty state. Si hay tours: secciones por negocio (header con nombre + hr) con grid de cards (título, descripción, fecha, badge publicado/borrador). Negocios sin tours muestran "Sin tours aún. Crear tour →".
+
+
+## 2026-05-07 — Gestión de negocio individual /dashboard/negocios/{slug}
+
+### Routing dinámico
+El router tabla-fija no soporta segmentos variables. Se añaden dos bloques `elseif` con `preg_match` en `web.php` antes del 404:
+- `GET /dashboard/negocios/([a-z0-9-]+)` → `BusinessController::showManage()`
+- `POST /dashboard/negocios/([a-z0-9-]+)/edit` → `BusinessController::update()`
+
+El slug capturado se almacena en `$routeSlug` (global scope de web.php), los métodos del controller lo leen con `global $routeSlug` y sanitizan con `preg_replace('/[^a-z0-9-]/', '', ...)`.
+
+### Archivos creados/modificados
+
+**`BusinessModel.php`**
+- `getBySlug(string $slug, int $userId): ?array` — SELECT * WHERE slug = ? AND user_id = ? AND deleted_at IS NULL. Devuelve null si no existe o no pertenece al usuario.
+- `update(int $id, string $name, ?string $description, ?string $phone, ?string $address): void` — UPDATE SET name, description, phone, address, updated_at=NOW() WHERE id = ? AND deleted_at IS NULL.
+
+**`BusinessController.php`**
+- `showManage()` — extrae slug global, llama getBySlug() (redirect a /dashboard/negocios si no existe), carga tours con TourModel::getByBusiness(), pasa flash de sesión a la vista.
+- `update()` — extrae slug global, verifyCsrf con fallback a /dashboard/negocios/{slug}, valida campos, getBySlug() para verificar propiedad, update(), flash success, redirect a /dashboard/negocios/{slug}.
+
+**`dashboard.css`** — nuevos bloques `.db-manage-layout` (grid 1fr 2fr → 1fr en <900px), `.db-manage-card`, `.db-manage-name`, `.db-manage-url-row`, `.db-manage-url`, `.db-manage-copy-btn` (con variante `.copied` verde), `.db-manage-desc`, `.db-manage-meta/meta-row`, `.db-manage-divider`, `.db-manage-actions`, `.db-manage-tours-header/title`.
+
+**`dashboard/negocios/manage.php`** (nuevo) — breadcrumb en topbar (Negocios / nombre). Layout 2 columnas. Columna izquierda: card con nombre, URL monospace + botón copiar (Clipboard API, icono toggle check/copy), descripción, teléfono/dirección con iconos Lucide, badge plan + fecha creación, botón "Editar negocio". Formulario inline oculto con `hidden` attribute — JS toggle con btn-edit/btn-cancel sin recarga de página; inputs pre-rellenos con `htmlspecialchars`. Columna derecha: header "Tours" + botón "Nuevo tour". Si vacío: empty state. Si tours: grid con título, descripción, fecha, badge publicado/borrador, botón "Gestionar" (apunta a /dashboard/negocios/{biz-slug}/tours/{tour-slug}, pendiente de implementar).
+
+### Seguridad
+- `getBySlug` incluye `user_id = ?` — un usuario no puede ver ni editar negocios de otro aunque conozca el slug
+- CSRF validado en update() con fallback correcto al slug dinámico
+- `strip_tags()` en todos los campos de entrada
+- Slug sanitizado antes de usarse en cualquier query o redirect

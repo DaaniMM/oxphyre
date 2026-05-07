@@ -41,6 +41,87 @@ class BusinessController extends BaseController
         require_once VIEWS_PATH . '/dashboard/negocios/index.php';
     }
 
+    public function showManage(): void
+    {
+        global $routeSlug;
+        $slug = preg_replace('/[^a-z0-9-]/', '', $routeSlug ?? '');
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+
+        $userId   = (int) ($_SESSION['user_id'] ?? 0);
+        $model    = new BusinessModel();
+        $business = $model->getBySlug($slug, $userId);
+
+        if (!$business) {
+            $this->flash('error', 'Negocio no encontrado.');
+            $this->go('/dashboard/negocios');
+        }
+
+        $tours = (new TourModel())->getByBusiness((int) $business['id']);
+
+        $this->ensureCsrfToken();
+
+        $userRole    = $_SESSION['user_role'] ?? 'business_free';
+        $userName    = htmlspecialchars($_SESSION['user_name']  ?? '');
+        $userEmail   = htmlspecialchars($_SESSION['user_email'] ?? '');
+        $planLabel   = self::$planLabels[$userRole] ?? 'Free';
+        $userInitial = mb_strtoupper(mb_substr($_SESSION['user_name'] ?? 'U', 0, 1));
+        $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+
+        $flash = $_SESSION['flash'] ?? null;
+        unset($_SESSION['flash']);
+
+        require_once VIEWS_PATH . '/dashboard/negocios/manage.php';
+    }
+
+    public function update(): void
+    {
+        global $routeSlug;
+        $slug = preg_replace('/[^a-z0-9-]/', '', $routeSlug ?? '');
+
+        $this->verifyCsrf("/dashboard/negocios/{$slug}");
+
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+        $name        = strip_tags(trim($_POST['name']        ?? ''));
+        $description = strip_tags(trim($_POST['description'] ?? ''));
+        $phone       = strip_tags(trim($_POST['phone']       ?? ''));
+        $address     = strip_tags(trim($_POST['address']     ?? ''));
+
+        $errors = [];
+        if ($name === '' || mb_strlen($name) > 100) {
+            $errors[] = 'El nombre es obligatorio y no puede superar 100 caracteres.';
+        }
+        if ($description !== '' && mb_strlen($description) > 300) {
+            $errors[] = 'La descripción no puede superar 300 caracteres.';
+        }
+
+        if (!empty($errors)) {
+            $this->flash('error', implode(' ', $errors));
+            $this->go("/dashboard/negocios/{$slug}");
+        }
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        $model    = new BusinessModel();
+        $business = $model->getBySlug($slug, $userId);
+
+        if (!$business) {
+            $this->go('/dashboard/negocios');
+        }
+
+        $model->update(
+            (int) $business['id'],
+            $name,
+            $description !== '' ? $description : null,
+            $phone       !== '' ? $phone       : null,
+            $address     !== '' ? $address     : null
+        );
+
+        $this->flash('success', 'Negocio actualizado correctamente.');
+        $this->go("/dashboard/negocios/{$slug}");
+    }
+
     public function showCreate(): void
     {
         require_once BACKEND_PATH . '/models/BusinessModel.php';

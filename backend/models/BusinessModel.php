@@ -36,6 +36,28 @@ class BusinessModel
         return $stmt->fetchAll();
     }
 
+    public function getBySlug(string $slug, int $userId): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT * FROM businesses
+             WHERE slug = ? AND user_id = ? AND deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->execute([$slug, $userId]);
+        $row = $stmt->fetch();
+        return $row !== false ? $row : null;
+    }
+
+    public function update(int $id, string $name, ?string $description, ?string $phone, ?string $address): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE businesses
+             SET name = ?, description = ?, phone = ?, address = ?, updated_at = NOW()
+             WHERE id = ? AND deleted_at IS NULL'
+        );
+        $stmt->execute([$name, $description, $phone, $address, $id]);
+    }
+
     public function softDelete(int $id): void
     {
         $stmt = $this->db->prepare('UPDATE businesses SET deleted_at = NOW() WHERE id = ?');
