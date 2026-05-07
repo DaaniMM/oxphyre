@@ -1079,6 +1079,46 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* ── Position cards ── */
+
+.db-pos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.db-pos-card {
+  background: var(--ox-bg-elevated);
+  border: 1px solid var(--ox-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: border-color 0.2s var(--ox-ease);
+}
+
+.db-pos-card:hover { border-color: var(--ox-border-strong); }
+
+.db-pos-card-title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--ox-text);
+}
+
+.db-pos-card-order {
+  font-size: 0.75rem;
+  color: var(--ox-text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.db-pos-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+
 /* ── Empty state ── */
 
 .db-empty {

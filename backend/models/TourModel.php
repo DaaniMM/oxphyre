@@ -63,6 +63,16 @@ class TourModel
         return (int) $this->db->lastInsertId();
     }
 
+    public function update(int $id, string $title, ?string $description, bool $isPublished): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE tours
+             SET title = ?, description = ?, is_published = ?, updated_at = NOW()
+             WHERE id = ? AND deleted_at IS NULL'
+        );
+        $stmt->execute([$title, $description, $isPublished ? 1 : 0, $id]);
+    }
+
     public function softDelete(int $id): void
     {
         $stmt = $this->db->prepare('UPDATE tours SET deleted_at = NOW() WHERE id = ?');

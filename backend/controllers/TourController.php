@@ -156,6 +156,106 @@ class TourController extends BaseController
         $this->go("/dashboard/negocios/{$bizSlug}");
     }
 
+    public function showManage(): void
+    {
+        global $routeParams;
+        $bizSlug  = preg_replace('/[^a-z0-9-]/', '', $routeParams['biz']  ?? '');
+        $tourSlug = preg_replace('/[^a-z0-9-]/', '', $routeParams['tour'] ?? '');
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+        require_once BACKEND_PATH . '/models/PositionModel.php';
+
+        $userId   = (int) ($_SESSION['user_id'] ?? 0);
+        $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
+
+        if (!$business) {
+            $this->flash('error', 'Negocio no encontrado.');
+            $this->go('/dashboard/negocios');
+        }
+
+        $tourModel = new TourModel();
+        $tour      = $tourModel->getBySlugAndBusiness($tourSlug, (int) $business['id']);
+
+        if (!$tour) {
+            $this->flash('error', 'Tour no encontrado.');
+            $this->go("/dashboard/negocios/{$bizSlug}");
+        }
+
+        $positions = (new PositionModel())->getByTour((int) $tour['id']);
+
+        $this->ensureCsrfToken();
+
+        $userRole    = $_SESSION['user_role'] ?? 'business_free';
+        $userName    = htmlspecialchars($_SESSION['user_name']  ?? '');
+        $userEmail   = htmlspecialchars($_SESSION['user_email'] ?? '');
+        $planLabel   = self::$planLabels[$userRole] ?? 'Free';
+        $userInitial = mb_strtoupper(mb_substr($_SESSION['user_name'] ?? 'U', 0, 1));
+        $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+
+        $flash = $_SESSION['flash'] ?? null;
+        unset($_SESSION['flash']);
+
+        require_once VIEWS_PATH . '/dashboard/tours/manage.php';
+    }
+
+    public function update(): void
+    {
+        global $routeParams;
+        $bizSlug  = preg_replace('/[^a-z0-9-]/', '', $routeParams['biz']  ?? '');
+        $tourSlug = preg_replace('/[^a-z0-9-]/', '', $routeParams['tour'] ?? '');
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->flash('error', 'Token de seguridad inválido.');
+            $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+        }
+        unset($_SESSION['csrf_token']);
+
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+
+        $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
+        if (!$business) {
+            $this->go('/dashboard/negocios');
+        }
+
+        $tourModel = new TourModel();
+        $tour      = $tourModel->getBySlugAndBusiness($tourSlug, (int) $business['id']);
+        if (!$tour) {
+            $this->go("/dashboard/negocios/{$bizSlug}");
+        }
+
+        $title       = strip_tags(trim($_POST['title']       ?? ''));
+        $description = strip_tags(trim($_POST['description'] ?? ''));
+        $isPublished = isset($_POST['is_published']) && $_POST['is_published'] === '1';
+
+        $errors = [];
+        if ($title === '' || mb_strlen($title) > 100) {
+            $errors[] = 'El título es obligatorio y no puede superar 100 caracteres.';
+        }
+        if ($description !== '' && mb_strlen($description) > 500) {
+            $errors[] = 'La descripción no puede superar 500 caracteres.';
+        }
+
+        if (!empty($errors)) {
+            $this->flash('error', implode(' ', $errors));
+            $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+        }
+
+        $tourModel->update(
+            (int) $tour['id'],
+            $title,
+            $description !== '' ? $description : null,
+            $isPublished
+        );
+
+        $this->flash('success', 'Tour actualizado correctamente.');
+        $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+    }
+
     public function delete(): void
     {
         global $routeSlug;

@@ -633,6 +633,7 @@ Nueva sección "Regla global: Soft delete" con la norma completa: NUNCA DELETE F
 **`dashboard/tours/index.php`** (nuevo) — sidebar con "Mis tours" activo. Mini-navbar con 3 estadísticas + botón "Nuevo tour →" (apunta a # pendiente de implementar). Si sin negocios: empty state con link a negocios. Si hay negocios pero 0 tours: empty state. Si hay tours: secciones por negocio (header con nombre + hr) con grid de cards (título, descripción, fecha, badge publicado/borrador). Negocios sin tours muestran "Sin tours aún. Crear tour →".
 
 
+
 ## 2026-05-07 — Gestión de negocio individual /dashboard/negocios/{slug}
 
 ### Routing dinámico
@@ -665,7 +666,7 @@ Layout 1fr/2fr reemplazado por patrón header-arriba + contenido-abajo (estánda
 - `strip_tags()` en todos los campos de entrada
 
 
-## 2026-05-07 — Creación de tours
+## — Creación de tours
 
 ### Migración de rutas
 `GET /dashboard/tours/nuevo` apuntaba al wizard de negocio (BusinessController::showCreate). Se separan en dos rutas distintas:
@@ -692,7 +693,7 @@ Los dos enlaces en manage.php que ya apuntaban a `/dashboard/tours/nuevo?negocio
 Breadcrumb en topbar: Negocios / {nombre} / Nuevo tour. Formulario con título (char counter, slug autogenerado via JS), slug editable con prefijo `oxphyre.com/{biz-slug}/`, descripción opcional (max 500). Validación client-side en submit. Mismos estilos wizard de dashboard.css.
 
 
-## 2026-05-07 — Eliminación de tours y negocios + texto informativo en create
+## — Eliminación de tours y negocios + texto informativo en create
 
 ### 1. Texto informativo en tours/create.php
 Párrafo con icono `info` de Lucide debajo del campo descripción: "Una vez creado el tour podrás añadir posiciones, subir fotos 360°, configurar hotspots y mucho más." Estilo `var(--ox-text-muted)`.
@@ -721,3 +722,30 @@ Párrafo con icono `info` de Lucide debajo del campo descripción: "Una vez crea
 - CSRF en ambas rutas de borrado
 - Soft delete conforme a la regla global de CLAUDE.md (nunca DELETE FROM)
 - Slug sanitizado antes de usarse en cualquier query o redirect
+
+
+## — Gestión individual de tour + posiciones
+
+### Routing con dos parámetros dinámicos
+Las rutas `GET /dashboard/negocios/{biz}/tours/{tour}` y `POST .../edit` usan `$routeParams = ['biz' => $m[1], 'tour' => $m[2]]` en lugar de `$routeSlug`. Los métodos del controller los leen con `global $routeParams`.
+
+### Archivos creados/modificados
+
+**`PositionModel.php`** (nuevo) — `getByTour(int $tourId): array`: SELECT * WHERE tour_id = ? AND deleted_at IS NULL ORDER BY order_index ASC.
+
+**`TourModel.php`** — `update(int $id, string $title, ?string $description, bool $isPublished): void`: UPDATE SET title, description, is_published, updated_at=NOW() WHERE id = ? AND deleted_at IS NULL.
+
+**`TourController.php`**
+- `showManage()`: extrae `$routeParams` global, verifica ownership user→business→tour, carga posiciones con PositionModel, pasa flash, ensureCsrfToken.
+- `update()`: extrae `$routeParams` global, CSRF inline, verifica ownership, valida title (max 100) + description (max 500), is_published desde checkbox POST, llama TourModel::update(), redirect con flash.
+
+**`web.php`** — 2 nuevas rutas con guard auth:
+- `GET /dashboard/negocios/([a-z0-9-]+)/tours/([a-z0-9-]+)$` → `TourController::showManage`
+- `POST /dashboard/negocios/([a-z0-9-]+)/tours/([a-z0-9-]+)/edit$` → `TourController::update`
+
+**`dashboard.css`** — `.db-pos-grid` (auto-fill 240px), `.db-pos-card` (mismo estilo que tour cards), `.db-pos-card-title/order/actions`.
+
+**`tours/manage.php`** (nuevo) — Breadcrumb 3 niveles: Negocios / {nombre} / {título tour}. Bloque 1: header con título + badge publicado/borrador, URL con copy button, descripción, fecha; botones "Editar" + toggle publicar/despublicar (mini-form con hidden inputs para title/description, is_published invertido) + "Eliminar". Bloque 2: formulario de edición inline con checkbox `is_published`. Bloque 3: grid de posiciones o empty state. Modal de eliminación con form action fija + biz_slug hidden. Botones "Eliminar" en position cards marcados `disabled` + `title="Próximamente"` hasta implementar PositionController.
+
+### Lógica de publicación
+El toggle "Publicar/Despublicar" en el header es una mini-form independiente que reutiliza el endpoint `/edit`. Envía title + description actuales como hidden inputs y el valor `is_published` invertido. No requiere un endpoint separado ni JS — funciona como un POST estándar.
