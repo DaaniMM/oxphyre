@@ -656,6 +656,9 @@ El slug capturado se almacena en `$routeSlug` (global scope de web.php), los mé
 
 **`dashboard/negocios/manage.php`** (nuevo) — breadcrumb en topbar (Negocios / nombre). Layout 2 columnas. Columna izquierda: card con nombre, URL monospace + botón copiar (Clipboard API, icono toggle check/copy), descripción, teléfono/dirección con iconos Lucide, badge plan + fecha creación, botón "Editar negocio". Formulario inline oculto con `hidden` attribute — JS toggle con btn-edit/btn-cancel sin recarga de página; inputs pre-rellenos con `htmlspecialchars`. Columna derecha: header "Tours" + botón "Nuevo tour". Si vacío: empty state. Si tours: grid con título, descripción, fecha, badge publicado/borrador, botón "Gestionar" (apunta a /dashboard/negocios/{biz-slug}/tours/{tour-slug}, pendiente de implementar).
 
+### Rediseño layout manage.php (mismo día)
+Layout 1fr/2fr reemplazado por patrón header-arriba + contenido-abajo (estándar Vercel/Linear/Stripe). Panel superior full-width con `.db-manage-header` (flex row: info izquierda + botón derecha). Formulario de edición inline `.db-manage-card` full-width con grid 2 columnas (nombre y descripción span-full, teléfono y dirección en paralelo; colapsa a 1 col en <600px). Sección tours `.db-manage-tours-section` full-width debajo. `.db-manage-meta` cambia de flex-column a flex-row para mostrar teléfono y dirección en horizontal.
+
 ### Seguridad
 - `getBySlug` incluye `user_id = ?` — un usuario no puede ver ni editar negocios de otro aunque conozca el slug
 - CSRF validado en update() con fallback correcto al slug dinámico

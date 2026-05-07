@@ -86,175 +86,165 @@
 
       <?php if ($flash): ?>
         <div role="alert" style="
-          padding: 0.75rem 1rem;
-          border-radius: 8px;
-          font-size: 0.875rem;
-          margin-bottom: 1.5rem;
+          padding:0.75rem 1rem;border-radius:8px;font-size:0.875rem;margin-bottom:1.25rem;
           <?= $flash['type'] === 'success'
             ? 'background:oklch(0.35 0.10 145/0.2);border:1px solid oklch(0.55 0.12 145/0.4);color:oklch(0.80 0.14 145);'
-            : 'background:oklch(0.35 0.12 25/0.2);border:1px solid oklch(0.55 0.15 25/0.4);color:oklch(0.80 0.10 25);' ?>
-        "><?= htmlspecialchars($flash['message']) ?></div>
+            : 'background:oklch(0.35 0.12 25/0.2);border:1px solid oklch(0.55 0.15 25/0.4);color:oklch(0.80 0.10 25);'
+          ?>"><?= htmlspecialchars($flash['message']) ?></div>
       <?php endif; ?>
 
       <?php $planBadgeNames = [PLAN_FREE => 'Free', PLAN_PRO => 'Pro', PLAN_BUSINESS => 'Business']; ?>
 
-      <div class="db-manage-layout">
+      <!-- ── PANEL SUPERIOR: info del negocio ── -->
+      <div class="db-manage-header" id="info-view">
+        <div class="db-manage-header-left">
 
-        <!-- ── COLUMNA IZQUIERDA: datos del negocio ── -->
-        <div>
-          <div class="db-manage-card">
-
-            <!-- Vista de información -->
-            <div id="info-view">
-              <h2 class="db-manage-name"><?= htmlspecialchars($business['name']) ?></h2>
-
-              <div class="db-manage-url-row">
-                <span class="db-manage-url">oxphyre.com/<?= htmlspecialchars($business['slug']) ?></span>
-                <button type="button" class="db-manage-copy-btn" id="btn-copy-url"
-                  data-url="https://oxphyre.com/<?= htmlspecialchars($business['slug']) ?>"
-                  aria-label="Copiar URL">
-                  <i data-lucide="copy" width="14" height="14" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <?php if (!empty($business['description'])): ?>
-                <p class="db-manage-desc"><?= htmlspecialchars($business['description']) ?></p>
-              <?php endif; ?>
-
-              <?php if (!empty($business['phone']) || !empty($business['address'])): ?>
-                <div class="db-manage-meta">
-                  <?php if (!empty($business['phone'])): ?>
-                    <span class="db-manage-meta-row">
-                      <i data-lucide="phone" width="13" height="13" aria-hidden="true"></i>
-                      <?= htmlspecialchars($business['phone']) ?>
-                    </span>
-                  <?php endif; ?>
-                  <?php if (!empty($business['address'])): ?>
-                    <span class="db-manage-meta-row">
-                      <i data-lucide="map-pin" width="13" height="13" aria-hidden="true"></i>
-                      <?= htmlspecialchars($business['address']) ?>
-                    </span>
-                  <?php endif; ?>
-                </div>
-              <?php endif; ?>
-
-              <div class="db-manage-divider"></div>
-
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.875rem;">
-                <span class="db-badge db-badge--plan">
-                  <?= htmlspecialchars($planBadgeNames[$business['plan_id']] ?? 'Free') ?>
-                </span>
-                <span style="font-size:0.75rem;color:var(--ox-text-dim);font-family:'JetBrains Mono',monospace;">
-                  <?= date('d/m/Y', strtotime($business['created_at'])) ?>
-                </span>
-              </div>
-
-              <div class="db-manage-actions">
-                <button type="button" class="db-btn-primary" id="btn-edit"
-                  style="font-size:0.8125rem;padding:0.5rem 0.875rem;">
-                  <i data-lucide="pencil" width="14" height="14" aria-hidden="true"></i>
-                  Editar negocio
-                </button>
-              </div>
-            </div>
-
-            <!-- Formulario de edición inline (oculto por defecto) -->
-            <form id="edit-form" action="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/edit"
-              method="POST" novalidate hidden>
-              <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
-
-              <div class="db-form-group">
-                <label class="db-form-label" for="edit-name">
-                  Nombre<span class="required" aria-hidden="true">*</span>
-                </label>
-                <input class="db-form-input" type="text" id="edit-name" name="name"
-                  maxlength="100" value="<?= htmlspecialchars($business['name']) ?>" required>
-              </div>
-
-              <div class="db-form-group">
-                <label class="db-form-label" for="edit-desc">Descripción</label>
-                <textarea class="db-form-textarea" id="edit-desc" name="description"
-                  maxlength="300" rows="3"><?= htmlspecialchars($business['description'] ?? '') ?></textarea>
-              </div>
-
-              <div class="db-form-group">
-                <label class="db-form-label" for="edit-phone">Teléfono</label>
-                <input class="db-form-input" type="tel" id="edit-phone" name="phone"
-                  maxlength="20" value="<?= htmlspecialchars($business['phone'] ?? '') ?>">
-              </div>
-
-              <div class="db-form-group" style="margin-bottom:0;">
-                <label class="db-form-label" for="edit-address">Dirección</label>
-                <input class="db-form-input" type="text" id="edit-address" name="address"
-                  maxlength="200" value="<?= htmlspecialchars($business['address'] ?? '') ?>">
-              </div>
-
-              <div class="db-manage-divider"></div>
-
-              <div class="db-manage-actions">
-                <button type="submit" class="db-btn-primary"
-                  style="font-size:0.8125rem;padding:0.5rem 0.875rem;">
-                  <i data-lucide="check" width="14" height="14" aria-hidden="true"></i>
-                  Guardar cambios
-                </button>
-                <button type="button" class="db-btn-secondary" id="btn-cancel-edit">Cancelar</button>
-              </div>
-            </form>
-
-          </div>
-        </div>
-
-        <!-- ── COLUMNA DERECHA: tours ── -->
-        <div>
-          <div class="db-manage-tours-header">
-            <span class="db-manage-tours-title">Tours</span>
-            <a href="/dashboard/tours/nuevo?negocio=<?= htmlspecialchars($business['slug']) ?>"
-               class="db-btn-secondary" style="font-size:0.8125rem;">
-              <i data-lucide="plus" width="14" height="14" aria-hidden="true"></i>
-              Nuevo tour
-            </a>
+          <div class="db-manage-header-top">
+            <h2 class="db-manage-name"><?= htmlspecialchars($business['name']) ?></h2>
+            <span class="db-badge db-badge--plan">
+              <?= htmlspecialchars($planBadgeNames[$business['plan_id']] ?? 'Free') ?>
+            </span>
           </div>
 
-          <?php if (empty($tours)): ?>
-            <div class="db-empty" style="padding:2.5rem 1rem;">
-              <div class="db-empty-icon" aria-hidden="true">
-                <i data-lucide="play-circle" width="24" height="24"></i>
-              </div>
-              <p class="db-empty-title">Este negocio aún no tiene tours.</p>
-              <p class="db-empty-sub">Crea el primer tour para empezar a recibir visitas virtuales.</p>
-              <a href="/dashboard/tours/nuevo?negocio=<?= htmlspecialchars($business['slug']) ?>"
-                 class="db-btn-primary">Crear primer tour →</a>
-            </div>
+          <div class="db-manage-url-row">
+            <span class="db-manage-url">oxphyre.com/<?= htmlspecialchars($business['slug']) ?></span>
+            <button type="button" class="db-manage-copy-btn" id="btn-copy-url"
+              data-url="https://oxphyre.com/<?= htmlspecialchars($business['slug']) ?>"
+              aria-label="Copiar URL">
+              <i data-lucide="copy" width="13" height="13" aria-hidden="true"></i>
+            </button>
+          </div>
 
-          <?php else: ?>
-            <div class="db-tour-grid">
-              <?php foreach ($tours as $tour): ?>
-                <article class="db-tour-card">
-                  <h3 class="db-tour-card-title"><?= htmlspecialchars($tour['title']) ?></h3>
-                  <?php if (!empty($tour['description'])): ?>
-                    <p class="db-tour-card-desc"><?= htmlspecialchars($tour['description']) ?></p>
-                  <?php endif; ?>
-                  <div class="db-tour-card-footer">
-                    <span class="db-tour-card-date">
-                      <?= date('d/m/Y', strtotime($tour['created_at'])) ?>
-                    </span>
-                    <span class="db-badge <?= $tour['is_published'] ? 'db-badge--published' : 'db-badge--draft' ?>">
-                      <?= $tour['is_published'] ? 'Publicado' : 'Borrador' ?>
-                    </span>
-                  </div>
-                  <div style="margin-top:0.75rem;">
-                    <a href="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>"
-                       class="db-btn-secondary" style="font-size:0.8125rem;width:100%;justify-content:center;">
-                      Gestionar
-                    </a>
-                  </div>
-                </article>
-              <?php endforeach; ?>
+          <?php if (!empty($business['description'])): ?>
+            <p class="db-manage-desc"><?= htmlspecialchars($business['description']) ?></p>
+          <?php endif; ?>
+
+          <?php if (!empty($business['phone']) || !empty($business['address'])): ?>
+            <div class="db-manage-meta">
+              <?php if (!empty($business['phone'])): ?>
+                <span class="db-manage-meta-row">
+                  <i data-lucide="phone" width="13" height="13" aria-hidden="true"></i>
+                  <?= htmlspecialchars($business['phone']) ?>
+                </span>
+              <?php endif; ?>
+              <?php if (!empty($business['address'])): ?>
+                <span class="db-manage-meta-row">
+                  <i data-lucide="map-pin" width="13" height="13" aria-hidden="true"></i>
+                  <?= htmlspecialchars($business['address']) ?>
+                </span>
+              <?php endif; ?>
             </div>
           <?php endif; ?>
+
         </div>
 
+        <div class="db-manage-header-right">
+          <button type="button" class="db-btn-secondary" id="btn-edit">
+            <i data-lucide="pencil" width="14" height="14" aria-hidden="true"></i>
+            Editar
+          </button>
+        </div>
       </div>
+
+      <!-- ── FORMULARIO DE EDICIÓN (full-width, oculto por defecto) ── -->
+      <div class="db-manage-card" id="edit-wrapper" hidden>
+        <form id="edit-form"
+          action="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/edit"
+          method="POST" novalidate>
+          <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+
+          <div class="db-manage-edit-grid">
+            <div class="db-form-group db-manage-edit-full">
+              <label class="db-form-label" for="edit-name">
+                Nombre<span class="required" aria-hidden="true">*</span>
+              </label>
+              <input class="db-form-input" type="text" id="edit-name" name="name"
+                maxlength="100" value="<?= htmlspecialchars($business['name']) ?>" required>
+            </div>
+
+            <div class="db-form-group db-manage-edit-full">
+              <label class="db-form-label" for="edit-desc">Descripción</label>
+              <textarea class="db-form-textarea" id="edit-desc" name="description"
+                maxlength="300" rows="2"><?= htmlspecialchars($business['description'] ?? '') ?></textarea>
+            </div>
+
+            <div class="db-form-group" style="margin-bottom:0;">
+              <label class="db-form-label" for="edit-phone">Teléfono</label>
+              <input class="db-form-input" type="tel" id="edit-phone" name="phone"
+                maxlength="20" value="<?= htmlspecialchars($business['phone'] ?? '') ?>">
+            </div>
+
+            <div class="db-form-group" style="margin-bottom:0;">
+              <label class="db-form-label" for="edit-address">Dirección</label>
+              <input class="db-form-input" type="text" id="edit-address" name="address"
+                maxlength="200" value="<?= htmlspecialchars($business['address'] ?? '') ?>">
+            </div>
+          </div>
+
+          <div class="db-manage-divider"></div>
+
+          <div class="db-manage-actions">
+            <button type="submit" class="db-btn-primary" style="font-size:0.8125rem;padding:0.5rem 0.875rem;">
+              <i data-lucide="check" width="14" height="14" aria-hidden="true"></i>
+              Guardar cambios
+            </button>
+            <button type="button" class="db-btn-secondary" id="btn-cancel-edit">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── SECCIÓN TOURS (full-width) ── -->
+      <section class="db-manage-tours-section" aria-label="Tours de este negocio">
+
+        <div class="db-manage-tours-header">
+          <span class="db-manage-tours-title">Tours</span>
+          <a href="/dashboard/tours/nuevo?negocio=<?= htmlspecialchars($business['slug']) ?>"
+             class="db-btn-secondary" style="font-size:0.8125rem;">
+            <i data-lucide="plus" width="14" height="14" aria-hidden="true"></i>
+            Nuevo tour
+          </a>
+        </div>
+
+        <?php if (empty($tours)): ?>
+          <div class="db-empty" style="padding:2.5rem 1rem;">
+            <div class="db-empty-icon" aria-hidden="true">
+              <i data-lucide="play-circle" width="24" height="24"></i>
+            </div>
+            <p class="db-empty-title">Este negocio aún no tiene tours.</p>
+            <p class="db-empty-sub">Crea el primer tour para empezar a recibir visitas virtuales.</p>
+            <a href="/dashboard/tours/nuevo?negocio=<?= htmlspecialchars($business['slug']) ?>"
+               class="db-btn-primary">Crear primer tour →</a>
+          </div>
+
+        <?php else: ?>
+          <div class="db-tour-grid">
+            <?php foreach ($tours as $tour): ?>
+              <article class="db-tour-card">
+                <h3 class="db-tour-card-title"><?= htmlspecialchars($tour['title']) ?></h3>
+                <?php if (!empty($tour['description'])): ?>
+                  <p class="db-tour-card-desc"><?= htmlspecialchars($tour['description']) ?></p>
+                <?php endif; ?>
+                <div class="db-tour-card-footer">
+                  <span class="db-tour-card-date">
+                    <?= date('d/m/Y', strtotime($tour['created_at'])) ?>
+                  </span>
+                  <span class="db-badge <?= $tour['is_published'] ? 'db-badge--published' : 'db-badge--draft' ?>">
+                    <?= $tour['is_published'] ? 'Publicado' : 'Borrador' ?>
+                  </span>
+                </div>
+                <div style="margin-top:0.75rem;">
+                  <a href="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>"
+                     class="db-btn-secondary" style="font-size:0.8125rem;width:100%;justify-content:center;">
+                    Gestionar
+                  </a>
+                </div>
+              </article>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+      </section>
+
     </div>
   </main>
 
@@ -279,19 +269,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar(); });
 
   // ── Toggle formulario de edición ──────────────────────────────────────────
-  const infoView    = document.getElementById('info-view');
-  const editForm    = document.getElementById('edit-form');
-  const btnEdit     = document.getElementById('btn-edit');
-  const btnCancel   = document.getElementById('btn-cancel-edit');
+  const infoView   = document.getElementById('info-view');
+  const editWrapper = document.getElementById('edit-wrapper');
+  const btnEdit    = document.getElementById('btn-edit');
+  const btnCancel  = document.getElementById('btn-cancel-edit');
 
   btnEdit.addEventListener('click', () => {
     infoView.hidden = true;
-    editForm.hidden = false;
+    editWrapper.hidden = false;
     document.getElementById('edit-name').focus();
   });
 
   btnCancel.addEventListener('click', () => {
-    editForm.hidden = true;
+    editWrapper.hidden = true;
     infoView.hidden = false;
   });
 
@@ -301,11 +291,11 @@ document.addEventListener('DOMContentLoaded', () => {
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(copyBtn.dataset.url).then(() => {
         copyBtn.classList.add('copied');
-        copyBtn.innerHTML = '<i data-lucide="check" width="14" height="14"></i>';
+        copyBtn.innerHTML = '<i data-lucide="check" width="13" height="13"></i>';
         lucide.createIcons();
         setTimeout(() => {
           copyBtn.classList.remove('copied');
-          copyBtn.innerHTML = '<i data-lucide="copy" width="14" height="14"></i>';
+          copyBtn.innerHTML = '<i data-lucide="copy" width="13" height="13"></i>';
           lucide.createIcons();
         }, 2000);
       });
