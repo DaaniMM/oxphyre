@@ -103,6 +103,82 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - El tribunal evaluará específicamente: SEO, PageSpeed, seguridad (intentarán inyecciones SQL y XSS), UX/UI, MVC correcto
 - Exposición: profesores probarán la app en tiempo real desde sus portátiles escaneando un QR
 
+### Estrategia de procesado MiDaS y demo para la exposición
+
+#### Hardware del desarrollador (PC local)
+- CPU: Intel Core i5-12400F 12th Gen
+- RAM: 16GB DDR4 3200MHz (uso normal ~63% con Chrome abierto, ~50% sin Chrome)
+- GPU: NVIDIA GeForce RTX 3060 12GB VRAM (CUDA 13.0)
+- Disco C:: 948GB total, ~24.5GB libres actualmente (liberar ~90GB borrando Fortnite de Epic Games)
+- Python: 3.12.6 instalado en Windows
+- OS: Windows 11
+
+#### Por qué procesamos en local y no en el servidor
+El servidor EC2 t3.small tiene 2GB RAM. MiDaS DPT-Hybrid necesita ~1800MB para cargar. Con el stack completo (Nginx+PHP+MySQL) corriendo solo quedan ~1200MB libres — insuficiente. El servidor se colgó al intentarlo.
+
+El PC local tiene RTX 3060 con CUDA — procesa cada foto en 2-3 segundos en lugar de 45 segundos en CPU. La calidad es máxima (DPT-Hybrid).
+
+#### Plan de procesado en PC local
+
+**Requisitos previos (hacer una sola vez):**
+1. Desinstalar Fortnite desde Epic Games Launcher (~92GB) → disco C: pasa a ~115GB libres
+2. Instalar PyTorch con CUDA en Windows:
+   - Abrir PowerShell como administrador
+   - Ejecutar: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+3. Instalar dependencias: pip install transformers timm opencv-python Pillow
+4. Descargar modelo DPT-Hybrid (~467MB) — instrucciones pendientes de implementar en script local
+
+**Cada vez que vayas a procesar fotos:**
+1. Cerrar Chrome completamente (libera ~1GB RAM extra)
+2. Cerrar League of Legends si está abierto (~480MB)
+3. RAM disponible resultante: ~6-7GB libres (40-45% de uso) — sobrado para MiDaS
+4. VRAM disponible: ~10GB libres — sobrado para DPT-Hybrid
+5. Ejecutar script local de procesado (pendiente de crear)
+6. Tiempo por foto: 2-3 segundos con GPU
+7. Subir fotos originales + mapas de profundidad al servidor
+
+**RAM mínima recomendada para procesar:** 35-40% de uso (6GB+ libres)
+**RAM máxima aceptable para procesar:** 65% de uso (5GB+ libres)
+**No procesar nunca con RAM >70%** — riesgo de lentitud o cuelgue
+
+#### Tours de demo para la exposición (OBLIGATORIO)
+
+Tener preparados 1-2 tours completos y visualmente impecables ANTES de la exposición:
+- Fotos 360° equirectangulares de alta calidad (buscar en Flickr 360°, Poly Pizza, o generar con IA)
+- Procesadas con MiDaS DPT-Hybrid en PC local con GPU
+- Subidas al servidor y tours publicados y navegables
+- El tribunal navega estos tours y ve el producto en su máximo esplendor
+
+**Regla de oro:** nunca depender de que algo funcione en tiempo real delante del tribunal. Los tours pregenerados son el plan A siempre.
+
+#### Subida en directo (si el tribunal quiere probar)
+
+El servidor usa MiDaS Small (80MB, cabe en RAM) para procesado en tiempo real. Tiempo estimado: 30-60 segundos por foto en t3.small con swap de 2GB.
+
+La UX debe camuflar el tiempo de espera:
+- Barra de progreso animada durante el procesado
+- Mensaje: "Analizando profundidad con IA..."
+- Formulario con campos adicionales visibles mientras procesa (nombre de posición, descripción) para que el usuario esté ocupado
+- El tiempo percibido es mucho menor cuando el usuario interactúa
+
+**Si algo falla en directo:** los tours pregenerados demuestran que el producto funciona. El fallo puntual es atribuible a las limitaciones del servidor de desarrollo (t3.small), no al producto.
+
+#### Estado actual del servidor (t3.small)
+
+- RAM: 1910MB total, ~1142MB disponibles con stack completo corriendo
+- Swap: pendiente de configurar (2GB en disco — 13GB libres disponibles)
+- MiDaS en servidor: usar Small (80MB) para no saturar RAM
+- MiDaS DPT-Hybrid: solo en PC local para los tours de demo
+- Modelo descargado en servidor: /var/www/oxphyre/python-service/dpt_hybrid.pt (467MB) → Este modelo NO se usa en el servidor, solo el Small → Considerar borrarlo del servidor para liberar espacio si hace falta
+
+#### Pendiente de implementar
+- Script Python local para procesado con GPU en Windows
+- Swap de 2GB en servidor t3.small
+- Instalar MiDaS Small en servidor (en lugar del Hybrid)
+- Microservicio Flask funcional con MiDaS Small
+- Flujo completo PHP → Flask → mapa de profundidad → BD
+- UX de progreso durante el procesado
+
 ---
 
 ## Diseño Visual y Storytelling
