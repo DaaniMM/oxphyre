@@ -37,12 +37,12 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_BYTES
 # En llamadas posteriores lo carga desde disco sin conexión a internet.
 
 log.info("Cargando MiDaS Small via torch.hub ...")
-midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small")
+midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small", trust_repo=True)
 midas.to(DEVICE)
 midas.eval()
 
 # Transformaciones oficiales de MiDaS Small (normalización + resize esperado por el modelo)
-midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
+midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms", trust_repo=True)
 transform = midas_transforms.small_transform
 
 log.info("MiDaS Small listo en %s.", DEVICE)
