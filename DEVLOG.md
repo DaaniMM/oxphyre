@@ -933,6 +933,42 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - Toda la seguridad se mantiene intacta: localhost check, hmac token, MAX_CONTENT_LENGTH, PIL verify
 - `/health` devuelve `"model": "MiDaS_small"` en lugar del MODEL_ID anterior
 
+
+## 2026-05-07 — Flujo completo de subida de fotos y procesado MiDaS
+
+### Archivos creados/modificados
+
+**`PositionModel.php`** — añadidos: `getByIdAndTour(int $id, int $tourId): ?array` (ownership check), `countByTour(int $tourId): int` (límite plan), `create(int $tourId, string $name, int $orderIndex): int`, `softDelete(int $id): void`.
+
+**`PhotoModel.php`** (nuevo) — `getByPosition(int $positionId): array` y `create(...)` con 6 campos. `processed=true` solo cuando MiDaS generó el depth map. `depth_map_filename` vacío si falló el procesado.
+
+**`MiDaSService.php`** (nuevo, `backend/services/`) — `process(string $imagePath): ?string`. Usa cURL multipart con `CURLFile` para enviar la imagen al microservicio Flask en `127.0.0.1:5000`. Header `X-Service-Token` desde `$_ENV['PYTHON_SERVICE_TOKEN']`. Timeout 120s. Fallo silencioso con `error_log` — devuelve null si cURL falla, HTTP ≠ 200, o `success !== true`. SSL verify desactivado (conexión localhost).
+
+**`PositionController.php`** (nuevo) — 4 métodos:
+- `showCreate()`: verifica user→business→tour, carga vista
+- `store()`: CSRF, valida nombre, verifica ownership, aplica límite de plan (Free 5, Pro 20, Business ilimitado), inserta con `order_index = count + 1`, redirect al tour
+- `showUpload()`: verifica user→business→tour→position, carga fotos existentes por dirección (`$photosByDir`), carga vista
+- `upload()`: CSRF, verifica ownership completa, crea directorio `uploads/{position_id}/`, para cada dirección válida: valida MIME real con `finfo`, valida tamaño, rename con `uniqid()`, mueve archivo, llama `MiDaSService::process()`, guarda PNG del depth map si hay base64, inserta en `photos`
+
+**`web.php`** — 4 nuevas rutas auth: `GET /dashboard/posicion/nueva`, `POST /dashboard/posicion/store`, `GET /dashboard/posicion/upload`, `POST /dashboard/posicion/upload`.
+
+**`dashboard.css`** — `.db-upload-grid` (2 columnas → 1 en <600px), `.db-upload-zone` (dashed border, `.has-file` variante verde sólido), `.db-upload-preview` (aspect-ratio 2:1), `.db-upload-preview-placeholder`, `.db-upload-input` (oculto), `.db-upload-btn`.
+
+**`position/create.php`** (nueva) — breadcrumb 4 niveles, formulario con nombre de posición y texto informativo.
+
+**`position/upload.php`** (nueva) — breadcrumb 4 niveles, grid 2x2 con zonas de upload (N/S/E/O). Cada zona muestra foto existente si la hay (con badge "IA ✓" o "Sin IA"). Preview client-side con FileReader API. Botón de submit se deshabilita durante el procesado con texto "Procesando con IA...". Hidden inputs: `position_id`, `biz_slug`, `tour_slug`, `csrf_token`.
+
+**`tours/manage.php`** — 3 links de posiciones actualizados de `#` a rutas reales: "Añadir posición" → `/dashboard/posicion/nueva?negocio=&tour=`, "Añadir primera posición" → misma ruta, "Gestionar" en position cards → `/dashboard/posicion/upload?position=&negocio=&tour=`.
+
+### Seguridad
+- Ownership verificado en cadena completa: user→business→tour→position en cada operación
+- MIME real validado con `finfo(FILEINFO_MIME_TYPE)` — nunca la extensión
+- `uniqid()` para nombres de archivo — oculta nombres originales y evita colisiones
+- `MAX_UPLOAD_SIZE` de config.php (10MB) aplicado en el controller
+- `ALLOWED_MIME_TYPES` de config.php (`image/jpeg`, `image/png`, `image/webp`)
+- Token MiDaS desde `$_ENV` nunca hardcodeado
+- Fallo silencioso en MiDaS: si falla, foto se guarda sin depth map (`processed=false`) — el tour sigue funcionando
+
 ### Verificado en producción
 - `curl http://127.0.0.1:5000/health` devuelve `{"device":"cpu","model":"MiDaS_small","status":"ok"}`
 - RAM con servicio activo: 534MB usados, 1200MB disponibles

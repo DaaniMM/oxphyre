@@ -208,7 +208,8 @@
 
         <div class="db-manage-tours-header">
           <span class="db-manage-tours-title">Posiciones</span>
-          <a href="#" class="db-btn-secondary" style="font-size:0.8125rem;">
+          <a href="/dashboard/posicion/nueva?negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"
+             class="db-btn-secondary" style="font-size:0.8125rem;">
             <i data-lucide="plus" width="14" height="14" aria-hidden="true"></i>
             Añadir posición
           </a>
@@ -221,7 +222,8 @@
             </div>
             <p class="db-empty-title">Este tour aún no tiene posiciones.</p>
             <p class="db-empty-sub">Añade la primera posición para empezar a subir fotos 360°.</p>
-            <a href="#" class="db-btn-primary">Añadir primera posición →</a>
+            <a href="/dashboard/posicion/nueva?negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"
+               class="db-btn-primary">Añadir primera posición →</a>
           </div>
 
         <?php else: ?>
@@ -233,7 +235,8 @@
                   <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
                 </div>
                 <div class="db-pos-card-actions">
-                  <a href="#" class="db-btn-secondary" style="font-size:0.8125rem;flex:1;justify-content:center;">
+                  <a href="/dashboard/posicion/upload?position=<?= (int) $pos['id'] ?>&negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"
+                     class="db-btn-secondary" style="font-size:0.8125rem;flex:1;justify-content:center;">
                     Gestionar
                   </a>
                   <button type="button" class="db-btn-danger"

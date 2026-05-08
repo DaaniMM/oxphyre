@@ -35,7 +35,9 @@ $routes = [
         '/dashboard/negocios/nuevo'   => ['BusinessController', 'showCreate',  'auth'],
         '/dashboard/tours'            => ['TourController',     'showList',    'auth'],
         '/dashboard/tours/nuevo'      => ['TourController',     'showCreate',  'auth'],
-        '/dashboard/business/created' => ['BusinessController', 'showSuccess', 'auth'],
+        '/dashboard/business/created'  => ['BusinessController',  'showSuccess', 'auth'],
+        '/dashboard/posicion/nueva'    => ['PositionController', 'showCreate',  'auth'],
+        '/dashboard/posicion/upload'   => ['PositionController', 'showUpload',  'auth'],
     ],
     'POST' => [
         '/login'    => ['AuthController', 'login',    'guest'],
@@ -45,7 +47,9 @@ $routes = [
         '/reset'    => ['AuthController', 'reset',    'guest'],
         '/logout'                   => ['AuthController',    'logout', 'auth'],
         '/dashboard/business/store' => ['BusinessController', 'store',  'auth'],
-        '/dashboard/tours/store'    => ['TourController',     'store',  'auth'],
+        '/dashboard/tours/store'       => ['TourController',     'store',       'auth'],
+        '/dashboard/posicion/store'    => ['PositionController', 'store',       'auth'],
+        '/dashboard/posicion/upload'   => ['PositionController', 'upload',      'auth'],
     ],
 ];
 
