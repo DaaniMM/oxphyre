@@ -919,6 +919,7 @@ MiDaS Small carga en ~80MB de RAM — perfectamente viable en el servidor.
 DPT-Hybrid solo se usa en PC local con GPU para pre-generar los tours de demo. El servidor usa Small para las subidas en directo.
 
 
+
 ## 2026-05-08 — Reescritura app.py: transformers → torch.hub
 
 ### Motivo
@@ -934,7 +935,7 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - `/health` devuelve `"model": "MiDaS_small"` en lugar del MODEL_ID anterior
 
 
-## 2026-05-07 — Flujo completo de subida de fotos y procesado MiDaS
+## — Flujo completo de subida de fotos y procesado MiDaS
 
 ### Archivos creados/modificados
 
@@ -976,8 +977,9 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - Solución `trust_repo`: modelo pre-cargado interactivamente desde terminal para poblar caché antes de arrancar como servicio systemd
 
 
-## 2026-05-08 — Mejoras UX en vistas de posición y tours
+## — Mejoras UX en vistas de posición y tours
 
 - **`position/upload.php`**: mensaje del header cambiado a "Sube las fotos de cada orientación de tu local (imagen normal o 360°)" — más accesible para usuarios sin conocimiento técnico. Etiquetas de las 4 zonas cambiadas de N/S/E/O a "Frente/Fondo/Izquierda/Derecha"; las claves en BD siguen siendo N/S/E/O sin cambio.
 - **`position/create.php`**: añadido texto informativo con icono `info` bajo el subtítulo del wizard explicando qué es una posición con ejemplos concretos (entrada, barra, terraza).
 - **`tours/index.php`**: añadido botón "Gestionar →" en cada card de tour de las secciones agrupadas por negocio, enlazando a `/dashboard/negocios/{biz-slug}/tours/{tour-slug}`.
+- **`PositionController::upload()`**: directorio de destino construido con `$positionId = (int) $position['id']` (del registro verificado, no del input GET) con trailing slash — `UPLOADS_PATH . '/' . $positionId . '/'`. La `$destPath` se forma sin doble barra: `$uploadDir . $filename`. Garantiza que el directorio se crea antes del primer `move_uploaded_file()` usando el ID real de la posición, no el parámetro sin sanitizar.

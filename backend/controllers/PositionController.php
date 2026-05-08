@@ -216,7 +216,8 @@ class PositionController extends BaseController
         }
 
         // Directorio de uploads específico de esta posición
-        $uploadDir = UPLOADS_PATH . '/' . $posId;
+        $positionId = (int) $position['id'];
+        $uploadDir  = UPLOADS_PATH . '/' . $positionId . '/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -256,7 +257,7 @@ class PositionController extends BaseController
             // Generar nombre único para evitar colisiones y ocultar el nombre original
             $ext      = ($mime === 'image/png') ? 'png' : 'jpg';
             $filename = uniqid('', true) . '.' . $ext;
-            $destPath = $uploadDir . '/' . $filename;
+            $destPath = $uploadDir . $filename;
 
             if (!move_uploaded_file($tmpPath, $destPath)) {
                 error_log("PositionController: no se pudo mover {$tmpPath} a {$destPath}");
