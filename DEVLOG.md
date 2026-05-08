@@ -894,3 +894,26 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 echo "PYTHON_SERVICE_TOKEN=<token-generado>" >> /var/www/oxphyre/.env
 ```
 El mismo token debe configurarse en el `.env` para que PHP lo use al llamar al microservicio.
+
+
+## — Cambio de modelo MiDaS: DPT-Hybrid → Small
+
+### Motivo
+DPT-Hybrid necesita ~1800MB de RAM para cargar. El t3.small tiene 1910MB totales; con Nginx + PHP-FPM + MySQL corriendo solo quedan ~1142MB libres — insuficiente. El servidor se cuelga por OOM al intentar cargar Hybrid.
+
+MiDaS Small carga en ~80MB de RAM — perfectamente viable en el servidor.
+
+### Cambios en `python-service/app.py`
+- `MODEL_ID` cambiado de `"Intel/dpt-hybrid-midas"` a `"Intel/dpt-small-midas"`
+- Eliminadas las 3 líneas del bloque que cargaba pesos locales desde `dpt_hybrid.pt` (`LOCAL_PT`, `os.path.exists`, `torch.load`, `model.load_state_dict`) — ese archivo no existe ni debe existir en el servidor
+- Eliminada la constante `LOCAL_PT`
+- Docstring y log de carga actualizados para reflejar Small
+- La inferencia (interpolación, normalización, base64) no cambia
+
+### Estrategia actualizada
+| Entorno | Modelo | RAM uso | Tiempo/foto |
+|---|---|---|---|
+| Servidor t3.small | MiDaS Small | ~80MB | ~30-60s CPU |
+| PC local (demo) | DPT-Hybrid | ~1800MB | ~2-3s GPU |
+
+DPT-Hybrid solo se usa en PC local con GPU para pre-generar los tours de demo. El servidor usa Small para las subidas en directo.

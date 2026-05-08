@@ -2,7 +2,7 @@
 Oxphyre MiDaS microservice.
 
 Expone POST /process — recibe una imagen y devuelve su mapa de
-profundidad generado con DPT-Hybrid-MiDaS como PNG en base64.
+profundidad generado con MiDaS Small como PNG en base64.
 
 Corre en 127.0.0.1:5000 (no accesible desde el exterior).
 El modelo se carga una sola vez al arrancar para minimizar latencia.
@@ -23,8 +23,7 @@ from transformers import DPTForDepthEstimation, DPTImageProcessor
 # ── Configuración ──────────────────────────────────────────────────────────────
 
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
-LOCAL_PT      = os.path.join(BASE_DIR, "dpt_hybrid.pt")
-MODEL_ID      = "Intel/dpt-hybrid-midas"
+MODEL_ID      = "Intel/dpt-small-midas"
 SERVICE_TOKEN = os.environ.get("PYTHON_SERVICE_TOKEN", "")
 MAX_BYTES     = 20 * 1024 * 1024  # 20 MB
 
@@ -40,14 +39,8 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_BYTES
 log.info("Cargando DPTImageProcessor desde %s ...", MODEL_ID)
 processor = DPTImageProcessor.from_pretrained(MODEL_ID)
 
-log.info("Cargando DPTForDepthEstimation desde %s ...", MODEL_ID)
+log.info("Cargando MiDaS Small (DPTForDepthEstimation) desde %s ...", MODEL_ID)
 model = DPTForDepthEstimation.from_pretrained(MODEL_ID)
-
-# Si existe un archivo de pesos local lo cargamos en lugar del descargado
-if os.path.exists(LOCAL_PT):
-    log.info("Cargando pesos locales desde %s", LOCAL_PT)
-    state_dict = torch.load(LOCAL_PT, map_location="cpu")
-    model.load_state_dict(state_dict)
 
 model.eval()
 log.info("Modelo listo.")
