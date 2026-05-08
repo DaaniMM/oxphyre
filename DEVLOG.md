@@ -917,3 +917,18 @@ MiDaS Small carga en ~80MB de RAM — perfectamente viable en el servidor.
 | PC local (demo) | DPT-Hybrid | ~1800MB | ~2-3s GPU |
 
 DPT-Hybrid solo se usa en PC local con GPU para pre-generar los tours de demo. El servidor usa Small para las subidas en directo.
+
+
+## 2026-05-08 — Reescritura app.py: transformers → torch.hub
+
+### Motivo
+La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor) requiere `transformers` instalado y usaba un flujo de inferencia que no coincide con la documentación oficial de MiDaS. La API canónica de MiDaS Small es `torch.hub.load("intel-isl/MiDaS", ...)`, que descarga y cachea el modelo en `~/.cache/torch/hub/` y expone las transformaciones correctas para cada variante del modelo.
+
+### Cambios en `python-service/app.py`
+- Eliminados imports `transformers`, `DPTForDepthEstimation`, `DPTImageProcessor`, `cv2` (cv2 se importó por error — nunca se usó)
+- Carga del modelo con `torch.hub.load("intel-isl/MiDaS", "MiDaS_small")`
+- Transformaciones con `torch.hub.load("intel-isl/MiDaS", "transforms").small_transform`
+- Flujo de inferencia: PIL → NumPy RGB → `transform(img_np)` → `midas(input_batch)` → interpolar → normalizar → PNG base64
+- `DEVICE = torch.device("cpu")` explícito — el servidor no tiene GPU
+- Toda la seguridad se mantiene intacta: localhost check, hmac token, MAX_CONTENT_LENGTH, PIL verify
+- `/health` devuelve `"model": "MiDaS_small"` en lugar del MODEL_ID anterior

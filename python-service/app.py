@@ -2,14 +2,14 @@
 Oxphyre MiDaS microservice.
 
 Expone POST /process — recibe una imagen y devuelve su mapa de
-profundidad generado con MiDaS Small como PNG en base64.
+profundidad generado con MiDaS Small (torch.hub) como PNG en base64.
 
 Corre en 127.0.0.1:5000 (no accesible desde el exterior).
 El modelo se carga una sola vez al arrancar para minimizar latencia.
 """
 
-import os
 import io
+import os
 import hmac
 import base64
 import logging
@@ -18,14 +18,12 @@ import numpy as np
 import torch
 from PIL import Image
 from flask import Flask, request, jsonify
-from transformers import DPTForDepthEstimation, DPTImageProcessor
 
 # ── Configuración ──────────────────────────────────────────────────────────────
 
-BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
-MODEL_ID      = "Intel/dpt-small-midas"
 SERVICE_TOKEN = os.environ.get("PYTHON_SERVICE_TOKEN", "")
 MAX_BYTES     = 20 * 1024 * 1024  # 20 MB
+DEVICE        = torch.device("cpu")  # el servidor no tiene GPU
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s [%(levelname)s] %(message)s")
@@ -35,29 +33,37 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_BYTES
 
 # ── Carga del modelo al arrancar (una sola vez) ────────────────────────────────
+# torch.hub descarga y cachea el modelo en ~/.cache/torch/hub/ la primera vez.
+# En llamadas posteriores lo carga desde disco sin conexión a internet.
 
-log.info("Cargando DPTImageProcessor desde %s ...", MODEL_ID)
-processor = DPTImageProcessor.from_pretrained(MODEL_ID)
+log.info("Cargando MiDaS Small via torch.hub ...")
+midas = torch.hub.load("intel-isl/MiDaS", "MiDaS_small")
+midas.to(DEVICE)
+midas.eval()
 
-log.info("Cargando MiDaS Small (DPTForDepthEstimation) desde %s ...", MODEL_ID)
-model = DPTForDepthEstimation.from_pretrained(MODEL_ID)
+# Transformaciones oficiales de MiDaS Small (normalización + resize esperado por el modelo)
+midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
+transform = midas_transforms.small_transform
 
-model.eval()
-log.info("Modelo listo.")
+log.info("MiDaS Small listo en %s.", DEVICE)
 
 
 # ── Helpers de validación ──────────────────────────────────────────────────────
 
 def _is_localhost(req) -> bool:
+    """Rechaza cualquier request que no venga de localhost."""
     return req.remote_addr in ("127.0.0.1", "::1")
 
 
 def _token_valid(req) -> bool:
+    """
+    Compara el header X-Service-Token con PYTHON_SERVICE_TOKEN del entorno.
+    hmac.compare_digest evita timing attacks.
+    Si el token no está configurado en el entorno rechaza siempre.
+    """
     if not SERVICE_TOKEN:
-        # Si no hay token configurado se rechaza siempre para no operar sin auth
         return False
     received = req.headers.get("X-Service-Token", "")
-    # hmac.compare_digest evita timing attacks
     return hmac.compare_digest(SERVICE_TOKEN, received)
 
 
@@ -65,58 +71,62 @@ def _token_valid(req) -> bool:
 
 @app.route("/process", methods=["POST"])
 def process():
-    # Solo localhost
+    # Solo se aceptan requests desde localhost
     if not _is_localhost(request):
         return jsonify({"success": False, "error": "Forbidden"}), 403
 
-    # Token de autenticación
+    # Token de autenticación obligatorio
     if not _token_valid(request):
         return jsonify({"success": False, "error": "Unauthorized"}), 401
 
-    # Archivo de imagen obligatorio
+    # El campo 'image' es obligatorio en el multipart form
     if "image" not in request.files:
         return jsonify({"success": False, "error": "Campo 'image' no encontrado"}), 400
 
     file = request.files["image"]
 
-    # Validar que es una imagen real (MIME real, no extensión)
+    # Validar que el archivo es una imagen real (no solo por extensión)
     try:
-        image = Image.open(file.stream).convert("RGB")
-        image.verify()          # detecta archivos corruptos
-        file.stream.seek(0)     # volver al inicio tras verify()
-        image = Image.open(file.stream).convert("RGB")
+        pil_img = Image.open(file.stream)
+        pil_img.verify()       # lanza excepción si el archivo está corrupto
+        file.stream.seek(0)    # volver al inicio tras verify()
+        pil_img = Image.open(file.stream).convert("RGB")
     except Exception as exc:
-        log.warning("Imagen inválida: %s", exc)
+        log.warning("Imagen inválida recibida: %s", exc)
         return jsonify({"success": False, "error": "Archivo no es una imagen válida"}), 400
 
-    original_size = image.size  # (width, height)
+    # Tamaño original para la interpolación final
+    orig_w, orig_h = pil_img.size
 
     try:
-        # Preparar inputs con el procesador de HuggingFace
-        inputs = processor(images=image, return_tensors="pt")
+        # MiDaS espera un array NumPy en formato RGB (uint8, HxWx3)
+        img_np = np.array(pil_img)
 
-        # Inferencia sin gradientes para ahorrar memoria y acelerar
+        # Aplicar las transformaciones oficiales de MiDaS Small:
+        # convierte a tensor float32, normaliza y redimensiona al tamaño esperado
+        input_batch = transform(img_np).to(DEVICE)
+
+        # Inferencia sin gradientes — ahorra memoria y acelera en CPU
         with torch.no_grad():
-            outputs = model(**inputs)
-            predicted_depth = outputs.predicted_depth  # shape: (1, H', W')
+            prediction = midas(input_batch)
 
-        # Interpolar al tamaño original (height, width) con bicúbica
+        # Interpolar el mapa de profundidad al tamaño original de la imagen
         prediction = torch.nn.functional.interpolate(
-            predicted_depth.unsqueeze(1),
-            size=(original_size[1], original_size[0]),  # (H, W)
+            prediction.unsqueeze(1),
+            size=(orig_h, orig_w),
             mode="bicubic",
             align_corners=False,
-        )
+        ).squeeze()
 
-        # Normalizar a [0, 255]
-        depth_np = prediction.squeeze().cpu().numpy()
+        # Normalizar a [0, 255] para guardar como PNG en escala de grises
+        depth_np = prediction.cpu().numpy()
         max_val  = depth_np.max()
         if max_val > 0:
             depth_np = (depth_np * 255.0 / max_val).astype(np.uint8)
         else:
             depth_np = depth_np.astype(np.uint8)
 
-        # Guardar como PNG en memoria
+        # Codificar el resultado como PNG en memoria y convertir a base64
         depth_img = Image.fromarray(depth_np, mode="L")
         buf = io.BytesIO()
         depth_img.save(buf, format="PNG")
@@ -133,9 +143,10 @@ def process():
 
 @app.route("/health", methods=["GET"])
 def health():
+    # Desde el exterior solo devuelve ok sin información adicional
     if not _is_localhost(request):
-        return jsonify({"status": "ok"}), 200  # público pero sin info
-    return jsonify({"status": "ok", "model": MODEL_ID}), 200
+        return jsonify({"status": "ok"}), 200
+    return jsonify({"status": "ok", "model": "MiDaS_small", "device": str(DEVICE)}), 200
 
 
 if __name__ == "__main__":
