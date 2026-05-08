@@ -49,7 +49,8 @@ $routes = [
         '/dashboard/business/store' => ['BusinessController', 'store',  'auth'],
         '/dashboard/tours/store'       => ['TourController',     'store',       'auth'],
         '/dashboard/posicion/store'    => ['PositionController', 'store',       'auth'],
-        '/dashboard/posicion/upload'   => ['PositionController', 'upload',      'auth'],
+        '/dashboard/posicion/upload'    => ['PositionController', 'upload',        'auth'],
+        '/dashboard/posicion/set-mode'  => ['PositionController', 'setActiveMode', 'auth'],
     ],
 ];
 

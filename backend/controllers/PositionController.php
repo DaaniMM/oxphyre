@@ -110,7 +110,7 @@ class PositionController extends BaseController
         }
 
         // Insertar con order_index = total_actual + 1
-        $positionId = $posModel->create((int) $tour['id'], $name, $count + 1);
+        $posModel->create((int) $tour['id'], $name, $count + 1);
 
         $this->flash('success', "Posición \"{$name}\" creada. Ahora sube las fotos 360°.");
         $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
@@ -160,6 +160,9 @@ class PositionController extends BaseController
         foreach ($existingPhotos as $p) {
             $photosByDir[$p['direction']] = $p;
         }
+        // Foto panorámica separada para la sección 360° de la vista
+        $photo360   = $photosByDir['360'] ?? null;
+        $activeMode = $position['active_mode'] ?? '4photos';
 
         $this->ensureCsrfToken();
 
@@ -293,6 +296,53 @@ class PositionController extends BaseController
             $processed++;
         }
 
+        // ── Foto panorámica 360° ─────────────────────────────────────────────────
+        if (isset($_FILES['photo_360']) && $_FILES['photo_360']['error'] === UPLOAD_ERR_OK) {
+            $file    = $_FILES['photo_360'];
+            $tmpPath = $file['tmp_name'];
+
+            $validSize = $file['size'] <= MAX_UPLOAD_SIZE;
+            $finfo     = new finfo(FILEINFO_MIME_TYPE);
+            $mime      = $finfo->file($tmpPath);
+            $validMime = in_array($mime, ALLOWED_MIME_TYPES, true);
+
+            if ($validSize && $validMime) {
+                $ext      = ($mime === 'image/png') ? 'png' : 'jpg';
+                $filename = uniqid('360_', true) . '.' . $ext;
+                $destPath = $uploadDir . $filename;
+
+                if (move_uploaded_file($tmpPath, $destPath)) {
+                    $depthB64  = $miDaS->process($destPath);
+                    $depthFile = '';
+
+                    if ($depthB64 !== null) {
+                        $depthFile    = 'depth_' . pathinfo($filename, PATHINFO_FILENAME) . '.png';
+                        $depthDecoded = base64_decode($depthB64);
+
+                        if ($depthDecoded === false || file_put_contents($uploadDir . $depthFile, $depthDecoded) === false) {
+                            error_log("PositionController: no se pudo guardar depth map 360 en {$uploadDir}{$depthFile}");
+                            $depthFile = '';
+                        }
+                    }
+
+                    // direction='360' identifica esta foto como panorámica en BD
+                    $photoModel->create(
+                        (int) $position['id'],
+                        '360',
+                        $filename,
+                        htmlspecialchars($file['name']),
+                        $depthFile,
+                        $depthFile !== ''
+                    );
+                    $processed++;
+                } else {
+                    $failed++;
+                }
+            } else {
+                $failed++;
+            }
+        }
+
         if ($processed === 0 && $failed === 0) {
             $this->flash('error', 'No se subió ningún archivo.');
         } elseif ($failed > 0) {
@@ -302,6 +352,61 @@ class PositionController extends BaseController
         }
 
         $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+    }
+
+    // ── Cambiar modo activo del visor (AJAX) ─────────────────────────────────
+
+    public function setActiveMode(): void
+    {
+        // Respuesta siempre JSON — es un endpoint AJAX
+        header('Content-Type: application/json');
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            echo json_encode(['success' => false, 'error' => 'Token de seguridad inválido.']);
+            exit();
+        }
+        // No consumir el token CSRF aquí: el usuario puede cambiar de modo varias veces
+        // sin recargar la página, y no necesitamos protección de doble envío de formulario
+
+        $bizSlug  = preg_replace('/[^a-z0-9-]/', '', $_POST['biz_slug']    ?? '');
+        $tourSlug = preg_replace('/[^a-z0-9-]/', '', $_POST['tour_slug']   ?? '');
+        $posId    = (int) ($_POST['position_id'] ?? 0);
+        $mode     = $_POST['mode'] ?? '';
+        $userId   = (int) ($_SESSION['user_id']  ?? 0);
+
+        if (!in_array($mode, ['4photos', 'panoramic'], true)) {
+            echo json_encode(['success' => false, 'error' => 'Modo no válido.']);
+            exit();
+        }
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+        require_once BACKEND_PATH . '/models/PositionModel.php';
+
+        // Verificar ownership completa: usuario → negocio → tour → posición
+        $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
+        if (!$business) {
+            echo json_encode(['success' => false, 'error' => 'Negocio no encontrado.']);
+            exit();
+        }
+
+        $tour = (new TourModel())->getBySlugAndBusiness($tourSlug, (int) $business['id']);
+        if (!$tour) {
+            echo json_encode(['success' => false, 'error' => 'Tour no encontrado.']);
+            exit();
+        }
+
+        $posModel = new PositionModel();
+        $position = $posModel->getByIdAndTour($posId, (int) $tour['id']);
+        if (!$position) {
+            echo json_encode(['success' => false, 'error' => 'Posición no encontrada.']);
+            exit();
+        }
+
+        $posModel->updateActiveMode($posId, $mode);
+        echo json_encode(['success' => true]);
+        exit();
     }
 
     // ── Helper privado ────────────────────────────────────────────────────────

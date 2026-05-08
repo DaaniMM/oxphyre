@@ -6,6 +6,24 @@
 ## Qué es Oxphyre
 SaaS de tours virtuales inmersivos para pequeños negocios locales. El dueño sube fotos de su local (4 por posición: N,S,E,O) → Python + MiDaS genera mapas de profundidad reales (disponible en Pro y Business) → editor canvas drag&drop permite construir la estructura de navegación del local → Three.js renderiza el tour inmersivo con hotspots, minimapa (Pro/Business) y tour guiado (Pro/Business) → clientes visitan escaneando un QR o mediante embed en su web (Pro/Business). Plan Free incluye 1 posición con MiDaS de prueba y 4 posiciones con esfera Three.js navegable sin profundidad IA.
 
+#### -- 08/05/2026 -- Decisión crítica sobre el visor y upload de fotos
+### Sistema de subida de fotos por posición
+Cada posición acepta DOS tipos de foto (pueden coexistir, solo una activa):
+
+**Modo 4 fotos** (default):
+- El usuario sube hasta 4 fotos normales con su móvil
+- Etiquetas UI: Frente/Fondo/Izquierda/Derecha (internamente N/S/E/O en BD)
+- El visor muestra la foto correspondiente según la dirección que mira el usuario
+- Transición suave (fade) al cambiar de dirección
+
+**Modo panorámica 360°**:
+- El usuario sube 1 foto equirectangular (relación 2:1)
+- Se guarda con direction='360' en la tabla photos
+- El visor mapea la foto completa en la esfera — cobertura 360° continua
+
+**BD:** positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'
+**Visor:** usa active_mode para decidir cómo renderizar la posición
+
 ## Stack técnico
 - **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js
 - **Backend:** PHP 8.1 puro, patrón MVC, Front Controller (todo pasa por index.php)

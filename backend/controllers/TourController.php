@@ -343,10 +343,11 @@ class TourController extends BaseController
                 ];
             }
             $tourPositions[] = [
-                'id'     => (int) $pos['id'],
-                'name'   => $pos['name'],
-                'order'  => (int) $pos['order_index'],
-                'photos' => $photosByDir,
+                'id'         => (int) $pos['id'],
+                'name'       => $pos['name'],
+                'order'      => (int) $pos['order_index'],
+                'activeMode' => $pos['active_mode'] ?? '4photos',
+                'photos'     => $photosByDir,
             ];
         }
 

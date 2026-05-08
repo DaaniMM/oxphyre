@@ -1454,3 +1454,215 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .db-metrics { grid-template-columns: 1fr; }
   .db-main    { padding: 1.25rem 1rem; }
 }
+
+
+/* ▬▬ Upload modo dual (4 fotos / panorámica 360°) ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ */
+
+/* Toggle 4 Fotos / Panorámica */
+.upload-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--ox-bg-elevated);
+  border: 1px solid var(--ox-border);
+  border-radius: 10px;
+  padding: 0.25rem;
+}
+
+.upload-mode-btn {
+  padding: 0.4375rem 1rem;
+  border-radius: 7px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ox-text-muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--ox-transition), background var(--ox-transition);
+}
+
+.upload-mode-btn.active {
+  color: var(--ox-text);
+  background: var(--ox-bg-card);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+
+.upload-mode-btn:hover:not(.active) { color: var(--ox-text); }
+
+/* Secciones de upload (solo la activa es visible) */
+.upload-section          { display: none; }
+.upload-section.active   { display: block; }
+
+/* Botón "Usar en el visor" */
+.btn-set-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ox-text-muted);
+  border: 1px solid var(--ox-border);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--ox-transition);
+  margin-top: 1rem;
+}
+
+.btn-set-active:hover:not(:disabled) {
+  color: var(--ox-amber);
+  border-color: var(--ox-amber);
+}
+
+.btn-set-active.is-active {
+  color: var(--ox-text);
+  border-color: var(--ox-amber);
+  background: oklch(0.55 0.12 65 / 0.12);
+}
+
+.btn-set-active:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Modal de ayuda (tooltip de instrucciones) */
+.upload-tip-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: ut-fade 0.2s ease;
+}
+
+@keyframes ut-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.upload-tip-modal {
+  background: var(--ox-bg-card);
+  border: 1px solid var(--ox-border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+  animation: ut-up 0.25s ease;
+}
+
+@keyframes ut-up {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.upload-tip-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--ox-text-dim);
+  cursor: pointer;
+  transition: color var(--ox-transition), background var(--ox-transition);
+}
+
+.upload-tip-close:hover {
+  color: var(--ox-text);
+  background: var(--ox-bg-elevated);
+}
+
+.upload-tip-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ox-text);
+  margin-bottom: 1.25rem;
+  padding-right: 2rem;
+}
+
+.upload-tip-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.upload-tip-col {
+  background: var(--ox-bg-elevated);
+  border: 1px solid var(--ox-border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.upload-tip-col h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ox-amber);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.upload-tip-col p,
+.upload-tip-col ol {
+  font-size: 0.8125rem;
+  color: var(--ox-text-muted);
+  line-height: 1.6;
+}
+
+.upload-tip-col ol { padding-left: 1.1rem; }
+.upload-tip-col ol li { margin-bottom: 0.2rem; }
+
+.upload-tip-footer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--ox-text-dim);
+  border-top: 1px solid var(--ox-border);
+  padding-top: 1rem;
+}
+
+/* Zona de upload panorámica 360° (más grande y centrada) */
+.db-upload-zone-360 {
+  border: 1px dashed var(--ox-border);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  min-height: 180px;
+  transition: border-color var(--ox-transition), background var(--ox-transition);
+}
+
+.db-upload-zone-360:hover,
+.db-upload-zone-360.has-file {
+  border-color: var(--ox-amber);
+  background: oklch(0.55 0.12 65 / 0.04);
+}
+
+.db-upload-zone-360-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: none;
+}
+
+.db-upload-zone-360.has-file .db-upload-zone-360-preview {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .upload-tip-cols { grid-template-columns: 1fr; }
+}

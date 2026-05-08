@@ -1093,3 +1093,47 @@ Cada sección tiene su grid de upload y su botón "Usar en el visor"
 que marca active_mode en BD.
 Tooltip informativo visible al entrar explicando ambas opciones con 
 instrucciones claras y sencillas sobre cómo hacer cada tipo de foto.
+
+## — Sistema de fotos dual implementado
+
+### Migración BD (ejecutar manualmente vía SSH)
+```sql
+ALTER TABLE positions ADD COLUMN active_mode ENUM('4photos','panoramic') NOT NULL DEFAULT '4photos';
+```
+
+### Archivos modificados/creados
+
+**`CLAUDE.md`** — añadida sección "Sistema de subida de fotos por posición" con decisión sobre modo dual.
+
+**`PositionModel.php`** — `updateActiveMode(int $id, string $mode): void` — valida que `$mode` sea '4photos' o 'panoramic' antes de ejecutar el UPDATE, previene inyección de valores arbitrarios al ENUM.
+
+**`web.php`** — nueva ruta `POST /dashboard/posicion/set-mode → PositionController::setActiveMode` con guard `auth`.
+
+**`PositionController.php`**:
+- `setActiveMode()`: endpoint AJAX que responde JSON. Valida CSRF (sin consumirlo — el usuario puede llamarlo varias veces sin recargar). Verifica ownership completa user→business→tour→position. Llama `PositionModel::updateActiveMode()`.
+- `showUpload()`: extrae `$photo360 = $photosByDir['360'] ?? null` y `$activeMode = $position['active_mode'] ?? '4photos'` para pasar a la vista.
+- `upload()`: añadido bloque para `photo_360` — misma validación MIME + tamaño que N/S/E/O. Se guarda con `direction='360'`. Nombre único con prefijo `360_` para distinguirlo. `$depthPath` sin doble barra.
+
+**`TourController::showPublic()`** — añadido `'activeMode' => $pos['active_mode'] ?? '4photos'` en el array de cada posición dentro de `$tourPositions`, así el JS lo recibe en `TOUR_DATA`.
+
+**`upload.php`** (rediseño completo):
+- Modal de ayuda con instrucciones (4 fotos paso a paso + panorámica). Controlado por `localStorage key='oxphyre_upload_tip_seen'`. Reabierto con botón ?.
+- Toggle "4 Fotos" / "Panorámica 360°" (JS puro, sin recarga).
+- Sección 4 fotos: grid 2×2 existente + botón AJAX "Usar estas fotos en el visor".
+- Sección panorámica: zona única grande (`db-upload-zone-360`) + preview + botón AJAX "Usar panorámica en el visor".
+- Un solo `<form>` con todos los campos (photo_N/S/E/O + photo_360); el controller procesa solo los que vienen con UPLOAD_ERR_OK.
+- AJAX `setActiveMode()` con `fetch()` + `URLSearchParams`; actualiza el estado visual sin recargar.
+
+**`tour-viewer.js`** (actualización):
+- `loadPosition()` bifurca según `pos.activeMode`: panoramic → foto '360', 4photos → foto 'N'.
+- Extraído `applyPhoto(photo)` como función reutilizable (evita duplicar lógica MiDaS/standard).
+- `getLonDirection(lon)`: mapea lon normalizado (0–360) a N/E/S/O con cuadrantes de 90°.
+- `switchDirection(newDir, pos)`: fade 200ms → `applyPhoto()` → fade out. Protegido con `isSwitchingDir` flag + `DIR_COOLDOWN_MS = 800` para evitar cambios rápidos al borde de umbral.
+- En `animate()`: solo en modo '4photos', si han pasado 800ms desde el último cambio y la dirección nueva difiere de la actual → llama `switchDirection()`.
+
+**`dashboard.css`** — añadidas al final: `.upload-mode-toggle`, `.upload-mode-btn`, `.upload-section`, `.btn-set-active` (con estado `.is-active`), `.upload-tip-overlay`, `.upload-tip-modal`, `.upload-tip-col`, `.db-upload-zone-360`, `.db-upload-zone-360-preview`.
+
+### Seguridad
+- `setActiveMode()`: ownership verificada, CSRF validado (no consumido para AJAX multi-llamada)
+- `photo_360`: misma pipeline de validación que N/S/E/O (MIME real con `finfo`, tamaño MAX_UPLOAD_SIZE)
+- `active_mode` validado en modelo antes de INSERT (whitelist explícita)

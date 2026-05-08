@@ -56,6 +56,19 @@ class PositionModel
         return (int) $this->db->lastInsertId();
     }
 
+    // Actualiza el modo activo de la posición: '4photos' o 'panoramic'
+    // Solo admite los dos valores válidos del ENUM para prevenir inyecciones
+    public function updateActiveMode(int $id, string $mode): void
+    {
+        if (!in_array($mode, ['4photos', 'panoramic'], true)) {
+            return;
+        }
+        $stmt = $this->db->prepare(
+            'UPDATE positions SET active_mode = ? WHERE id = ? AND deleted_at IS NULL'
+        );
+        $stmt->execute([$mode, $id]);
+    }
+
     // Soft delete: nunca borramos físicamente (regla global del proyecto)
     public function softDelete(int $id): void
     {

@@ -14,16 +14,22 @@ let lat = 0;        // rotación vertical (−85° a +85°)
 let isDragging = false;
 let gyroActive = false;
 
-// Acumula la velocidad de arrastre para calcular el shift del shader MiDaS
+// Delta suavizado para el shader MiDaS (EMA)
 let prevLon = 0;
 let prevLat = 0;
 let smoothDeltaLon = 0;
 let smoothDeltaLat = 0;
 
-// Guarda el punto de inicio del drag para calcular el desplazamiento relativo
 let dragStart = { x: 0, y: 0, lon: 0, lat: 0 };
 
-const LAT_LIMIT = 85;  // evitar gimbal lock en los polos
+const LAT_LIMIT = 85;
+
+// ── Estado del cambio de dirección (modo 4 fotos) ─────────────────────────────
+
+let currentDir = 'N';          // dirección actualmente visible
+let isSwitchingDir = false;    // evita llamadas paralelas mientras carga
+let lastDirSwitch = 0;         // timestamp del último cambio (debounce)
+const DIR_COOLDOWN_MS = 800;   // ms mínimos entre cambios de dirección
 
 
 // ── Inicialización ────────────────────────────────────────────────────────────
@@ -31,23 +37,20 @@ const LAT_LIMIT = 85;  // evitar gimbal lock en los polos
 function init() {
   const canvas = document.getElementById('tour-canvas');
 
-  // Renderer con antialias — el pixel ratio limita a 2 para no saturar GPUs móviles
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   scene  = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1100);
-  // camera.target es el punto hacia el que apunta la cámara en cada frame
   camera.target = new THREE.Vector3(0, 0, 0);
 
-  // Esfera grande invertida: la cámara queda dentro mirando la textura en la cara interna
+  // Esfera invertida: cámara dentro mirando la textura en la cara interna
   const geo  = new THREE.SphereGeometry(500, 60, 40);
   standardMat = new THREE.MeshBasicMaterial({ side: THREE.BackSide });
   sphere      = new THREE.Mesh(geo, standardMat);
   scene.add(sphere);
 
-  // Material con shader para el efecto de paralaje con depth map de MiDaS
   midasMat = buildMiDaSMaterial();
 
   setupDrag(canvas);
@@ -56,7 +59,6 @@ function init() {
   setupHotspots();
   setupResize();
 
-  // Cargar la primera posición con foto
   loadPosition(0).then(() => {
     document.getElementById('tour-loading').style.display = 'none';
   });
@@ -65,14 +67,13 @@ function init() {
 }
 
 
-// ── Material ShaderMaterial para efecto de profundidad MiDaS ─────────────────
+// ── Material ShaderMaterial con efecto parallax MiDaS ────────────────────────
 
 function buildMiDaSMaterial() {
   return new THREE.ShaderMaterial({
     uniforms: {
       u_texture: { value: null },
       u_depth:   { value: null },
-      // Desplazamiento UV basado en el movimiento de cámara, suavizado por EMA
       u_shift:   { value: new THREE.Vector2(0, 0) },
     },
     vertexShader: `
@@ -107,64 +108,99 @@ async function loadPosition(idx) {
   const fade = document.getElementById('tour-fade');
   const pos  = TOUR_DATA.positions[idx];
 
-  // Fade negro para ocultar la carga de la nueva textura
   fade.classList.add('visible');
   await sleep(300);
 
-  // Usar siempre la foto N (Frente) como textura de la esfera
-  const photo = getPhotoN(pos);
+  const activeMode = pos.activeMode || '4photos';
 
-  if (photo) {
-    try {
-      // La textura de la esfera es SIEMPRE photo.url (foto original)
-      // photo.depthUrl se usa únicamente como u_depth en el shader, nunca como textura visible
-      const tex = await loadTexture(photo.url);
-      tex.colorSpace = THREE.SRGBColorSpace;
-
-      // Activar shader MiDaS solo si el plan lo permite Y hay depth map para esta foto
-      const useMiDaS = TOUR_DATA.features.midas && photo.processed && photo.depthUrl;
-
-      if (useMiDaS) {
-        const depthTex = await loadTexture(photo.depthUrl);
-        midasMat.uniforms.u_texture.value = tex;       // foto original → esfera visible
-        midasMat.uniforms.u_depth.value   = depthTex;  // depth map → parallax interno
-        sphere.material = midasMat;
-      } else {
-        standardMat.map = tex;
-        standardMat.needsUpdate = true;
-        sphere.material = standardMat;
-      }
-    } catch (err) {
-      console.warn('[tour-viewer] Error cargando textura:', err);
-    }
+  if (activeMode === 'panoramic' && pos.photos['360']) {
+    // Modo panorámica: foto equirectangular cubre la esfera completa
+    await applyPhoto(pos.photos['360']);
+    currentDir = '360';
+  } else {
+    // Modo 4 fotos: carga foto N (Frente) como vista inicial
+    const photo = pos.photos['N'] || null;
+    if (photo) await applyPhoto(photo);
+    currentDir = 'N';
   }
 
   currentPositionIdx = idx;
   updateHotspotButtons();
 
-  // Fade out: revelar la nueva posición
   fade.classList.remove('visible');
 }
 
-// Devuelve la foto de dirección N (Frente), la única que se mapea a la esfera.
-// S, E, O son datos auxiliares para MiDaS, no se usan como textura del visor.
-function getPhotoN(pos) {
-  return pos.photos['N'] || null;
+// Aplica una foto a la esfera — usa ShaderMaterial si hay depth map MiDaS disponible
+async function applyPhoto(photo) {
+  try {
+    // La textura de la esfera es SIEMPRE photo.url (foto original)
+    // photo.depthUrl solo entra como uniform u_depth en el shader, nunca como textura visible
+    const tex = await loadTexture(photo.url);
+    tex.colorSpace = THREE.SRGBColorSpace;
+
+    const useMiDaS = TOUR_DATA.features.midas && photo.processed && photo.depthUrl;
+
+    if (useMiDaS) {
+      const depthTex = await loadTexture(photo.depthUrl);
+      midasMat.uniforms.u_texture.value = tex;       // foto original → esfera visible
+      midasMat.uniforms.u_depth.value   = depthTex;  // depth map → parallax interno
+      sphere.material = midasMat;
+    } else {
+      standardMat.map = tex;
+      standardMat.needsUpdate = true;
+      sphere.material = standardMat;
+    }
+  } catch (err) {
+    console.warn('[tour-viewer] Error cargando textura:', err);
+  }
 }
 
-// Promesa que carga una textura con THREE.TextureLoader.
-// repeat.x = -1 + offset.x = 1 corrige el espejo horizontal que produce BackSide en esferas.
+
+// ── Cambio de dirección en modo 4 fotos ───────────────────────────────────────
+
+// Determina qué foto cargar según el ángulo horizontal actual
+function getLonDirection(lon) {
+  const l = ((lon % 360) + 360) % 360;
+  if (l >= 315 || l < 45)  return 'N';  // Frente
+  if (l >= 45  && l < 135) return 'E';  // Izquierda (mapeado según convención N/S/E/O)
+  if (l >= 135 && l < 225) return 'S';  // Fondo
+  return 'O';                           // Derecha (225–315)
+}
+
+// Cambia la textura de la esfera al girar a otra zona de dirección (con fade suave)
+async function switchDirection(newDir, pos) {
+  if (isSwitchingDir) return;
+  const photo = pos.photos[newDir];
+  if (!photo) return;
+
+  isSwitchingDir = true;
+  currentDir     = newDir;
+  lastDirSwitch  = Date.now();
+
+  const fade = document.getElementById('tour-fade');
+  fade.classList.add('visible');
+  await sleep(200);
+
+  await applyPhoto(photo);
+
+  fade.classList.remove('visible');
+  isSwitchingDir = false;
+}
+
+
+// ── Helpers de textura ────────────────────────────────────────────────────────
+
+// repeat.x = -1 + offset.x = 1 corrige el espejo horizontal de BackSide en esferas
 function loadTexture(url) {
   return new Promise((resolve, reject) => {
     new THREE.TextureLoader().load(url, texture => {
-      texture.repeat.x  = -1;
-      texture.offset.x  =  1;
+      texture.repeat.x = -1;
+      texture.offset.x =  1;
       resolve(texture);
     }, undefined, reject);
   });
 }
 
-// Promesa de espera mínima
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
@@ -180,7 +216,6 @@ function setupDrag(canvas) {
 
   document.addEventListener('mousemove', e => {
     if (!isDragging) return;
-    // Factor 0.25 da una sensibilidad de arrastre suave
     lon = (dragStart.x - e.clientX) * 0.25 + dragStart.lon;
     lat = (e.clientY - dragStart.y) * 0.25 + dragStart.lat;
   });
@@ -203,7 +238,6 @@ function setupTouch(canvas) {
 
   canvas.addEventListener('touchmove', e => {
     e.preventDefault();
-    // El giroscopio tiene prioridad sobre el drag táctil
     if (!isDragging || gyroActive) return;
     const t = e.touches[0];
     lon = (touchStart.x - t.clientX) * 0.25 + touchStart.lon;
@@ -220,7 +254,6 @@ function setupGyro() {
   const btn = document.getElementById('tour-gyro-btn');
   if (!btn) return;
 
-  // Ocultar el botón si el dispositivo no tiene giroscopio
   if (typeof DeviceOrientationEvent === 'undefined') {
     btn.style.display = 'none';
     return;
@@ -228,7 +261,6 @@ function setupGyro() {
 
   btn.addEventListener('click', async () => {
     if (gyroActive) {
-      // Desactivar
       gyroActive = false;
       btn.classList.remove('active');
       btn.setAttribute('aria-label', 'Activar giroscopio');
@@ -254,14 +286,12 @@ function setupGyro() {
 
 function handleGyroEvent(e) {
   if (!gyroActive) return;
-  // alpha: rotación alrededor del eje vertical (0–360°) → lon
-  // beta: inclinación frontal (−180° a 180°) → lat, restamos 90° para neutro horizontal
   if (e.alpha !== null) lon = -e.alpha;
   if (e.beta  !== null) lat = e.beta - 90;
 }
 
 
-// ── Botones de hotspot de posición ────────────────────────────────────────────
+// ── Hotspots de navegación entre posiciones ───────────────────────────────────
 
 function setupHotspots() {
   document.querySelectorAll('.tour-pos-btn').forEach((btn, i) => {
@@ -296,23 +326,20 @@ function setupResize() {
 function animate() {
   requestAnimationFrame(animate);
 
-  // Auto-rotación suave cuando el usuario no interactúa ni usa giroscopio
+  // Auto-rotación cuando el usuario no interactúa
   if (!isDragging && !gyroActive) {
     lon += 0.03;
   }
 
-  // Limitar inclinación vertical para no dar la vuelta por los polos
   lat = Math.max(-LAT_LIMIT, Math.min(LAT_LIMIT, lat));
 
-  // Calcular delta de movimiento suavizado (EMA) para el shader MiDaS
+  // Delta suavizado (EMA) para el shader MiDaS
   const deltaLon = lon - prevLon;
   const deltaLat = lat - prevLat;
-  // Factor 0.15: decae rápido para que el efecto solo sea visible durante el movimiento
   smoothDeltaLon = smoothDeltaLon * 0.85 + deltaLon * 0.15;
   smoothDeltaLat = smoothDeltaLat * 0.85 + deltaLat * 0.15;
 
   if (sphere.material === midasMat) {
-    // Multiplicar por un factor pequeño: el shift visual no debe ser perceptible como glitch
     midasMat.uniforms.u_shift.value.set(
       smoothDeltaLon * 0.0018,
       smoothDeltaLat * 0.0018
@@ -322,7 +349,16 @@ function animate() {
   prevLon = lon;
   prevLat = lat;
 
-  // Calcular el punto de destino de la cámara en coordenadas esféricas
+  // Cambio de textura por dirección solo en modo 4 fotos
+  const pos = TOUR_DATA.positions[currentPositionIdx];
+  if (pos && (pos.activeMode || '4photos') === '4photos' && !isSwitchingDir) {
+    const newDir = getLonDirection(lon);
+    if (newDir !== currentDir && Date.now() - lastDirSwitch > DIR_COOLDOWN_MS) {
+      switchDirection(newDir, pos);
+    }
+  }
+
+  // Posicionar la cámara según lon/lat en coordenadas esféricas
   const phi   = THREE.MathUtils.degToRad(90 - lat);
   const theta = THREE.MathUtils.degToRad(lon);
 
