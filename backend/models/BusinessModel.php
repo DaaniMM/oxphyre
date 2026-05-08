@@ -64,6 +64,17 @@ class BusinessModel
         $stmt->execute([$id]);
     }
 
+    // Acceso público: busca negocio por slug sin filtrar por user_id
+    public function getBySlugPublic(string $slug): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT * FROM businesses WHERE slug = ? AND deleted_at IS NULL LIMIT 1'
+        );
+        $stmt->execute([$slug]);
+        $row = $stmt->fetch();
+        return $row !== false ? $row : null;
+    }
+
     public function create(
         int $userId,
         string $name,

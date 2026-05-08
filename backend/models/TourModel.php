@@ -34,6 +34,19 @@ class TourModel
         return $row !== false ? $row : null;
     }
 
+    // Acceso público: requiere is_published=1, no verifica propiedad del usuario
+    public function getBySlugAndBusinessPublic(int $businessId, string $slug): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT * FROM tours
+             WHERE business_id = ? AND slug = ? AND is_published = 1 AND deleted_at IS NULL
+             LIMIT 1'
+        );
+        $stmt->execute([$businessId, $slug]);
+        $row = $stmt->fetch();
+        return $row !== false ? $row : null;
+    }
+
     public function countByBusiness(int $businessId): int
     {
         $stmt = $this->db->prepare(

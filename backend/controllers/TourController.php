@@ -293,7 +293,91 @@ class TourController extends BaseController
         $this->go("/dashboard/negocios/{$bizSlug}");
     }
 
+    // ── Visor público ────────────────────────────────────────────────────────
+
+    public function showPublic(): void
+    {
+        global $routeParams;
+        $bizSlug  = preg_replace('/[^a-z0-9-]/', '', $routeParams['biz']  ?? '');
+        $tourSlug = preg_replace('/[^a-z0-9-]/', '', $routeParams['tour'] ?? '');
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+        require_once BACKEND_PATH . '/models/PositionModel.php';
+        require_once BACKEND_PATH . '/models/PhotoModel.php';
+
+        // Acceso público: busca el negocio sin filtrar por usuario
+        $business = (new BusinessModel())->getBySlugPublic($bizSlug);
+        if (!$business) {
+            $this->serve404();
+        }
+
+        // Solo tours publicados son visibles al público
+        $tour = (new TourModel())->getBySlugAndBusinessPublic((int) $business['id'], $tourSlug);
+        if (!$tour) {
+            $this->serve404();
+        }
+
+        // Determinar features disponibles según plan del negocio
+        $planId       = (int) $business['plan_id'];
+        $hasMiDaS     = $planId >= PLAN_PRO;
+        $hasWatermark = $planId <= PLAN_FREE;
+        $hasMinimapa  = $planId >= PLAN_PRO;
+
+        // Cargar posiciones con sus fotos organizadas por dirección
+        $posModel   = new PositionModel();
+        $photoModel = new PhotoModel();
+        $positions  = $posModel->getByTour((int) $tour['id']);
+
+        $tourPositions = [];
+        foreach ($positions as $pos) {
+            $photos     = $photoModel->getByPosition((int) $pos['id']);
+            $photosByDir = [];
+            foreach ($photos as $photo) {
+                $photosByDir[$photo['direction']] = [
+                    'url'       => '/uploads/' . $pos['id'] . '/' . $photo['filename'],
+                    'depthUrl'  => $photo['depth_map_filename'] !== ''
+                        ? '/uploads/' . $pos['id'] . '/' . $photo['depth_map_filename']
+                        : null,
+                    'processed' => (bool) $photo['processed'],
+                ];
+            }
+            $tourPositions[] = [
+                'id'     => (int) $pos['id'],
+                'name'   => $pos['name'],
+                'order'  => (int) $pos['order_index'],
+                'photos' => $photosByDir,
+            ];
+        }
+
+        $tourData = [
+            'tourId'    => (int) $tour['id'],
+            'tourTitle' => $tour['title'],
+            'bizName'   => $business['name'],
+            'positions' => $tourPositions,
+            'features'  => [
+                'midas'     => $hasMiDaS,
+                'watermark' => $hasWatermark,
+                'minimap'   => $hasMinimapa,
+            ],
+        ];
+
+        require_once VIEWS_PATH . '/tour.php';
+    }
+
     // ── Helpers privados ──────────────────────────────────────────────────────
+
+    private function serve404(): never
+    {
+        http_response_code(404);
+        $view404 = VIEWS_PATH . '/errors/404.php';
+        if (file_exists($view404)) {
+            require_once $view404;
+        } else {
+            echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>404</title></head><body><h1>Tour no encontrado</h1><p><a href="/">Volver al inicio</a></p></body></html>';
+        }
+        exit();
+    }
 
     private function slugify(string $str): string
     {

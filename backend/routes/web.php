@@ -143,6 +143,12 @@ if (isset($routes[$method][$uri])) {
     require_once BACKEND_PATH . '/controllers/TourController.php';
     (new TourController())->update();
 
+} elseif ($method === 'GET' && preg_match('#^/tour/([a-z0-9-]+)/([a-z0-9-]+)$#', $uri, $m)) {
+    // Visor público: sin guard auth, cualquier visitante puede ver el tour
+    $routeParams = ['biz' => $m[1], 'tour' => $m[2]];
+    require_once BACKEND_PATH . '/controllers/TourController.php';
+    (new TourController())->showPublic();
+
 } else {
     // La combinación método + URI no existe en la tabla de rutas.
     // Respondemos con 404 en lugar de dejar que PHP muestre un error genérico.

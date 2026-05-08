@@ -1011,3 +1011,50 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - Swap 2GB configurado como colchón de seguridad
 
 → Siguiente paso: visor Three.js del tour
+
+## — Visor público Three.js del tour
+
+### URL pública
+`GET /tour/{biz-slug}/{tour-slug}` → sin guard auth, acceso libre. Responde 404 si el tour no está publicado (`is_published=0`) o no existe.
+
+### Archivos creados/modificados
+
+**`BusinessModel.php`** — añadido `getBySlugPublic(string $slug): ?array` — igual que `getBySlug` pero sin filtro `user_id`, necesario para acceso público al visor.
+
+**`TourModel.php`** — añadido `getBySlugAndBusinessPublic(int $bizId, string $slug): ?array` — filtra `is_published=1` además del `deleted_at IS NULL` estándar.
+
+**`TourController.php`** — añadidos `showPublic()` y `serve404()`:
+- `showPublic()`: extrae slugs de `$routeParams`, busca negocio + tour (métodos Public), determina features por `plan_id` (>= PLAN_PRO → MiDaS + minimapa, <= PLAN_FREE → watermark), carga posiciones con `PositionModel::getByTour()` y fotos con `PhotoModel::getByPosition()`, construye `$tourData` con URLs y depth URLs, pasa a vista.
+- `serve404()`: responde 404 con vista `/errors/404.php` si existe, fallback inline. Tipo de retorno `never`.
+
+**`web.php`** — ruta pública añadida antes del bloque 404: `elseif preg_match #^/tour/([a-z0-9-]+)/([a-z0-9-]+)$# → TourController::showPublic`. Sin `AuthMiddleware::check()`.
+
+**`backend/views/tour.php`** (nuevo) — vista pública full screen sin sidebar: canvas, loading overlay, fade overlay, header (negocio + título), barra de posiciones en el fondo, botón giroscopio, marca de agua (solo Free), minimapa placeholder (solo Pro/Business). `TOUR_DATA` inyectado como JSON con `JSON_HEX_TAG | JSON_HEX_AMP`.
+
+**`public/css/tour.css`** (nuevo) — `body overflow:hidden`, canvas `position:fixed inset:0`, barra de posiciones con glassmorphism + backdrop-filter, punto ámbar activo con glow, botón giroscopio oculto en `pointer:fine` (desktop), watermark semitransparente esquina inferior izquierda.
+
+**`public/js/tour-viewer.js`** (nuevo):
+- Renderer con `pixelRatio min(dpr, 2)` para no saturar GPU móvil
+- `SphereGeometry(500, 60, 40)` con `side: BackSide` — cámara dentro mirando hacia afuera
+- `standardMat` (MeshBasicMaterial) para plan Free / fotos sin depth map
+- `midasMat` (ShaderMaterial) para Pro/Business con depth map disponible: desplaza UV por `u_shift * depth * 0.035` creando parallax 3D; shift calculado con EMA (factor 0.85) sobre el delta de lon/lat frame a frame
+- Carga de posición: fade negro → `loadTexture()` async → elige material según features + `photo.processed` → fade out
+- Drag mouse + drag touch con `passive:false` para bloquear scroll nativo
+- Giroscopio: botón togglable, pide permiso en iOS 13+ con `DeviceOrientationEvent.requestPermission()`; beta−90 → lat, −alpha → lon
+- Auto-rotación `lon += 0.03` por frame cuando no hay drag ni giroscopio
+- `camera.target` recalculado cada frame desde lon/lat con coordenadas esféricas estándar
+
+### Seguridad
+- Tours no publicados (is_published=0): 404 — nunca se puede forzar la URL para ver borradores
+- `json_encode` con `JSON_HEX_TAG | JSON_HEX_AMP` — previene XSS en la inyección de TOUR_DATA
+- URLs de archivos construidas en el controller (sin user input), solo expone `/uploads/{id}/{filename}` que ya valida ownership en la subida
+
+### Features por plan en el visor
+| Feature | Free | Pro | Business |
+|---|---|---|---|
+| Esfera 360° navegable | ✓ | ✓ | ✓ |
+| Profundidad MiDaS (parallax) | — | ✓ | ✓ |
+| Minimapa | — | ✓ (placeholder) | ✓ (placeholder) |
+| Marca de agua Oxphyre | ✓ | — | — |
+
+→ Siguiente paso: editor canvas drag&drop o QR descargable
