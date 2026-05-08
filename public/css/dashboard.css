@@ -1144,8 +1144,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .db-help-tooltip {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  right: 0;
+  left: auto;
+  transform: none;
   width: max-content;
   max-width: 260px;
   background: oklch(0.18 0.01 60);
@@ -1172,8 +1173,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   content: '';
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 8px;
+  left: auto;
+  transform: none;
   border: 5px solid transparent;
   border-top-color: var(--ox-border-strong);
 }
