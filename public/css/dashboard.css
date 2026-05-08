@@ -1122,6 +1122,67 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 
 
+/* ── Help icon + tooltip CSS puro ── */
+
+.db-help-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ox-text-dim);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: help;
+  line-height: 1;
+  /* Necesario para que el tooltip se posicione relativo a este elemento */
+}
+
+.db-help-icon:hover,
+.db-help-icon:focus { color: var(--ox-text-muted); outline: none; }
+
+.db-help-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 260px;
+  background: oklch(0.18 0.01 60);
+  border: 1px solid var(--ox-border-strong);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ox-text-muted);
+  line-height: 1.5;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 50;
+  /* Triángulo apuntando hacia abajo */
+  filter: drop-shadow(0 4px 12px oklch(0 0 0 / 0.4));
+}
+
+/* Triángulo del tooltip */
+.db-help-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ox-border-strong);
+}
+
+/* Mostrar en hover (desktop) y focus (móvil / teclado) */
+.db-help-icon:hover .db-help-tooltip,
+.db-help-icon:focus .db-help-tooltip { opacity: 1; }
+
+
 /* ── Upload zones (subida de fotos 360°) ── */
 
 .db-upload-grid {

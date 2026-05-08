@@ -207,7 +207,16 @@
       <section class="db-manage-tours-section" aria-label="Posiciones del tour">
 
         <div class="db-manage-tours-header">
-          <span class="db-manage-tours-title">Posiciones</span>
+          <span class="db-manage-tours-title" style="display:inline-flex;align-items:center;gap:0.375rem;">
+            Posiciones
+            <button type="button" class="db-help-icon" aria-label="¿Qué es una posición?">
+              <i data-lucide="circle-help" width="15" height="15" aria-hidden="true"></i>
+              <span class="db-help-tooltip">
+                Una posición es un punto de tu local desde el que el cliente podrá mirar a su alrededor.
+                Ej: la entrada, la barra, la terraza.
+              </span>
+            </button>
+          </span>
           <a href="/dashboard/posicion/nueva?negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"
              class="db-btn-secondary" style="font-size:0.8125rem;">
             <i data-lucide="plus" width="14" height="14" aria-hidden="true"></i>
