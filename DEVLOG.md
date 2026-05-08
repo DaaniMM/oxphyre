@@ -983,3 +983,31 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - **`position/create.php`**: añadido texto informativo con icono `info` bajo el subtítulo del wizard explicando qué es una posición con ejemplos concretos (entrada, barra, terraza).
 - **`tours/index.php`**: añadido botón "Gestionar →" en cada card de tour de las secciones agrupadas por negocio, enlazando a `/dashboard/negocios/{biz-slug}/tours/{tour-slug}`.
 - **`PositionController::upload()`**: directorio de destino construido con `$positionId = (int) $position['id']` (del registro verificado, no del input GET) con trailing slash — `UPLOADS_PATH . '/' . $positionId . '/'`. La `$destPath` se forma sin doble barra: `$uploadDir . $filename`. Garantiza que el directorio se crea antes del primer `move_uploaded_file()` usando el ID real de la posición, no el parámetro sin sanitizar.
+
+## — Subida de fotos + procesado MiDaS funcionando en producción
+
+### Flujo verificado end-to-end
+1. Usuario sube hasta 4 fotos por posición (Frente/Fondo/Izquierda/Derecha)
+2. PHP valida MIME real con finfo (nunca la extensión) — acepta jpeg, png, webp
+3. Crea subdirectorio public/uploads/{position_id}/ si no existe
+4. Guarda foto con nombre aleatorio uniqid()
+5. Llama a MiDaSService que hace cURL al microservicio Flask en 127.0.0.1:5000
+6. Flask procesa con MiDaS Small y devuelve mapa de profundidad en base64
+7. PHP decodifica el base64 y guarda depth_{filename}.png en el mismo directorio
+8. Inserta registro en tabla photos con processed=1
+
+### Verificado en BD
+4 fotos con processed=1 y depth_map_filename relleno en position_id=1.
+
+### Bugs corregidos durante la implementación
+- Directorio uploads/{position_id}/ no se creaba → añadido mkdir() antes de move_uploaded_file()
+- PHP-FPM (www-data) sin permisos en uploads/ → sudo chown -R www-data:www-data public/uploads/
+- Log temporal de debug eliminado del controller tras verificación
+
+### Estado del microservicio MiDaS
+- Corriendo en 127.0.0.1:5000 con systemd (arranque automático)
+- Modelo: MiDaS Small (~80MB en caché ~/.cache/torch/hub/)
+- RAM con servicio activo: ~534MB usados, ~1200MB disponibles
+- Swap 2GB configurado como colchón de seguridad
+
+→ Siguiente paso: visor Three.js del tour
