@@ -1530,7 +1530,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .upload-tip-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.85);
   z-index: 200;
   display: flex;
   align-items: center;
@@ -1542,10 +1542,10 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 @keyframes ut-fade { from { opacity: 0; } to { opacity: 1; } }
 
 .upload-tip-modal {
-  background: var(--ox-bg-card);
-  border: 1px solid var(--ox-border);
+  background: oklch(0.12 0.008 60);
+  border: 1px solid oklch(0.78 0.16 65 / 0.3);
   border-radius: 16px;
-  padding: 1.75rem;
+  padding: 2rem;
   max-width: 600px;
   width: 100%;
   position: relative;
@@ -1595,10 +1595,10 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 
 .upload-tip-col {
-  background: var(--ox-bg-elevated);
-  border: 1px solid var(--ox-border);
-  border-radius: 10px;
-  padding: 1rem;
+  background: oklch(0.08 0.005 60);
+  border: 1px solid oklch(0.78 0.16 65 / 0.4);
+  border-radius: 12px;
+  padding: 1.5rem;
 }
 
 .upload-tip-col h4 {
