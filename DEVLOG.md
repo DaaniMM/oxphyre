@@ -932,3 +932,9 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - `DEVICE = torch.device("cpu")` explícito — el servidor no tiene GPU
 - Toda la seguridad se mantiene intacta: localhost check, hmac token, MAX_CONTENT_LENGTH, PIL verify
 - `/health` devuelve `"model": "MiDaS_small"` en lugar del MODEL_ID anterior
+
+### Verificado en producción
+- `curl http://127.0.0.1:5000/health` devuelve `{"device":"cpu","model":"MiDaS_small","status":"ok"}`
+- RAM con servicio activo: 534MB usados, 1200MB disponibles
+- Swap: 426MB usados de 2047MB — estable
+- Solución `trust_repo`: modelo pre-cargado interactivamente desde terminal para poblar caché antes de arrancar como servicio systemd
