@@ -111,11 +111,13 @@ async function loadPosition(idx) {
   fade.classList.add('visible');
   await sleep(300);
 
-  // Usar la primera foto disponible en orden de prioridad N→S→E→O
-  const photo = getFirstPhoto(pos);
+  // Usar siempre la foto N (Frente) como textura de la esfera
+  const photo = getPhotoN(pos);
 
   if (photo) {
     try {
+      // La textura de la esfera es SIEMPRE photo.url (foto original)
+      // photo.depthUrl se usa únicamente como u_depth en el shader, nunca como textura visible
       const tex = await loadTexture(photo.url);
       tex.colorSpace = THREE.SRGBColorSpace;
 
@@ -124,8 +126,8 @@ async function loadPosition(idx) {
 
       if (useMiDaS) {
         const depthTex = await loadTexture(photo.depthUrl);
-        midasMat.uniforms.u_texture.value = tex;
-        midasMat.uniforms.u_depth.value   = depthTex;
+        midasMat.uniforms.u_texture.value = tex;       // foto original → esfera visible
+        midasMat.uniforms.u_depth.value   = depthTex;  // depth map → parallax interno
         sphere.material = midasMat;
       } else {
         standardMat.map = tex;
@@ -144,12 +146,10 @@ async function loadPosition(idx) {
   fade.classList.remove('visible');
 }
 
-// Devuelve la primera foto disponible de una posición (N > S > E > O)
-function getFirstPhoto(pos) {
-  for (const dir of ['N', 'S', 'E', 'O']) {
-    if (pos.photos[dir]) return pos.photos[dir];
-  }
-  return null;
+// Devuelve la foto de dirección N (Frente), la única que se mapea a la esfera.
+// S, E, O son datos auxiliares para MiDaS, no se usan como textura del visor.
+function getPhotoN(pos) {
+  return pos.photos['N'] || null;
 }
 
 // Promesa que carga una textura con THREE.TextureLoader
