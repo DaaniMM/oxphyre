@@ -152,6 +152,12 @@
                         <?= $tour['is_published'] ? 'Publicado' : 'Borrador' ?>
                       </span>
                     </div>
+                    <div style="margin-top:0.75rem;">
+                      <a href="/dashboard/negocios/<?= htmlspecialchars($biz['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>"
+                         class="db-btn-secondary" style="font-size:0.8125rem;width:100%;justify-content:center;">
+                        Gestionar →
+                      </a>
+                    </div>
                   </article>
                 <?php endforeach; ?>
               </div>

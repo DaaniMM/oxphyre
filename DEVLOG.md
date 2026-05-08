@@ -974,3 +974,10 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 - RAM con servicio activo: 534MB usados, 1200MB disponibles
 - Swap: 426MB usados de 2047MB — estable
 - Solución `trust_repo`: modelo pre-cargado interactivamente desde terminal para poblar caché antes de arrancar como servicio systemd
+
+
+## 2026-05-08 — Mejoras UX en vistas de posición y tours
+
+- **`position/upload.php`**: mensaje del header cambiado a "Sube las fotos de cada orientación de tu local (imagen normal o 360°)" — más accesible para usuarios sin conocimiento técnico. Etiquetas de las 4 zonas cambiadas de N/S/E/O a "Frente/Fondo/Izquierda/Derecha"; las claves en BD siguen siendo N/S/E/O sin cambio.
+- **`position/create.php`**: añadido texto informativo con icono `info` bajo el subtítulo del wizard explicando qué es una posición con ejemplos concretos (entrada, barra, terraza).
+- **`tours/index.php`**: añadido botón "Gestionar →" en cada card de tour de las secciones agrupadas por negocio, enlazando a `/dashboard/negocios/{biz-slug}/tours/{tour-slug}`.

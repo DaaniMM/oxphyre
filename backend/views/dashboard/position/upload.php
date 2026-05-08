@@ -108,7 +108,7 @@
             <span class="db-badge db-badge--draft">Posición #<?= (int) $position['order_index'] ?></span>
           </div>
           <p class="db-manage-desc" style="margin-top:0.25rem;">
-            Sube las fotos 360° equirectangulares de cada orientación.
+            Sube las fotos de cada orientación de tu local (imagen normal o 360°).
           </p>
         </div>
       </div>
@@ -134,12 +134,13 @@
         <input type="hidden" name="position_id"  value="<?= (int) $position['id'] ?>">
 
         <?php
-          // Mapa de orientaciones: clave, etiqueta y nombre completo
+          // Mapa de orientaciones: clave BD → etiqueta visible para el usuario
+          // Las claves (N/S/E/O) se guardan en BD; los nombres son solo UI
           $orientations = [
-            'N' => ['label' => 'N', 'name' => 'Norte'],
-            'S' => ['label' => 'S', 'name' => 'Sur'],
-            'E' => ['label' => 'E', 'name' => 'Este'],
-            'O' => ['label' => 'O', 'name' => 'Oeste'],
+            'N' => ['label' => 'Frente',    'name' => 'Frente'],
+            'S' => ['label' => 'Fondo',     'name' => 'Fondo'],
+            'E' => ['label' => 'Izquierda', 'name' => 'Izquierda'],
+            'O' => ['label' => 'Derecha',   'name' => 'Derecha'],
           ];
         ?>
 

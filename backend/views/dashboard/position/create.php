@@ -96,6 +96,10 @@
           Para el tour <strong><?= htmlspecialchars($tour['title']) ?></strong>
           · <?= htmlspecialchars($business['name']) ?>
         </p>
+        <p style="display:flex;align-items:flex-start;gap:0.375rem;font-size:0.8125rem;color:var(--ox-text-muted);margin-top:0.625rem;">
+          <i data-lucide="info" width="14" height="14" style="flex-shrink:0;margin-top:2px;color:var(--ox-text-dim);" aria-hidden="true"></i>
+          Una posición es un punto de tu local desde el que el cliente podrá mirar a su alrededor. Por ejemplo: la entrada, la barra o la terraza.
+        </p>
       </div>
 
       <form action="/dashboard/posicion/store" method="POST" novalidate>
