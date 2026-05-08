@@ -1058,3 +1058,38 @@ La API de Hugging Face `transformers` (DPTForDepthEstimation + DPTImageProcessor
 | Marca de agua Oxphyre | ✓ | — | — |
 
 → Siguiente paso: editor canvas drag&drop o QR descargable
+
+## 2026-05-08 — Decisión: sistema de subida de fotos dual por posición
+
+Tras debate exhaustivo se establece definitivamente cómo funciona la subida
+de fotos por posición y el visor:
+
+### Decisión
+El usuario puede subir dos tipos de foto por posición:
+- **4 fotos normales** (Frente/Fondo/Izquierda/Derecha): más accesible, 
+  cualquier smartphone. Maricarmen puede hacerlo sin instrucciones técnicas.
+- **1 foto panorámica 360° equirectangular**: mejor resultado visual si se 
+  hace correctamente. Requiere modo panorama del móvil o cámara 360°.
+
+Puede tener ambas subidas simultáneamente. Un toggle "Activo" determina 
+cuál usa el visor. Se guarda en BD como positions.active_mode.
+
+### Comportamiento del visor
+- Modo 4 fotos: el visor cambia entre foto N/S/E/O según la dirección 
+  que mira el usuario, con transición suave entre ellas.
+- Modo panorámica: la foto equirectangular se mapea completa en la esfera, 
+  cobertura 360° continua sin saltos.
+- Pro/Business: MiDaS aplica depth map en ambos modos.
+- Free: fotos planas sin depth map, con marca de agua.
+
+### Cambios en BD necesarios
+ALTER TABLE positions ADD COLUMN active_mode 
+ENUM('4photos','panoramic') NOT NULL DEFAULT '4photos';
+La tabla photos usa direction='360' para la panorámica — sin cambio de estructura.
+
+### UX de la pantalla de subida
+Toggle arriba: "4 Fotos" | "Panorámica 360°"
+Cada sección tiene su grid de upload y su botón "Usar en el visor" 
+que marca active_mode en BD.
+Tooltip informativo visible al entrar explicando ambas opciones con 
+instrucciones claras y sencillas sobre cómo hacer cada tipo de foto.

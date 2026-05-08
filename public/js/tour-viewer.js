@@ -152,10 +152,15 @@ function getPhotoN(pos) {
   return pos.photos['N'] || null;
 }
 
-// Promesa que carga una textura con THREE.TextureLoader
+// Promesa que carga una textura con THREE.TextureLoader.
+// repeat.x = -1 + offset.x = 1 corrige el espejo horizontal que produce BackSide en esferas.
 function loadTexture(url) {
   return new Promise((resolve, reject) => {
-    new THREE.TextureLoader().load(url, resolve, undefined, reject);
+    new THREE.TextureLoader().load(url, texture => {
+      texture.repeat.x  = -1;
+      texture.offset.x  =  1;
+      resolve(texture);
+    }, undefined, reject);
   });
 }
 
