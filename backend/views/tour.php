@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/css/tour.css">
   <!-- PSV: CSS del núcleo -->
   <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css">
+        href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.4.4/index.min.css">
 </head>
 <body>
 
