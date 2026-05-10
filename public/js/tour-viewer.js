@@ -70,18 +70,14 @@ function init() {
   }
 
   viewer = new PhotoSphereViewer.Viewer({
-    container:           document.getElementById('psv-viewer'),
-    panorama:            initialUrl,
-    panoData:            getPanoData(currentPosition),
-    defaultYaw:          0,
-    defaultPitch:        0,
-    navbar:              false,    // barra propia de PSV desactivada — usamos la nuestra
-    loadingImg:          null,
-    touchmoveTwoFingers: false,    // un dedo para rotar en móvil
-    mousewheel:          false,    // sin zoom con rueda del ratón
-    moveSpeed:           1.0,
-    zoomSpeed:           0,
-    defaultZoomLvl:      0,
+    container:    document.getElementById('psv-viewer'),
+    panorama:     initialUrl,
+    pano_data:    getPanoData(currentPosition),
+    default_long: 0,          // yaw inicial (radianes)
+    default_lat:  0,          // pitch inicial (radianes)
+    navbar:       false,      // barra propia de PSV desactivada — usamos la nuestra
+    loading_img:  null,
+    mousewheel:   false,      // sin zoom con rueda del ratón
   });
 
   // Cambio de foto al girar (solo en modo 4 fotos) — API PSV v4
