@@ -69,23 +69,25 @@ function init() {
     return;
   }
 
-  viewer = new PhotoSphereViewer.Viewer({
-    container:    document.getElementById('psv-viewer'),
-    panorama:     initialUrl,
-    pano_data:    getPanoData(currentPosition),
-    default_long: 0,          // yaw inicial (radianes)
-    default_lat:  0,          // pitch inicial (radianes)
-    navbar:       false,      // barra propia de PSV desactivada — usamos la nuestra
-    loading_img:  null,
-    mousewheel:   false,      // sin zoom con rueda del ratón
+  // PSV v4 CDN expone el constructor directamente como PhotoSphereViewer (sin .Viewer)
+  viewer = new PhotoSphereViewer({
+    container:  document.getElementById('psv-viewer'),
+    panorama:   initialUrl,
+    panoData:   getPanoData(currentPosition),
+    defaultLong: 0,          // yaw inicial (radianes)
+    defaultLat:  0,          // pitch inicial (radianes)
+    navbar:      false,      // barra propia de PSV desactivada — usamos la nuestra
+    loadingImg:  null,
+    mousewheel:  false,      // sin zoom con rueda del ratón
   });
 
   // Cambio de foto al girar (solo en modo 4 fotos) — API PSV v4
-  viewer.on('position-changed', (e, position) => {
+  viewer.on('position-updated', (e, position) => {
     if ((currentPosition.activeMode || '4photos') !== '4photos') return;
     if (isSwitchingPhoto) return;
 
-    const yawDeg = THREE.Math.radToDeg(position.longitude);
+    // THREE.MathUtils (no THREE.Math — deprecado en Three.js 0.147)
+    const yawDeg = THREE.MathUtils.radToDeg(position.longitude);
     const newDir = getDirectionFromYaw(yawDeg);
 
     if (newDir !== currentDirection) {
@@ -173,9 +175,10 @@ function setupGyro() {
 function handleGyro(e) {
   if (!gyroActive || !viewer || e.alpha === null) return;
   // alpha: rotación horizontal (0–360°) → yaw de la cámara
+  // PSV v4 rotate() recibe {longitude, latitude} no {yaw, pitch}
   viewer.rotate({
-    yaw:   -THREE.MathUtils.degToRad(e.alpha),
-    pitch: 0,
+    longitude: -THREE.MathUtils.degToRad(e.alpha),
+    latitude:  0,
   });
 }
 
