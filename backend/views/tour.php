@@ -7,9 +7,9 @@
   <meta name="robots" content="noindex, nofollow">
   <!-- Estilos base del visor -->
   <link rel="stylesheet" href="/css/tour.css">
-  <!-- PSV: CSS del núcleo -->
+  <!-- PSV v4: CSS -->
   <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.4.4/index.min.css">
+        href="https://cdn.jsdelivr.net/npm/photo-sphere-viewer@4/dist/photo-sphere-viewer.min.css">
 </head>
 <body>
 
@@ -49,9 +49,11 @@
   const TOUR_DATA = <?= json_encode($tourData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
 </script>
 
-<!-- PSV standalone (incluye Three.js internamente — no cargar Three.js por separado) -->
-<script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.standalone.min.js"></script>
-<!-- Lógica del visor (debe ir después de PSV, sin defer) -->
+<!-- PSV v4: dependencias en orden exacto requerido -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uevent@2/browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photo-sphere-viewer@4/dist/photo-sphere-viewer.min.js"></script>
+<!-- Lógica del visor (después de PSV, sin defer) -->
 <script src="/js/tour-viewer.js"></script>
 
 </body>

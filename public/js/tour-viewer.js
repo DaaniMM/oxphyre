@@ -84,12 +84,12 @@ function init() {
     defaultZoomLvl:      0,
   });
 
-  // Cambio de foto al girar (solo en modo 4 fotos)
-  viewer.addEventListener('position-updated', ({ position }) => {
+  // Cambio de foto al girar (solo en modo 4 fotos) — API PSV v4
+  viewer.on('position-changed', (e, position) => {
     if ((currentPosition.activeMode || '4photos') !== '4photos') return;
     if (isSwitchingPhoto) return;
 
-    const yawDeg = THREE.MathUtils.radToDeg(position.yaw);
+    const yawDeg = THREE.Math.radToDeg(position.longitude);
     const newDir = getDirectionFromYaw(yawDeg);
 
     if (newDir !== currentDirection) {
