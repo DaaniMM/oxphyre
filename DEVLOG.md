@@ -1137,3 +1137,94 @@ ALTER TABLE positions ADD COLUMN active_mode ENUM('4photos','panoramic') NOT NUL
 - `setActiveMode()`: ownership verificada, CSRF validado (no consumido para AJAX multi-llamada)
 - `photo_360`: misma pipeline de validación que N/S/E/O (MIME real con `finfo`, tamaño MAX_UPLOAD_SIZE)
 - `active_mode` validado en modelo antes de INSERT (whitelist explícita)
+
+## 2026-05-09 — Decisión arquitectural: migración a Photo Sphere Viewer (PSV) + CLAHE
+
+### Contexto y problema
+Tras probar el visor Three.js actual con fotos reales de smartphone (iPhone 12)
+se detectaron bugs críticos inaceptables para un producto comercial:
+- Imagen gigante/zoom excesivo — FOV mal configurado
+- Depth map visible como textura en lugar de la foto original
+- Distorsión grave en panorámicas (efecto "pinwheel" en techo y suelo)
+- Giroscopio, touch y hotspots implementados a mano con comportamiento incorrecto
+
+Se realizó una sesión completa de análisis y debate el 09/05/2026 evaluando
+todas las alternativas posibles.
+
+### Alternativas evaluadas y descartadas
+
+**Panorámica equirectangular completa con smartphone:**
+Descartada definitivamente. El iPhone genera imágenes cilíndricas (~270° horizontales),
+no equirectangulares reales (360°x180°). El modo gran angular sacrifica calidad de imagen
+inaceptablemente. Google Street View app (única solución gratuita) fue eliminada en 2023.
+No existe forma de conseguir 360° completo con smartphone sin hardware adicional.
+
+**Cubemap (6 fotos — frente/fondo/izquierda/derecha/techo/suelo):**
+Evaluado. Técnicamente completo pero el stitching automático requiere solapamiento del
+30% entre fotos que el usuario no hace naturalmente a 90° exactos. Descartado como
+opción principal para el TFG. Apuntado como mejora futura en roadmap.
+
+**OpenCV Stitching automático (propuesta Gemini):**
+Evaluado. cv2.Stitcher_create(cv2.Stitcher_PANORAMA) requiere fotos con solapamiento
+que el flujo actual no garantiza. Error código 2 (paredes lisas sin puntos clave) es
+frecuente en locales pequeños. Descartado para TFG. Roadmap post-TFG.
+
+**Visor cilíndrico con truco CSS (propuesta Gemini):**
+Evaluado y probado en HTML de prueba. Oculta bordes negros con gradientes CSS y
+bloquea rotación vertical a ±10°. No mejora la calidad real de la foto — es un
+truco cosmético. Válido como fallback visual para panorámicas parciales pero no
+como solución principal.
+
+**Regla permanente establecida en esta sesión:**
+NUNCA sugerir cámaras 360° profesionales como solución. El cliente objetivo son
+dueños de PYMES con smartphone normal. Sin inversión en hardware adicional.
+Esta regla está guardada en memoria permanente de Claude.
+
+### Decisión final: Photo Sphere Viewer (PSV) + CLAHE
+
+**¿Por qué PSV?**
+- Librería estándar de la industria para visores 360° web, usada en productos
+  comerciales reales (no experimental)
+- Basada en Three.js — mismo stack, migración sin cambio radical de arquitectura
+- Resuelve de golpe todos los bugs críticos del visor actual
+- Soporte nativo de panorámicas incompletas (panoData) — clave para iPhone ~270°
+- Plugins nativos ya probados: virtual tour, markers, compass, minimap
+- MIT license, activamente mantenido (última versión 2025-2026)
+
+**¿Por qué CLAHE?**
+CLAHE (Contrast Limited Adaptive Histogram Equalization) mejora automáticamente
+la iluminación y contraste de cada foto que sube el cliente. Especialmente útil
+para locales con iluminación desigual (ventanas brillantes + rincones oscuros).
+Se aplica en el servidor al subir la foto, antes del procesado MiDaS.
+OpenCV ya está instalado en el servidor — sin dependencia adicional.
+
+### Sistema de fotos definitivo
+
+**Opción A — 4 fotos normales (opción principal):**
+Frente/Fondo/Izquierda/Derecha con lente 1x (nunca gran angular).
+El visor PSV muestra la foto correcta según la dirección que mira el usuario.
+Funciona con cualquier smartphone de cualquier gama.
+
+**Opción B — 6 fotos (mejora opcional):**
+Igual que A + foto de techo y foto de suelo opcionales.
+Si el cliente las sube, el visor las muestra al mirar arriba/abajo.
+
+**Opción C — Panorámica parcial (~270°):**
+PSV la muestra con panoData indicando cobertura real — sin distorsión.
+El usuario no ve negro ni zonas vacías dentro de la zona cubierta.
+Limitación documentada en UI: no cubre los 360° completos.
+
+Las tres opciones coexisten. positions.active_mode determina cuál usa el visor.
+
+### Qué se implementa en esta sesión
+- Migración completa del visor a PSV (tour-viewer.js + tour.php + tour.css)
+- CLAHE automático en servidor (nuevo endpoint /enhance en app.py +
+  método enhance() en MiDaSService.php + integración en PositionController.php)
+
+### Bugs del visor Three.js que PSV resuelve
+- Imagen gigante: PSV gestiona FOV correctamente por defecto
+- Depth map visible: PSV carga texturas correctamente
+- Distorsión en panorámicas: soporte nativo de cropped panoramas con panoData
+- Giroscopio/touch: nativos en PSV, sin implementación manual con bugs
+
+→ Deuda técnica actualizada en sección 'Pendientes y deuda técnica' de CLAUDE.md
