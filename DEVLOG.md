@@ -1273,3 +1273,39 @@ Las tres opciones coexisten. positions.active_mode determina cuál usa el visor.
 ### Pendiente post-migración
 - Reimplementar shader MiDaS sobre PSV (efecto parallax con depth map) — ver CLAUDE.md pendientes
 - Recomendar al servidor: `sudo systemctl restart oxphyre-midas` tras desplegar app.py
+
+## — Correcciones iterativas de la integración PSV v4
+
+Tras el deploy inicial se detectaron y corrigieron varios errores en el visor público.
+
+### Limpieza de scripts en tour.php
+- Eliminada la carga separada de `three.min.js` desde cdn.jsdelivr.net — PSV standalone ya incluye Three.js internamente; cargarlos dos veces generaba conflicto de namespaces.
+- Eliminada la carga de Lucide — no se usa en el visor público (solo en el dashboard).
+- Eliminado el bloque `lucide.createIcons()` que dependía de Lucide.
+- Todos los `<script>` del visor sin atributo `defer` para garantizar el orden de ejecución.
+
+### Migración de PSV v5 a PSV v4
+La versión 5 de PSV exige un bundle standalone diferente y su API (`PhotoSphereViewer.Viewer`) no estaba disponible tal como se esperaba en el CDN. Se bajó a v4 que tiene soporte standalone estable en jsDelivr.
+
+URLs finales en `tour.php`:
+- CSS: `https://cdn.jsdelivr.net/npm/photo-sphere-viewer@4/dist/photo-sphere-viewer.min.css`
+- JS (orden obligatorio): `three@0.147/build/three.min.js` → `uevent@2/browser.min.js` → `photo-sphere-viewer@4/dist/photo-sphere-viewer.min.js`
+- `cdn.jsdelivr.net` añadido a `connect-src` en la CSP de `index.php`
+
+### Correcciones de API PSV v4 en tour-viewer.js
+
+**Análisis realizado:** revisión de código + consulta a la documentación oficial en `photo-sphere-viewer-4.netlify.app` + inspección del bundle CDN minificado para confirmar qué expone realmente.
+
+**Bugs corregidos:**
+
+| Línea | Error | Corrección |
+|---|---|---|
+| Constructor | `new PhotoSphereViewer({})` | `new PhotoSphereViewer.Viewer({})` — el CDN expone un namespace `{}`, la clase está en `.Viewer` |
+| Opciones constructor | `pano_data`, `default_long`, `default_lat`, `loading_img` en snake_case | `panoData`, `defaultLong`, `defaultLat`, `loadingImg` en camelCase (API v4) |
+| Evento de posición | `'position-changed'` | `'position-updated'` (nombre correcto en v4) |
+| Conversión ángulo | `THREE.Math.radToDeg()` | `THREE.MathUtils.radToDeg()` — `THREE.Math` deprecado en Three.js ≥ r130 |
+| Giroscopio | `viewer.rotate({ yaw, pitch })` | `viewer.rotate({ longitude, latitude })` — API v4 usa coordenadas esféricas |
+
+**Confirmado por inspección del bundle:** `setPanorama()` devuelve `this.prop.loadingPromise` (Promise válida), por lo que el uso de `.then()` es correcto y no necesitó cambio.
+
+**Error en diagnóstico del agente:** el agente infirió incorrectamente que el constructor era `new PhotoSphereViewer({})` a partir del UMD wrapper. El error en runtime `PhotoSphereViewer is not a constructor` confirmó que `PhotoSphereViewer` es el namespace y `.Viewer` es la clase.
