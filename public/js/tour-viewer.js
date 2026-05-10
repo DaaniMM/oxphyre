@@ -69,8 +69,7 @@ function init() {
     return;
   }
 
-  // PSV v4 CDN expone el constructor directamente como PhotoSphereViewer (sin .Viewer)
-  viewer = new PhotoSphereViewer({
+  viewer = new PhotoSphereViewer.Viewer({
     container:  document.getElementById('psv-viewer'),
     panorama:   initialUrl,
     panoData:   getPanoData(currentPosition),
