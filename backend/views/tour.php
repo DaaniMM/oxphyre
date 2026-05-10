@@ -49,18 +49,10 @@
   const TOUR_DATA = <?= json_encode($tourData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
 </script>
 
-<!-- Three.js (requerido por PSV) -->
-<script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
-<!-- PSV núcleo -->
+<!-- PSV standalone (incluye Three.js internamente — no cargar Three.js por separado) -->
 <script src="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.standalone.min.js"></script>
-<!-- Lucide para el icono del giroscopio -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<!-- Lógica del visor -->
+<!-- Lógica del visor (debe ir después de PSV, sin defer) -->
 <script src="/js/tour-viewer.js"></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
-</script>
 
 </body>
 </html>
