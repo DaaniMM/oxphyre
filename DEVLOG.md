@@ -1228,3 +1228,48 @@ Las tres opciones coexisten. positions.active_mode determina cuál usa el visor.
 - Giroscopio/touch: nativos en PSV, sin implementación manual con bugs
 
 → Deuda técnica actualizada en sección 'Pendientes y deuda técnica' de CLAUDE.md
+## — Migración a PSV + CLAHE implementada
+
+### Archivos modificados
+
+**`python-service/app.py`** — añadido endpoint `POST /enhance`:
+- Importa `cv2` con try/except (fallo silencioso si OpenCV no disponible)
+- Proceso CLAHE: PIL→BGR→LAB→CLAHE canal L→LAB→BGR→RGB→JPEG base64
+- Parámetros: `clipLimit=3.0`, `tileGridSize=(8,8)` — mejora perceptible sin artefactos
+- Misma seguridad que `/process`: localhost + X-Service-Token
+
+**`MiDaSService.php`** — refactorizado y ampliado:
+- Constantes renombradas: `ENDPOINT_PROCESS`, `ENDPOINT_ENHANCE`, `TIMEOUT_PROCESS`, `TIMEOUT_ENHANCE`
+- Método privado `callService()` extrae la lógica cURL compartida (DRY)
+- `enhance(string $imagePath): ?string` — llama `/enhance`, devuelve base64 JPEG o null
+- `curl_close()` eliminado: deprecated en PHP 8.4, GC libera el recurso automáticamente
+
+**`PositionController.php`** — CLAHE integrado en `upload()`:
+- Añadido en bucle N/S/E/O y en bloque photo_360: `$miDaS->enhance($destPath)` → si retorna base64, sobreescribe el archivo con la versión mejorada → continúa con `process()` sobre la foto ya mejorada
+- Fallo silencioso: si `enhance()` devuelve null, el flujo continúa normalmente con la foto original
+
+**`public/index.php`** — CSP actualizado:
+- `cdn.jsdelivr.net` añadido a `script-src` y `style-src` para cargar PSV desde CDN
+
+**`backend/views/tour.php`** — reescrita completamente:
+- Eliminado todo el HTML de Three.js manual (canvas, overlays complejos)
+- Estructura mínima: `#psv-viewer` + watermark condicional + barra de puntos + botón giroscopio
+- PSV cargado desde CDN (Three.js + PSV core standalone)
+- TOUR_DATA inyectado con `JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE`
+
+**`public/js/tour-viewer.js`** — reescrito completamente con PSV:
+- `PhotoSphereViewer.Viewer` con `navbar:false`, `mousewheel:false`, `zoomSpeed:0`
+- `getPhotoUrl(pos, dir)`: bifurca según `activeMode` — panoramic→'360', 4photos→dirección
+- `getPanoData(pos)`: retorna `panoData` 4096×2048 para panorámicas, null para 4 fotos
+- `getDirectionFromYaw(deg)`: cuadrantes N/E/S/O cada 90° con normalización 0–360
+- `position-updated`: detecta cruce de umbral de dirección (solo modo 4 fotos) + flag `isSwitchingPhoto` para evitar llamadas simultáneas a `setPanorama`
+- `loadPosition(idx)`: navega entre posiciones con `transition:'fade'`
+- Giroscopio: `DeviceOrientationEvent` + `requestPermission` iOS 13+, `viewer.rotate()` con yaw = -alpha
+
+**`public/css/tour.css`** — reescrito:
+- Eliminados todos los estilos del visor Three.js anterior
+- `#psv-viewer` 100vw×100vh, `.tour-watermark`, `.tour-positions-bar`, `.tour-pos-btn`, `#tour-gyro-btn`
+
+### Pendiente post-migración
+- Reimplementar shader MiDaS sobre PSV (efecto parallax con depth map) — ver CLAUDE.md pendientes
+- Recomendar al servidor: `sudo systemctl restart oxphyre-midas` tras desplegar app.py

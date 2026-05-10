@@ -268,6 +268,15 @@ class PositionController extends BaseController
                 continue;
             }
 
+            // Mejorar calidad con CLAHE antes de pasar a MiDaS (fallo silencioso)
+            $enhanced = $miDaS->enhance($destPath);
+            if ($enhanced !== null) {
+                $decoded = base64_decode($enhanced);
+                if ($decoded !== false) {
+                    file_put_contents($destPath, $decoded);
+                }
+            }
+
             // Procesar con MiDaS y guardar el mapa de profundidad
             $depthB64  = $miDaS->process($destPath);
             $depthFile = '';
@@ -312,6 +321,15 @@ class PositionController extends BaseController
                 $destPath = $uploadDir . $filename;
 
                 if (move_uploaded_file($tmpPath, $destPath)) {
+                    // Mejorar calidad con CLAHE (fallo silencioso)
+                    $enhanced = $miDaS->enhance($destPath);
+                    if ($enhanced !== null) {
+                        $decoded = base64_decode($enhanced);
+                        if ($decoded !== false) {
+                            file_put_contents($destPath, $decoded);
+                        }
+                    }
+
                     $depthB64  = $miDaS->process($destPath);
                     $depthFile = '';
 

@@ -1,10 +1,6 @@
-/* Visor 360° público de tours Oxphyre */
+/* Visor público de tours Oxphyre — estilos base para PSV */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   width: 100%;
@@ -15,153 +11,76 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Canvas Three.js ocupa toda la pantalla */
-#tour-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  touch-action: none; /* evita scroll nativo en móvil durante drag */
+/* Contenedor de PSV: ocupa toda la pantalla */
+#psv-viewer {
+  width: 100vw;
+  height: 100vh;
 }
 
-/* ── Pantalla de carga ─────────────────────────────────────────────────────── */
+/* ── Marca de agua (plan Free) ─────────────────────────────────────────────── */
 
-#tour-loading {
+.tour-watermark {
   position: fixed;
-  inset: 0;
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
   z-index: 100;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.875rem;
-}
-
-.tour-loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-top-color: #FEB354;
-  border-radius: 50%;
-  animation: tour-spin 0.8s linear infinite;
-}
-
-@keyframes tour-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ── Fade de transición entre posiciones ───────────────────────────────────── */
-
-#tour-fade {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  z-index: 50;
-}
-
-#tour-fade.visible {
-  opacity: 1;
-}
-
-/* ── Header: nombre de negocio y tour ─────────────────────────────────────── */
-
-#tour-header {
-  position: fixed;
-  top: 1.5rem;
-  left: 1.5rem;
-  z-index: 30;
   pointer-events: none;
 }
 
-.tour-header-biz {
-  font-size: 0.6875rem;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.tour-watermark a {
+  color: rgba(254, 179, 84, 0.7);
+  text-decoration: none;
+  pointer-events: auto;
 }
 
-.tour-header-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  margin-top: 0.125rem;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+.tour-watermark a:hover {
+  color: rgba(254, 179, 84, 1);
 }
 
-/* ── Navegación de posiciones (barra inferior) ─────────────────────────────── */
+/* ── Barra de navegación entre posiciones ──────────────────────────────────── */
 
-#tour-positions {
+.tour-positions-bar {
   position: fixed;
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  z-index: 30;
-  padding: 0.5rem 0.875rem;
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 100px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  max-width: calc(100vw - 3rem);
-  overflow-x: auto;
-  scrollbar-width: none;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  z-index: 100;
 }
 
-#tour-positions::-webkit-scrollbar {
-  display: none;
-}
-
+/* Punto por posición */
 .tour-pos-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.4375rem;
-  background: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
   border: none;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.8125rem;
-  font-family: inherit;
-  padding: 0.375rem 0.625rem;
-  border-radius: 100px;
-  transition: color 0.2s ease, background 0.2s ease;
-  white-space: nowrap;
+  padding: 0;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .tour-pos-btn:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.2);
 }
 
 .tour-pos-btn.active {
-  color: #fff;
-  background: rgba(254, 179, 84, 0.18);
-}
-
-.tour-pos-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
-  flex-shrink: 0;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tour-pos-btn.active .tour-pos-dot {
   background: #FEB354;
-  box-shadow: 0 0 7px rgba(254, 179, 84, 0.85);
+  box-shadow: 0 0 8px rgba(254, 179, 84, 0.6);
+  transform: scale(1.1);
 }
 
-/* ── Botón giroscopio ──────────────────────────────────────────────────────── */
+/* ── Botón giroscopio (móvil) ──────────────────────────────────────────────── */
 
 #tour-gyro-btn {
   position: fixed;
@@ -170,22 +89,20 @@ html, body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  z-index: 100;
   transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-  z-index: 30;
 }
 
 #tour-gyro-btn:hover {
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 #tour-gyro-btn.active {
@@ -194,83 +111,14 @@ html, body {
   background: rgba(254, 179, 84, 0.1);
 }
 
-/* El giroscopio solo tiene sentido en dispositivos con giroscopio (táctiles) */
+/* Solo visible en dispositivos táctiles (sin ratón preciso) */
 @media (pointer: fine) {
-  #tour-gyro-btn {
-    display: none;
-  }
-}
-
-/* ── Marca de agua (plan Free) ─────────────────────────────────────────────── */
-
-#tour-watermark {
-  position: fixed;
-  bottom: 1rem;
-  left: 1rem;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.45);
-  text-decoration: none;
-  letter-spacing: 0.02em;
-  z-index: 30;
-  transition: color 0.2s ease;
-  line-height: 1;
-}
-
-#tour-watermark:hover {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-#tour-watermark strong {
-  color: rgba(254, 179, 84, 0.65);
-  font-weight: 500;
-}
-
-/* ── Minimapa placeholder (Pro/Business) ───────────────────────────────────── */
-
-#tour-minimap {
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
-  width: 160px;
-  height: 120px;
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 30;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-}
-
-#tour-minimap::after {
-  content: 'MINIMAPA';
+  #tour-gyro-btn { display: none; }
 }
 
 /* ── Ajustes móvil ─────────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-  #tour-header {
-    top: 1rem;
-    left: 1rem;
-  }
-
-  #tour-positions {
-    bottom: 1.25rem;
-    max-width: calc(100vw - 2rem);
-  }
-
-  #tour-gyro-btn {
-    bottom: 1.25rem;
-    right: 1rem;
-  }
-
-  #tour-minimap {
-    display: none; /* demasiado pequeño en móvil */
-  }
+  .tour-positions-bar { bottom: 1.25rem; }
+  #tour-gyro-btn      { bottom: 1.25rem; right: 1rem; }
 }
