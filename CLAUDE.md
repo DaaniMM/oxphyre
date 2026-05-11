@@ -199,6 +199,119 @@ La UX debe camuflar el tiempo de espera:
 
 ---
 
+## Roadmap post-TFG: 3D Gaussian Splatting
+
+### Qué es y por qué es relevante para Oxphyre
+3D Gaussian Splatting (3DGS) es una tecnología de reconstrucción 3D que permite
+al visitante MOVERSE LIBREMENTE por el espacio — no solo girar desde un punto fijo
+como en el visor actual. La IA reconstruye el espacio completo a partir de un vídeo
+grabado con el smartphone del cliente. El resultado se renderiza en tiempo real en
+el navegador sin plugins ni descargas.
+
+Es la evolución natural del producto: mientras el visor actual muestra fotos dentro
+de una esfera, 3DGS crea un modelo 3D fotorrealista navegable. Es lo que hace que
+Matterport cueste $45k-$85k MXN de equipo — nosotros lo replicamos con un móvil
+y software open source.
+
+El resultado se sirve desde una URL, funciona en cualquier navegador (móvil y desktop)
+y soporta WebXR (AR/VR). No requiere app nativa.
+
+### Stack técnico decidido (open source, sin coste de licencias)
+
+**Procesado (generación del modelo 3D):**
+- OpenSplat (AGPLv3): convierte vídeo → archivo .splat/.ply
+  GitHub: github.com/pierotofy/OpenSplat
+  Requiere GPU NVIDIA para procesado viable (CPU es 100x más lento)
+  Uso comercial permitido bajo AGPLv3
+
+**Visor (renderizado en navegador):**
+- SuperSplat Viewer (MIT license): renderiza archivos .splat en el navegador
+  GitHub: github.com/playcanvas/supersplat
+  Self-hosteable sin restricciones, MIT = 100% libre para uso comercial
+  Soporta hotspots, anotaciones, animaciones de cámara, WebXR
+
+**Pipeline completo:**
+1. Cliente graba vídeo lento de su local con el smartphone (2-3 minutos)
+2. Sube el vídeo a Oxphyre (igual que sube fotos ahora)
+3. Oxphyre procesa con OpenSplat en GPU → genera archivo .splat
+4. Oxphyre sirve el .splat con SuperSplat Viewer embebido
+5. Visitante navega libremente por el local en el navegador
+
+### Legalidad y privacidad — confirmado y cerrado
+
+**Código de Oxphyre:** 100% privado siempre.
+La obligación AGPLv3 de OpenSplat solo afecta a modificaciones del código
+de OpenSplat en sí — no al código de Oxphyre. Si se usa OpenSplat como
+herramienta externa sin modificarlo (igual que usamos MiDaS), todo el código
+PHP, lógica de negocio, dashboard y sistema de Oxphyre permanece privado.
+Ningún competidor puede reclamarlo.
+
+**Vídeos y datos de clientes:** 100% privados.
+El vídeo se procesa en los servidores de Oxphyre y nunca sale de ellos.
+OpenSplat procesa localmente — no hay ningún servicio externo que reciba
+los datos del cliente. Los archivos .splat resultantes son propiedad del
+cliente según los términos y condiciones de Oxphyre.
+
+**SuperSplat Viewer:** MIT license — sin ninguna restricción legal.
+Se puede integrar, modificar y comercializar sin obligaciones de publicar código.
+
+### Hardware requerido para producción
+
+Para el TFG (tours de demo pregenerados):
+- PC local del desarrollador con RTX 3060 (CUDA) — procesa en minutos
+- El servidor t3.small no tiene GPU — no puede procesar en tiempo real
+
+Para producción real con clientes:
+- Instancia GPU en AWS (G4dn.xlarge ~0.50$/hora) bajo demanda
+- Se enciende al recibir un vídeo, procesa, se apaga — coste por uso
+- No es un coste fijo — solo se paga cuando un cliente sube un vídeo
+
+### Diferenciación por tiers (propuesta, no definitiva)
+
+**FREE (visor actual, sin cambios):**
+- 4 fotos estáticas desde puntos fijos
+- El visitante gira la cámara pero no se mueve por el espacio
+- "Mira tu negocio desde dentro"
+
+**PRO (Gaussian Splatting básico):**
+- Cliente graba 1 vídeo con el móvil → Oxphyre genera el tour 3D navegable
+- El visitante se mueve libremente por el local
+- 1 escena por negocio, resolución estándar, procesado en cola compartida
+- Hotspots básicos en el espacio 3D
+- "Pasea por tu negocio como si estuvieras ahí"
+
+**BUSINESS (Gaussian Splatting avanzado):**
+- Escenas ilimitadas, resolución máxima, procesado prioritario
+- Hotspots enriquecidos: vídeo, reservas, formularios dentro del espacio 3D
+- Dominio personalizado, marca blanca total
+- Exportación del modelo 3D para uso en webs propias
+- Ideal para hoteles, gimnasios, inmobiliarias, espacios grandes
+- "Tu negocio en 3D fotorrealista, integrado en tu web"
+
+### Requisitos para la captura (instrucciones al cliente)
+- Grabar vídeo lento y suave con el smartphone (sin movimientos bruscos)
+- Iluminación homogénea — evitar ventanas muy brillantes con resto oscuro
+- Objetos estáticos durante la grabación
+- Recorrer todo el espacio en 2-3 minutos
+- Lente normal (1x) — nunca gran angular
+- El resultado mejora significativamente con buena iluminación del local
+
+### Estado actual
+- Tecnología evaluada y validada: ✓
+- Stack técnico definido: ✓
+- Legalidad confirmada: ✓
+- Implementación en Oxphyre: pendiente post-TFG
+- Para la exposición del TFG: generar 1-2 tours de demo con RTX 3060 local
+  mostrándolo como "la tecnología que potencia los planes Pro/Business"
+
+### Herramientas descartadas
+- Luma AI: servicio de pago ($30-300/mes), sin API pública gratuita
+- Polycam: ídem, servicio de pago
+- Google Street View app: eliminada de las stores en 2023
+- Gran angular del smartphone: sacrifica calidad inaceptablemente
+
+---
+
 ## Diseño Visual y Storytelling
 
 ### Identidad Visual

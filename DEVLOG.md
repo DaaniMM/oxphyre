@@ -1309,3 +1309,18 @@ URLs finales en `tour.php`:
 **Confirmado por inspección del bundle:** `setPanorama()` devuelve `this.prop.loadingPromise` (Promise válida), por lo que el uso de `.then()` es correcto y no necesitó cambio.
 
 **Error en diagnóstico del agente:** el agente infirió incorrectamente que el constructor era `new PhotoSphereViewer({})` a partir del UMD wrapper. El error en runtime `PhotoSphereViewer is not a constructor` confirmó que `PhotoSphereViewer` es el namespace y `.Viewer` es la clase.
+
+## 2026-05-11 — Roadmap 3D Gaussian Splatting documentado en CLAUDE.md
+
+Sesión de análisis y evaluación de tecnologías para la evolución post-TFG del visor.
+Decisión documentada en la nueva sección "## Roadmap post-TFG: 3D Gaussian Splatting" de CLAUDE.md.
+
+**Decisión:** OpenSplat (AGPLv3) para procesado de vídeo → modelo 3D + SuperSplat Viewer (MIT) para renderizado en navegador. Stack 100% open source, sin costes de licencia, uso comercial permitido.
+
+**Conclusión legal:** la obligación AGPLv3 de OpenSplat solo afecta a modificaciones del propio código de OpenSplat. El código de Oxphyre permanece 100% privado al usar OpenSplat como herramienta externa, igual que con MiDaS.
+
+**Hardware:** PC local del desarrollador (RTX 3060) para los tours de demo del TFG. Producción real: instancia GPU AWS G4dn.xlarge bajo demanda (~0.50$/hora), solo se paga al procesar.
+
+**Herramientas descartadas:** Luma AI, Polycam (de pago sin API gratuita), Google Street View (eliminada de stores en 2023), gran angular de smartphone (calidad inaceptable).
+
+Ver CLAUDE.md para el detalle completo: stack técnico, pipeline, tiers de producto, instrucciones de captura y estado actual.
