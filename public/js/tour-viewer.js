@@ -49,13 +49,17 @@ function getPanoData(position) {
 }
 
 // Convierte un ángulo yaw (grados) a la dirección de foto correspondiente.
-// Los cuadrantes se reparten en 4 zonas de 90° cada una.
-function getDirectionFromYaw(yawDeg) {
+// Zonas de 70° centradas en cada dirección + 20° de zona muerta entre ellas
+// para evitar el efecto "ping-pong" al girar despacio cerca de un umbral.
+// Si el ángulo cae en zona de transición, devuelve currentDir sin cambiar.
+function getDirectionFromYaw(yawDeg, currentDir) {
   const deg = ((yawDeg % 360) + 360) % 360;
-  if (deg >= 315 || deg < 45)  return 'N';  // Frente       0°  ±45°
-  if (deg >= 45  && deg < 135) return 'E';  // Derecha      90° ±45°
-  if (deg >= 135 && deg < 225) return 'S';  // Fondo        180° ±45°
-  return 'O';                               // Izquierda    270° ±45°
+  if (deg >= 325 || deg < 35)  return 'N';  // Frente   0°  ±35°
+  if (deg >= 55  && deg < 125) return 'E';  // Derecha  90° ±35°
+  if (deg >= 145 && deg < 215) return 'S';  // Fondo    180° ±35°
+  if (deg >= 235 && deg < 305) return 'O';  // Izquierda 270° ±35°
+  // Zona de transición (35°-55°, 125°-145°, 215°-235°, 305°-325°): mantener dirección actual
+  return currentDir;
 }
 
 
@@ -70,14 +74,17 @@ function init() {
   }
 
   viewer = new PhotoSphereViewer.Viewer({
-    container:  document.getElementById('psv-viewer'),
-    panorama:   initialUrl,
-    panoData:   getPanoData(currentPosition),
-    defaultLong: 0,          // yaw inicial (radianes)
-    defaultLat:  0,          // pitch inicial (radianes)
-    navbar:      false,      // barra propia de PSV desactivada — usamos la nuestra
-    loadingImg:  null,
-    mousewheel:  false,      // sin zoom con rueda del ratón
+    container:       document.getElementById('psv-viewer'),
+    panorama:        initialUrl,
+    panoData:        getPanoData(currentPosition),
+    defaultLong:     0,     // yaw inicial (radianes)
+    defaultLat:      0,     // pitch inicial (radianes)
+    defaultZoomLvl:  50,    // 0=zoom máximo, 100=zoom mínimo — 50 es el estándar
+    minFov:          30,    // FOV mínimo (zoom máximo permitido)
+    maxFov:          90,    // FOV máximo (zoom mínimo permitido)
+    navbar:          false, // barra propia de PSV desactivada — usamos la nuestra
+    loadingImg:      null,
+    mousewheel:      false, // sin zoom con rueda del ratón
   });
 
   // Cambio de foto al girar (solo en modo 4 fotos) — API PSV v4
@@ -87,15 +94,15 @@ function init() {
 
     // THREE.MathUtils (no THREE.Math — deprecado en Three.js 0.147)
     const yawDeg = THREE.MathUtils.radToDeg(position.longitude);
-    const newDir = getDirectionFromYaw(yawDeg);
+    const newDir = getDirectionFromYaw(yawDeg, currentDirection);
 
     if (newDir !== currentDirection) {
       const url = getPhotoUrl(currentPosition, newDir);
       if (url) {
         currentDirection = newDir;
         isSwitchingPhoto = true;
-        // transition:false + showLoader:false para cambio instantáneo y silencioso
-        viewer.setPanorama(url, { transition: false, showLoader: false })
+        // transición corta (150ms) para suavizar el corte sin ser molesta
+        viewer.setPanorama(url, { transition: true, transitionDuration: 150, showLoader: false })
           .then(() => { isSwitchingPhoto = false; })
           .catch(() => { isSwitchingPhoto = false; });
       }
