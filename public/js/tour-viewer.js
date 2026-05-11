@@ -28,24 +28,42 @@ function getPhotoUrl(position, direction) {
   return position.photos[direction]?.url || null;
 }
 
-// Devuelve el objeto panoData para PSV cuando la panorámica es parcial (iPhone ~270°).
-// null en modo 4 fotos (PSV no necesita corrección).
+// Devuelve el objeto panoData para PSV según el modo activo de la posición.
+// Sin panoData, PSV estira la foto para cubrir la esfera completa — distorsión severa.
 function getPanoData(position) {
-  if ((position.activeMode || '4photos') !== 'panoramic') return null;
-  if (!position.photos['360']) return null;
+  const mode = position.activeMode || '4photos';
 
-  // PSV recibe panoData para tratar la imagen como equirectangular completa.
-  // Para panorámicas parciales del iPhone, indicar fullWidth y fullHeight 2:1
-  // evita la distorsión en techo y suelo que producía el visor Three.js anterior.
-  return {
-    isEquirectangular: true,
-    fullWidth:         4096,
-    fullHeight:        2048,  // ratio 2:1 estándar equirectangular
-    croppedWidth:      4096,
-    croppedHeight:     2048,
-    croppedX:          0,
-    croppedY:          0,
-  };
+  if (mode === 'panoramic' && position.photos['360']) {
+    // Panorámica parcial del iPhone (~270° horizontal): PSV la trata como
+    // equirectangular completa para evitar distorsión en techo y suelo.
+    return {
+      fullWidth:    4096,
+      fullHeight:   2048, // ratio 2:1 estándar equirectangular
+      croppedWidth: 4096,
+      croppedHeight: 2048,
+      croppedX:     0,
+      croppedY:     0,
+    };
+  }
+
+  if (mode === '4photos') {
+    // Foto normal de iPhone en horizontal: ~76° horizontal × ~51° vertical.
+    // PSV necesita saber qué fracción de la esfera cubre para no estirarla.
+    // Referencia: esfera completa = 1440×720px (ratio 2:1)
+    // croppedWidth  = 76°/360° × 1440 ≈ 305px
+    // croppedHeight = 51°/180° × 720  ≈ 204px
+    // croppedX/Y: centrado en el horizonte de la esfera
+    return {
+      fullWidth:     1440,
+      fullHeight:    720,
+      croppedWidth:  305,
+      croppedHeight: 204,
+      croppedX:      568, // (1440 - 305) / 2
+      croppedY:      258, // (720  - 204) / 2
+    };
+  }
+
+  return null;
 }
 
 // Convierte un ángulo yaw (grados) a la dirección de foto correspondiente.
