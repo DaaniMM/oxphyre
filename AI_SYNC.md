@@ -204,8 +204,11 @@ Sesión anterior importante:
 
 Antes de seguir con otras features, el próximo sprint recomendado es el Sprint 1 de `Oxphyre_Room_Free_Flow.md`:
 
+**Nota operativa:** aunque `CLAUDE.md` y parte de la documentación histórica describen el sistema vigente basado en `positions.active_mode` como selector entre `4photos` y `panoramic`, el flujo que se va a probar ahora es el definido en `Oxphyre_Room_Free_Flow.md`. Sigue siendo propuesta hasta validar Sprint 1, pero es la referencia operativa actual para la siguiente implementación.
+
 - Adaptar pantalla de subida al nuevo flujo: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
 - Adaptar visor público para entrar siempre en la panorámica principal y mostrar "Ver detalles" solo si hay 4 fotos completas.
+- Mantener hotspots sobre panorámica, no dentro de Oxphyre Room.
 - No mostrar posiciones sin panorámica en el tour público.
 - Mantener `positions.active_mode` como lógica actual/compatibilidad durante la transición; el documento propone dejarlo como campo heredado cuando el nuevo flujo esté implementado y validado.
 - No actualizar `CLAUDE.md` como decisión oficial hasta validar Sprint 1 funcionando.
