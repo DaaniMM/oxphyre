@@ -160,9 +160,19 @@ class PositionController extends BaseController
         foreach ($existingPhotos as $p) {
             $photosByDir[$p['direction']] = $p;
         }
-        // Foto panorámica separada para la sección 360° de la vista
-        $photo360   = $photosByDir['360'] ?? null;
-        $activeMode = $position['active_mode'] ?? '4photos';
+        // Estado Sprint 1: la panorámica es la vista principal y las 4 fotos
+        // activan Oxphyre Room como detalle opcional. active_mode queda heredado.
+        $photo360       = $photosByDir['360'] ?? null;
+        $roomDirections = ['N', 'S', 'E', 'O'];
+        $roomPhotoCount = 0;
+        foreach ($roomDirections as $dir) {
+            if (!empty($photosByDir[$dir])) {
+                $roomPhotoCount++;
+            }
+        }
+        $hasPanorama    = $photo360 !== null;
+        $hasOxphyreRoom = $roomPhotoCount === count($roomDirections);
+        $activeMode     = $position['active_mode'] ?? '4photos';
 
         $this->ensureCsrfToken();
 

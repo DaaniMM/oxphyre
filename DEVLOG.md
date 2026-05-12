@@ -1333,7 +1333,7 @@ Se añadió al final de `AGENTS.md` una sección de coordinación entre IAs.
 
 **Motivo:** dejar claro qué función cumple cada archivo de contexto: `AI_SYNC.md` como fuente rápida del estado actual, `DEVLOG.md` como historial completo y `CLAUDE.md` como contexto general. También se documentó cuándo actualizar `DEVLOG.md` y `AI_SYNC.md` para evitar duplicar información.
 
-## 2026-05-12 — Decisión comercial post-TFG sobre 3D Gaussian Splatting
+##  — Decisión comercial post-TFG sobre 3D Gaussian Splatting
 
 Se refinó la decisión sobre 3D Gaussian Splatting como dirección comercial definitiva post-TFG de Oxphyre.
 
@@ -1345,7 +1345,7 @@ Se refinó la decisión sobre 3D Gaussian Splatting como dirección comercial de
 
 **Visión comercial:** tras la entrega, Gaussian Splatting queda como la evolución principal para convertir Oxphyre en producto comercial real. El cliente no interactúa con OpenSplat; ve una experiencia de marca tipo "Oxphyre 3D Capture". Los vídeos de clientes se procesan en infraestructura controlada por Oxphyre o GPU bajo demanda.
 
-## 2026-05-12 — Propuesta candidata de nuevos tiers en Planes_Oxphyre.md
+## — Propuesta candidata de nuevos tiers en Planes_Oxphyre.md
 
 Se creó/guardó `Planes_Oxphyre.md` como documento de propuesta consolidada para redefinir los tiers Free, Pro y Business.
 
@@ -1353,7 +1353,7 @@ Se creó/guardó `Planes_Oxphyre.md` como documento de propuesta consolidada par
 
 **Motivo:** evitar actualizar límites y estrategia comercial principal antes de validar visual y comercialmente el plan Free y confirmar si la segmentación propuesta encaja con el producto.
 
-## 2026-05-12 — Especificación Oxphyre Room Free/base creada
+## — Especificación Oxphyre Room Free/base creada
 
 Se creó `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta del nuevo flujo Free/base del visor.
 
@@ -1364,3 +1364,48 @@ Se creó `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta de
 **Alcance:** no cambia código y no sustituye todavía `CLAUDE.md` hasta validar Sprint 1 funcionando.
 
 **Próximo paso técnico:** implementar Sprint 1: adaptar pantalla de subida + adaptar visor público al nuevo flujo panorámica principal / Oxphyre Room opcional.
+
+## — Sprint 1 Oxphyre Room Free/base implementado
+
+Se implementó el Sprint 1 definido en `Oxphyre_Room_Free_Flow.md`, sin tocar `CLAUDE.md` ni `Planes_Oxphyre.md`.
+
+**Qué se cambió:**
+- La pantalla de subida/gestión de posición deja de presentar la decisión antigua "4 fotos o panorámica".
+- La panorámica principal aparece como bloque obligatorio y explica que será la vista base del visitante.
+- Oxphyre Room aparece como bloque opcional recomendado con contador 0/4, 1/4, 2/4, 3/4 o "4/4 · Disponible".
+- Hotspots de navegación quedan como bloque informativo bloqueado para el siguiente sprint.
+- El visor público filtra posiciones sin panorámica y entra siempre en `photos.direction = '360'`.
+- El botón "Ver detalles" solo aparece si existen las 4 fotos N/S/E/O completas.
+- "Ver detalles" abre una vista MVP de Oxphyre Room con las 4 fotos, arrastre mouse/touch y botón "Volver a vista principal".
+- `positions.active_mode` se mantiene en BD y endpoint como compatibilidad, pero ya no controla la UI nueva ni el visor público Sprint 1.
+
+**Archivos tocados:**
+- `backend/controllers/PositionController.php`
+- `backend/controllers/TourController.php`
+- `backend/views/dashboard/position/upload.php`
+- `backend/views/tour.php`
+- `public/js/tour-viewer.js`
+- `public/css/dashboard.css`
+- `public/css/tour.css`
+- `AI_SYNC.md`
+- `DEVLOG.md`
+
+**Pendiente:**
+- Validación manual visual y funcional.
+- Validaciones avanzadas/checklist de publicación.
+- Editor real de hotspots.
+- Pulido UX de Oxphyre Room.
+- Confirmar responsive móvil/tablet.
+- Revisar consola JS en navegador real.
+
+**Cómo probarlo:**
+- Crear o usar un tour publicado con varias posiciones.
+- Crear una posición sin panorámica y confirmar que no aparece en el visor público.
+- Subir panorámica y confirmar que el visor entra en esa vista principal.
+- Subir 1, 2 o 3 fotos N/S/E/O y confirmar que no aparece "Ver detalles".
+- Subir las 4 fotos N/S/E/O y confirmar que aparece "Ver detalles".
+- Abrir Oxphyre Room, arrastrar para mirar alrededor y volver a la vista principal.
+
+**Verificación técnica local:**
+- `node --check public/js/tour-viewer.js` correcto.
+- No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.

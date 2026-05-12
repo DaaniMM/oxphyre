@@ -1,3 +1,14 @@
+<?php
+  $orientations = [
+    'N' => 'Frente',
+    'S' => 'Fondo',
+    'E' => 'Derecha',
+    'O' => 'Izquierda',
+  ];
+  $roomPhotoCount = $roomPhotoCount ?? 0;
+  $hasPanorama = $hasPanorama ?? ($photo360 !== null);
+  $hasOxphyreRoom = $hasOxphyreRoom ?? ($roomPhotoCount === 4);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,7 +24,6 @@
 </head>
 <body>
 
-<!-- Modal de ayuda — aparece la primera vez (controlado por localStorage) -->
 <div class="upload-tip-overlay" id="upload-tip-overlay" role="dialog"
      aria-modal="true" aria-labelledby="tip-title" style="display:none;">
   <div class="upload-tip-modal">
@@ -21,38 +31,23 @@
       <i data-lucide="x" width="16" height="16" aria-hidden="true"></i>
     </button>
 
-    <h2 class="upload-tip-title" id="tip-title">¿Cómo funciona la subida de fotos?</h2>
+    <h2 class="upload-tip-title" id="tip-title">Cómo completar una posición</h2>
 
-    <div class="upload-tip-cols">
-      <div class="upload-tip-col">
-        <h4>Opción 1 — 4 Fotos</h4>
-        <p style="margin-bottom:0.5rem;">Haz 4 fotos en el mismo punto de tu local, girando sobre ti mismo:</p>
-        <ol>
-          <li>Apunta hacia la entrada <strong>(Frente)</strong></li>
-          <li>Gira 180° y apunta al fondo <strong>(Fondo)</strong></li>
-          <li>Apunta a tu derecha <strong>(Derecha)</strong></li>
-          <li>Apunta a tu izquierda <strong>(Izquierda)</strong></li>
-        </ol>
-        <p style="margin-top:0.5rem;color:var(--ox-text-dim);">
-          <i data-lucide="lightbulb" width="12" height="12" style="vertical-align:middle;"></i>
-          No te muevas del sitio, solo gira.
-        </p>
-      </div>
-      <div class="upload-tip-col">
-        <h4>Opción 2 — Panorámica 360°</h4>
-        <p>Con tu móvil en horizontal, usa el <strong>modo Panorama</strong> de la cámara.</p>
-        <p style="margin-top:0.5rem;">Gira lentamente sobre ti mismo de izquierda a derecha hasta completar el giro.</p>
-        <p style="margin-top:0.5rem;color:var(--ox-text-dim);">
-          <i data-lucide="lightbulb" width="12" height="12" style="vertical-align:middle;"></i>
-          La foto debe ser muy ancha (proporción 2:1 o más). Gira despacio y mantén el móvil nivelado.
-        </p>
-      </div>
-    </div>
+    <ol class="upload-tip-steps">
+      <li>Sube una panorámica principal. Es obligatoria.</li>
+      <li>Añade Oxphyre Room con 4 fotos si quieres mostrar más detalle.</li>
+      <li>Los hotspots servirán para conectar esta zona con otras posiciones.</li>
+    </ol>
 
     <p class="upload-tip-footer">
       <i data-lucide="info" width="14" height="14" style="flex-shrink:0;color:var(--ox-amber);" aria-hidden="true"></i>
-      Puedes subir ambas opciones y elegir cuál usa el visor con el botón "Usar en el visor".
+      Consejo: sube las fotos originales desde el móvil y evita WhatsApp para conservar calidad.
     </p>
+
+    <div class="upload-tip-actions">
+      <button type="button" class="wizard-btn-submit" id="tip-understood">Entendido</button>
+      <button type="button" class="db-btn-ghost" id="tip-never">No volver a mostrar</button>
+    </div>
   </div>
 </div>
 
@@ -60,33 +55,32 @@
 
 <div class="db-layout">
 
-  <!-- ── Sidebar ── -->
   <aside class="db-sidebar" id="db-sidebar" role="navigation" aria-label="Navegación principal">
     <div class="db-sidebar-header">
-      <a href="/" class="db-logo" aria-label="Oxphyre inicio">◉ Oxphyre</a>
+      <a href="/" class="db-logo" aria-label="Oxphyre inicio">Oxphyre</a>
       <button class="db-sidebar-close" id="db-sidebar-close" aria-label="Cerrar menú">
         <i data-lucide="x" width="18" height="18"></i>
       </button>
     </div>
     <nav class="db-nav">
-      <a href="/dashboard"               class="db-nav-item">
-        <i data-lucide="home"            width="18" height="18" aria-hidden="true"></i>
+      <a href="/dashboard" class="db-nav-item">
+        <i data-lucide="home" width="18" height="18" aria-hidden="true"></i>
         <span>Inicio</span>
       </a>
-      <a href="/dashboard/tours"         class="db-nav-item active" aria-current="page">
-        <i data-lucide="play-circle"     width="18" height="18" aria-hidden="true"></i>
+      <a href="/dashboard/tours" class="db-nav-item active" aria-current="page">
+        <i data-lucide="play-circle" width="18" height="18" aria-hidden="true"></i>
         <span>Mis tours</span>
       </a>
-      <a href="/dashboard/negocios"      class="db-nav-item">
-        <i data-lucide="building-2"      width="18" height="18" aria-hidden="true"></i>
+      <a href="/dashboard/negocios" class="db-nav-item">
+        <i data-lucide="building-2" width="18" height="18" aria-hidden="true"></i>
         <span>Negocios</span>
       </a>
-      <a href="/dashboard/analiticas"    class="db-nav-item">
-        <i data-lucide="bar-chart-2"     width="18" height="18" aria-hidden="true"></i>
+      <a href="/dashboard/analiticas" class="db-nav-item">
+        <i data-lucide="bar-chart-2" width="18" height="18" aria-hidden="true"></i>
         <span>Analíticas</span>
       </a>
       <a href="/dashboard/configuracion" class="db-nav-item">
-        <i data-lucide="settings"        width="18" height="18" aria-hidden="true"></i>
+        <i data-lucide="settings" width="18" height="18" aria-hidden="true"></i>
         <span>Configuración</span>
       </a>
     </nav>
@@ -108,7 +102,6 @@
     </div>
   </aside>
 
-  <!-- ── Topbar ── -->
   <header class="db-topbar">
     <button class="db-hamburger" id="db-hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="db-sidebar">
       <i data-lucide="menu" width="20" height="20" aria-hidden="true"></i>
@@ -129,7 +122,6 @@
     </div>
   </header>
 
-  <!-- ── Contenido ── -->
   <main class="db-main">
     <div class="db-page">
 
@@ -143,7 +135,6 @@
         </div>
       <?php endif; ?>
 
-      <!-- Header de la posición -->
       <div class="db-manage-header" style="margin-bottom:1.25rem;">
         <div class="db-manage-header-left">
           <div class="db-manage-header-top">
@@ -151,68 +142,108 @@
             <span class="db-badge db-badge--draft">Posición #<?= (int) $position['order_index'] ?></span>
           </div>
           <p class="db-manage-desc" style="margin-top:0.25rem;">
-            Sube fotos de tu local para este punto del tour.
+            Completa esta posición con una panorámica principal y, si quieres, añade Oxphyre Room como vista de detalle.
           </p>
         </div>
-      </div>
-
-      <!-- Toggle de modo + botón de ayuda -->
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-        <div class="upload-mode-toggle" role="group" aria-label="Tipo de foto">
-          <button type="button" class="upload-mode-btn <?= $activeMode === '4photos' ? 'active' : '' ?>"
-                  id="toggle-4photos" aria-pressed="<?= $activeMode === '4photos' ? 'true' : 'false' ?>">
-            4 Fotos
-          </button>
-          <button type="button" class="upload-mode-btn <?= $activeMode === 'panoramic' ? 'active' : '' ?>"
-                  id="toggle-panoramic" aria-pressed="<?= $activeMode === 'panoramic' ? 'true' : 'false' ?>">
-            Panorámica 360°
-          </button>
-        </div>
-        <button type="button" class="db-help-icon" id="reopen-tip" aria-label="Cómo hacer las fotos">
-          <i data-lucide="circle-help" width="16" height="16" aria-hidden="true"></i>
+        <button type="button" class="db-help-icon" id="reopen-tip" aria-label="Cómo completar una posición">
+          <i data-lucide="circle-help" width="18" height="18" aria-hidden="true"></i>
           <span class="db-help-tooltip">Ver instrucciones de subida</span>
         </button>
       </div>
 
-      <!-- Aviso de tiempo de procesado -->
       <div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:var(--ox-text-muted);
                   background:var(--ox-bg-elevated);border:1px solid var(--ox-border);border-radius:10px;
                   padding:0.875rem 1rem;margin-bottom:1.5rem;">
         <i data-lucide="cpu" width="16" height="16" style="flex-shrink:0;margin-top:1px;color:var(--ox-amber);" aria-hidden="true"></i>
-        <span>El procesado con IA puede tardar <strong>30–60 segundos por foto</strong>. Las fotos sin procesar se guardan igualmente.</span>
+        <span>El procesado con IA puede tardar <strong>30-60 segundos por foto</strong>. Las fotos sin procesar se guardan igualmente.</span>
       </div>
 
-      <!-- Formulario único con todos los campos de subida -->
       <form action="/dashboard/posicion/upload" method="POST"
             enctype="multipart/form-data" id="upload-form" novalidate>
-        <input type="hidden" name="csrf_token"   value="<?= $csrfToken ?>">
-        <input type="hidden" name="biz_slug"     value="<?= htmlspecialchars($business['slug']) ?>">
-        <input type="hidden" name="tour_slug"    value="<?= htmlspecialchars($tour['slug']) ?>">
-        <input type="hidden" name="position_id"  value="<?= (int) $position['id'] ?>">
+        <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+        <input type="hidden" name="biz_slug" value="<?= htmlspecialchars($business['slug']) ?>">
+        <input type="hidden" name="tour_slug" value="<?= htmlspecialchars($tour['slug']) ?>">
+        <input type="hidden" name="position_id" value="<?= (int) $position['id'] ?>">
 
-        <!-- ── SECCIÓN 4 FOTOS ─────────────────────────────────────────── -->
-        <div class="upload-section <?= $activeMode === '4photos' ? 'active' : '' ?>" id="section-4photos">
+        <section class="upload-flow-card upload-flow-card--required" aria-labelledby="panorama-title">
+          <div class="upload-flow-card-header">
+            <div>
+              <p class="upload-flow-kicker">Panorámica principal</p>
+              <h3 class="upload-flow-title" id="panorama-title">Obligatoria</h3>
+            </div>
+            <span class="db-badge <?= $hasPanorama ? 'db-badge--published' : 'db-badge--draft' ?>">
+              <?= $hasPanorama ? 'Completada' : 'Pendiente' ?>
+            </span>
+          </div>
 
-          <?php
-            // Mapa de orientaciones: clave BD → etiqueta visible
-            $orientations = [
-              'N' => 'Frente',
-              'S' => 'Fondo',
-              'E' => 'Izquierda',
-              'O' => 'Derecha',
-            ];
-          ?>
+          <p class="upload-flow-copy">
+            Será la vista principal que verán tus clientes al entrar en esta posición.
+          </p>
+          <p class="upload-flow-help">
+            Usa una panorámica hecha con tu móvil. No pasa nada si no cubre los 360º completos: Oxphyre limitará la vista para evitar zonas vacías.
+          </p>
+
+          <div class="db-upload-zone-360 <?= $photo360 ? 'has-file' : '' ?>" id="zone-360"
+               role="region" aria-label="Foto panorámica principal">
+
+            <?php if ($photo360): ?>
+              <img src="/uploads/<?= (int) $position['id'] ?>/<?= htmlspecialchars($photo360['filename']) ?>"
+                   alt="Foto panorámica principal" class="db-upload-zone-360-preview" id="preview-360">
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+                <span class="db-upload-zone-dir">Panorámica</span>
+                <?php if ($photo360['processed']): ?>
+                  <span class="db-badge db-badge--published" style="font-size:9px;">IA OK</span>
+                <?php else: ?>
+                  <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
+                <?php endif; ?>
+              </div>
+            <?php else: ?>
+              <img alt="" class="db-upload-zone-360-preview" id="preview-360" style="display:none;">
+              <div data-empty-360 class="upload-flow-empty">
+                <i data-lucide="panorama" width="32" height="32" aria-hidden="true"></i>
+                <span>Sin panorámica principal</span>
+              </div>
+            <?php endif; ?>
+
+            <input type="file" name="photo_360" id="input-360"
+                   class="db-upload-input" accept="image/jpeg,image/png,image/webp"
+                   aria-label="Seleccionar panorámica principal">
+            <button type="button" class="db-upload-btn" style="margin-top:0.5rem;"
+                    onclick="document.getElementById('input-360').click()">
+              <i data-lucide="upload" width="14" height="14" aria-hidden="true"></i>
+              <?= $photo360 ? 'Cambiar panorámica' : 'Subir panorámica' ?>
+            </button>
+          </div>
+        </section>
+
+        <section class="upload-flow-card" aria-labelledby="room-title">
+          <div class="upload-flow-card-header">
+            <div>
+              <p class="upload-flow-kicker">Oxphyre Room</p>
+              <h3 class="upload-flow-title" id="room-title">Opcional recomendado</h3>
+            </div>
+            <span class="db-badge <?= $hasOxphyreRoom ? 'db-badge--published' : 'db-badge--draft' ?>">
+              <?= $hasOxphyreRoom ? '4/4 · Disponible' : $roomPhotoCount . '/4 fotos' ?>
+            </span>
+          </div>
+
+          <p class="upload-flow-copy">
+            Añade 4 fotos para que tus clientes puedan ver esta zona con más detalle desde varios ángulos.
+          </p>
+          <p class="upload-flow-help">
+            Recomendamos fotos horizontales, con buena luz y subidas directamente desde el móvil.
+          </p>
 
           <div class="db-upload-grid">
             <?php foreach ($orientations as $dir => $label): ?>
               <?php $existing = $photosByDir[$dir] ?? null; ?>
               <div class="db-upload-zone <?= $existing ? 'has-file' : '' ?>"
-                   id="zone-<?= $dir ?>" role="region" aria-label="Foto <?= $label ?>">
+                   id="zone-<?= $dir ?>" role="region" aria-label="Foto <?= htmlspecialchars($label) ?>">
 
                 <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <span class="db-upload-zone-dir"><?= $label ?></span>
+                  <span class="db-upload-zone-dir"><?= htmlspecialchars($label) ?></span>
                   <?php if ($existing && $existing['processed']): ?>
-                    <span class="db-badge db-badge--published" style="font-size:9px;">IA ✓</span>
+                    <span class="db-badge db-badge--published" style="font-size:9px;">IA OK</span>
                   <?php elseif ($existing): ?>
                     <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
                   <?php endif; ?>
@@ -221,7 +252,7 @@
                 <div class="db-upload-preview" id="preview-<?= $dir ?>">
                   <?php if ($existing): ?>
                     <img src="/uploads/<?= (int) $position['id'] ?>/<?= htmlspecialchars($existing['filename']) ?>"
-                         alt="Foto <?= $label ?>"
+                         alt="Foto <?= htmlspecialchars($label) ?>"
                          style="display:block;width:100%;height:100%;object-fit:cover;">
                   <?php else: ?>
                     <img alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
@@ -234,79 +265,41 @@
 
                 <input type="file" name="photo_<?= $dir ?>" id="input-<?= $dir ?>"
                        class="db-upload-input" accept="image/jpeg,image/png,image/webp"
-                       aria-label="Seleccionar foto <?= $label ?>">
+                       aria-label="Seleccionar foto <?= htmlspecialchars($label) ?>">
                 <button type="button" class="db-upload-btn"
                         onclick="document.getElementById('input-<?= $dir ?>').click()">
                   <i data-lucide="upload" width="14" height="14" aria-hidden="true"></i>
                   <?= $existing ? 'Cambiar foto' : 'Seleccionar foto' ?>
                 </button>
-
               </div>
             <?php endforeach; ?>
           </div>
 
-          <!-- Botón AJAX para activar modo 4 fotos en el visor -->
-          <button type="button" class="btn-set-active <?= $activeMode === '4photos' ? 'is-active' : '' ?>"
-                  id="btn-use-4" aria-pressed="<?= $activeMode === '4photos' ? 'true' : 'false' ?>">
-            <i data-lucide="<?= $activeMode === '4photos' ? 'check-circle' : 'circle' ?>"
-               width="16" height="16" aria-hidden="true"></i>
-            <?= $activeMode === '4photos' ? '✓ Usando estas fotos en el visor' : 'Usar estas fotos en el visor' ?>
-          </button>
-
-        </div><!-- /section-4photos -->
-
-        <!-- ── SECCIÓN PANORÁMICA 360° ─────────────────────────────────── -->
-        <div class="upload-section <?= $activeMode === 'panoramic' ? 'active' : '' ?>" id="section-panoramic">
-
-          <p style="font-size:0.8125rem;color:var(--ox-text-muted);margin-bottom:1rem;">
-            Foto panorámica equirectangular (proporción 2:1 o más ancha).
-            Obtenida con el modo Panorama del móvil o una cámara 360°.
+          <p class="upload-flow-cta-note">
+            <?= $roomPhotoCount > 0 ? 'Actualizar fotos si ya existen.' : 'Subir fotos para activar la vista de detalle.' ?>
           </p>
+        </section>
 
-          <div class="db-upload-zone-360 <?= $photo360 ? 'has-file' : '' ?>" id="zone-360"
-               role="region" aria-label="Foto panorámica 360°">
-
-            <?php if ($photo360): ?>
-              <img src="/uploads/<?= (int) $position['id'] ?>/<?= htmlspecialchars($photo360['filename']) ?>"
-                   alt="Foto panorámica" class="db-upload-zone-360-preview" id="preview-360">
-              <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
-                <span class="db-upload-zone-dir">Panorámica</span>
-                <?php if ($photo360['processed']): ?>
-                  <span class="db-badge db-badge--published" style="font-size:9px;">IA ✓</span>
-                <?php else: ?>
-                  <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
-                <?php endif; ?>
-              </div>
-            <?php else: ?>
-              <img alt="" class="db-upload-zone-360-preview" id="preview-360" style="display:none;">
-              <i data-lucide="panorama" width="32" height="32"
-                 style="color:var(--ox-text-dim);" aria-hidden="true" id="icon-360"></i>
-              <span style="font-size:0.875rem;color:var(--ox-text-muted);">Sin foto panorámica</span>
-            <?php endif; ?>
-
-            <input type="file" name="photo_360" id="input-360"
-                   class="db-upload-input" accept="image/jpeg,image/png,image/webp"
-                   aria-label="Seleccionar foto panorámica 360°">
-            <button type="button" class="db-upload-btn" style="margin-top:0.5rem;"
-                    onclick="document.getElementById('input-360').click()">
-              <i data-lucide="upload" width="14" height="14" aria-hidden="true"></i>
-              <?= $photo360 ? 'Cambiar panorámica' : 'Seleccionar panorámica' ?>
-            </button>
-
+        <section class="upload-flow-card upload-flow-card--locked" aria-labelledby="hotspots-title">
+          <div class="upload-flow-card-header">
+            <div>
+              <p class="upload-flow-kicker">Hotspots de navegación</p>
+              <h3 class="upload-flow-title" id="hotspots-title">Próximamente</h3>
+            </div>
+            <span class="db-badge db-badge--draft">Sprint siguiente</span>
           </div>
+          <p class="upload-flow-copy">
+            Conecta esta posición con otras zonas del tour.
+          </p>
+          <p class="upload-flow-help">
+            Los hotspots aparecerán sobre la panorámica principal y permitirán que tus clientes viajen entre posiciones.
+          </p>
+          <div class="upload-flow-locked-row">
+            <i data-lucide="lock" width="16" height="16" aria-hidden="true"></i>
+            <span>Se configurará en el siguiente sprint.</span>
+          </div>
+        </section>
 
-          <!-- Botón AJAX para activar modo panorámica en el visor -->
-          <button type="button" class="btn-set-active <?= $activeMode === 'panoramic' ? 'is-active' : '' ?>"
-                  id="btn-use-360" aria-pressed="<?= $activeMode === 'panoramic' ? 'true' : 'false' ?>"
-                  <?= !$photo360 ? 'disabled title="Sube primero una foto panorámica"' : '' ?>>
-            <i data-lucide="<?= $activeMode === 'panoramic' ? 'check-circle' : 'circle' ?>"
-               width="16" height="16" aria-hidden="true"></i>
-            <?= $activeMode === 'panoramic' ? '✓ Usando panorámica en el visor' : 'Usar panorámica en el visor' ?>
-          </button>
-
-        </div><!-- /section-panoramic -->
-
-        <!-- Botones de navegación del formulario -->
         <div class="wizard-nav" style="margin-top:1.75rem;">
           <a href="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>"
              class="wizard-btn-back">
@@ -315,103 +308,86 @@
           </a>
           <button type="submit" class="wizard-btn-submit" id="btn-submit-upload">
             <i data-lucide="cpu" width="16" height="16" aria-hidden="true"></i>
-            Procesar con IA →
+            Guardar y procesar fotos →
           </button>
         </div>
-
       </form>
-
     </div>
   </main>
-
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
 
-  // ── Sidebar móvil ──────────────────────────────────────────────────────────
-  const sidebar   = document.getElementById('db-sidebar');
-  const overlay   = document.getElementById('db-overlay');
+  const sidebar = document.getElementById('db-sidebar');
+  const overlay = document.getElementById('db-overlay');
   const hamburger = document.getElementById('db-hamburger');
-  const closeBtn  = document.getElementById('db-sidebar-close');
+  const closeBtn = document.getElementById('db-sidebar-close');
 
-  const openSidebar  = () => { sidebar.classList.add('is-open'); overlay.classList.add('is-visible'); hamburger.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; };
-  const closeSidebar = () => { sidebar.classList.remove('is-open'); overlay.classList.remove('is-visible'); hamburger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; };
+  const openSidebar = () => {
+    sidebar.classList.add('is-open');
+    overlay.classList.add('is-visible');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeSidebar = () => {
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-visible');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
 
   hamburger.addEventListener('click', openSidebar);
   closeBtn.addEventListener('click', closeSidebar);
   overlay.addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar();
+  });
 
-  // ── Modal de ayuda ─────────────────────────────────────────────────────────
   const tipOverlay = document.getElementById('upload-tip-overlay');
-  const tipClose   = document.getElementById('tip-close');
-  const reopenTip  = document.getElementById('reopen-tip');
-  const TIP_KEY    = 'oxphyre_upload_tip_seen';
+  const tipClose = document.getElementById('tip-close');
+  const tipUnderstood = document.getElementById('tip-understood');
+  const tipNever = document.getElementById('tip-never');
+  const reopenTip = document.getElementById('reopen-tip');
+  const TIP_KEY = 'oxphyre_room_free_flow_tip_seen';
 
   function showTip() {
     tipOverlay.style.display = 'flex';
     tipOverlay.removeAttribute('aria-hidden');
-    // Re-renderizar iconos dentro del modal por si no existían cuando se ocultó
     lucide.createIcons();
   }
-  function hideTip() {
+
+  function hideTip(remember = false) {
+    if (remember) localStorage.setItem(TIP_KEY, '1');
     tipOverlay.style.display = 'none';
     tipOverlay.setAttribute('aria-hidden', 'true');
   }
 
-  // Mostrar la primera vez que el usuario entra a esta vista
-  if (!localStorage.getItem(TIP_KEY)) {
-    showTip();
-  }
+  if (!localStorage.getItem(TIP_KEY)) showTip();
 
-  tipClose.addEventListener('click', () => {
-    localStorage.setItem(TIP_KEY, '1');
-    hideTip();
-  });
+  tipClose.addEventListener('click', () => hideTip(false));
+  tipUnderstood.addEventListener('click', () => hideTip(false));
+  tipNever.addEventListener('click', () => hideTip(true));
+  reopenTip.addEventListener('click', showTip);
 
-  // El icono ? reabre el modal manualmente
-  reopenTip.addEventListener('click', () => showTip());
-
-  // Cerrar con Escape
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && tipOverlay.style.display !== 'none') hideTip();
+    if (e.key === 'Escape' && tipOverlay.style.display !== 'none') hideTip(false);
   });
 
-  // ── Toggle de secciones (4 Fotos / Panorámica) ────────────────────────────
-  const toggle4     = document.getElementById('toggle-4photos');
-  const toggle360   = document.getElementById('toggle-panoramic');
-  const section4    = document.getElementById('section-4photos');
-  const section360  = document.getElementById('section-panoramic');
-
-  function activateSection(mode) {
-    const is4 = mode === '4photos';
-    toggle4.classList.toggle('active', is4);
-    toggle360.classList.toggle('active', !is4);
-    toggle4.setAttribute('aria-pressed', is4 ? 'true' : 'false');
-    toggle360.setAttribute('aria-pressed', is4 ? 'false' : 'true');
-    section4.classList.toggle('active', is4);
-    section360.classList.toggle('active', !is4);
-  }
-
-  toggle4.addEventListener('click', () => activateSection('4photos'));
-  toggle360.addEventListener('click', () => activateSection('panoramic'));
-
-  // ── Preview de imágenes (4 fotos) ─────────────────────────────────────────
   ['N', 'S', 'E', 'O'].forEach(dir => {
-    const input       = document.getElementById(`input-${dir}`);
-    const zone        = document.getElementById(`zone-${dir}`);
-    const preview     = document.getElementById(`preview-${dir}`);
-    const img         = preview.querySelector('img');
-    const placeholder = preview.querySelector('.db-upload-preview-placeholder');
+    const input = document.getElementById(`input-${dir}`);
+    const zone = document.getElementById(`zone-${dir}`);
+    const preview = document.getElementById(`preview-${dir}`);
+    const img = preview?.querySelector('img');
+    const placeholder = preview?.querySelector('.db-upload-preview-placeholder');
 
-    input.addEventListener('change', () => {
+    input?.addEventListener('change', () => {
       const file = input.files[0];
-      if (!file) return;
+      if (!file || !img) return;
       const reader = new FileReader();
       reader.onload = ev => {
-        img.src           = ev.target.result;
+        img.src = ev.target.result;
         img.style.display = 'block';
         if (placeholder) placeholder.style.display = 'none';
         zone.classList.add('has-file');
@@ -420,78 +396,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Preview de la panorámica 360° ─────────────────────────────────────────
   const input360 = document.getElementById('input-360');
-  const zone360  = document.getElementById('zone-360');
-  const img360   = document.getElementById('preview-360');
-  const icon360  = document.getElementById('icon-360');
+  const zone360 = document.getElementById('zone-360');
+  const img360 = document.getElementById('preview-360');
+  const empty360 = zone360?.querySelector('[data-empty-360]');
 
   input360?.addEventListener('change', () => {
     const file = input360.files[0];
-    if (!file) return;
+    if (!file || !img360) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      img360.src           = ev.target.result;
+      img360.src = ev.target.result;
       img360.style.display = 'block';
-      if (icon360) icon360.style.display = 'none';
+      if (empty360) empty360.style.display = 'none';
       zone360.classList.add('has-file');
-      // Habilitar botón "Usar panorámica" si estaba deshabilitado
-      document.getElementById('btn-use-360').disabled = false;
     };
     reader.readAsDataURL(file);
   });
 
-  // ── Botones AJAX "Usar en el visor" ───────────────────────────────────────
-  const positionId = <?= (int) $position['id'] ?>;
-  const bizSlug    = '<?= addslashes($business['slug']) ?>';
-  const tourSlug   = '<?= addslashes($tour['slug']) ?>';
-  const csrfToken  = document.querySelector('[name=csrf_token]').value;
-
-  async function setActiveMode(mode) {
-    try {
-      const resp = await fetch('/dashboard/posicion/set-mode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          csrf_token:  csrfToken,
-          biz_slug:    bizSlug,
-          tour_slug:   tourSlug,
-          position_id: positionId,
-          mode,
-        }),
-      });
-      const data = await resp.json();
-      if (data.success) updateActiveModeUI(mode);
-    } catch (err) {
-      console.warn('[upload] Error al cambiar modo:', err);
-    }
-  }
-
-  function updateActiveModeUI(activeMode) {
-    const btn4   = document.getElementById('btn-use-4');
-    const btn360 = document.getElementById('btn-use-360');
-    const is4    = activeMode === '4photos';
-
-    btn4.classList.toggle('is-active', is4);
-    btn4.setAttribute('aria-pressed', is4 ? 'true' : 'false');
-    btn4.innerHTML = `<i data-lucide="${is4 ? 'check-circle' : 'circle'}" width="16" height="16" aria-hidden="true"></i> ${is4 ? '✓ Usando estas fotos en el visor' : 'Usar estas fotos en el visor'}`;
-
-    btn360.classList.toggle('is-active', !is4);
-    btn360.setAttribute('aria-pressed', is4 ? 'false' : 'true');
-    btn360.innerHTML = `<i data-lucide="${!is4 ? 'check-circle' : 'circle'}" width="16" height="16" aria-hidden="true"></i> ${!is4 ? '✓ Usando panorámica en el visor' : 'Usar panorámica en el visor'}`;
-
-    lucide.createIcons();
-  }
-
-  document.getElementById('btn-use-4')  ?.addEventListener('click', () => setActiveMode('4photos'));
-  document.getElementById('btn-use-360')?.addEventListener('click', () => setActiveMode('panoramic'));
-
-  // ── Deshabilitar submit durante el procesado ───────────────────────────────
-  const form      = document.getElementById('upload-form');
+  const form = document.getElementById('upload-form');
   const btnSubmit = document.getElementById('btn-submit-upload');
 
   form.addEventListener('submit', () => {
-    btnSubmit.disabled    = true;
+    btnSubmit.disabled = true;
     btnSubmit.textContent = 'Procesando con IA...';
   });
 });

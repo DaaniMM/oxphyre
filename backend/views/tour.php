@@ -16,6 +16,11 @@
 <!-- Contenedor principal de PSV — ocupa 100vw × 100vh -->
 <div id="psv-viewer"></div>
 
+<div class="tour-unavailable" id="tour-unavailable" hidden>
+  <h1>Tour no disponible</h1>
+  <p>Este tour todavía no está listo.</p>
+</div>
+
 <?php if ($hasWatermark): ?>
 <!-- Marca de agua: solo visible en plan Free -->
 <div class="tour-watermark">
@@ -43,6 +48,21 @@
 <button id="tour-gyro-btn" type="button" aria-label="Activar giroscopio">
   <i data-lucide="compass" width="20" height="20" aria-hidden="true"></i>
 </button>
+
+<button id="tour-details-btn" class="tour-details-btn" type="button" hidden>
+  Ver detalles
+</button>
+
+<div id="room-viewer" class="room-viewer" hidden aria-hidden="true">
+  <div class="room-hud">
+    <div>
+      <strong>Oxphyre Room</strong>
+      <span>Arrastra para mirar alrededor</span>
+    </div>
+    <button id="room-back-btn" type="button">Volver a vista principal</button>
+  </div>
+  <div id="room-track" class="room-track" aria-live="polite"></div>
+</div>
 
 <!-- Datos del tour inyectados como variable JS global para tour-viewer.js -->
 <script>

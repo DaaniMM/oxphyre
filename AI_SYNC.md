@@ -41,7 +41,7 @@ Estado implementado:
 - Procesado MiDaS en servidor mediante microservicio Flask.
 - CLAHE para mejora automática de imagen.
 - Visor público con Photo Sphere Viewer v4.
-- Sistema dual de fotos por posición: 4 fotos normales o panorámica.
+- Sprint 1 Oxphyre Room Free/base implementado, pendiente de validación manual: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
 - Soft delete en businesses, tours, positions y photos.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
 
@@ -72,11 +72,13 @@ Estado implementado:
 - Three.js sigue formando parte del proyecto: landing, efectos visuales y base interna de PSV.
 
 ### Sistema de fotos por posición
-Cada posición puede tener dos modos:
-- `4photos`: Frente/Fondo/Izquierda/Derecha, guardadas internamente como N/S/E/O.
-- `panoramic`: panorámica guardada como direction='360'.
-
-`positions.active_mode` decide qué modo usa el visor.
+Sprint 1 implementado, pendiente de validación manual:
+- `photos.direction = '360'` define la panorámica principal obligatoria de una posición.
+- `photos.direction = N/S/E/O` define las 4 fotos que activan Oxphyre Room como vista opcional de detalle.
+- El visor público entra siempre en la panorámica principal.
+- Las posiciones sin panorámica no se muestran en el tour público.
+- El botón público "Ver detalles" solo aparece si existen las 4 fotos N/S/E/O completas.
+- `positions.active_mode` se mantiene como campo heredado/compatibilidad durante la transición, pero ya no debe controlar el nuevo flujo público.
 
 Las panorámicas de smartphone pueden ser parciales, no necesariamente 360° equirectangulares reales. La UI debe explicarlo sin prometer cobertura total cuando no exista.
 
@@ -126,7 +128,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Si n8n entra en el TFG o queda documentado como integración futura.
 - Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
 - Existe una propuesta consolidada en `Planes_Oxphyre.md` para redefinir Free/Pro/Business: Free como prueba limitada con 3 posiciones, Pro como plan comercial profesional y Business como premium/Gaussian. Todavía no es decisión definitiva; no aplicar a código ni documentación principal hasta validar el visor Free y confirmar la estrategia comercial.
-- Existe `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta del nuevo flujo Free/base: panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos, hotspots sobre panorámica y botón "Ver detalles" si hay 4 fotos completas. No sustituye todavía `CLAUDE.md`; se debe implementar y validar Sprint 1 antes de convertirlo en decisión oficial.
+- Existe `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta del nuevo flujo Free/base: panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos, hotspots sobre panorámica y botón "Ver detalles" si hay 4 fotos completas. Sprint 1 está implementado y queda pendiente de validación manual antes de convertirlo en decisión oficial o sincronizarlo en `CLAUDE.md`.
 
 ---
 
@@ -185,12 +187,12 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
-Última decisión documentada:
-- 3D Gaussian Splatting queda como dirección comercial definitiva post-TFG de Oxphyre.
-- Stack decidido: OpenSplat como herramienta externa sin modificar y SuperSplat Viewer como visor MIT.
-- Legalidad revisada: Oxphyre puede mantener privado su código PHP/backend/dashboard si usa OpenSplat como herramienta externa.
-- Producción futura: procesado en infraestructura controlada por Oxphyre o GPU bajo demanda.
-- Para TFG: no es core obligatorio; solo demo pregenerada si da tiempo.
+Última sesión de implementación:
+- Sprint 1 Oxphyre Room Free/base implementado en pantalla de subida y visor público.
+- La pantalla de subida muestra panorámica principal obligatoria, Oxphyre Room opcional 4/4 y hotspots como próximo sprint.
+- El visor público filtra posiciones sin panorámica, entra siempre en `direction='360'` y muestra "Ver detalles" solo si hay N/S/E/O completas.
+- Oxphyre Room MVP carga las 4 fotos en una escena Three.js tipo Direction Sphere, con paneles curvos, arrastre, brújula N/E/S/O y botón "Volver a vista principal".
+- Estado: pendiente de validación manual visual/funcional antes de actualizar `CLAUDE.md` como decisión oficial.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.
@@ -202,14 +204,17 @@ Sesión anterior importante:
 
 ## Próximo paso recomendado
 
-Antes de seguir con otras features, el próximo sprint recomendado es el Sprint 1 de `Oxphyre_Room_Free_Flow.md`:
+Validar manualmente Sprint 1 de `Oxphyre_Room_Free_Flow.md` antes de seguir con otras features:
 
 **Nota operativa:** aunque `CLAUDE.md` y parte de la documentación histórica describen el sistema vigente basado en `positions.active_mode` como selector entre `4photos` y `panoramic`, el flujo que se va a probar ahora es el definido en `Oxphyre_Room_Free_Flow.md`. Sigue siendo propuesta hasta validar Sprint 1, pero es la referencia operativa actual para la siguiente implementación.
 
-- Adaptar pantalla de subida al nuevo flujo: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
-- Adaptar visor público para entrar siempre en la panorámica principal y mostrar "Ver detalles" solo si hay 4 fotos completas.
-- Mantener hotspots sobre panorámica, no dentro de Oxphyre Room.
-- No mostrar posiciones sin panorámica en el tour público.
+- Probar posición sin panorámica: debe aparecer incompleta en dashboard y no mostrarse en visor público.
+- Probar panorámica subida: el visor debe entrar en la panorámica principal.
+- Probar 1, 2 o 3 fotos N/S/E/O: contador parcial en dashboard y sin botón "Ver detalles" público.
+- Probar 4/4 fotos: estado "4/4 · Disponible" y botón "Ver detalles" público.
+- Probar abrir Oxphyre Room, arrastrar para mirar y volver a vista principal.
+- Comprobar en Oxphyre Room que N = Frente, E = Derecha, S = Fondo y O = Izquierda.
+- Revisar responsive básico y consola JS.
 - Mantener `positions.active_mode` como lógica actual/compatibilidad durante la transición; el documento propone dejarlo como campo heredado cuando el nuevo flujo esté implementado y validado.
 - No actualizar `CLAUDE.md` como decisión oficial hasta validar Sprint 1 funcionando.
 
