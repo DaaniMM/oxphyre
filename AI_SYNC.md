@@ -90,7 +90,17 @@ Las panorámicas de smartphone pueden ser parciales, no necesariamente 360° equ
 - Free: 1 negocio, 1 tour, hasta 5 posiciones.
 - Pro: MiDaS en todas las posiciones, más negocios, más posiciones, QR, embed, minimapa, hotspots, analíticas básicas.
 - Business: funciones avanzadas, dominio personalizado, usuarios, API, analíticas avanzadas y features futuras.
-- Agente IA completo y 3D Gaussian Splatting quedan como roadmap/post-TFG salvo decisión contraria.
+- Agente IA completo queda como roadmap/post-TFG salvo decisión contraria.
+
+### 3D Gaussian Splatting post-TFG
+- 3D Gaussian Splatting queda como dirección comercial definitiva post-TFG de Oxphyre.
+- No forma parte del core obligatorio del TFG.
+- Para el TFG solo se contempla una demo pregenerada si da tiempo.
+- OpenSplat se usará como herramienta externa sin modificar, igual que MiDaS.
+- Oxphyre mantiene privado su código PHP, backend y dashboard.
+- Los vídeos de clientes se procesan en infraestructura controlada por Oxphyre o en GPU bajo demanda.
+- El cliente no interactúa con OpenSplat; ve una experiencia de marca tipo "Oxphyre 3D Capture".
+- El valor comercial no es solo la herramienta open source, sino el pack completo: captura guiada, procesado automático, hosting, visor, QR, embed, analíticas, soporte y UX para PYMES.
 
 ### Soft delete
 Soft delete activo en:
@@ -114,7 +124,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Cómo enseñar las limitaciones de panorámicas parciales de móvil sin empeorar la percepción del producto.
 - Cuándo implementar modo claro: está pendiente hasta cerrar bien modo oscuro y funcionalidad principal.
 - Si n8n entra en el TFG o queda documentado como integración futura.
-- Cómo presentar 3D Gaussian Splatting en la memoria/exposición: como roadmap potente, no como núcleo obligatorio del TFG.
+- Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
 
 ---
 
@@ -174,11 +184,11 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Última decisión documentada:
-- Roadmap post-TFG de 3D Gaussian Splatting.
-- Stack decidido: OpenSplat para procesado y SuperSplat Viewer para renderizado.
-- Legalidad revisada: Oxphyre puede mantener su código privado si usa OpenSplat como herramienta externa sin modificarlo.
-- Producción futura: instancia GPU bajo demanda.
-- Para TFG: mostrarlo como evolución o tecnología futura, no como requisito del núcleo actual.
+- 3D Gaussian Splatting queda como dirección comercial definitiva post-TFG de Oxphyre.
+- Stack decidido: OpenSplat como herramienta externa sin modificar y SuperSplat Viewer como visor MIT.
+- Legalidad revisada: Oxphyre puede mantener privado su código PHP/backend/dashboard si usa OpenSplat como herramienta externa.
+- Producción futura: procesado en infraestructura controlada por Oxphyre o GPU bajo demanda.
+- Para TFG: no es core obligatorio; solo demo pregenerada si da tiempo.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.

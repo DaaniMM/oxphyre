@@ -1332,3 +1332,15 @@ Creado archivo AI_SYNC.md para garantizar contexto entre ClaudeCode y Codex.
 Se añadió al final de `AGENTS.md` una sección de coordinación entre IAs.
 
 **Motivo:** dejar claro qué función cumple cada archivo de contexto: `AI_SYNC.md` como fuente rápida del estado actual, `DEVLOG.md` como historial completo y `CLAUDE.md` como contexto general. También se documentó cuándo actualizar `DEVLOG.md` y `AI_SYNC.md` para evitar duplicar información.
+
+## 2026-05-12 — Decisión comercial post-TFG sobre 3D Gaussian Splatting
+
+Se refinó la decisión sobre 3D Gaussian Splatting como dirección comercial definitiva post-TFG de Oxphyre.
+
+**Decisión:** OpenSplat se mantiene como herramienta externa AGPLv3 sin modificar, igual que MiDaS. SuperSplat Viewer se confirma como visor MIT para renderizar el resultado en navegador.
+
+**Motivo legal y técnico:** usar OpenSplat como herramienta externa sin modificarlo permite que el código PHP, backend, dashboard y lógica de negocio de Oxphyre permanezcan privados. El valor comercial de Oxphyre no es solo la herramienta open source, sino el producto completo: captura guiada, procesado automático, hosting, visor, QR, embed, analíticas, soporte y UX para PYMES.
+
+**Alcance TFG:** 3D Gaussian Splatting no se implementa como núcleo obligatorio del TFG por tiempo, coste GPU y riesgo de desestabilizar la entrega. Para el TFG solo se contempla una demo pregenerada en el PC local con RTX 3060 si da tiempo.
+
+**Visión comercial:** tras la entrega, Gaussian Splatting queda como la evolución principal para convertir Oxphyre en producto comercial real. El cliente no interactúa con OpenSplat; ve una experiencia de marca tipo "Oxphyre 3D Capture". Los vídeos de clientes se procesan en infraestructura controlada por Oxphyre o GPU bajo demanda.

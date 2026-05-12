@@ -312,6 +312,14 @@ La UX debe camuflar el tiempo de espera:
 
 **Decisión vigente:** No borrar este roadmap. No implementarlo como prioridad TFG salvo aprobación explícita. Mantenerlo como visión post-TFG y diferenciación futura.
 
+### Decisión comercial post-TFG
+
+**Estado actual:** 3D Gaussian Splatting queda como la dirección comercial definitiva post-TFG de Oxphyre. No forma parte del core obligatorio del TFG; para la entrega solo se contempla una demo pregenerada si da tiempo y no compromete estabilidad.
+
+**Nota histórica:** OpenSplat se confirmó como herramienta externa AGPLv3 sin modificar, igual que MiDaS. SuperSplat Viewer se mantiene como visor MIT para servir el resultado en navegador. Esta decisión conserva el razonamiento legal ya documentado: la obligación AGPLv3 afecta a modificaciones de OpenSplat, no al código PHP, backend, dashboard ni lógica de negocio de Oxphyre cuando se usa como herramienta externa.
+
+**Decisión vigente:** Oxphyre mantiene privado su código PHP/backend/dashboard. Los vídeos de clientes se procesan en infraestructura controlada por Oxphyre o GPU bajo demanda. El cliente no interactúa con OpenSplat: ve una experiencia de marca tipo **"Oxphyre 3D Capture"**. El valor comercial no es solo usar una herramienta open source, sino ofrecer el pack completo: captura guiada, procesado automático, hosting, visor, QR, embed, analíticas, soporte y UX pensada para PYMES.
+
 ### Qué es y por qué es relevante para Oxphyre
 3D Gaussian Splatting (3DGS) es una tecnología de reconstrucción 3D que permite
 al visitante MOVERSE LIBREMENTE por el espacio — no solo girar desde un punto fijo
