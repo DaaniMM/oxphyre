@@ -61,6 +61,7 @@ Tipos de commit: feat, fix, docs, style, refactor, chore
 - Animaciones con transform y opacity (GPU), nunca con propiedades que causan reflow.
 
 ## Prioridad de desarrollo actual
+> Roadmap base del proyecto desde cero. Para saber el estado real actual y el próximo paso vivo, consultar `AI_SYNC.md`.
 1. Landing desplegada en https://oxphyre.com — revisar visualmente y ajustar bugs visuales pendientes
 2. Auth completa: registro, verificación email, login, recuperar contraseña
 3. Dashboard base con navegación y layout
@@ -70,3 +71,21 @@ Tipos de commit: feat, fix, docs, style, refactor, chore
 7. Vista tour Three.js con hotspots y minimapa
 8. QR descargable con analíticas
 9. Ver DEVLOG.md para historial completo
+
+## Coordinación entre IAs
+
+- AI_SYNC.md es la fuente rápida de verdad del estado actual.
+- DEVLOG.md es el historial completo.
+- CLAUDE.md es el contexto general del proyecto.
+- Antes de cualquier tarea importante, leer AGENTS.md, CLAUDE.md, DEVLOG.md y AI_SYNC.md.
+- No contradecir AI_SYNC.md salvo que haya un problema claro y se explique antes.
+
+### Cómo actualizar DEVLOG.md y AI_SYNC.md
+
+- DEVLOG.md debe registrar el historial: qué se hizo, qué archivos se tocaron, qué bugs se corrigieron, qué decisiones se tomaron y por qué.
+- AI_SYNC.md debe reflejar el estado actual: decisiones activas, problemas pendientes, ideas en debate, opciones descartadas y próximo paso recomendado.
+- No copiar la misma información en ambos archivos.
+- Si algo ya está cerrado y forma parte del historial, va en DEVLOG.md.
+- Si algo afecta a cómo debe continuar la siguiente IA, va en AI_SYNC.md.
+- Al terminar una tarea importante, actualizar DEVLOG.md y actualizar AI_SYNC.md solo si cambió el estado actual del proyecto.
+

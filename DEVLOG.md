@@ -1324,3 +1324,11 @@ Decisión documentada en la nueva sección "## Roadmap post-TFG: 3D Gaussian Spl
 **Herramientas descartadas:** Luma AI, Polycam (de pago sin API gratuita), Google Street View (eliminada de stores en 2023), gran angular de smartphone (calidad inaceptable).
 
 Ver CLAUDE.md para el detalle completo: stack técnico, pipeline, tiers de producto, instrucciones de captura y estado actual.
+
+## 2026-05-12 — Coordinación entre IAs añadida a AGENTS.md
+
+Activado Codex para mejorar efectividad y velocidad en producción.
+Creado archivo AI_SYNC.md para garantizar contexto entre ClaudeCode y Codex.
+Se añadió al final de `AGENTS.md` una sección de coordinación entre IAs.
+
+**Motivo:** dejar claro qué función cumple cada archivo de contexto: `AI_SYNC.md` como fuente rápida del estado actual, `DEVLOG.md` como historial completo y `CLAUDE.md` como contexto general. También se documentó cuándo actualizar `DEVLOG.md` y `AI_SYNC.md` para evitar duplicar información.

@@ -3,43 +3,72 @@
 > Lee también AGENTS.md para instrucciones de comportamiento.
 > Lee DEVLOG.md para historial completo de decisiones y avances.
 
+## Fuentes de verdad del proyecto
+
+**Estado actual:** `CLAUDE.md` es el documento amplio de contexto, visión de producto, decisiones técnicas/comerciales y razonamiento. `AI_SYNC.md` es la fuente rápida del estado vivo actual y del próximo paso recomendado. `DEVLOG.md` es el historial completo de lo que se hizo, cuándo, con qué archivos y por qué. `AGENTS.md` contiene las normas de comportamiento, seguridad, estilo y coordinación entre IAs.
+
+**Nota histórica:** Antes, parte del estado vivo y parte del historial quedaban mezclados dentro de `CLAUDE.md`. Eso era útil para no perder contexto, pero podía confundir a una IA futura si una decisión antigua ya había sido sustituida por otra más reciente.
+
+**Decisión vigente:** Si hay contradicción, usar este orden: 1) `DEVLOG.md` para confirmar historial real, 2) `AI_SYNC.md` para estado vivo actual, 3) `CLAUDE.md` como contexto general que debe mantenerse sincronizado, 4) `AGENTS.md` para normas de trabajo.
+
 ## Qué es Oxphyre
-SaaS de tours virtuales inmersivos para pequeños negocios locales. El dueño sube fotos de su local (4 por posición: N,S,E,O) → Python + MiDaS genera mapas de profundidad reales (disponible en Pro y Business) → editor canvas drag&drop permite construir la estructura de navegación del local → Three.js renderiza el tour inmersivo con hotspots, minimapa (Pro/Business) y tour guiado (Pro/Business) → clientes visitan escaneando un QR o mediante embed en su web (Pro/Business). Plan Free incluye 1 posición con MiDaS de prueba y 4 posiciones con esfera Three.js navegable sin profundidad IA.
+
+**Estado actual:** Oxphyre es un SaaS de tours virtuales inmersivos para pequeños negocios locales y, a la vez, el proyecto TFG de 2º DAW. El dueño crea un negocio, crea tours, añade posiciones, sube fotos por posición y publica una experiencia visitable mediante URL pública, QR o embed según el plan. El producto mantiene la visión completa: posiciones conectadas, mapas de profundidad MiDaS, editor canvas drag & drop, QR descargable, embed, hotspots, minimapa, analíticas, planes Free/Pro/Business y evolución comercial real.
+
+El visor público vigente usa **Photo Sphere Viewer v4**, basado en Three.js. Three.js sigue formando parte del proyecto, especialmente en la landing, efectos visuales y como base técnica del ecosistema PSV, pero el visor público manual anterior en Three.js ya no es la solución principal.
+
+**Nota histórica:** El planteamiento inicial era un visor Three.js propio: esfera navegable, shader de profundidad, giroscopio, hotspots, minimapa y cambio de texturas implementados a mano. Ese enfoque permitió validar el concepto y construir una primera versión inmersiva, pero al probar fotos reales de smartphone aparecieron problemas críticos: FOV/zoom incorrecto, distorsión en panorámicas, depth map visible como textura, touch y giroscopio frágiles.
+
+**Decisión vigente:** No volver al visor público Three.js manual salvo problema claro, justificado y aprobado. Mantener Photo Sphere Viewer v4 como visor público actual. Mantener Three.js como parte activa del stack para la landing, efectos visuales y base interna de PSV. El producto sigue orientado a PYMES con smartphone normal: no exigir cámara 360° profesional ni hardware especial.
 
 #### -- 08/05/2026 -- Decisión crítica sobre el visor y upload de fotos
 ### Sistema de subida de fotos por posición
-Cada posición acepta DOS tipos de foto (pueden coexistir, solo una activa):
 
-**Modo 4 fotos** (default):
-- El usuario sube hasta 4 fotos normales con su móvil
-- Etiquetas UI: Frente/Fondo/Izquierda/Derecha (internamente N/S/E/O en BD)
-- El visor muestra la foto correspondiente según la dirección que mira el usuario
-- Transición suave (fade) al cambiar de dirección
+**Estado actual:** Cada posición acepta dos modos de imagen. Ambos pueden coexistir en BD, pero solo uno queda activo para el visor mediante `positions.active_mode`.
 
-**Modo panorámica 360°**:
-- El usuario sube 1 foto equirectangular (relación 2:1)
-- Se guarda con direction='360' en la tabla photos
-- El visor mapea la foto completa en la esfera — cobertura 360° continua
+**Modo 4 fotos** (`active_mode='4photos'`, default):
+- El usuario sube hasta 4 fotos normales con su móvil.
+- Etiquetas UI: Frente/Fondo/Izquierda/Derecha.
+- Internamente se guardan como N/S/E/O en `photos.direction`.
+- PSV muestra la foto correspondiente según la dirección de mirada.
+- Es el modo principal porque funciona con cualquier smartphone normal, sin hardware adicional.
 
-**BD:** positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'
-**Visor:** usa active_mode para decidir cómo renderizar la posición
+**Modo panorámica** (`active_mode='panoramic'`):
+- El usuario sube una panorámica.
+- Se guarda con `photos.direction='360'`.
+- Puede ser panorámica parcial de smartphone, no necesariamente equirectangular 360°x180° real.
+- PSV debe mostrarla sin distorsión grave y la UI no debe prometer cobertura total cuando la imagen no la tenga.
+
+**BD:** `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'`.
+**Visor:** usa `active_mode` para decidir qué imagen cargar y cómo renderizar la posición.
+
+**Nota histórica:** El 08/05/2026 se decidió permitir una panorámica 360° equirectangular como alternativa ideal al modo de 4 fotos. El 09/05/2026, tras probar fotos reales de iPhone/smartphone, se ajustó la decisión: muchos móviles generan panorámicas cilíndricas o parciales (~270°), no equirectangulares completas. Photo Sphere Viewer v4 se eligió porque gestiona mejor panorámicas, touch, giroscopio y FOV que el visor manual.
+
+**Decisión vigente:** Mantener el sistema dual `4photos`/`panoramic`. No exigir cámaras 360°. No recomendar gran angular como solución principal porque sacrifica calidad. No prometer 360° completo si el usuario sube una panorámica parcial. Si una parte antigua habla de “panorámica 360° equirectangular”, debe leerse como el ideal histórico, no como requisito actual.
 
 ## Stack técnico
-- **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js
+- **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js + Photo Sphere Viewer v4
+- **Visor público:** Photo Sphere Viewer v4, basado en Three.js
+- **Uso directo de Three.js:** landing, hero, efectos visuales y base técnica del ecosistema PSV
 - **Backend:** PHP 8.1 puro, patrón MVC, Front Controller (todo pasa por index.php)
 - **BD:** MySQL 8.0 · BD: `oxphyre` · usuario: `oxphyre`@`localhost`
-- **Python:** Flask + Pillow + MiDaS (Intel, open source, profundidad real con IA gratuita)
+- **Python servidor:** Flask + Pillow + OpenCV/CLAHE + MiDaS Small (Intel, open source, profundidad real con IA gratuita)
+- **Python local/demo:** MiDaS DPT-Hybrid + CUDA en PC local con RTX 3060 para generar tours demo de máxima calidad
 - **Emails:** PHPMailer + Gmail SMTP
-- **Despliegue:** AWS EC2 · IP: 13.62.93.7 · Dominio: https://oxphyre.com
+- **Despliegue:** AWS EC2 t3.small · IP: 13.62.93.7 · Dominio: https://oxphyre.com
 - **OS servidor:** Ubuntu 22.04 · Nginx · PHP-FPM · Let's Encrypt
 - **Repo:** /var/www/oxphyre en servidor · github.com/DaaniMM/oxphyre
+
+**Nota histórica:** El stack empezó con Three.js como visor público propio. La migración a PSV v4 no cambia la arquitectura base: sigue siendo JS vanilla y Three.js sigue presente, pero delega el visor público a una librería especializada y mantenida.
+
+**Decisión vigente:** Mantener PHP puro MVC, MySQL, JS vanilla, Three.js/PSV y Python Flask. No introducir React, Vue, Angular, Laravel, Symfony, Bootstrap ni frameworks no autorizados.
 
 ## Estructura del proyecto
 oxphyre/
 public/              → frontend servido por Nginx
 assets/            → imágenes, iconos, fuentes
 css/               → estilos compilados
-js/                → scripts vanilla + Three.js
+js/                → scripts vanilla + Three.js + visor PSV
 uploads/           → fotos procesadas de los negocios
 backend/
 controllers/       → lógica de negocio
@@ -48,7 +77,8 @@ views/             → templates PHP
 routes/            → mini-router
 middleware/        → auth, roles, rate limiting
 config/            → BD, constantes, .env loader
-python-service/      → Flask + Pillow + MiDaS
+services/          → servicios PHP como MiDaSService para hablar con Flask
+python-service/      → Flask + Pillow + OpenCV/CLAHE + MiDaS Small
 venv/              → en .gitignore, no se sube
 docs/                → memoria TFG
 DEVLOG.md            → diario de desarrollo
@@ -57,7 +87,18 @@ CLAUDE.md            → este archivo
 .env                 → credenciales (en .gitignore, nunca a GitHub)
 
 ## Base de datos - tablas principales
-users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans, contact_messages, cookies_consent
+
+**Estado actual:** Tablas principales: `users`, `businesses`, `plans`, `tours`, `positions`, `photos`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent`, `login_attempts`.
+
+**Campos y reglas importantes:**
+- `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` decide qué modo usa el visor.
+- `photos.direction='360'` identifica la panorámica de una posición.
+- `login_attempts` existe para rate limiting de login.
+- `businesses`, `tours`, `positions` y `photos` tienen soft delete con `deleted_at`.
+
+**Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan y que el dueño elija qué modo queda activo.
+
+**Decisión vigente:** Todos los modelos deben usar prepared statements. En tablas con soft delete, no usar `DELETE FROM`; usar `UPDATE ... SET deleted_at = NOW()` y filtrar `deleted_at IS NULL` en todos los SELECT.
 
 ## Rutas importantes del servidor
 - Proyecto: `/var/www/oxphyre`
@@ -67,13 +108,27 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Certbot: `/etc/letsencrypt/live/oxphyre.com/`
 - Python venv: `/var/www/oxphyre/python-service/venv`
 
+## Estado implementado resumido
+
+**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo (registro, verificación email, login, logout y recuperación de contraseña), dashboard base con navegación/métricas/layout, wizard de creación de negocio, listado y gestión de negocios, creación/edición/publicación/soft delete de tours, creación de posiciones, subida de fotos por posición, procesado MiDaS en servidor mediante Flask, CLAHE para mejora automática de imagen, visor público con Photo Sphere Viewer v4, sistema dual de fotos por posición y soft delete en `businesses`, `tours`, `positions` y `photos`.
+
+**Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
+
+**Decisión vigente:** Antes de implementar algo, comprobar si ya existe. Si se necesita el estado vivo y la prioridad inmediata, consultar `AI_SYNC.md`.
+
 ## Planes SaaS — Definición técnica y comercial
+
+**Estado actual:** Los planes Free, Pro y Business siguen siendo la definición técnica y comercial del producto. Esta sección conserva precios, límites, features y posicionamiento de cada plan porque forma parte de la visión comercial y del TFG. Algunas capacidades están implementadas, otras están en desarrollo TFG y otras pertenecen al roadmap.
+
+**Nota histórica:** Parte de esta definición se escribió cuando el visor principal era Three.js manual. Tras la migración a PSV, las referencias a “esfera Three.js” deben interpretarse como visor público navegable basado en PSV/Three.js, no como obligación de volver al visor manual anterior.
+
+**Decisión vigente:** No simplificar ni borrar la definición comercial de planes. Al implementar una feature concreta, verificar en `AI_SYNC.md` y `DEVLOG.md` si está lista, pendiente o en roadmap.
 
 ### FREE (0€)
 - 1 tour, 1 negocio (no se pueden crear más tours ni negocios adicionales)
 - Hasta 5 posiciones por tour
 - 1 posición con MiDaS real incluida como crédito de prueba permanente
-- Las otras 4 posiciones: esfera Three.js navegable con efecto parallax/giroscopio, sin profundidad IA (foto plana dentro de la esfera)
+- Las otras 4 posiciones: visor navegable basado en PSV/Three.js, sin profundidad IA (foto plana). Históricamente se planteó como esfera Three.js con efecto parallax/giroscopio; tras la migración a PSV, el shader/parallax MiDaS sobre PSV queda pendiente de reimplementar o descartar.
 - Todas las posiciones conectadas con hotspots navegables (misma estructura que Pro)
 - Sin minimapa
 - Sin embed/iframe — solo enlace público oxphyre.com/[slug-negocio]
@@ -121,9 +176,20 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - El tribunal evaluará específicamente: SEO, PageSpeed, seguridad (intentarán inyecciones SQL y XSS), UX/UI, MVC correcto
 - Exposición: profesores probarán la app en tiempo real desde sus portátiles escaneando un QR
 
+**Decisión vigente:** Para el TFG prima estabilidad, seguridad, SEO, PageSpeed, UX y demo fiable sobre ampliar alcance. No sacrificar calidad ni robustez por añadir features grandes de roadmap.
+
 ### Estrategia de procesado MiDaS y demo para la exposición
 
+**Estado actual:** El servidor t3.small usa MiDaS Small mediante un microservicio Flask en localhost, gestionado con systemd. El flujo de subida y procesado está implementado: PHP valida y guarda la imagen, llama a `MiDaSService`, Flask procesa con MiDaS Small y devuelve el depth map para guardarlo y asociarlo en BD. CLAHE se aplica para mejorar contraste/iluminación antes del procesado cuando el servicio responde correctamente.
+
+**Nota histórica:** Se intentó usar MiDaS DPT-Hybrid en el servidor porque da más calidad, pero el t3.small no tiene RAM suficiente para cargarlo junto con Nginx, PHP-FPM y MySQL. El servidor se colgó por OOM al intentar cargar Hybrid. Por eso se cambió a MiDaS Small en servidor y se reservó DPT-Hybrid para PC local con GPU.
+
+**Decisión vigente:** Servidor = MiDaS Small para demo/subidas puntuales. PC local con RTX 3060 = DPT-Hybrid para tours demo pregenerados de alta calidad. Nunca depender del procesado en directo como plan principal de la exposición.
+
 #### Hardware del desarrollador (PC local)
+
+**Estado actual:** Este hardware sigue siendo la referencia para generar tours demo con MiDaS DPT-Hybrid + CUDA antes de la exposición.
+
 - CPU: Intel Core i5-12400F 12th Gen
 - RAM: 16GB DDR4 3200MHz (uso normal ~63% con Chrome abierto, ~50% sin Chrome)
 - GPU: NVIDIA GeForce RTX 3060 12GB VRAM (CUDA 13.0)
@@ -131,12 +197,23 @@ users, businesses, plans, tours, positions, photos, hotspots, qr_codes, qr_scans
 - Python: 3.12.6 instalado en Windows
 - OS: Windows 11
 
+**Decisión vigente:** No depender del servidor para procesado pesado de máxima calidad. Usar el PC local para pregenerar material demo cuando se necesite máxima calidad visual.
+
 #### Por qué procesamos en local y no en el servidor
+
+**Estado actual:** El servidor procesa con MiDaS Small. El PC local procesa con DPT-Hybrid cuando se necesita calidad máxima.
+
 El servidor EC2 t3.small tiene 2GB RAM. MiDaS DPT-Hybrid necesita ~1800MB para cargar. Con el stack completo (Nginx+PHP+MySQL) corriendo solo quedan ~1200MB libres — insuficiente. El servidor se colgó al intentarlo.
 
 El PC local tiene RTX 3060 con CUDA — procesa cada foto en 2-3 segundos en lugar de 45 segundos en CPU. La calidad es máxima (DPT-Hybrid).
 
+**Nota histórica:** La decisión no fue por preferencia estética, sino por límite físico de RAM y estabilidad. DPT-Hybrid en servidor se descartó tras comprobar que el t3.small no puede sostenerlo junto al stack web.
+
+**Decisión vigente:** No reinstalar ni activar DPT-Hybrid como modelo de servidor en t3.small salvo cambio real de infraestructura.
+
 #### Plan de procesado en PC local
+
+**Estado actual:** El script local Windows para procesar con DPT-Hybrid + CUDA sigue pendiente. Este plan conserva los pasos previstos porque son útiles para preparar los tours demo.
 
 **Requisitos previos (hacer una sola vez):**
 1. Desinstalar Fortnite desde Epic Games Launcher (~92GB) → disco C: pasa a ~115GB libres
@@ -159,7 +236,13 @@ El PC local tiene RTX 3060 con CUDA — procesa cada foto en 2-3 segundos en lug
 **RAM máxima aceptable para procesar:** 65% de uso (5GB+ libres)
 **No procesar nunca con RAM >70%** — riesgo de lentitud o cuelgue
 
+**Nota histórica:** Este plan nació para poder enseñar calidad máxima en la exposición sin depender del rendimiento limitado del servidor t3.small.
+
+**Decisión vigente:** El script local no debe convertirse en requisito para clientes; es una herramienta interna para demo/TFG.
+
 #### Tours de demo para la exposición (OBLIGATORIO)
+
+**Estado actual:** Tener preparados 1-2 tours completos y visualmente impecables antes de la exposición sigue siendo obligatorio. Pueden usar material de alta calidad, panorámicas controladas o imágenes pregeneradas, pero no se debe presentar la captura 360° perfecta como requisito para clientes con smartphone normal.
 
 Tener preparados 1-2 tours completos y visualmente impecables ANTES de la exposición:
 - Fotos 360° equirectangulares de alta calidad (buscar en Flickr 360°, Poly Pizza, o generar con IA)
@@ -169,9 +252,13 @@ Tener preparados 1-2 tours completos y visualmente impecables ANTES de la exposi
 
 **Regla de oro:** nunca depender de que algo funcione en tiempo real delante del tribunal. Los tours pregenerados son el plan A siempre.
 
+**Nota histórica:** La idea de usar fotos equirectangulares 360° de alta calidad se planteó como estrategia de demo para maximizar impacto visual. Después se detectó que los smartphones comunes no garantizan equirectangulares reales, así que esa opción debe entenderse como material demo controlado, no como requisito comercial para el cliente final.
+
+**Decisión vigente:** Los tours pregenerados son el plan A de la exposición. La subida en directo es demostración secundaria y debe tener fallback.
+
 #### Subida en directo (si el tribunal quiere probar)
 
-El servidor usa MiDaS Small (80MB, cabe en RAM) para procesado en tiempo real. Tiempo estimado: 30-60 segundos por foto en t3.small con swap de 2GB.
+**Estado actual:** El servidor usa MiDaS Small (80MB, cabe en RAM) para procesado en tiempo real/puntual. Tiempo estimado: 30-60 segundos por foto en t3.small con swap de 2GB. La UX debe camuflar la espera y dejar claro que está analizando profundidad.
 
 La UX debe camuflar el tiempo de espera:
 - Barra de progreso animada durante el procesado
@@ -181,25 +268,49 @@ La UX debe camuflar el tiempo de espera:
 
 **Si algo falla en directo:** los tours pregenerados demuestran que el producto funciona. El fallo puntual es atribuible a las limitaciones del servidor de desarrollo (t3.small), no al producto.
 
+**Nota histórica:** Esta sección nació para evitar que la latencia de CPU en servidor se perciba como fallo de producto durante la exposición.
+
+**Decisión vigente:** Si el tribunal prueba subida en directo, usar progreso/feedback y mantener tours pregenerados listos como respaldo.
+
 #### Estado actual del servidor (t3.small)
 
-- RAM: 1910MB total, ~1142MB disponibles con stack completo corriendo
-- Swap: pendiente de configurar (2GB en disco — 13GB libres disponibles)
-- MiDaS en servidor: usar Small (80MB) para no saturar RAM
-- MiDaS DPT-Hybrid: solo en PC local para los tours de demo
-- Modelo descargado en servidor: /var/www/oxphyre/python-service/dpt_hybrid.pt (467MB) → Este modelo NO se usa en el servidor, solo el Small → Considerar borrarlo del servidor para liberar espacio si hace falta
+**Estado actual:**
+- Servidor AWS EC2 t3.small con Ubuntu 22.04.
+- RAM total aproximada: 1910MB.
+- Swap 2GB configurado como colchón de seguridad.
+- Microservicio Flask MiDaS activo en `127.0.0.1:5000` mediante systemd (`oxphyre-midas`).
+- Modelo en servidor: MiDaS Small, cargado desde caché torch/hub.
+- Flujo funcionando en producción: upload PHP → `MiDaSService` → Flask → depth map base64 → guardado de archivo → asociación en BD.
+- CLAHE integrado mediante endpoint `/enhance` para mejorar imagen antes del depth map cuando el servicio responde correctamente.
+- MiDaS DPT-Hybrid queda reservado para PC local y tours demo.
+
+**Nota histórica:** En un momento anterior el swap figuraba como pendiente y el modelo `dpt_hybrid.pt` estaba descargado en servidor. Después se configuró swap 2GB y se migró el servicio a MiDaS Small porque Hybrid no era viable en t3.small. Si el archivo Hybrid pesado sigue existiendo en servidor, considerarlo residuo histórico y valorar borrarlo solo si hace falta espacio.
+
+**Decisión vigente:** No usar DPT-Hybrid en servidor t3.small. Mantener MiDaS Small para producción/demo puntual y reservar Hybrid para PC local.
 
 #### Pendiente de implementar
-- Script Python local para procesado con GPU en Windows
-- Swap de 2GB en servidor t3.small
-- Instalar MiDaS Small en servidor (en lugar del Hybrid)
-- Microservicio Flask funcional con MiDaS Small
-- Flujo completo PHP → Flask → mapa de profundidad → BD
-- UX de progreso durante el procesado
+
+**Estado actual:** MiDaS Small, Flask, systemd, swap y flujo PHP → Flask → mapa de profundidad → BD ya están implementados según `DEVLOG.md` y `AI_SYNC.md`.
+
+**Pendiente real relacionado con MiDaS/demo:**
+- Script Python local para procesado con GPU en Windows usando DPT-Hybrid + CUDA.
+- Preparar 1-2 tours demo pregenerados visualmente impecables.
+- Revisar/afinar UX de progreso durante procesado si el tribunal prueba subida en directo.
+- Reimplementar o decidir si se descarta el shader/parallax MiDaS sobre PSV.
+
+**Nota histórica:** Antes estaban pendientes: swap de 2GB, instalar MiDaS Small, levantar microservicio Flask funcional y cerrar el flujo PHP → Flask → mapa de profundidad → BD. Esos puntos ya se completaron durante la integración del microservicio y la subida de fotos.
+
+**Decisión vigente:** No tratar Flask/MiDaS Small/swap/flujo PHP-Flask como tareas pendientes. La prioridad pendiente real es demo local de alta calidad y decisiones sobre parallax MiDaS en PSV.
 
 ---
 
 ## Roadmap post-TFG: 3D Gaussian Splatting
+
+**Estado actual:** Roadmap post-TFG documentado y validado conceptualmente. No forma parte obligatoria del núcleo TFG salvo decisión posterior. Para la exposición puede presentarse como evolución potente del producto o tecnología futura, no como requisito para terminar la versión actual.
+
+**Nota histórica:** Se evaluaron alternativas como Luma AI, Polycam, Google Street View app, gran angular de smartphone, OpenSplat y SuperSplat Viewer. Se decidió OpenSplat + SuperSplat por ser open source, viable comercialmente y compatible con procesado propio.
+
+**Decisión vigente:** No borrar este roadmap. No implementarlo como prioridad TFG salvo aprobación explícita. Mantenerlo como visión post-TFG y diferenciación futura.
 
 ### Qué es y por qué es relevante para Oxphyre
 3D Gaussian Splatting (3DGS) es una tecnología de reconstrucción 3D que permite
@@ -312,7 +423,36 @@ Para producción real con clientes:
 
 ---
 
+## Decisiones descartadas o no reabrir sin motivo
+
+**Estado actual:** Estas opciones están descartadas o no son el camino principal del proyecto.
+
+- React, Vue, Angular.
+- Laravel, Symfony.
+- Bootstrap.
+- SQL directo sin prepared statements.
+- Guardar tokens o datos sensibles en localStorage.
+- Validar uploads solo por extensión.
+- Visor público Three.js manual anterior como solución principal.
+- DPT-Hybrid en servidor t3.small.
+- Depender del procesado MiDaS en directo durante la exposición.
+- Cámaras 360° profesionales como requisito para clientes.
+- Gran angular del smartphone como recomendación principal.
+- OpenCV stitching automático como núcleo del TFG.
+- Luma AI y Polycam como núcleo del producto.
+- Google Street View app como solución de captura.
+
+**Nota histórica:** Varias de estas opciones se descartaron tras pruebas reales con fotos de smartphone, límites de RAM del servidor, coste de servicios externos, desaparición de apps o mala compatibilidad con el público objetivo de PYMES con smartphone normal.
+
+**Decisión vigente:** No reabrir estas decisiones salvo problema claro, explicado antes y aprobado. Si una IA cree que debe reabrir una decisión, primero debe justificar qué cambió desde el análisis anterior.
+
 ## Diseño Visual y Storytelling
+
+**Estado actual:** Esta sección funciona como referencia visual y narrativa de la landing. La landing está implementada y desplegada, pero cualquier ajuste visual debe verificarse contra los archivos reales y contra `DEVLOG.md`.
+
+**Nota histórica:** Esta especificación recoge el diseño objetivo definido durante el rediseño completo de la landing: estética negra cinematográfica, acento ámbar, storytelling por secciones, hero con Three.js y experiencia visual de producto premium.
+
+**Decisión vigente:** Mantener el estilo oscuro/cinematográfico y la identidad Oxphyre. No usar esta sección para reabrir decisiones ya cerradas sin revisar implementación real. Three.js en landing sigue permitido y forma parte de la identidad visual.
 
 ### Identidad Visual
 - Fondo: #000000 puro en toda la página
@@ -469,28 +609,61 @@ Para producción real con clientes:
 
 ### Regla global: Soft delete
 
+**Estado actual:** Soft delete activo en `businesses`, `tours`, `positions` y `photos`.
+
 Soft delete activo en `businesses`, `tours`, `positions`, `photos`.
 - **NUNCA usar `DELETE FROM`** en estos modelos — siempre `UPDATE ... SET deleted_at = NOW() WHERE id = ?`
 - **Todos los `SELECT`** de estos modelos deben incluir `WHERE deleted_at IS NULL` (o `AND deleted_at IS NULL` si ya hay `WHERE`)
 - Las tablas `users`, `plans`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent` y `login_attempts` **no tienen soft delete** — en ellas sí se puede usar `DELETE FROM`
 
+**Nota histórica:** Esta regla se añadió tras implementar borrado lógico en negocios, tours, posiciones y fotos para evitar pérdida definitiva de datos y mantener consistencia en el dashboard.
+
+**Decisión vigente:** Nunca usar borrado físico en esos modelos. Cualquier query nueva debe respetar `deleted_at IS NULL`.
+
 ### Pendientes y deuda técnica
-- Logo y favicon: diseñar cuando la página esté terminada
-- Modo claro: implementar cuando modo oscuro esté completamente cerrado
-- Video demo real: grabar y sustituir placeholder de S4
-- Responsive: verificar todas las secciones en móvil y tablet tras implementar
+
+**Estado actual:** Esta lista se organiza por prioridad para el TFG, prioridad media, deuda técnica y roadmap/futuro. No se borran pendientes antiguos útiles; se reclasifican para que una IA no confunda tareas críticas de entrega con mejoras post-TFG.
+
+#### Prioridad alta para TFG
+- `/precios`: crear página independiente con las 3 cards de planes (Free, Pro, Business), mismo diseño que la sección de precios de la landing pero como página propia. Slug correcto para SEO es `/precios` (no `/planes`). Todos los CTAs de upgrade del dashboard apuntan aquí.
+- Verificar que el enlace "Ver planes Pro/Business →" del wizard paso 2 y los CTAs de upgrade del dashboard apuntan a `/precios`.
 - API externa obligatoria (requisito tribunal): integrar Google Maps o Mapbox para mostrar ubicación del negocio en el dashboard/tour. Sin esto el proyecto no cumple los requisitos mínimos.
-- Roles documentados (requisito tribunal): documentar explícitamente en la memoria qué puede hacer cada rol (admin, business_owner, viewer) tanto en frontend como en backend. Los roles ya existen en BD pero no están documentados.
-- Emails transaccionales: actualmente PHPMailer + Gmail SMTP con cuenta danimm3097@gmail.com (válido para TFG). La cuenta digitechfp.com se descartó porque el centro educativo tiene SMTP capado. En producción real migrar a Resend, SendGrid o Mailgun con dominio propio noreply@oxphyre.com — Gmail muestra la cuenta del remitente en lugar de una dirección de marca y tiene límite de ~500 emails/día.
-- UserModel::create() tiene el rol "business_free" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar $role como parámetro o definir constante ROLE_DEFAULT en config.php
-- Gmail SMTP requiere App Password en .env, no la contraseña de cuenta. MAIL_USERNAME y MAIL_FROM deben ser el mismo email o Gmail rechazará la conexión
-- Wizard paso 2 (Tu plan): mostrar los 3 planes en cards lado a lado (Free, Pro destacado, Business) en lugar del plan Free solo con link discreto. El momento del onboarding es el de mayor motivación del usuario — es el mejor punto para mostrar el valor de Pro y Business y conseguir upgrades. Mismo diseño de cards que la sección de precios de la landing.
+- Roles documentados (requisito tribunal): documentar explícitamente en la memoria qué puede hacer cada rol (`admin`, `business_owner`, `viewer`) tanto en frontend como en backend. Los roles ya existen en BD pero no están documentados.
+- Preparar 1-2 tours demo visualmente impecables antes de la exposición.
+- Video demo real: grabar y sustituir placeholder de S4.
+- Responsive: verificar todas las secciones en móvil y tablet.
+- Revisar SEO técnico final: sitemap, robots, schema, metas, Open Graph.
+- Revisar PageSpeed final.
 - Dashboard y wizard: revisar visibilidad general — inputs, labels y texto secundario tienen contraste insuficiente (texto gris oscuro sobre fondo negro). Mejorar colores para que los campos que el usuario debe rellenar sean claramente visibles. Nunca texto gris oscuro sobre fondo negro en zonas interactivas.
-- /precios: crear página independiente con las 3 cards de planes (Free, Pro, Business), mismo diseño que la sección de precios de la landing pero como página propia. Slug correcto para SEO es /precios (no /planes). Todos los CTAs de upgrade del dashboard apuntan aquí.
-- El enlace "Ver planes Pro/Business →" del wizard paso 2 y los CTAs de upgrade del dashboard apuntan a /precios. Verificar que todos son consistentes cuando se cree esa página.
-- Dashboard: añadir tooltips de ayuda contextual en las métricas para clarificar la jerarquía del producto al usuario no técnico. Ejemplo: icono ? en "Tours activos" con tooltip "Un tour es la experiencia 360° que verán tus clientes", y en "Negocios" con "Un negocio agrupa todos tus tours". Hacerlo en el pass de UX final junto con el tutorial del editor.
-- Editor canvas: implementar tutorial/onboarding la primera vez que el usuario accede, con botón para volver a verlo. El editor de nodos y conexiones puede resultar confuso — el tutorial debe explicar la jerarquía negocio → tour → posiciones → fotos y cómo usar el canvas.
-- BusinessController tiene go() y verifyCsrf() como métodos privados propios. AuthController tiene redirect() y validateCsrf() con la misma funcionalidad pero distintos nombres. Unificar en BaseController como métodos protegidos y eliminar duplicados en los controllers hijos. Hacer en un refactor pass cuando todos los controllers estén creados.
-- OpenCV Stitching automático de fotos: mejora futura post-TFG. Requiere que el usuario haga fotos cada 45° (8 fotos) con lente 1x y solapamiento mínimo 30%. Genera equirectangular de calidad. Librería: cv2.Stitcher_create(cv2.Stitcher_PANORAMA). Falla en paredes lisas (Error 2 — sin puntos clave).
-- Shader MiDaS sobre PSV: el efecto de profundidad (ShaderMaterial con depth map) pendiente de reimplementar sobre PSV tras la migración. En esta versión PSV muestra foto plana en todos los planes hasta que se integre el shader.
+
+#### Prioridad media
+- QR descargable con analíticas.
+- Editor canvas drag & drop.
+- Hotspots.
+- Minimap real.
+- Tutorial/onboarding del editor: implementar tutorial la primera vez que el usuario accede, con botón para volver a verlo. Debe explicar la jerarquía negocio → tour → posiciones → fotos y cómo usar el canvas.
+- Dashboard: añadir tooltips de ayuda contextual en las métricas para clarificar la jerarquía del producto al usuario no técnico. Ejemplo: icono ? en "Tours activos" con tooltip "Un tour es la experiencia 360° que verán tus clientes", y en "Negocios" con "Un negocio agrupa todos tus tours".
+- Wizard paso 2 (Tu plan): mostrar los 3 planes en cards lado a lado (Free, Pro destacado, Business) en lugar del plan Free solo con link discreto. El momento del onboarding es el de mayor motivación del usuario — es el mejor punto para mostrar el valor de Pro y Business y conseguir upgrades. Mismo diseño de cards que la sección de precios de la landing.
+- Logo y favicon: diseñar cuando la página esté terminada.
+- Modo claro: implementar cuando modo oscuro esté completamente cerrado.
+- 404/500 personalizadas.
+- Legal/RGPD: privacidad, términos, cookies.
+- PWA: manifest y service worker.
+
+#### Deuda técnica
+- BusinessController tiene `go()` y `verifyCsrf()` como métodos privados propios. AuthController tiene `redirect()` y `validateCsrf()` con la misma funcionalidad pero distintos nombres. Unificar en BaseController como métodos protegidos y eliminar duplicados en los controllers hijos. Hacer en un refactor pass cuando todos los controllers estén creados.
+- `UserModel::create()` tiene el rol "business_free" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar `$role` como parámetro o definir constante `ROLE_DEFAULT` en config.php.
+- Emails transaccionales: actualmente PHPMailer + Gmail SMTP con cuenta `danimm3097@gmail.com` (válido para TFG). La cuenta `digitechfp.com` se descartó porque el centro educativo tiene SMTP capado. En producción real migrar a Resend, SendGrid o Mailgun con dominio propio `noreply@oxphyre.com` — Gmail muestra la cuenta del remitente en lugar de una dirección de marca y tiene límite de ~500 emails/día.
+- Gmail SMTP requiere App Password en `.env`, no la contraseña de cuenta. `MAIL_USERNAME` y `MAIL_FROM` deben ser el mismo email o Gmail rechazará la conexión.
+- Shader MiDaS sobre PSV: el efecto de profundidad (ShaderMaterial con depth map) está pendiente de reimplementar sobre PSV tras la migración. En esta versión PSV muestra foto plana en todos los planes hasta que se integre o se descarte el shader.
 - Script Python local (Windows) para procesar tours de demo con MiDaS DPT-Hybrid + CUDA (RTX 3060) antes de la exposición del TFG. Genera calidad máxima en 2-3 segundos por foto. Pendiente de crear el script.
+
+#### Roadmap/futuro
+- OpenCV Stitching automático de fotos: mejora futura post-TFG. Requiere que el usuario haga fotos cada 45° (8 fotos) con lente 1x y solapamiento mínimo 30%. Genera equirectangular de calidad. Librería: `cv2.Stitcher_create(cv2.Stitcher_PANORAMA)`. Falla en paredes lisas (Error 2 — sin puntos clave).
+- 3D Gaussian Splatting con OpenSplat + SuperSplat Viewer como evolución post-TFG.
+- Agente IA completo (OpenClaw/Make/n8n) según definición Business, marcado como roadmap/próximamente hasta implementación real.
+- n8n solo si hay tiempo y RAM suficiente; si no, documentarlo como integración futura.
+
+**Nota histórica:** La lista original mezclaba tareas críticas, deuda técnica y mejoras futuras. Se conserva todo el contenido útil, pero queda separado para priorizar mejor la entrega del TFG.
+
+**Decisión vigente:** Para el TFG, priorizar requisitos visibles del tribunal y estabilidad: `/precios`, API externa, roles, demo, responsive, SEO/PageSpeed y seguridad. No ampliar alcance grande si pone en riesgo la entrega.
