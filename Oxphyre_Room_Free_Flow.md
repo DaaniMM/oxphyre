@@ -998,4 +998,4 @@ Pro/Business podrán añadir más capacidad, publicación profesional, QR, embed
 ### Prioridad inmediata
 
 Pedir a Codex/Claude Code el Sprint 1:
-adaptar pantalla de subida + adaptar visor público al nuevo flujo panorámica principal / Oxphyre Ro
+adaptar pantalla de subida + adaptar visor público al nuevo flujo panorámica principal / Oxphyre Room opcional.

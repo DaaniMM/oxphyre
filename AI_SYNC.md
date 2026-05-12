@@ -126,6 +126,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Si n8n entra en el TFG o queda documentado como integración futura.
 - Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
 - Existe una propuesta consolidada en `Planes_Oxphyre.md` para redefinir Free/Pro/Business: Free como prueba limitada con 3 posiciones, Pro como plan comercial profesional y Business como premium/Gaussian. Todavía no es decisión definitiva; no aplicar a código ni documentación principal hasta validar el visor Free y confirmar la estrategia comercial.
+- Existe `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta del nuevo flujo Free/base: panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos, hotspots sobre panorámica y botón "Ver detalles" si hay 4 fotos completas. No sustituye todavía `CLAUDE.md`; se debe implementar y validar Sprint 1 antes de convertirlo en decisión oficial.
 
 ---
 
@@ -201,22 +202,13 @@ Sesión anterior importante:
 
 ## Próximo paso recomendado
 
-Antes de escribir más código, hacer una pasada de sincronización documental:
+Antes de seguir con otras features, el próximo sprint recomendado es el Sprint 1 de `Oxphyre_Room_Free_Flow.md`:
 
-1. Actualizar CLAUDE.md para reflejar:
-   - PSV v4 como visor público actual.
-   - MiDaS Small + Flask + systemd + subida de fotos ya funcionando.
-   - Swap configurado.
-   - `positions.active_mode`, `photos.direction='360'` y soft delete.
-   - Panorámicas parciales de smartphone como caso real.
-
-2. Actualizar AGENTS.md:
-   - Quitar o suavizar la “Prioridad de desarrollo actual” antigua.
-   - Indicar que la prioridad viva está en AI_SYNC.md.
-
-3. Después, elegir una prioridad funcional:
-   - Opción recomendada para TFG: `/precios` + API externa Google Maps/Mapbox + documentación de roles.
-   - Motivo: son requisitos visibles para tribunal y reducen riesgo académico.
+- Adaptar pantalla de subida al nuevo flujo: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
+- Adaptar visor público para entrar siempre en la panorámica principal y mostrar "Ver detalles" solo si hay 4 fotos completas.
+- No mostrar posiciones sin panorámica en el tour público.
+- Mantener `positions.active_mode` como lógica actual/compatibilidad durante la transición; el documento propone dejarlo como campo heredado cuando el nuevo flujo esté implementado y validado.
+- No actualizar `CLAUDE.md` como decisión oficial hasta validar Sprint 1 funcionando.
 
 ---
 

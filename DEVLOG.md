@@ -1352,3 +1352,15 @@ Se creó/guardó `Planes_Oxphyre.md` como documento de propuesta consolidada par
 **Estado:** la propuesta queda en evaluación, no cerrada. No sustituye todavía la definición vigente de planes en la documentación principal ni debe aplicarse a código.
 
 **Motivo:** evitar actualizar límites y estrategia comercial principal antes de validar visual y comercialmente el plan Free y confirmar si la segmentación propuesta encaja con el producto.
+
+## 2026-05-12 — Especificación Oxphyre Room Free/base creada
+
+Se creó `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta del nuevo flujo Free/base del visor.
+
+**Contenido:** el documento define un flujo con panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos, hotspots sobre la panorámica y botón "Ver detalles" si hay 4 fotos completas.
+
+**Motivo:** sincronizar a Dani, ChatGPT, Claude Web, Codex y Claude Code antes de implementar, evitando que cada IA interprete el flujo Free/base de forma distinta.
+
+**Alcance:** no cambia código y no sustituye todavía `CLAUDE.md` hasta validar Sprint 1 funcionando.
+
+**Próximo paso técnico:** implementar Sprint 1: adaptar pantalla de subida + adaptar visor público al nuevo flujo panorámica principal / Oxphyre Room opcional.
