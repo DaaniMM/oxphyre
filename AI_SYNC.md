@@ -125,6 +125,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Cuándo implementar modo claro: está pendiente hasta cerrar bien modo oscuro y funcionalidad principal.
 - Si n8n entra en el TFG o queda documentado como integración futura.
 - Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
+- Existe una propuesta consolidada en `Planes_Oxphyre.md` para redefinir Free/Pro/Business: Free como prueba limitada con 3 posiciones, Pro como plan comercial profesional y Business como premium/Gaussian. Todavía no es decisión definitiva; no aplicar a código ni documentación principal hasta validar el visor Free y confirmar la estrategia comercial.
 
 ---
 

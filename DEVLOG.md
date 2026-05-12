@@ -1344,3 +1344,11 @@ Se refinó la decisión sobre 3D Gaussian Splatting como dirección comercial de
 **Alcance TFG:** 3D Gaussian Splatting no se implementa como núcleo obligatorio del TFG por tiempo, coste GPU y riesgo de desestabilizar la entrega. Para el TFG solo se contempla una demo pregenerada en el PC local con RTX 3060 si da tiempo.
 
 **Visión comercial:** tras la entrega, Gaussian Splatting queda como la evolución principal para convertir Oxphyre en producto comercial real. El cliente no interactúa con OpenSplat; ve una experiencia de marca tipo "Oxphyre 3D Capture". Los vídeos de clientes se procesan en infraestructura controlada por Oxphyre o GPU bajo demanda.
+
+## 2026-05-12 — Propuesta candidata de nuevos tiers en Planes_Oxphyre.md
+
+Se creó/guardó `Planes_Oxphyre.md` como documento de propuesta consolidada para redefinir los tiers Free, Pro y Business.
+
+**Estado:** la propuesta queda en evaluación, no cerrada. No sustituye todavía la definición vigente de planes en la documentación principal ni debe aplicarse a código.
+
+**Motivo:** evitar actualizar límites y estrategia comercial principal antes de validar visual y comercialmente el plan Free y confirmar si la segmentación propuesta encaja con el producto.

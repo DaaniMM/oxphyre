@@ -116,6 +116,12 @@ CLAUDE.md            → este archivo
 
 **Decisión vigente:** Antes de implementar algo, comprobar si ya existe. Si se necesita el estado vivo y la prioridad inmediata, consultar `AI_SYNC.md`.
 
+## Propuesta provisional de tiers
+
+**Estado actual:** Existe `Planes_Oxphyre.md` como propuesta candidata/provisional para redefinir Free/Pro/Business, creada el 12/05/2026. Se debe consultar durante las pruebas actuales del visor Free.
+
+**Decisión vigente:** Esta propuesta no sustituye todavía la definición oficial de planes y no debe aplicarse a código como decisión definitiva hasta validar visual y comercialmente Free. Si se valida, se sincronizarán `CLAUDE.md`, `AI_SYNC.md`, landing, `/precios` y los límites reales de la app.
+
 ## Planes SaaS — Definición técnica y comercial
 
 **Estado actual:** Los planes Free, Pro y Business siguen siendo la definición técnica y comercial del producto. Esta sección conserva precios, límites, features y posicionamiento de cada plan porque forma parte de la visión comercial y del TFG. Algunas capacidades están implementadas, otras están en desarrollo TFG y otras pertenecen al roadmap.
