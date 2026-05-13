@@ -337,9 +337,6 @@ class TourController extends BaseController
             foreach ($photos as $photo) {
                 $photosByDir[$photo['direction']] = [
                     'url'       => '/uploads/' . $pos['id'] . '/' . $photo['filename'],
-                    'depthUrl'  => $photo['depth_map_filename'] !== ''
-                        ? '/uploads/' . $pos['id'] . '/' . $photo['depth_map_filename']
-                        : null,
                     'processed' => (bool) $photo['processed'],
                 ];
             }

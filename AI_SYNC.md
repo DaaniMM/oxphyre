@@ -23,7 +23,7 @@ Stack activo:
 - MySQL 8.0.
 - JS vanilla.
 - Three.js en landing y efectos visuales.
-- Photo Sphere Viewer v4 para el visor público actual, basado en Three.js.
+- Visor público actual en Three.js vanilla: panorámica principal cilíndrica/adaptativa + Oxphyre Room.
 - Python Flask + MiDaS Small en servidor para mapas de profundidad.
 - PHPMailer + Gmail SMTP para emails transaccionales.
 - AWS EC2 t3.small, Ubuntu 22.04, Nginx, PHP-FPM, Let's Encrypt.
@@ -39,8 +39,8 @@ Estado implementado:
 - Creación de posiciones.
 - Subida de fotos por posición.
 - Procesado MiDaS en servidor mediante microservicio Flask.
-- CLAHE para mejora automática de imagen.
-- Visor público con Photo Sphere Viewer v4.
+- CLAHE disponible en el microservicio, pero no aplicado a la imagen visible en Sprint 1.
+- Visor público Sprint 1 sin Photo Sphere Viewer: panorámica parcial horizontal con pitch limitado.
 - Sprint 1 Oxphyre Room Free/base implementado, pendiente de validación manual: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
 - Soft delete en businesses, tours, positions y photos.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
@@ -66,10 +66,10 @@ Estado implementado:
 - Credenciales siempre en .env, nunca en código ni GitHub.
 
 ### Visor público
-- El visor público actual usa Photo Sphere Viewer v4.
-- No volver al visor Three.js manual salvo problema claro y justificado.
-- PSV se usa porque resuelve FOV, touch, giroscopio y panorámicas mejor que el visor propio.
-- Three.js sigue formando parte del proyecto: landing, efectos visuales y base interna de PSV.
+- El visor público Sprint 1 usa Three.js vanilla para la panorámica principal adaptativa y Oxphyre Room.
+- La panorámica principal no debe tratarse como esfera/equirectangular 360 completa: se renderiza como vista cilíndrica parcial, con arrastre horizontal y pitch muy limitado.
+- Photo Sphere Viewer v4 queda retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al forzarlas como esfera completa.
+- La imagen visible siempre debe ser la foto original subida por el usuario; MiDaS/CLAHE quedan como procesado interno o futuro, no como textura pública en Sprint 1.
 
 ### Sistema de fotos por posición
 Sprint 1 implementado, pendiente de validación manual:
@@ -192,6 +192,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - La pantalla de subida muestra panorámica principal obligatoria, Oxphyre Room opcional 4/4 y hotspots como próximo sprint.
 - El visor público filtra posiciones sin panorámica, entra siempre en `direction='360'` y muestra "Ver detalles" solo si hay N/S/E/O completas.
 - Oxphyre Room MVP carga las 4 fotos en una escena Three.js tipo Direction Sphere, con paneles curvos, arrastre, brújula N/E/S/O y botón "Volver a vista principal".
+- Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Estado: pendiente de validación manual visual/funcional antes de actualizar `CLAUDE.md` como decisión oficial.
 
 Sesión anterior importante:
@@ -231,4 +232,4 @@ Validar manualmente Sprint 1 de `Oxphyre_Room_Free_Flow.md` antes de seguir con 
 - No proponer cámaras 360° profesionales como requisito para clientes.
 - No implementar ideas en debate como si fueran decisiones tomadas.
 - Priorizar terminar el TFG con calidad antes que ampliar demasiado el alcance.
-- Mantener PHP puro MVC, JS vanilla, Three.js/PSV, MySQL y seguridad fuerte.
+- Mantener PHP puro MVC, JS vanilla, Three.js, MySQL y seguridad fuerte.

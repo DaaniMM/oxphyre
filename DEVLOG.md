@@ -1409,3 +1409,27 @@ Se implementó el Sprint 1 definido en `Oxphyre_Room_Free_Flow.md`, sin tocar `C
 **Verificación técnica local:**
 - `node --check public/js/tour-viewer.js` correcto.
 - No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.
+
+## 2026-05-13 — Corrección visual Sprint 1: imagen original + panorámica adaptativa
+
+Se corrigió la validación visual de Sprint 1 para que Free/base no prometa ni fuerce un 360 real cuando el usuario sube panorámicas parciales de móvil.
+
+**Qué se cambió:**
+- `PositionController.php`: se dejó de aplicar CLAHE sobre el archivo subido. La foto visible en dashboard/visor queda como el original del móvil. MiDaS puede seguir generando `depth_map_filename`, pero no altera la imagen pública.
+- `TourController.php`: el JSON público del tour ya no expone `depthUrl`; `processed` sigue como dato interno de estado.
+- `tour-viewer.js`: la panorámica principal deja de renderizarse como esfera/equirectangular completa. Ahora se muestra en una superficie cilíndrica parcial con drag horizontal, yaw limitado según cobertura estimada por aspecto y pitch bloqueado a ±6°.
+- `tour.php`: se retiraron las dependencias de Photo Sphere Viewer para la vista principal; queda Three.js como dependencia del visor y de Oxphyre Room.
+- `tour.css`: se añadieron estados de drag/canvas para el contenedor de la panorámica principal.
+
+**Motivo:** evitar contraste artificial, sombras exageradas, efecto túnel/pinchazo al mirar arriba y deformación por tratar una panorámica móvil parcial como 360 equirectangular completo.
+
+**Se mantiene:**
+- Oxphyre Room con 4 paneles curvos N/E/S/O.
+- Botón "Ver detalles" si hay 4/4 fotos.
+- Botón "Volver a vista principal".
+- MiDaS en el proyecto como procesado interno/futuro, sin uso visual en Sprint 1.
+
+**Verificación técnica local:**
+- `node --check public/js/tour-viewer.js` correcto.
+- `rg` confirma que no quedan usos de `PhotoSphereViewer`, `panoData`, `getPanoData` ni `depthUrl` en `backend`/`public`.
+- No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.

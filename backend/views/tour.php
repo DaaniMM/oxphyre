@@ -7,13 +7,10 @@
   <meta name="robots" content="noindex, nofollow">
   <!-- Estilos base del visor -->
   <link rel="stylesheet" href="/css/tour.css">
-  <!-- PSV v4: CSS -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/photo-sphere-viewer@4/dist/photo-sphere-viewer.min.css">
 </head>
 <body>
 
-<!-- Contenedor principal de PSV — ocupa 100vw × 100vh -->
+<!-- Contenedor principal de la panorámica adaptativa -->
 <div id="psv-viewer"></div>
 
 <div class="tour-unavailable" id="tour-unavailable" hidden>
@@ -69,11 +66,9 @@
   const TOUR_DATA = <?= json_encode($tourData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
 </script>
 
-<!-- PSV v4: dependencias en orden exacto requerido -->
+<!-- Three.js para panorámica adaptativa y Oxphyre Room -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/uevent@2/browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/photo-sphere-viewer@4/dist/photo-sphere-viewer.min.js"></script>
-<!-- Lógica del visor (después de PSV, sin defer) -->
+<!-- Lógica del visor (después de Three.js, sin defer) -->
 <script src="/js/tour-viewer.js"></script>
 
 </body>

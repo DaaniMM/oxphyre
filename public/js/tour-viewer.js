@@ -1,14 +1,16 @@
 // Visor público Oxphyre: panorámica principal + Oxphyre Room opcional.
-// Depende de: Three.js CDN, PSV v4 CDN, TOUR_DATA inyectado por PHP.
+// Depende de: Three.js CDN y TOUR_DATA inyectado por PHP.
 
 'use strict';
 
-let viewer = null;
+let mainState = null;
 let currentPositionIdx = 0;
 let currentPosition = null;
 let gyroActive = false;
 let roomState = null;
 
+const MAIN_PITCH_LIMIT_DEG = 6;
+const MAIN_DEFAULT_FOV = 58;
 const ROOM_DIRECTIONS = ['N', 'E', 'S', 'O'];
 const ROOM_LABELS = {
   N: 'Frente',
@@ -36,19 +38,6 @@ function hasRoom(position) {
   return ROOM_DIRECTIONS.every(dir => Boolean(position?.photos?.[dir]?.url));
 }
 
-function getPanoData(position) {
-  if (!getPanoramaUrl(position)) return null;
-
-  return {
-    fullWidth: 4096,
-    fullHeight: 2048,
-    croppedWidth: 4096,
-    croppedHeight: 2048,
-    croppedX: 0,
-    croppedY: 0,
-  };
-}
-
 function showUnavailable() {
   const unavailable = document.getElementById('tour-unavailable');
   const viewerEl = document.getElementById('psv-viewer');
@@ -73,26 +62,13 @@ function initViewer() {
     return;
   }
 
-  viewer = new PhotoSphereViewer.Viewer({
-    container: document.getElementById('psv-viewer'),
-    panorama: initialUrl,
-    panoData: getPanoData(currentPosition),
-    defaultLong: 0,
-    defaultLat: 0,
-    defaultZoomLvl: 50,
-    minFov: 30,
-    maxFov: 90,
-    navbar: false,
-    loadingImg: null,
-    mousewheel: false,
-  });
-
+  initMainPanorama(initialUrl);
   updateDetailsButton();
 }
 
 function loadPosition(idx) {
   const positions = getPositions();
-  if (idx === currentPositionIdx || !viewer || !positions[idx]) return;
+  if (idx === currentPositionIdx || !positions[idx]) return;
 
   closeRoom();
 
@@ -102,14 +78,244 @@ function loadPosition(idx) {
   const url = getPanoramaUrl(currentPosition);
   if (!url) return;
 
-  viewer.setPanorama(url, {
-    transition: 'fade',
-    showLoader: true,
-    panoData: getPanoData(currentPosition),
-  });
-
+  initMainPanorama(url);
   updateActiveBtn();
   updateDetailsButton();
+}
+
+function initMainPanorama(url) {
+  disposeMainPanorama();
+
+  const container = document.getElementById('psv-viewer');
+  if (!container || typeof THREE === 'undefined') {
+    showUnavailable();
+    return;
+  }
+
+  container.innerHTML = '';
+  mainState = {
+    container,
+    renderer: null,
+    scene: null,
+    camera: null,
+    texture: null,
+    material: null,
+    geometry: null,
+    mesh: null,
+    frameId: null,
+    listeners: [],
+    yaw: 0,
+    targetYaw: 0,
+    pitch: 0,
+    targetPitch: 0,
+    yawLimit: 0,
+    dragging: false,
+    lastX: 0,
+    lastY: 0,
+    disposed: false,
+  };
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x050505);
+
+  const camera = new THREE.PerspectiveCamera(MAIN_DEFAULT_FOV, 1, 0.05, 80);
+  camera.rotation.order = 'YXZ';
+
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: false,
+    powerPreference: 'high-performance',
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x050505, 1);
+  container.appendChild(renderer.domElement);
+
+  mainState.scene = scene;
+  mainState.camera = camera;
+  mainState.renderer = renderer;
+
+  const state = mainState;
+  const loader = new THREE.TextureLoader();
+  loader.load(
+    url,
+    texture => {
+      if (!state || state.disposed || mainState !== state) {
+        texture.dispose();
+        return;
+      }
+
+      texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
+      texture.encoding = THREE.sRGBEncoding || texture.encoding;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy?.() || 1;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+
+      const image = texture.image || {};
+      const aspect = image.width && image.height ? image.width / image.height : 2.6;
+      const coverageDeg = THREE.MathUtils.clamp(aspect * 68, 130, 285);
+
+      state.texture = texture;
+      state.geometry = createMainPanoramaGeometry(THREE.MathUtils.degToRad(coverageDeg));
+      state.material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+      });
+      state.mesh = new THREE.Mesh(state.geometry, state.material);
+      scene.add(state.mesh);
+
+      updateMainLimits();
+      resizeMainRenderer();
+      animateMainPanorama();
+    },
+    undefined,
+    () => {
+      if (mainState === state) showUnavailable();
+    }
+  );
+
+  const resize = () => {
+    resizeMainRenderer();
+    updateMainLimits();
+  };
+  addMainListener(window, 'resize', resize);
+  addMainPointerListeners(container);
+  resizeMainRenderer();
+}
+
+function createMainPanoramaGeometry(widthAngle, radius = 5.2, height = 6.1, widthSegments = 96, heightSegments = 16) {
+  const positions = [];
+  const uvs = [];
+  const indices = [];
+
+  for (let y = 0; y <= heightSegments; y++) {
+    const v = y / heightSegments;
+    const py = (0.5 - v) * height;
+
+    for (let x = 0; x <= widthSegments; x++) {
+      const u = x / widthSegments;
+      const angle = (u - 0.5) * widthAngle;
+      positions.push(Math.sin(angle) * radius, py, -Math.cos(angle) * radius);
+      uvs.push(u, 1 - v);
+    }
+  }
+
+  for (let y = 0; y < heightSegments; y++) {
+    for (let x = 0; x < widthSegments; x++) {
+      const a = y * (widthSegments + 1) + x;
+      const b = a + 1;
+      const c = a + widthSegments + 1;
+      const d = c + 1;
+      indices.push(a, c, b, b, c, d);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  geometry.userData.widthAngle = widthAngle;
+  return geometry;
+}
+
+function addMainListener(target, type, handler, options) {
+  target.addEventListener(type, handler, options);
+  mainState.listeners.push({ target, type, handler, options });
+}
+
+function resizeMainRenderer() {
+  if (!mainState?.renderer || !mainState.camera) return;
+
+  const width = Math.max(1, mainState.container.clientWidth);
+  const height = Math.max(1, mainState.container.clientHeight);
+  mainState.camera.aspect = width / height;
+  mainState.camera.updateProjectionMatrix();
+  mainState.renderer.setSize(width, height, false);
+}
+
+function updateMainLimits() {
+  if (!mainState?.geometry || !mainState.camera) return;
+
+  const visibleAngle = THREE.MathUtils.degToRad(mainState.camera.fov * Math.max(1, mainState.camera.aspect));
+  const halfCoverage = mainState.geometry.userData.widthAngle / 2;
+  mainState.yawLimit = Math.max(0, halfCoverage - visibleAngle * 0.54);
+  mainState.targetYaw = THREE.MathUtils.clamp(mainState.targetYaw, -mainState.yawLimit, mainState.yawLimit);
+  mainState.yaw = THREE.MathUtils.clamp(mainState.yaw, -mainState.yawLimit, mainState.yawLimit);
+}
+
+function addMainPointerListeners(container) {
+  const pitchLimit = THREE.MathUtils.degToRad(MAIN_PITCH_LIMIT_DEG);
+
+  addMainListener(container, 'pointerdown', event => {
+    if (event.target.closest('button')) return;
+    mainState.dragging = true;
+    mainState.lastX = event.clientX;
+    mainState.lastY = event.clientY;
+    container.classList.add('is-dragging');
+    container.setPointerCapture(event.pointerId);
+  });
+
+  addMainListener(container, 'pointermove', event => {
+    if (!mainState?.dragging) return;
+
+    const dx = event.clientX - mainState.lastX;
+    const dy = event.clientY - mainState.lastY;
+    mainState.lastX = event.clientX;
+    mainState.lastY = event.clientY;
+
+    mainState.targetYaw = THREE.MathUtils.clamp(
+      mainState.targetYaw - dx * 0.0042,
+      -mainState.yawLimit,
+      mainState.yawLimit
+    );
+    mainState.targetPitch = THREE.MathUtils.clamp(
+      mainState.targetPitch + dy * 0.0012,
+      -pitchLimit,
+      pitchLimit
+    );
+  });
+
+  const stopDrag = event => {
+    if (!mainState?.dragging) return;
+    mainState.dragging = false;
+    container.classList.remove('is-dragging');
+    try {
+      container.releasePointerCapture(event.pointerId);
+    } catch {
+      // Algunos navegadores mÃ³viles liberan el puntero antes del pointerup.
+    }
+  };
+
+  addMainListener(container, 'pointerup', stopDrag);
+  addMainListener(container, 'pointercancel', stopDrag);
+}
+
+function animateMainPanorama() {
+  if (!mainState || mainState.disposed || !mainState.mesh) return;
+
+  mainState.yaw += (mainState.targetYaw - mainState.yaw) * 0.14;
+  mainState.pitch += (mainState.targetPitch - mainState.pitch) * 0.12;
+  mainState.camera.rotation.set(mainState.pitch, mainState.yaw, 0);
+  mainState.renderer.render(mainState.scene, mainState.camera);
+  mainState.frameId = requestAnimationFrame(animateMainPanorama);
+}
+
+function disposeMainPanorama() {
+  if (!mainState) return;
+
+  mainState.disposed = true;
+  if (mainState.frameId) cancelAnimationFrame(mainState.frameId);
+  mainState.listeners.forEach(({ target, type, handler, options }) => {
+    target.removeEventListener(type, handler, options);
+  });
+  mainState.geometry?.dispose();
+  mainState.material?.dispose();
+  mainState.texture?.dispose();
+  mainState.renderer?.dispose();
+  mainState.renderer?.domElement?.remove();
+  mainState.container.classList.remove('is-dragging');
+  mainState.container.innerHTML = '';
+  mainState = null;
 }
 
 function updateActiveBtn() {
@@ -559,12 +765,14 @@ function setupGyro() {
 }
 
 function handleGyro(e) {
-  if (!gyroActive || !viewer || e.alpha === null || document.body.classList.contains('room-is-open')) return;
+  if (!gyroActive || !mainState || e.alpha === null || document.body.classList.contains('room-is-open')) return;
 
-  viewer.rotate({
-    longitude: -THREE.MathUtils.degToRad(e.alpha),
-    latitude: 0,
-  });
+  mainState.targetYaw = THREE.MathUtils.clamp(
+    -THREE.MathUtils.degToRad(e.alpha),
+    -mainState.yawLimit,
+    mainState.yawLimit
+  );
+  mainState.targetPitch = 0;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
