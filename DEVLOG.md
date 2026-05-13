@@ -1433,3 +1433,26 @@ Se corrigió la validación visual de Sprint 1 para que Free/base no prometa ni 
 - `node --check public/js/tour-viewer.js` correcto.
 - `rg` confirma que no quedan usos de `PhotoSphereViewer`, `panoData`, `getPanoData` ni `depthUrl` en `backend`/`public`.
 - No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.
+
+## 2026-05-13 — Sprint 1: bug PSV residual, borrado de fotos y preview público
+
+Se corrigió el fallo detectado en producción `PhotoSphereViewer is not defined` reforzando el visor Sprint 1 para que no dependa de PSV y forzando cache-busting del JS público con `tour-viewer.js?v=20260513-2`.
+
+**Qué se cambió:**
+- `tour-viewer.js`: se protegió `getPositions()` si `TOUR_DATA` no existe y se mantuvo la panorámica principal en Three.js cilíndrico/adaptativo, sin referencias a `PhotoSphereViewer`.
+- `tour.php`: el script del visor carga con versión para evitar que producción siga usando una copia cacheada antigua.
+- `PhotoModel.php`: `getByPosition()` filtra `deleted_at IS NULL`; añadidos `getByPositionAndDirection()` y `softDeleteByPositionAndDirection()`.
+- `PositionController.php`: añadido `deletePhoto()` con CSRF, whitelist de dirección `N/S/E/O/360` y ownership completo usuario → negocio → tour → posición antes de borrar.
+- `web.php`: añadido endpoint POST `/dashboard/posicion/photo/delete`.
+- `upload.php`: añadidos botones de eliminar para panorámica y fotos N/S/E/O, confirmación JS y botón "Ver tour público" en nueva pestaña.
+- `dashboard.css`: estilos para preview y botones discretos de eliminación.
+
+**Decisiones:**
+- El borrado de foto es soft delete en BD; no se elimina físicamente el archivo en esta tarea.
+- No se reintroduce PSV, depth map/parallax visual ni CLAHE sobre la imagen visible.
+
+**Verificación técnica local:**
+- `node --check public/js/tour-viewer.js` correcto.
+- `git diff --check` correcto.
+- `rg` confirma que no quedan usos de `PhotoSphereViewer`, `photo-sphere-viewer`, `panoData`, `getPanoData` ni `depthUrl` en `backend`/`public`.
+- No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.

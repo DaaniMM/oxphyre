@@ -51,6 +51,7 @@ $routes = [
         '/dashboard/posicion/store'    => ['PositionController', 'store',       'auth'],
         '/dashboard/posicion/upload'    => ['PositionController', 'upload',        'auth'],
         '/dashboard/posicion/set-mode'  => ['PositionController', 'setActiveMode', 'auth'],
+        '/dashboard/posicion/photo/delete' => ['PositionController', 'deletePhoto', 'auth'],
     ],
 ];
 

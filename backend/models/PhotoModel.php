@@ -15,11 +15,34 @@ class PhotoModel
     {
         $stmt = $this->db->prepare(
             'SELECT * FROM photos
-             WHERE position_id = ?
-             ORDER BY direction ASC'
+             WHERE position_id = ? AND deleted_at IS NULL
+             ORDER BY direction ASC, created_at ASC'
         );
         $stmt->execute([$positionId]);
         return $stmt->fetchAll();
+    }
+
+    public function getByPositionAndDirection(int $positionId, string $direction): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT * FROM photos
+             WHERE position_id = ? AND direction = ? AND deleted_at IS NULL
+             ORDER BY created_at DESC, id DESC
+             LIMIT 1'
+        );
+        $stmt->execute([$positionId, $direction]);
+        $photo = $stmt->fetch();
+        return $photo ?: null;
+    }
+
+    public function softDeleteByPositionAndDirection(int $positionId, string $direction): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE photos
+             SET deleted_at = NOW()
+             WHERE position_id = ? AND direction = ? AND deleted_at IS NULL'
+        );
+        $stmt->execute([$positionId, $direction]);
     }
 
     // Registra una foto en BD.

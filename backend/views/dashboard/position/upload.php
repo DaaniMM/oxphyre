@@ -145,10 +145,19 @@
             Completa esta posición con una panorámica principal y, si quieres, añade Oxphyre Room como vista de detalle.
           </p>
         </div>
+        <div class="position-header-actions">
+          <a class="db-preview-link"
+             href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>"
+             target="_blank"
+             rel="noopener">
+            <i data-lucide="external-link" width="15" height="15" aria-hidden="true"></i>
+            Ver tour público
+          </a>
         <button type="button" class="db-help-icon" id="reopen-tip" aria-label="Cómo completar una posición">
           <i data-lucide="circle-help" width="18" height="18" aria-hidden="true"></i>
           <span class="db-help-tooltip">Ver instrucciones de subida</span>
         </button>
+        </div>
       </div>
 
       <div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:var(--ox-text-muted);
@@ -196,6 +205,14 @@
                 <?php else: ?>
                   <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
                 <?php endif; ?>
+                <button type="submit"
+                        class="db-upload-delete-btn"
+                        form="delete-photo-360"
+                        title="Eliminar panorámica"
+                        aria-label="Eliminar panorámica principal">
+                  <i data-lucide="trash-2" width="13" height="13" aria-hidden="true"></i>
+                  Eliminar
+                </button>
               </div>
             <?php else: ?>
               <img alt="" class="db-upload-zone-360-preview" id="preview-360" style="display:none;">
@@ -246,6 +263,15 @@
                     <span class="db-badge db-badge--published" style="font-size:9px;">IA OK</span>
                   <?php elseif ($existing): ?>
                     <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
+                  <?php endif; ?>
+                  <?php if ($existing): ?>
+                    <button type="submit"
+                            class="db-upload-delete-icon"
+                            form="delete-photo-<?= $dir ?>"
+                            title="Eliminar foto <?= htmlspecialchars($label) ?>"
+                            aria-label="Eliminar foto <?= htmlspecialchars($label) ?>">
+                      <i data-lucide="trash-2" width="13" height="13" aria-hidden="true"></i>
+                    </button>
                   <?php endif; ?>
                 </div>
 
@@ -312,6 +338,28 @@
           </button>
         </div>
       </form>
+
+      <?php if ($photo360): ?>
+        <form action="/dashboard/posicion/photo/delete" method="POST" id="delete-photo-360" class="js-delete-photo-form">
+          <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+          <input type="hidden" name="biz_slug" value="<?= htmlspecialchars($business['slug']) ?>">
+          <input type="hidden" name="tour_slug" value="<?= htmlspecialchars($tour['slug']) ?>">
+          <input type="hidden" name="position_id" value="<?= (int) $position['id'] ?>">
+          <input type="hidden" name="direction" value="360">
+        </form>
+      <?php endif; ?>
+
+      <?php foreach ($orientations as $dir => $label): ?>
+        <?php if (!empty($photosByDir[$dir])): ?>
+          <form action="/dashboard/posicion/photo/delete" method="POST" id="delete-photo-<?= $dir ?>" class="js-delete-photo-form">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <input type="hidden" name="biz_slug" value="<?= htmlspecialchars($business['slug']) ?>">
+            <input type="hidden" name="tour_slug" value="<?= htmlspecialchars($tour['slug']) ?>">
+            <input type="hidden" name="position_id" value="<?= (int) $position['id'] ?>">
+            <input type="hidden" name="direction" value="<?= $dir ?>">
+          </form>
+        <?php endif; ?>
+      <?php endforeach; ?>
     </div>
   </main>
 </div>
@@ -420,6 +468,16 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', () => {
     btnSubmit.disabled = true;
     btnSubmit.textContent = 'Procesando con IA...';
+  });
+
+  document.querySelectorAll('.js-delete-photo-form').forEach(deleteForm => {
+    deleteForm.addEventListener('submit', event => {
+      const direction = deleteForm.querySelector('[name="direction"]')?.value || '';
+      const label = direction === '360' ? 'la panorámica principal' : `la foto ${direction}`;
+      if (!confirm(`¿Eliminar ${label}?`)) {
+        event.preventDefault();
+      }
+    });
   });
 });
 </script>

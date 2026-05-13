@@ -422,6 +422,61 @@ class PositionController extends BaseController
         exit();
     }
 
+    // ── Eliminar foto individual ──────────────────────────────────────────────
+
+    public function deletePhoto(): void
+    {
+        $token = $_POST['csrf_token'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->flash('error', 'Token de seguridad inválido.');
+            $this->go('/dashboard/negocios');
+        }
+        unset($_SESSION['csrf_token']);
+
+        $bizSlug   = preg_replace('/[^a-z0-9-]/', '', $_POST['biz_slug']   ?? '');
+        $tourSlug  = preg_replace('/[^a-z0-9-]/', '', $_POST['tour_slug']  ?? '');
+        $posId     = (int) ($_POST['position_id'] ?? 0);
+        $direction = $_POST['direction'] ?? '';
+        $userId    = (int) ($_SESSION['user_id']  ?? 0);
+
+        if ($bizSlug === '' || $tourSlug === '' || $posId <= 0 || !in_array($direction, ['N', 'S', 'E', 'O', '360'], true)) {
+            $this->flash('error', 'Solicitud de eliminación inválida.');
+            $this->go('/dashboard/negocios');
+        }
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+        require_once BACKEND_PATH . '/models/PositionModel.php';
+        require_once BACKEND_PATH . '/models/PhotoModel.php';
+
+        $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
+        if (!$business) {
+            $this->go('/dashboard/negocios');
+        }
+
+        $tour = (new TourModel())->getBySlugAndBusiness($tourSlug, (int) $business['id']);
+        if (!$tour) {
+            $this->go("/dashboard/negocios/{$bizSlug}");
+        }
+
+        $position = (new PositionModel())->getByIdAndTour($posId, (int) $tour['id']);
+        if (!$position) {
+            $this->flash('error', 'Posición no encontrada.');
+            $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+        }
+
+        $photoModel = new PhotoModel();
+        $photo = $photoModel->getByPositionAndDirection((int) $position['id'], $direction);
+        if (!$photo) {
+            $this->flash('error', 'La foto ya no existe o ya fue eliminada.');
+            $this->go("/dashboard/posicion/upload?position={$posId}&negocio={$bizSlug}&tour={$tourSlug}");
+        }
+
+        $photoModel->softDeleteByPositionAndDirection((int) $position['id'], $direction);
+        $this->flash('success', 'Foto eliminada correctamente.');
+        $this->go("/dashboard/posicion/upload?position={$posId}&negocio={$bizSlug}&tour={$tourSlug}");
+    }
+
     // ── Helper privado ────────────────────────────────────────────────────────
 
     private function go(string $url): never

@@ -27,6 +27,7 @@ const ROOM_TARGET_YAW = {
 const ROOM_PITCH_LIMIT_DEG = 24;
 
 function getPositions() {
+  if (typeof TOUR_DATA === 'undefined') return [];
   return Array.isArray(TOUR_DATA?.positions) ? TOUR_DATA.positions : [];
 }
 
