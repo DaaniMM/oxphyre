@@ -82,6 +82,18 @@ Sprint 1 implementado, pendiente de validación manual:
 
 Las panorámicas de smartphone pueden ser parciales, no necesariamente 360° equirectangulares reales. La UI debe explicarlo sin prometer cobertura total cuando no exista.
 
+### Pipeline de imágenes y almacenamiento
+
+Decisión técnica para próximas iteraciones:
+- El usuario podrá subir imágenes en formatos habituales de móvil, incluyendo HEIC/HEIF, JPG, PNG y WebP si el servidor lo soporta.
+- Oxphyre no debe depender de que el usuario cambie ajustes del móvil ni convierta manualmente archivos.
+- EC2 usará las imágenes originales como temporales de procesamiento, no como almacenamiento permanente.
+- El formato visible final del visor será WebP optimizado.
+- Cloudflare R2/CDN será el destino recomendado para servir imágenes finales del visor y reducir carga, tráfico y almacenamiento persistente en EC2.
+- La BD debe guardar la referencia al archivo final WebP y metadatos útiles: formato original, dimensiones originales, dimensiones finales, tamaño final, storage provider/key y estado de procesamiento.
+- En la versión TFG/MVP no se conservarán originales de usuario indefinidamente. La conservación de originales queda como posible feature Pro/Business o política temporal futura.
+- Si una imagen llega con baja resolución o parece comprimida, la UI debe avisar al usuario de forma clara y no técnica.
+
 ### MiDaS
 - Servidor t3.small: MiDaS Small con CPU, viable para demo/subida puntual.
 - PC local del desarrollador: DPT-Hybrid con RTX 3060 para generar tours demo de alta calidad.
@@ -163,6 +175,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar responsive en móvil/tablet.
 - Revisar SEO técnico final: sitemap, robots, schema, metas, Open Graph.
 - Revisar PageSpeed final.
+- Revisar pipeline de imágenes: aceptar HEIC/HEIF de iPhone, convertir a WebP optimizado, detectar imágenes comprimidas y mostrar mensajes de subida más claros.
 
 ### Prioridad media
 - QR descargable con analíticas.
@@ -174,6 +187,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Página 404/500 personalizada si no está completa.
 - Legal/RGPD: privacidad, términos, cookies.
 - PWA: manifest y service worker.
+- Evaluar integración de Cloudflare R2/CDN para servir imágenes finales del visor y reducir carga persistente en EC2.
 
 ### Deuda técnica
 - Unificar métodos duplicados de controllers en BaseController.
@@ -206,6 +220,7 @@ Sesión anterior importante:
 
 ## Próximo paso recomendado
 
+Antes de cerrar la validación visual de panorámica, analizar viabilidad del pipeline HEIC/HEIF → WebP optimizado. La prueba real con iPhone confirmó que WhatsApp comprime la panorámica de 16248x3832 a 1600x377, provocando pixelación. El flujo objetivo debe permitir subir desde móvil sin barreras y evitar mensajes técnicos como “MIME inválido”.
 Validar manualmente Sprint 1 de `Oxphyre_Room_Free_Flow.md` antes de seguir con otras features:
 
 **Nota operativa:** aunque `CLAUDE.md` y parte de la documentación histórica describen el sistema vigente basado en `positions.active_mode` como selector entre `4photos` y `panoramic`, el flujo que se va a probar ahora es el definido en `Oxphyre_Room_Free_Flow.md`. Sigue siendo propuesta hasta validar Sprint 1, pero es la referencia operativa actual para la siguiente implementación.
