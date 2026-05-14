@@ -13,6 +13,12 @@
 <!-- Contenedor principal de la panorámica adaptativa -->
 <div id="psv-viewer"></div>
 
+<!-- Loading overlay: visible mientras carga la textura panorámica -->
+<div id="psv-loading" class="tour-loading" aria-live="polite" aria-label="Cargando panorámica">
+  <div class="tour-loading-spinner"></div>
+  <p class="tour-loading-text">Cargando vista…</p>
+</div>
+
 <div class="tour-unavailable" id="tour-unavailable" hidden>
   <h1>Tour no disponible</h1>
   <p>Este tour todavía no está listo.</p>
@@ -43,7 +49,10 @@
 
 <!-- Botón giroscopio (solo visible en móvil via CSS pointer:coarse) -->
 <button id="tour-gyro-btn" type="button" aria-label="Activar giroscopio">
-  <i data-lucide="compass" width="20" height="20" aria-hidden="true"></i>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10"/>
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+  </svg>
 </button>
 
 <button id="tour-details-btn" class="tour-details-btn" type="button" hidden>
@@ -69,7 +78,7 @@
 <!-- Three.js para panorámica adaptativa y Oxphyre Room -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
 <!-- Lógica del visor (después de Three.js, sin defer) -->
-<script src="/js/tour-viewer.js?v=20260514-1"></script>
+<script src="/js/tour-viewer.js?v=20260514-2"></script>
 
 </body>
 </html>

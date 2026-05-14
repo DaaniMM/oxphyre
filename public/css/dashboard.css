@@ -1098,7 +1098,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 .db-pos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 0.75rem;
 }
 
@@ -1109,18 +1109,20 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 1rem;
   transition: border-color 0.2s var(--ox-ease);
   min-width: 0;
 }
 
 .db-pos-card:hover { border-color: var(--ox-border-strong); }
 
-.db-pos-card-meta {
+.db-pos-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
+  width: 100%;
+  align-self: stretch;
   min-width: 0;
 }
 
@@ -1130,7 +1132,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   color: var(--ox-text);
   line-height: 1.35;
   min-width: 0;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.5rem;
   overflow-wrap: anywhere;
 }
 
@@ -1148,9 +1150,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   border: 1px solid oklch(0.58 0.14 25 / 0.78);
   border-radius: 8px;
   color: oklch(0.82 0.16 25);
@@ -1167,13 +1169,13 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 .db-pos-card-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
+  width: 100%;
   min-width: 0;
 }
 
 .db-pos-card-action {
-  flex: 1 1 132px;
+  flex: 1 1 0;
   justify-content: center;
   min-width: 0;
   min-height: 38px;
@@ -1191,7 +1193,6 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
   .db-pos-card-actions {
     flex-direction: column;
-    flex-wrap: nowrap;
   }
 
   .db-pos-card-action {

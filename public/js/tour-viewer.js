@@ -10,7 +10,7 @@ let gyroActive = false;
 let roomState = null;
 
 const MAIN_PITCH_LIMIT_DEG = 6;
-const MAIN_DEFAULT_FOV = 58;
+const MAIN_DEFAULT_FOV = 62;
 const ROOM_DIRECTIONS = ['N', 'E', 'S', 'O'];
 const ROOM_LABELS = {
   N: 'Frente',
@@ -56,12 +56,14 @@ function showUnavailable() {
   const gyroBtn = document.getElementById('tour-gyro-btn');
   const detailsBtn = document.getElementById('tour-details-btn');
   const bar = document.getElementById('tour-positions-bar');
+  const loadingEl = document.getElementById('psv-loading');
 
   if (viewerEl) viewerEl.style.display = 'none';
   if (gyroBtn) gyroBtn.hidden = true;
   if (detailsBtn) detailsBtn.hidden = true;
   if (bar) bar.hidden = true;
   if (unavailable) unavailable.hidden = false;
+  if (loadingEl) loadingEl.hidden = true;
 }
 
 function initViewer() {
@@ -105,6 +107,9 @@ function initMainPanorama(url) {
     showUnavailable();
     return;
   }
+
+  const loadingEl = document.getElementById('psv-loading');
+  if (loadingEl) loadingEl.hidden = false;
 
   container.innerHTML = '';
   mainState = {
@@ -157,6 +162,8 @@ function initMainPanorama(url) {
         texture.dispose();
         return;
       }
+
+      if (loadingEl) loadingEl.hidden = true;
 
       texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
       texture.encoding = THREE.sRGBEncoding || texture.encoding;
@@ -278,7 +285,7 @@ function addMainPointerListeners(container) {
     mainState.lastY = event.clientY;
 
     mainState.targetYaw = THREE.MathUtils.clamp(
-      mainState.targetYaw - dx * 0.0042,
+      mainState.targetYaw - dx * 0.0032,
       -mainState.yawLimit,
       mainState.yawLimit
     );
@@ -643,9 +650,7 @@ function addRoomPointerListeners(room) {
 }
 
 function rotateRoomTo(dir) {
-  if (!roomState || !ROOM_TARGET_YAW[dir]) {
-    if (dir !== 'N') return;
-  }
+  if (!roomState || !(dir in ROOM_TARGET_YAW)) return;
 
   const desired = ROOM_TARGET_YAW[dir];
   roomState.targetYaw += shortestAngleDelta(roomState.targetYaw, desired);

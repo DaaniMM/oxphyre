@@ -89,3 +89,30 @@ Tipos de commit: feat, fix, docs, style, refactor, chore
 - Si algo afecta a cómo debe continuar la siguiente IA, va en AI_SYNC.md.
 - Al terminar una tarea importante, actualizar DEVLOG.md y actualizar AI_SYNC.md solo si cambió el estado actual del proyecto.
 
+
+## Regla crítica sobre GitHub remoto
+
+Aunque GitHub pueda estar conectado para lectura de contexto, ningún agente tiene permiso operativo para modificar el repositorio remoto.
+
+Reglas obligatorias:
+- No crear commits.
+- No hacer push.
+- No abrir, cerrar ni modificar pull requests.
+- No modificar issues.
+- No modificar workflows/actions.
+- No escribir, actualizar, borrar ni renombrar archivos directamente en GitHub.
+- No ejecutar acciones destructivas sobre el repositorio remoto.
+
+Uso permitido:
+- Leer archivos del repositorio.
+- Analizar código, arquitectura, bugs y diffs.
+- Proponer cambios.
+- Generar prompts o instrucciones.
+- Indicar comandos para que el usuario los ejecute manualmente.
+
+Flujo obligatorio:
+1. El agente analiza.
+2. El agente propone cambios.
+3. Los cambios se hacen localmente en VS Code mediante Codex, Claude Code o manualmente.
+4. El usuario revisa el diff.
+5. Solo el usuario decide commit/push, salvo autorización explícita en ese mismo momento.

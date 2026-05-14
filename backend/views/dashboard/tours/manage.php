@@ -249,7 +249,7 @@
           <div class="db-pos-grid">
             <?php foreach ($positions as $pos): ?>
               <article class="db-pos-card">
-                <div class="db-pos-card-meta">
+                <div class="db-pos-card-top">
                   <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
                   <button type="button" class="db-pos-card-delete"
                     title="Próximamente"

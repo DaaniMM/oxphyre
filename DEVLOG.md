@@ -1479,8 +1479,8 @@ Se ajustaron accesos de previsualización y textos visibles sin tocar subida, BD
 Se rediseñaron las cards de posiciones en la gestión de tour sin tocar backend, rutas, visor ni BD.
 
 **Qué se cambió:**
-- `tours/manage.php`: la card separa fila meta, título y acciones. El orden queda arriba izquierda y la papelera arriba derecha.
-- `dashboard.css`: el grid de posiciones usa cards más anchas y responsive, la papelera queda visible con borde rojo sutil y las acciones principales se adaptan sin overflow.
+- `tours/manage.php`: la card separa fila superior, título y acciones. El orden queda arriba izquierda y la papelera arriba derecha.
+- `dashboard.css`: el grid de posiciones usa cards de 340px cuando hay espacio, la fila superior fuerza `space-between`, la papelera queda visible con borde rojo sutil y las acciones principales se adaptan sin overflow.
 - "Ver posición" no parte línea y, en móvil o cards estrechas, los botones pasan a columna y ocupan el ancho completo.
 
 **Motivo:** evitar overflow tras añadir "Ver posición" y mantener una UI limpia para Gestionar, previsualizar y futura eliminación.
