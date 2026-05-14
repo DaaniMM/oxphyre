@@ -146,13 +146,15 @@
           </p>
         </div>
         <div class="position-header-actions">
+          <?php if ((bool) $tour['is_published']): ?>
           <a class="db-preview-link"
-             href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>"
+             href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $position['id'] ?>"
              target="_blank"
              rel="noopener">
             <i data-lucide="external-link" width="15" height="15" aria-hidden="true"></i>
-            Ver tour público
+            Ver esta posición
           </a>
+          <?php endif; ?>
         <button type="button" class="db-help-icon" id="reopen-tip" aria-label="Cómo completar una posición">
           <i data-lucide="circle-help" width="18" height="18" aria-hidden="true"></i>
           <span class="db-help-tooltip">Ver instrucciones de subida</span>
@@ -473,7 +475,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.js-delete-photo-form').forEach(deleteForm => {
     deleteForm.addEventListener('submit', event => {
       const direction = deleteForm.querySelector('[name="direction"]')?.value || '';
-      const label = direction === '360' ? 'la panorámica principal' : `la foto ${direction}`;
+      const photoLabels = {
+        '360': 'la panorámica principal',
+        N: 'la foto Frente',
+        S: 'la foto Fondo',
+        E: 'la foto Derecha',
+        O: 'la foto Izquierda',
+      };
+      const label = photoLabels[direction] || 'esta foto';
       if (!confirm(`¿Eliminar ${label}?`)) {
         event.preventDefault();
       }

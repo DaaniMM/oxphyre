@@ -35,6 +35,17 @@ function getPanoramaUrl(position) {
   return position?.photos?.['360']?.url || null;
 }
 
+function getInitialPositionIndex(positions) {
+  const requestedId = new URLSearchParams(window.location.search).get('position');
+  if (!requestedId) return 0;
+
+  const requestedIdx = positions.findIndex(position => {
+    return String(position?.id) === requestedId && Boolean(getPanoramaUrl(position));
+  });
+
+  return requestedIdx >= 0 ? requestedIdx : 0;
+}
+
 function hasRoom(position) {
   return ROOM_DIRECTIONS.every(dir => Boolean(position?.photos?.[dir]?.url));
 }
@@ -55,7 +66,8 @@ function showUnavailable() {
 
 function initViewer() {
   const positions = getPositions();
-  currentPosition = positions[0] || null;
+  currentPositionIdx = getInitialPositionIndex(positions);
+  currentPosition = positions[currentPositionIdx] || null;
   const initialUrl = getPanoramaUrl(currentPosition);
 
   if (!initialUrl) {
@@ -64,6 +76,7 @@ function initViewer() {
   }
 
   initMainPanorama(initialUrl);
+  updateActiveBtn();
   updateDetailsButton();
 }
 

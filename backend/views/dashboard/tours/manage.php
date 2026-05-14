@@ -133,6 +133,16 @@
         </div>
 
         <div class="db-manage-header-right">
+          <?php if ($isPublished): ?>
+            <a href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>"
+               class="db-btn-secondary db-btn-brand-outline"
+               target="_blank"
+               rel="noopener">
+              <i data-lucide="external-link" width="14" height="14" aria-hidden="true"></i>
+              Ver tour público
+            </a>
+          <?php endif; ?>
+
           <button type="button" class="db-btn-secondary" id="btn-edit">
             <i data-lucide="pencil" width="14" height="14" aria-hidden="true"></i>
             Editar
@@ -248,6 +258,16 @@
                      class="db-btn-secondary" style="font-size:0.8125rem;flex:1;justify-content:center;">
                     Gestionar
                   </a>
+                  <?php if ($isPublished): ?>
+                    <a href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $pos['id'] ?>"
+                       class="db-btn-secondary db-btn-brand-outline"
+                       style="font-size:0.8125rem;flex:1;justify-content:center;"
+                       target="_blank"
+                       rel="noopener">
+                      <i data-lucide="external-link" width="13" height="13" aria-hidden="true"></i>
+                      Ver posición
+                    </a>
+                  <?php endif; ?>
                   <button type="button" class="db-btn-danger"
                     style="opacity:0.5;cursor:not-allowed;" disabled
                     title="Próximamente">

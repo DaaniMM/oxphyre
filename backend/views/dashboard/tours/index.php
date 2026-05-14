@@ -152,11 +152,21 @@
                         <?= $tour['is_published'] ? 'Publicado' : 'Borrador' ?>
                       </span>
                     </div>
-                    <div style="margin-top:0.75rem;">
+                    <div class="db-tour-card-actions">
                       <a href="/dashboard/negocios/<?= htmlspecialchars($biz['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>"
-                         class="db-btn-secondary" style="font-size:0.8125rem;width:100%;justify-content:center;">
+                         class="db-btn-secondary" style="font-size:0.8125rem;flex:1;justify-content:center;">
                         Gestionar →
                       </a>
+                      <?php if ((bool) $tour['is_published']): ?>
+                        <a href="/tour/<?= htmlspecialchars($biz['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>"
+                           class="db-btn-secondary db-btn-brand-outline"
+                           style="font-size:0.8125rem;flex:1;justify-content:center;"
+                           target="_blank"
+                           rel="noopener">
+                          <i data-lucide="external-link" width="13" height="13" aria-hidden="true"></i>
+                          Ver tour
+                        </a>
+                      <?php endif; ?>
                     </div>
                   </article>
                 <?php endforeach; ?>

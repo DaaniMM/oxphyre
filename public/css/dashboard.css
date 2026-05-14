@@ -992,6 +992,18 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 .db-btn-secondary:hover { color: var(--ox-text); border-color: var(--ox-border-strong); }
 
+.db-btn-brand-outline {
+  color: var(--ox-amber-bright);
+  border-color: oklch(0.78 0.16 65 / 0.58);
+  background: oklch(0.78 0.16 65 / 0.08);
+}
+
+.db-btn-brand-outline:hover {
+  color: var(--ox-text);
+  border-color: var(--ox-amber);
+  background: oklch(0.78 0.16 65 / 0.14);
+}
+
 /* ── Tour list ── */
 
 .db-stat-bar {
@@ -1684,10 +1696,10 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   gap: 0.45rem;
   min-height: 38px;
   padding: 0.55rem 0.8rem;
-  border: 1px solid var(--ox-border);
+  border: 1px solid oklch(0.78 0.16 65 / 0.58);
   border-radius: 999px;
-  color: var(--ox-text-muted);
-  background: var(--ox-bg-elevated);
+  color: var(--ox-amber-bright);
+  background: oklch(0.78 0.16 65 / 0.08);
   font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: none;
@@ -1696,8 +1708,8 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 .db-preview-link:hover {
   color: var(--ox-text);
-  border-color: var(--ox-border-strong);
-  background: var(--ox-bg-card);
+  border-color: var(--ox-amber);
+  background: oklch(0.78 0.16 65 / 0.14);
 }
 
 .db-upload-delete-btn,

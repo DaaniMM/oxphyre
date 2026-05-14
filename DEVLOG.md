@@ -1456,3 +1456,18 @@ Se corrigió el fallo detectado en producción `PhotoSphereViewer is not defined
 - `git diff --check` correcto.
 - `rg` confirma que no quedan usos de `PhotoSphereViewer`, `photo-sphere-viewer`, `panoData`, `getPanoData` ni `depthUrl` en `backend`/`public`.
 - No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.
+
+## 2026-05-14 — UX de previsualización Sprint 1
+
+Se ajustaron accesos de previsualización y textos visibles sin tocar subida, BD, MiDaS ni CLAHE.
+
+**Qué se cambió:**
+- `upload.php`: el acceso público de la posición apunta a `?position={id}` y se muestra como "Ver esta posición" cuando el tour está publicado.
+- `upload.php`: la confirmación de borrado usa nombres de usuario: panorámica principal, Frente, Fondo, Derecha e Izquierda.
+- `tours/index.php`: cada card de tour publicado añade "Ver tour" sin quitar "Gestionar" como acción de edición.
+- `tours/manage.php`: el header del tour publicado añade "Ver tour público" y cada posición añade "Ver posición".
+- `tour-viewer.js`: lee `?position=`, busca la posición en `TOUR_DATA.positions` y arranca ahí si tiene panorámica; si no, cae a la primera posición válida.
+- `tour.php`: cache-busting actualizado a `tour-viewer.js?v=20260514-1`.
+- `dashboard.css`: los botones de preview usan borde/acento ámbar como acción secundaria destacada.
+
+**Motivo:** facilitar la validación manual de Sprint 1 desde el dashboard y evitar que el creador vea direcciones internas `N/S/E/O/360`.
