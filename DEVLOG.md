@@ -1718,3 +1718,34 @@ Se añadió soporte de entrada para fotos HEIC/HEIF de iPhone sin depender de Im
 
 **Pendiente:**
 - Prueba manual en servidor con archivo HEIC/HEIF real de iPhone.
+
+## 2026-05-14 — Validación parcial iPhone tras soporte HEIC/HEIF
+
+### Verificación de sintaxis en servidor
+- `php -l backend/services/ImageProcessingService.php` → OK
+- `php -l backend/config/config.php` → OK
+- `php -l backend/views/dashboard/position/upload.php` → OK
+- `git diff --check` → correcto en local antes del commit
+
+### Subida real desde iPhone validada
+- Subida desde móvil iPhone completada correctamente.
+- El archivo llegó al servidor como `IMG_8024.jpeg` (iOS/Safari convirtió automáticamente a JPEG antes de enviarlo; no llegó como `.heic` puro).
+- Pipeline ejecutó correctamente el path JPG/JPEG del servicio.
+
+### Datos reales del archivo procesado
+- `filename` en BD: `360_6a060457b60db7.84481882.webp`
+- `original_filename`: `IMG_8024.jpeg`
+- WebP final: `8192 × 1932 px`, peso `4.4 MB`
+- Depth map: `443 KB`
+- `processed = 1` en BD
+- Visor móvil probado y carga correctamente.
+
+### Estado de HEIC/HEIF
+- Código HEIC/HEIF: implementado en `ImageProcessingService.php`.
+- Servidor: `libvips 8.12.1`, `libheif1` instalados y validados (`vips list classes` muestra HEIF/HEIC load).
+- config.php: permite `image/heic`, `image/heif`, `image/heic-sequence`, `image/heif-sequence`.
+- Flujo iPhone normal: validado (aunque el archivo llegó como JPEG por conversión automática de iOS/Safari).
+- Pendiente: prueba con archivo `.heic` puro sin conversión automática para confirmar el path HEIC del pipeline.
+
+### Próximo bloque recomendado
+R2/CDN — el pipeline de imágenes queda cerrado para uso normal de JPG/PNG/WebP y flujo iPhone habitual; el siguiente bloque es subir los WebP finales a Cloudflare R2.

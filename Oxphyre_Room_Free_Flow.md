@@ -13,7 +13,10 @@ El Sprint 1 ya está implementado en la app real:
 - botón "Ver detalles" solo si existen las 4 fotos;
 - retorno desde Oxphyre Room a vista principal;
 - subida conjunta de N/S/E/O + `photo_360`;
-- pipeline WebP/libvips en `ImageProcessingService`, incluyendo HEIC/HEIF pendiente de prueba real tras deploy.
+- pipeline WebP/libvips en `ImageProcessingService`;
+- HEIC/HEIF implementado en pipeline y soportado por servidor;
+- flujo iPhone normal validado;
+- pendiente prueba con archivo `.heic` puro sin conversión automática.
 
 Quedan pendientes para fases posteriores:
 - editor real de hotspots;

@@ -119,7 +119,7 @@ Estado implementado:
 - Si una imagen parece comprimida, aparece recomendación secundaria: evitar WhatsApp, Instagram u otras apps antes de subir.
 
 Pendiente:
-- HEIC/HEIF de iPhone implementado en el pipeline, pendiente de prueba manual real con archivo iPhone tras deploy.
+- HEIC/HEIF implementado en código y soportado por servidor vía libvips/libheif. Prueba real desde iPhone validada: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente, aunque iOS/Safari entregó el archivo como `IMG_8024.jpeg` y no como `.heic` puro. Queda pendiente probar un archivo `.heic` real sin conversión automática.
 - Cloudflare R2/CDN sigue pendiente para servir imágenes finales y reducir carga persistente en EC2.
 - BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, storage_provider, storage_key, public_url, processing_status/error_code.
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
@@ -206,7 +206,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar responsive en móvil/tablet.
 - Revisar SEO técnico final: sitemap, robots, schema, metas, Open Graph.
 - Revisar PageSpeed final.
-- Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF ya entran al pipeline WebP/libvips; queda pendiente prueba manual real HEIC en servidor tras deploy.
+- Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
 
 ### Prioridad media
 - QR descargable con analíticas.
@@ -262,12 +262,13 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. Probar HEIC/HEIF real en servidor tras deploy: debe convertirse a WebP final y generar JPG temporal MiDaS.
-2. R2/CDN: subir WebP final a Cloudflare R2 y guardar provider/key/url/metadatos mínimos. No implementado todavía.
-3. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía.
-4. QR descargable con analíticas. No implementado todavía.
-5. Hotspots de navegación entre posiciones. No implementado todavía.
-6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+1. R2/CDN: subir WebP final a Cloudflare R2 y guardar provider/key/url/metadatos mínimos. No implementado todavía.
+2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía.
+3. QR descargable con analíticas. No implementado todavía.
+4. Hotspots de navegación entre posiciones. No implementado todavía.
+5. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+
+Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
 
 Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo público actual depende de `photos.direction='360'` para la panorámica principal y N/S/E/O para Oxphyre Room.
 

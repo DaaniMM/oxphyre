@@ -127,7 +127,10 @@ CLAUDE.md            → este archivo
 - El WebP visible no se sobrescribe con MiDaS ni CLAHE.
 - El flujo TFG actual genera depth maps cuando MiDaS responde, pero la imagen pública visible sigue siendo el WebP optimizado.
 - La definición comercial de planes podrá limitar créditos MiDaS en el futuro; esa política de producto no cambia el pipeline actual.
-- HEIC/HEIF queda implementado en pipeline, pendiente de prueba real con archivo iPhone tras deploy. Cloudflare R2/CDN y metadata avanzada en BD quedan pendientes.
+- HEIC/HEIF implementado en pipeline y soportado por servidor vía libvips/libheif.
+- Flujo iPhone normal validado: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente. En esa prueba iOS/Safari entregó el archivo como JPEG, no como `.heic` puro.
+- Queda pendiente probar un archivo `.heic` puro sin conversión automática.
+- Cloudflare R2/CDN y metadata avanzada en BD quedan pendientes.
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
