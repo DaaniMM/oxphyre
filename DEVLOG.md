@@ -1503,3 +1503,22 @@ Se corrigió el pipeline de color/render del visor público para que la panorám
 
 **Verificación técnica local:**
 - `node --check public/js/tour-viewer.js` correcto.
+
+## 2026-05-14 — Ajuste controlado de drag y cobertura panorámica
+
+Se ajustó solo la interacción horizontal y la estimación de cobertura de la panorámica principal.
+
+**Qué se cambió:**
+- `tour-viewer.js`: el drag horizontal principal invierte el signo de `dx`, pasando de `targetYaw - dx * 0.0032` a `targetYaw + dx * 0.0032`.
+- `tour-viewer.js`: la cobertura estimada pasa de `clamp(aspect * 68, 130, 285)` a `clamp(aspect * 55, 110, 240)` para evitar sobreestirar panorámicas parciales de móvil.
+- `tour.php`: cache-busting actualizado a `tour-viewer.js?v=20260514-4`.
+
+**Motivo:** hacer que el arrastre se sienta natural y reducir la sensación de imagen blanda/estirada sin tocar color, geometría vertical, FOV, pitch ni Oxphyre Room.
+
+**Análisis pendiente separado:**
+- Geometría principal actual: `radius = 5.2`, `height = 6.1`, `MAIN_DEFAULT_FOV = 62`, `MAIN_PITCH_LIMIT_DEG = 6`.
+- La altura fija podría contribuir a una percepción de imagen grande en panorámicas estrechas; conviene probarlo aparte, por ejemplo con `height` entre `5.0` y `5.5` manteniendo radio/FOV constantes.
+
+**Verificación técnica local:**
+- `node --check public/js/tour-viewer.js` correcto.
+- `git diff --check` correcto.

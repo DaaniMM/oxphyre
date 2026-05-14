@@ -195,7 +195,7 @@ function initMainPanorama(url) {
 
       const image = texture.image || {};
       const aspect = image.width && image.height ? image.width / image.height : 2.6;
-      const coverageDeg = THREE.MathUtils.clamp(aspect * 68, 130, 285);
+      const coverageDeg = THREE.MathUtils.clamp(aspect * 55, 110, 240);
 
       state.texture = texture;
       state.geometry = createMainPanoramaGeometry(THREE.MathUtils.degToRad(coverageDeg));
@@ -307,7 +307,7 @@ function addMainPointerListeners(container) {
     mainState.lastY = event.clientY;
 
     mainState.targetYaw = THREE.MathUtils.clamp(
-      mainState.targetYaw - dx * 0.0032,
+      mainState.targetYaw + dx * 0.0032,
       -mainState.yawLimit,
       mainState.yawLimit
     );
