@@ -1561,6 +1561,21 @@ Se ajustó la UX de los mensajes de subida cuando una imagen se detecta como com
 - `php -l` no disponible en el PATH local de Windows.
 - `git diff --check` correcto.
 
+## 2026-05-14 — Límite específico para panorámica principal
+
+Se ajustó el límite interno de subida para permitir panorámicas originales algo más pesadas sin abrir el límite global de fotos.
+
+**Qué se cambió:**
+- `PositionController.php`: las fotos normales N/S/E/O mantienen `MAX_UPLOAD_SIZE` de 10MB.
+- `PositionController.php`: la panorámica principal `direction='360'` usa un límite específico de 15MB (`PANORAMA_MAX_UPLOAD_SIZE`), coherente con `upload_max_filesize=15M`.
+- `PositionController.php`: el log interno de tamaño excedido ahora incluye dirección, tamaño recibido y límite aplicado en bytes.
+
+**Motivo:** una panorámica original de móvil pesaba ~10.48MB y era rechazada por el límite interno de 10MB, aunque PHP/Nginx ya permiten hasta 15-20MB.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
+
 ## 2026-05-14 — Experimento de altura en cilindro panorámico
 
 Se redujo solo la altura vertical del cilindro de la panorámica principal.

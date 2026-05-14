@@ -6,6 +6,7 @@ class PositionController extends BaseController
 {
     private const WEBP_QUALITY = 92;
     private const MEMORY_SAFETY_BYTES = 33554432; // 32 MB de margen para evitar OOM en GD.
+    private const PANORAMA_MAX_UPLOAD_SIZE = 15 * 1024 * 1024;
     private const LOW_QUALITY_RECOMMENDATION = 'Recomendación de Oxphyre: evita pasar las fotos por WhatsApp, Instagram u otras apps antes de subirlas, porque pueden reducir la calidad.';
 
     // Etiquetas de plan para mostrar en el sidebar
@@ -443,8 +444,10 @@ class PositionController extends BaseController
             return $this->uploadResult(false, 'No hemos podido recibir esta imagen. Inténtalo otra vez.');
         }
 
-        if (($file['size'] ?? 0) > MAX_UPLOAD_SIZE) {
-            error_log("PositionController: tamaño excedido en {$direction}: {$file['size']}");
+        $sizeLimit = $this->uploadSizeLimitForDirection($direction);
+        $fileSize = (int) ($file['size'] ?? 0);
+        if ($fileSize > $sizeLimit) {
+            error_log("PositionController: tamaño excedido en {$direction}: {$fileSize} bytes; límite aplicado {$sizeLimit} bytes");
             return $this->uploadResult(false, 'Esta imagen es demasiado grande para subirla ahora. Prueba con una versión más ligera.');
         }
 
@@ -502,6 +505,11 @@ class PositionController extends BaseController
 
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         return $finfo->file($path) ?: '';
+    }
+
+    private function uploadSizeLimitForDirection(string $direction): int
+    {
+        return $direction === '360' ? self::PANORAMA_MAX_UPLOAD_SIZE : MAX_UPLOAD_SIZE;
     }
 
     private function convertToWebp(string $sourcePath, string $mime, string $webpPath, string $midasTempPath): bool
