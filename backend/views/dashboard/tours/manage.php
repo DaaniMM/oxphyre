@@ -249,18 +249,17 @@
           <div class="db-pos-grid">
             <?php foreach ($positions as $pos): ?>
               <article class="db-pos-card">
-                <div class="db-pos-card-header">
-                  <h3 class="db-pos-card-title"><?= htmlspecialchars($pos['name']) ?></h3>
-                  <div class="db-pos-card-meta">
-                    <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
-                    <button type="button" class="db-pos-card-delete"
-                      disabled
-                      title="Próximamente"
-                      aria-label="Eliminar posición próximamente">
-                      <i data-lucide="trash-2" width="13" height="13" aria-hidden="true"></i>
-                    </button>
-                  </div>
+                <div class="db-pos-card-meta">
+                  <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
+                  <button type="button" class="db-pos-card-delete"
+                    title="Próximamente"
+                    aria-label="Eliminar posición próximamente">
+                    <i data-lucide="trash-2" width="14" height="14" aria-hidden="true"></i>
+                  </button>
                 </div>
+
+                <h3 class="db-pos-card-title"><?= htmlspecialchars($pos['name']) ?></h3>
+
                 <div class="db-pos-card-actions">
                   <a href="/dashboard/posicion/upload?position=<?= (int) $pos['id'] ?>&negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"
                      class="db-btn-secondary db-pos-card-action">

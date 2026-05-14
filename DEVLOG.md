@@ -1457,6 +1457,8 @@ Se corrigió el fallo detectado en producción `PhotoSphereViewer is not defined
 - `rg` confirma que no quedan usos de `PhotoSphereViewer`, `photo-sphere-viewer`, `panoData`, `getPanoData` ni `depthUrl` en `backend`/`public`.
 - No se pudo ejecutar `php -l` porque PHP no está disponible en el PATH local de Windows.
 
+
+
 ## 2026-05-14 — UX de previsualización Sprint 1
 
 Se ajustaron accesos de previsualización y textos visibles sin tocar subida, BD, MiDaS ni CLAHE.
@@ -1472,13 +1474,13 @@ Se ajustaron accesos de previsualización y textos visibles sin tocar subida, BD
 
 **Motivo:** facilitar la validación manual de Sprint 1 desde el dashboard y evitar que el creador vea direcciones internas `N/S/E/O/360`.
 
-## 2026-05-14 — Ajuste UX de cards de posiciones
+## — Ajuste UX de cards de posiciones
 
 Se rediseñaron las cards de posiciones en la gestión de tour sin tocar backend, rutas, visor ni BD.
 
 **Qué se cambió:**
-- `tours/manage.php`: la card separa cabecera y acciones. El título queda a la izquierda, el orden y la papelera discreta a la derecha.
-- `dashboard.css`: el grid de posiciones usa cards más anchas y responsive, las acciones principales quedan en dos botones flexibles y "Ver posición" no parte línea.
-- En móvil, las acciones pasan a columna y ocupan el ancho completo.
+- `tours/manage.php`: la card separa fila meta, título y acciones. El orden queda arriba izquierda y la papelera arriba derecha.
+- `dashboard.css`: el grid de posiciones usa cards más anchas y responsive, la papelera queda visible con borde rojo sutil y las acciones principales se adaptan sin overflow.
+- "Ver posición" no parte línea y, en móvil o cards estrechas, los botones pasan a columna y ocupan el ancho completo.
 
 **Motivo:** evitar overflow tras añadir "Ver posición" y mantener una UI limpia para Gestionar, previsualizar y futura eliminación.
