@@ -1749,3 +1749,40 @@ Se añadió soporte de entrada para fotos HEIC/HEIF de iPhone sin depender de Im
 
 ### Próximo bloque recomendado
 R2/CDN — el pipeline de imágenes queda cerrado para uso normal de JPG/PNG/WebP y flujo iPhone habitual; el siguiente bloque es subir los WebP finales a Cloudflare R2.
+
+## 2026-05-14 — Decisión arquitectónica R2/CDN documentada
+
+Tipo: documentación/decisión. Sin cambios de código ni de base de datos.
+
+### Contexto
+El pipeline de imágenes WebP/libvips está cerrado y validado en servidor.
+El siguiente bloque principal es integrar Cloudflare R2 como almacenamiento y CDN para los WebP finales de posiciones de usuarios.
+Antes de escribir código se documenta la arquitectura decidida para que quede retomable desde cualquier IA o sesión.
+
+### Decisión
+- **EC2** procesa temporalmente: valida, convierte a WebP, genera depth map, sube a R2 y guarda la URL en BD.
+- **Cloudflare R2** almacena y sirve los WebP finales. Bandwidth gratuito (sin coste de egress).
+- **Bucket `oxphyre-assets`** — ya existe; se reserva para assets de landing/demo. No se usa para fotos reales de tours.
+- **Bucket `oxphyre-tour-media`** — a crear; para WebP de posiciones de usuarios.
+- **Custom domain:** `media.oxphyre.com` (CNAME a R2 en la zone de Cloudflare).
+- **Restricción crítica:** coste 0€. Free tier R2: 10 GB, 1M escrituras/mes, 10M lecturas/mes. No activar servicios de pago hasta tener ingresos.
+
+### Scope definido para la implementación
+- Solo WebP visibles de nuevas subidas. Depth maps quedan en EC2.
+- Migración de fotos antiguas: postergada hasta validar R2.
+- Limpieza física en EC2: solo después de confirmar que R2 sirve el archivo.
+- Fallback local obligatorio si R2 falla.
+- BD: añadir `storage_provider`, `storage_key`, `public_url` a `photos`. SQL pendiente.
+
+### Plan de implementación previsto (no ejecutado todavía)
+- Fase 0: crear bucket `oxphyre-tour-media`, configurar CNAME `media.oxphyre.com`, añadir credenciales a `.env`/`.env.example`. Sin tocar código de aplicación.
+- Fase 1: implementar `R2StorageService.php` (upload, url, delete). Sin tocar `PositionController`, `PhotoModel`, upload.php ni visor.
+- Fases posteriores: integrar en el pipeline de subida, migrar fotos antiguas, limpieza física.
+
+### Archivos de documentación actualizados en esta sesión
+- `AI_SYNC.md`: nueva sección "Almacenamiento en Cloudflare R2" en Decisiones activas; Próximo paso actualizado con Fase 0+1.
+- `CLAUDE.md`: nueva sección "Arquitectura de almacenamiento prevista" dentro del pipeline de imágenes.
+- `DEVLOG.md`: esta entrada.
+
+### Código modificado
+Ninguno. Solo documentación.

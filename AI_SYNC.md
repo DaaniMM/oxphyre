@@ -125,6 +125,23 @@ Pendiente:
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
 - Ruido/granulado residual en panorámicas interiores: mejora opcional/no bloqueante. La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp; el ruido restante probablemente viene de captura en interior/poca luz + ruido real de cámara + visualización fullscreen. No aplicar denoise por defecto todavía porque puede suavizar demasiado o generar efecto acuarela.
 
+### Almacenamiento en Cloudflare R2 (decisión arquitectónica — pendiente de implementación)
+
+Estrategia decidida, sin código escrito todavía:
+
+- **EC2** actúa como procesador/temporal: valida, convierte a WebP, genera depth map y luego sube el WebP final a R2.
+- **Cloudflare R2** actúa como almacenamiento final y CDN de WebP visibles. El visor público cargará imágenes desde R2, no desde EC2.
+- **Buckets:**
+  - `oxphyre-assets` — ya existe; se mantiene exclusivamente para assets de landing, demo e imágenes estáticas. **No se usa para fotos de tours de usuarios.**
+  - `oxphyre-tour-media` — bucket nuevo a crear para WebP finales reales de posiciones/tours de usuarios.
+- **Custom domain:** `media.oxphyre.com` (Cloudflare zone ya existe; añadir CNAME a R2 cuando se cree el bucket).
+- **Depth maps:** quedan fuera del scope R2 por ahora. Siguen en EC2 hasta decisión posterior.
+- **Migración de fotos antiguas:** postergada. No se migrarán las fotos existentes hasta que R2 esté validado en producción.
+- **Limpieza física en EC2:** no se borrará el archivo físico local hasta confirmar que R2 lo tiene y lo sirve correctamente.
+- **Fallback local obligatorio:** si R2 falla o la subida falla, el WebP queda en EC2 y el visor lo sirve desde `/uploads/` como ahora. No debe romperse el flujo si R2 no está disponible.
+- **Restricción crítica — coste 0€:** usar R2 dentro del free tier. Free tier actual: 10 GB de almacenamiento, 1 millón de operaciones de escritura/mes, 10 millones de lectura/mes, sin coste de egress (bandwidth gratuito). Vigilar consumo; no activar planes de pago ni Workers, Streams u otros servicios de pago mientras no haya ingresos.
+- **BD:** añadir columnas `storage_provider` (enum: 'local'|'r2'), `storage_key` (ruta en R2) y `public_url` a la tabla `photos`. Migración SQL pendiente de diseñar.
+
 ### MiDaS
 - Servidor t3.small: MiDaS Small con CPU, viable para demo/subida puntual.
 - PC local del desarrollador: DPT-Hybrid con RTX 3060 para generar tours demo de alta calidad.
@@ -262,8 +279,10 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. R2/CDN: subir WebP final a Cloudflare R2 y guardar provider/key/url/metadatos mínimos. No implementado todavía.
-2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía.
+1. **R2/CDN — Fase 0 + Fase 1** (siguiente bloque principal):
+   - Fase 0: crear bucket `oxphyre-tour-media` en Cloudflare, configurar CNAME `media.oxphyre.com`, añadir credenciales a `.env` y documentar en `.env.example`. Sin tocar código de aplicación todavía.
+   - Fase 1: implementar `R2StorageService.php` (upload, url, delete). Sin tocar `PositionController`, `PhotoModel`, upload.php ni visor. Solo crear el servicio y los tests mínimos en desarrollo.
+2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.
 5. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.

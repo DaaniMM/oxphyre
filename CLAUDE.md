@@ -134,6 +134,28 @@ CLAUDE.md            → este archivo
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
+### Arquitectura de almacenamiento prevista — Cloudflare R2 (pendiente de implementación)
+
+**Estado:** decisión arquitectónica documentada. No hay código escrito todavía para R2.
+
+**Roles:**
+- **EC2** = procesamiento temporal. Recibe el upload, valida, convierte a WebP y genera depth map. Sube el WebP final a R2 y guarda la URL en BD.
+- **Cloudflare R2** = almacenamiento final y CDN para WebP visibles de posiciones/tours de usuarios. Bandwidth gratuito (sin coste de egress).
+
+**Buckets:**
+- `oxphyre-assets` — ya existe; solo para assets de landing, demo e imágenes estáticas. **No se usa para fotos reales de tours de usuarios.**
+- `oxphyre-tour-media` — a crear; para WebP finales de posiciones de usuarios. Custom domain: `media.oxphyre.com`.
+
+**Restricción crítica:** mantener coste 0€ mientras no haya ingresos. Free tier R2: 10 GB almacenamiento, 1M escrituras/mes, 10M lecturas/mes, egress gratuito. No activar Workers, Streams ni otros servicios de pago de Cloudflare hasta tener ingresos reales.
+
+**Scope inicial:**
+- Solo WebP visibles de posiciones. Depth maps quedan en EC2 por ahora.
+- Fallback local obligatorio: si R2 falla, el WebP queda en EC2 y el visor lo sirve desde `/uploads/` como ahora.
+- Migración de fotos antiguas: postergada hasta validar R2 en producción.
+- Limpieza física en EC2: solo después de confirmar que R2 tiene y sirve el archivo correctamente.
+
+**BD:** añadir `storage_provider` ('local'|'r2'), `storage_key` y `public_url` a la tabla `photos`. Migración SQL pendiente de diseñar junto con el servicio.
+
 ## Propuesta provisional de tiers
 
 **Estado actual:** Existe `Planes_Oxphyre.md` como propuesta candidata/provisional para redefinir Free/Pro/Business, creada el 12/05/2026. Se debe consultar durante las pruebas actuales del visor Free.
