@@ -97,13 +97,15 @@ Las panorámicas de smartphone pueden ser parciales, no necesariamente 360° equ
 
 Estado implementado:
 - `ImageProcessingService.php` es el servicio responsable del pipeline local de imágenes.
-- El usuario puede subir JPG, PNG y WebP; se valida MIME real con `finfo`.
+- El usuario puede subir JPG, PNG, WebP y HEIC/HEIF; se valida MIME real con `finfo`.
 - El formato visible final del visor es WebP optimizado.
 - `php8.1-gd` está instalado y validado con soporte JPEG/PNG/WebP.
 - `libvips-tools` está instalado y validado: vips 8.12.1, ruta `/usr/bin/vips`, WebP load/save confirmado.
 - Límites reales actuales del servidor: `upload_max_filesize=15M`, `post_max_size=20M`, `nginx client_max_body_size=20M`.
 - N/S/E/O usan WebP quality 92.
 - `direction='360'` usa WebP quality 96.
+- HEIC/HEIF se procesan siempre con libvips, no GD.
+- Si `getimagesize()` no puede leer dimensiones HEIC/HEIF, se usa `vipsheader`.
 - Panorámicas grandes usan libvips CLI si GD no puede procesarlas con seguridad o si superan 8192px de ancho.
 - El ancho final máximo de panorámica es 8192px, manteniendo proporción.
 - MiDaS recibe un JPG temporal quality 92 separado; CLAHE/MiDaS no sobrescriben la imagen visible.
@@ -117,7 +119,7 @@ Estado implementado:
 - Si una imagen parece comprimida, aparece recomendación secundaria: evitar WhatsApp, Instagram u otras apps antes de subir.
 
 Pendiente:
-- HEIC/HEIF de iPhone sigue pendiente. No implementado todavía.
+- HEIC/HEIF de iPhone implementado en el pipeline, pendiente de prueba manual real con archivo iPhone tras deploy.
 - Cloudflare R2/CDN sigue pendiente para servir imágenes finales y reducir carga persistente en EC2.
 - BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, storage_provider, storage_key, public_url, processing_status/error_code.
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
@@ -204,7 +206,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar responsive en móvil/tablet.
 - Revisar SEO técnico final: sitemap, robots, schema, metas, Open Graph.
 - Revisar PageSpeed final.
-- Pipeline de imágenes: HEIC/HEIF de iPhone pendiente; WebP/libvips para JPG/PNG/WebP ya implementado.
+- Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF ya entran al pipeline WebP/libvips; queda pendiente prueba manual real HEIC en servidor tras deploy.
 
 ### Prioridad media
 - QR descargable con analíticas.
@@ -233,11 +235,11 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Última sesión de implementación:
-- Pipeline de imágenes Fase 1.2 cerrado para JPG/PNG/WebP:
+- Pipeline de imágenes Fase 1.2 cerrado para JPG/PNG/WebP y ampliado a HEIC/HEIF:
   - `ImageProcessingService.php` centraliza validación, conversión y temporales.
   - N/S/E/O se guardan como WebP quality 92.
   - Panorámica `360` se guarda como WebP quality 96.
-  - Panorámicas grandes se procesan con libvips CLI y máximo 8192px de ancho.
+  - Panorámicas grandes y HEIC/HEIF se procesan con libvips CLI; 360 usa máximo 8192px de ancho.
   - MiDaS procesa JPG temporal separado quality 92.
   - Subida conjunta de 5 imágenes y delete de fotos funcionan.
 - Sprint 1 Oxphyre Room Free/base implementado en pantalla de subida y visor público.
@@ -246,7 +248,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Oxphyre Room MVP carga las 4 fotos en una escena Three.js tipo Direction Sphere, con paneles curvos, arrastre, brújula N/E/S/O y botón "Volver a vista principal".
 - Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
-- Estado: flujo base y pipeline WebP/libvips validados en servidor; quedan pendientes HEIC/HEIF, R2/CDN, QR, limpieza física de soft delete y posibles mejoras de ruido/granulado.
+- Estado: flujo base y pipeline WebP/libvips validados en servidor; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes R2/CDN, QR, limpieza física de soft delete y posibles mejoras de ruido/granulado.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.
@@ -260,7 +262,7 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. HEIC/HEIF → WebP: aceptar formato real de iPhone y convertir a WebP usando una herramienta robusta. No implementado todavía.
+1. Probar HEIC/HEIF real en servidor tras deploy: debe convertirse a WebP final y generar JPG temporal MiDaS.
 2. R2/CDN: subir WebP final a Cloudflare R2 y guardar provider/key/url/metadatos mínimos. No implementado todavía.
 3. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía.
 4. QR descargable con analíticas. No implementado todavía.

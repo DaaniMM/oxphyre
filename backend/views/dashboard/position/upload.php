@@ -230,7 +230,7 @@
             <?php endif; ?>
 
             <input type="file" name="photo_360" id="input-360"
-                   class="db-upload-input" accept="image/jpeg,image/png,image/webp"
+                   class="db-upload-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                    aria-label="Seleccionar panorámica principal">
             <button type="button" class="db-upload-btn" style="margin-top:0.5rem;"
                     onclick="document.getElementById('input-360').click()">
@@ -297,7 +297,7 @@
                 </div>
 
                 <input type="file" name="photo_<?= $dir ?>" id="input-<?= $dir ?>"
-                       class="db-upload-input" accept="image/jpeg,image/png,image/webp"
+                       class="db-upload-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                        aria-label="Seleccionar foto <?= htmlspecialchars($label) ?>">
                 <button type="button" class="db-upload-btn"
                         onclick="document.getElementById('input-<?= $dir ?>').click()">

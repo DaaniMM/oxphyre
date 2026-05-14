@@ -16,6 +16,12 @@ class ImageProcessingService
     private const MEMORY_SAFETY_BYTES = 33554432; // 32 MB de margen para evitar OOM en GD.
     private const PANORAMA_MAX_UPLOAD_SIZE = 15 * 1024 * 1024;
     private const PANORAMA_MAX_FINAL_WIDTH = 8192;
+    private const HEIF_MIME_TYPES = [
+        'image/heic',
+        'image/heif',
+        'image/heic-sequence',
+        'image/heif-sequence',
+    ];
 
     public function processUpload(array $file, string $uploadDir, string $direction, string $filenamePrefix): array
     {
@@ -35,18 +41,18 @@ class ImageProcessingService
         $mime = $this->detectMime($tmpPath);
         if (!in_array($mime, ALLOWED_MIME_TYPES, true)) {
             error_log("ImageProcessingService: MIME no permitido en {$direction}: {$mime}");
-            return $this->result(false, 'No hemos podido leer esta imagen. Sube una foto en JPG, PNG o WebP.');
+            return $this->result(false, 'No hemos podido leer esta imagen. Sube una foto en JPG, PNG, WebP o HEIC/HEIF (foto original de iPhone).');
         }
 
-        $dimensions = @getimagesize($tmpPath);
-        if (!$dimensions || empty($dimensions[0]) || empty($dimensions[1])) {
+        $dimensions = $this->imageDimensions($tmpPath, $mime);
+        if ($dimensions === null) {
             error_log("ImageProcessingService: imagen sin dimensiones legibles en {$direction}");
-            return $this->result(false, 'No hemos podido leer esta imagen. Sube una foto en JPG, PNG o WebP.');
+            return $this->result(false, $this->messageForUnreadableImage($mime));
         }
 
-        [$width, $height] = [(int) $dimensions[0], (int) $dimensions[1]];
+        [$width, $height] = $dimensions;
         $canUseGd = $this->canProcessWithGd($width, $height);
-        if ($direction !== '360' && !$canUseGd) {
+        if ($direction !== '360' && !$canUseGd && !$this->isHeifMime($mime)) {
             error_log("ImageProcessingService: imagen demasiado grande para GD en {$direction}: {$width}x{$height}");
             return $this->result(false, 'Esta imagen es demasiado grande para procesarla ahora. Prueba con una versión más ligera.');
         }
@@ -60,7 +66,7 @@ class ImageProcessingService
             @unlink($finalPath);
             @unlink($midasTempPath);
             error_log("ImageProcessingService: conversión WebP fallida en {$direction}");
-            return $this->result(false, 'No hemos podido procesar esta imagen ahora mismo. Inténtalo de nuevo en unos segundos.');
+            return $this->result(false, $this->messageForConversionFailure($mime));
         }
 
         $finalDimensions = @getimagesize($finalPath);
@@ -96,6 +102,20 @@ class ImageProcessingService
         return $direction === '360' ? self::PANORAMA_MAX_UPLOAD_SIZE : MAX_UPLOAD_SIZE;
     }
 
+    private function imageDimensions(string $path, string $mime): ?array
+    {
+        $dimensions = @getimagesize($path);
+        if ($dimensions && !empty($dimensions[0]) && !empty($dimensions[1])) {
+            return [(int) $dimensions[0], (int) $dimensions[1]];
+        }
+
+        if (!$this->isHeifMime($mime)) {
+            return null;
+        }
+
+        return $this->vipsDimensions($path);
+    }
+
     private function convertImage(
         string $sourcePath,
         string $mime,
@@ -106,6 +126,16 @@ class ImageProcessingService
         int $height,
         bool $canUseGd
     ): bool {
+        if ($this->isHeifMime($mime)) {
+            $vipsPath = $this->vipsPath();
+            if ($vipsPath === '') {
+                error_log("ImageProcessingService: libvips no disponible para HEIC/HEIF {$width}x{$height}");
+                return false;
+            }
+
+            return $this->convertWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $direction, $width, $height);
+        }
+
         if ($direction === '360' && (!$canUseGd || $width > self::PANORAMA_MAX_FINAL_WIDTH)) {
             $vipsPath = $this->vipsPath();
             if ($vipsPath === '') {
@@ -113,7 +143,7 @@ class ImageProcessingService
                 return false;
             }
 
-            return $this->convertPanoramaWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $width, $height);
+            return $this->convertWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $direction, $width, $height);
         }
 
         return $this->convertToWebp($sourcePath, $mime, $webpPath, $midasTempPath, $this->webpQualityForDirection($direction));
@@ -153,16 +183,17 @@ class ImageProcessingService
         return $direction === '360' ? self::WEBP_QUALITY_PANORAMA : self::WEBP_QUALITY_NORMAL;
     }
 
-    private function convertPanoramaWithVips(
+    private function convertWithVips(
         string $vipsPath,
         string $sourcePath,
         string $webpPath,
         string $midasTempPath,
+        string $direction,
         int $width,
         int $height
     ): bool {
-        $shouldResize = $width > self::PANORAMA_MAX_FINAL_WIDTH;
-        $webpTarget = $webpPath . '[Q=' . self::WEBP_QUALITY_PANORAMA . ',strip]';
+        $shouldResize = $direction === '360' && $width > self::PANORAMA_MAX_FINAL_WIDTH;
+        $webpTarget = $webpPath . '[Q=' . $this->webpQualityForDirection($direction) . ',strip]';
         $jpegTarget = $midasTempPath . '[Q=' . self::MIDAS_JPEG_QUALITY . ',strip]';
 
         if ($shouldResize) {
@@ -174,12 +205,31 @@ class ImageProcessingService
             $jpegCommand = $this->vipsCommand($vipsPath, 'copy', [$sourcePath, $jpegTarget]);
         }
 
-        return $this->runCommand($webpCommand, 'WebP panorama libvips')
-            && $this->runCommand($jpegCommand, 'JPG temporal MiDaS libvips')
+        return $this->runCommand($webpCommand, "WebP {$direction} libvips")
+            && $this->runCommand($jpegCommand, "JPG temporal MiDaS {$direction} libvips")
             && is_file($webpPath)
             && filesize($webpPath) > 0
             && is_file($midasTempPath)
             && filesize($midasTempPath) > 0;
+    }
+
+    private function vipsDimensions(string $path): ?array
+    {
+        $vipsHeaderPath = $this->vipsHeaderPath();
+        if ($vipsHeaderPath === '') {
+            error_log('ImageProcessingService: vipsheader no disponible para leer dimensiones HEIC/HEIF');
+            return null;
+        }
+
+        $width = $this->vipsHeaderField($vipsHeaderPath, $path, 'width');
+        $height = $this->vipsHeaderField($vipsHeaderPath, $path, 'height');
+
+        if ($width <= 0 || $height <= 0) {
+            error_log("ImageProcessingService: vipsheader no pudo leer dimensiones de {$path}");
+            return null;
+        }
+
+        return [$width, $height];
     }
 
     private function vipsPath(): string
@@ -194,6 +244,33 @@ class ImageProcessingService
 
         $path = trim((string) @shell_exec('command -v vips 2>/dev/null'));
         return $path !== '' && is_executable($path) ? $path : '';
+    }
+
+    private function vipsHeaderPath(): string
+    {
+        if (is_file('/usr/bin/vipsheader') && is_executable('/usr/bin/vipsheader')) {
+            return '/usr/bin/vipsheader';
+        }
+
+        if (!function_exists('shell_exec')) {
+            return '';
+        }
+
+        $path = trim((string) @shell_exec('command -v vipsheader 2>/dev/null'));
+        return $path !== '' && is_executable($path) ? $path : '';
+    }
+
+    private function vipsHeaderField(string $vipsHeaderPath, string $path, string $field): int
+    {
+        $command = implode(' ', [
+            escapeshellarg($vipsHeaderPath),
+            '-f',
+            escapeshellarg($field),
+            escapeshellarg($path),
+        ]);
+
+        $output = $this->commandOutput($command, "vipsheader {$field}");
+        return $output === null ? 0 : (int) trim($output);
     }
 
     private function vipsCommand(string $vipsPath, string $operation, array $arguments): string
@@ -223,6 +300,48 @@ class ImageProcessingService
         }
 
         return true;
+    }
+
+    private function commandOutput(string $command, string $context): ?string
+    {
+        if (!function_exists('exec')) {
+            error_log("ImageProcessingService: exec no disponible para {$context}");
+            return null;
+        }
+
+        $output = [];
+        $exitCode = 0;
+        exec($command . ' 2>&1', $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            error_log("ImageProcessingService: {$context} fallo con codigo {$exitCode}: " . implode(' | ', $output));
+            return null;
+        }
+
+        return implode("\n", $output);
+    }
+
+    private function isHeifMime(string $mime): bool
+    {
+        return in_array($mime, self::HEIF_MIME_TYPES, true);
+    }
+
+    private function messageForUnreadableImage(string $mime): string
+    {
+        if ($this->isHeifMime($mime)) {
+            return 'No hemos podido procesar esta foto del iPhone ahora mismo. Inténtalo de nuevo o súbela como JPG.';
+        }
+
+        return 'No hemos podido leer esta imagen. Sube una foto en JPG, PNG, WebP o HEIC/HEIF (foto original de iPhone).';
+    }
+
+    private function messageForConversionFailure(string $mime): string
+    {
+        if ($this->isHeifMime($mime)) {
+            return 'No hemos podido procesar esta foto del iPhone ahora mismo. Inténtalo de nuevo o súbela como JPG.';
+        }
+
+        return 'No hemos podido procesar esta imagen ahora mismo. Inténtalo de nuevo en unos segundos.';
     }
 
     private function qualityWarning(string $direction, int $width, int $height): string

@@ -13,13 +13,12 @@ El Sprint 1 ya está implementado en la app real:
 - botón "Ver detalles" solo si existen las 4 fotos;
 - retorno desde Oxphyre Room a vista principal;
 - subida conjunta de N/S/E/O + `photo_360`;
-- pipeline WebP/libvips en `ImageProcessingService`.
+- pipeline WebP/libvips en `ImageProcessingService`, incluyendo HEIC/HEIF pendiente de prueba real tras deploy.
 
 Quedan pendientes para fases posteriores:
 - editor real de hotspots;
 - QR;
 - R2/CDN;
-- HEIC/HEIF;
 - limpieza física de archivos asociados a soft delete;
 - pulido opcional de ruido/granulado.
 

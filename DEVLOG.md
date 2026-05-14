@@ -1697,3 +1697,24 @@ Se sincronizó la documentación de estado tras cerrar el bloque WebP/libvips.
 - La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp, pero queda ruido/granulado residual en zonas oscuras de interiores.
 - Causa probable: captura en interior/poca luz, ruido real de cámara y visualización fullscreen.
 - No aplicar denoise por defecto todavía: podría suavizar demasiado o generar efecto acuarela.
+
+## 2026-05-14 — Soporte HEIC/HEIF con libvips
+
+Se añadió soporte de entrada para fotos HEIC/HEIF de iPhone sin depender de Imagick.
+
+**Qué se cambió:**
+- `config.php`: añadidos MIME reales `image/heic`, `image/heif`, `image/heic-sequence` e `image/heif-sequence`.
+- `ImageProcessingService.php`: HEIC/HEIF se procesan siempre con libvips, nunca con GD.
+- `ImageProcessingService.php`: si `getimagesize()` no puede leer dimensiones HEIC/HEIF, usa `vipsheader`.
+- `ImageProcessingService.php`: convierte HEIC/HEIF a WebP final y genera JPG temporal para MiDaS quality 92.
+- `ImageProcessingService.php`: panorámicas `360` HEIC/HEIF mantienen WebP quality 96 y máximo 8192px de ancho si hace falta redimensionar.
+- `upload.php`: el selector de archivos acepta también `image/heic` e `image/heif`.
+
+**Motivo:** permitir subidas reales desde iPhone sin pedir al usuario cambiar ajustes del móvil ni convertir manualmente.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
+
+**Pendiente:**
+- Prueba manual en servidor con archivo HEIC/HEIF real de iPhone.

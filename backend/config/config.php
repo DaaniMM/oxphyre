@@ -74,7 +74,15 @@ define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024);
 // Tipos MIME reales permitidos para fotos de posiciones del tour.
 // Validamos el MIME real con finfo_file(), no la extensión del archivo,
 // porque un atacante puede renombrar un .php a .jpg fácilmente.
-define('ALLOWED_MIME_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
+define('ALLOWED_MIME_TYPES', [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/heic',
+    'image/heif',
+    'image/heic-sequence',
+    'image/heif-sequence',
+]);
 
 
 // ─── Sesión ────────────────────────────────────────────────────────────────────

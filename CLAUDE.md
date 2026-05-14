@@ -118,15 +118,16 @@ CLAUDE.md            → este archivo
 
 **Estado actual:** `backend/services/ImageProcessingService.php` concentra el pipeline local de imágenes. Valida errores de upload, tamaño por dirección, MIME real, dimensiones, protección de memoria, conversión, warnings de calidad, metadata y temporales.
 
-- JPG/PNG/WebP se convierten a WebP visible.
+- JPG/PNG/WebP y HEIC/HEIF se convierten a WebP visible.
 - N/S/E/O se guardan como WebP quality 92.
 - Panorámica `360` se guarda como WebP quality 96.
 - Panorámicas grandes usan libvips CLI y se limitan a 8192px de ancho manteniendo proporción.
+- HEIC/HEIF se procesa siempre con libvips; si `getimagesize()` no lee dimensiones, se usa `vipsheader`.
 - MiDaS procesa un JPG temporal separado quality 92.
 - El WebP visible no se sobrescribe con MiDaS ni CLAHE.
 - El flujo TFG actual genera depth maps cuando MiDaS responde, pero la imagen pública visible sigue siendo el WebP optimizado.
 - La definición comercial de planes podrá limitar créditos MiDaS en el futuro; esa política de producto no cambia el pipeline actual.
-- HEIC/HEIF, Cloudflare R2/CDN y metadata avanzada en BD quedan pendientes.
+- HEIC/HEIF queda implementado en pipeline, pendiente de prueba real con archivo iPhone tras deploy. Cloudflare R2/CDN y metadata avanzada en BD quedan pendientes.
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
