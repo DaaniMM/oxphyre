@@ -11,8 +11,10 @@ class ImageProcessingService
     public const LOW_QUALITY_RECOMMENDATION = 'Recomendación de Oxphyre: evita pasar las fotos por WhatsApp, Instagram u otras apps antes de subirlas, porque pueden reducir la calidad.';
 
     private const WEBP_QUALITY = 92;
+    private const MIDAS_JPEG_QUALITY = 92;
     private const MEMORY_SAFETY_BYTES = 33554432; // 32 MB de margen para evitar OOM en GD.
     private const PANORAMA_MAX_UPLOAD_SIZE = 15 * 1024 * 1024;
+    private const PANORAMA_MAX_FINAL_WIDTH = 8192;
 
     public function processUpload(array $file, string $uploadDir, string $direction, string $filenamePrefix): array
     {
@@ -42,7 +44,8 @@ class ImageProcessingService
         }
 
         [$width, $height] = [(int) $dimensions[0], (int) $dimensions[1]];
-        if (!$this->canProcessWithGd($width, $height)) {
+        $canUseGd = $this->canProcessWithGd($width, $height);
+        if ($direction !== '360' && !$canUseGd) {
             error_log("ImageProcessingService: imagen demasiado grande para GD en {$direction}: {$width}x{$height}");
             return $this->result(false, 'Esta imagen es demasiado grande para procesarla ahora. Prueba con una versión más ligera.');
         }
@@ -52,12 +55,16 @@ class ImageProcessingService
         $finalPath = $uploadDir . $filename;
         $midasTempPath = $uploadDir . $baseName . '_midas.jpg';
 
-        if (!$this->convertToWebp($tmpPath, $mime, $finalPath, $midasTempPath)) {
+        if (!$this->convertImage($tmpPath, $mime, $finalPath, $midasTempPath, $direction, $width, $height, $canUseGd)) {
             @unlink($finalPath);
             @unlink($midasTempPath);
             error_log("ImageProcessingService: conversión WebP fallida en {$direction}");
             return $this->result(false, 'No hemos podido procesar esta imagen ahora mismo. Inténtalo de nuevo en unos segundos.');
         }
+
+        $finalDimensions = @getimagesize($finalPath);
+        $finalWidth = $finalDimensions && !empty($finalDimensions[0]) ? (int) $finalDimensions[0] : $width;
+        $finalHeight = $finalDimensions && !empty($finalDimensions[1]) ? (int) $finalDimensions[1] : $height;
 
         return $this->result(true, '', [
             'warning' => $this->qualityWarning($direction, $width, $height),
@@ -67,8 +74,8 @@ class ImageProcessingService
             'originalName' => $file['name'] ?? '',
             'originalWidth' => $width,
             'originalHeight' => $height,
-            'finalWidth' => $width,
-            'finalHeight' => $height,
+            'finalWidth' => $finalWidth,
+            'finalHeight' => $finalHeight,
             'finalSize' => is_file($finalPath) ? filesize($finalPath) : 0,
         ]);
     }
@@ -86,6 +93,29 @@ class ImageProcessingService
     private function uploadSizeLimitForDirection(string $direction): int
     {
         return $direction === '360' ? self::PANORAMA_MAX_UPLOAD_SIZE : MAX_UPLOAD_SIZE;
+    }
+
+    private function convertImage(
+        string $sourcePath,
+        string $mime,
+        string $webpPath,
+        string $midasTempPath,
+        string $direction,
+        int $width,
+        int $height,
+        bool $canUseGd
+    ): bool {
+        if ($direction === '360' && (!$canUseGd || $width > self::PANORAMA_MAX_FINAL_WIDTH)) {
+            $vipsPath = $this->vipsPath();
+            if ($vipsPath === '') {
+                error_log("ImageProcessingService: libvips no disponible para panoramica grande {$width}x{$height}");
+                return false;
+            }
+
+            return $this->convertPanoramaWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $width, $height);
+        }
+
+        return $this->convertToWebp($sourcePath, $mime, $webpPath, $midasTempPath);
     }
 
     private function convertToWebp(string $sourcePath, string $mime, string $webpPath, string $midasTempPath): bool
@@ -111,10 +141,82 @@ class ImageProcessingService
         imagesavealpha($image, true);
 
         $webpOk = imagewebp($image, $webpPath, self::WEBP_QUALITY);
-        $jpegOk = imagejpeg($image, $midasTempPath, 92);
+        $jpegOk = imagejpeg($image, $midasTempPath, self::MIDAS_JPEG_QUALITY);
         imagedestroy($image);
 
         return $webpOk && $jpegOk && is_file($webpPath) && filesize($webpPath) > 0;
+    }
+
+    private function convertPanoramaWithVips(
+        string $vipsPath,
+        string $sourcePath,
+        string $webpPath,
+        string $midasTempPath,
+        int $width,
+        int $height
+    ): bool {
+        $shouldResize = $width > self::PANORAMA_MAX_FINAL_WIDTH;
+        $webpTarget = $webpPath . '[Q=' . self::WEBP_QUALITY . ',strip]';
+        $jpegTarget = $midasTempPath . '[Q=' . self::MIDAS_JPEG_QUALITY . ',strip]';
+
+        if ($shouldResize) {
+            error_log("ImageProcessingService: libvips redimensiona 360 {$width}x{$height} a ancho " . self::PANORAMA_MAX_FINAL_WIDTH . "; final {$webpPath}; midas {$midasTempPath}");
+            $webpCommand = $this->vipsCommand($vipsPath, 'thumbnail', [$sourcePath, $webpTarget, (string) self::PANORAMA_MAX_FINAL_WIDTH]);
+            $jpegCommand = $this->vipsCommand($vipsPath, 'thumbnail', [$sourcePath, $jpegTarget, (string) self::PANORAMA_MAX_FINAL_WIDTH]);
+        } else {
+            $webpCommand = $this->vipsCommand($vipsPath, 'copy', [$sourcePath, $webpTarget]);
+            $jpegCommand = $this->vipsCommand($vipsPath, 'copy', [$sourcePath, $jpegTarget]);
+        }
+
+        return $this->runCommand($webpCommand, 'WebP panorama libvips')
+            && $this->runCommand($jpegCommand, 'JPG temporal MiDaS libvips')
+            && is_file($webpPath)
+            && filesize($webpPath) > 0
+            && is_file($midasTempPath)
+            && filesize($midasTempPath) > 0;
+    }
+
+    private function vipsPath(): string
+    {
+        if (is_file('/usr/bin/vips') && is_executable('/usr/bin/vips')) {
+            return '/usr/bin/vips';
+        }
+
+        if (!function_exists('shell_exec')) {
+            return '';
+        }
+
+        $path = trim((string) @shell_exec('command -v vips 2>/dev/null'));
+        return $path !== '' && is_executable($path) ? $path : '';
+    }
+
+    private function vipsCommand(string $vipsPath, string $operation, array $arguments): string
+    {
+        $escaped = [escapeshellarg($vipsPath), escapeshellarg($operation)];
+        foreach ($arguments as $argument) {
+            $escaped[] = escapeshellarg($argument);
+        }
+
+        return implode(' ', $escaped);
+    }
+
+    private function runCommand(string $command, string $context): bool
+    {
+        if (!function_exists('exec')) {
+            error_log("ImageProcessingService: exec no disponible para {$context}");
+            return false;
+        }
+
+        $output = [];
+        $exitCode = 0;
+        exec($command . ' 2>&1', $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            error_log("ImageProcessingService: {$context} fallo con codigo {$exitCode}: " . implode(' | ', $output));
+            return false;
+        }
+
+        return true;
     }
 
     private function qualityWarning(string $direction, int $width, int $height): string

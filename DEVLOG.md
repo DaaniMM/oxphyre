@@ -1633,3 +1633,22 @@ Se corrigió el caso en el que al seleccionar N/S/E/O + panorámica en el mismo 
 **Verificación técnica local:**
 - `php -l` no disponible en el PATH local de Windows.
 - `git diff --check` correcto.
+
+## 2026-05-14 — Fase 1.2 libvips para panorámicas grandes
+
+Se añadió soporte de procesamiento con libvips CLI para panorámicas principales grandes sin cargar toda la imagen en GD.
+
+**Qué se cambió:**
+- `ImageProcessingService.php`: decide herramienta de procesado según dirección, tamaño y capacidad de GD.
+- Fotos N/S/E/O siguen usando GD como antes.
+- Panorámicas `360` usan libvips si superan el ancho final recomendado o si GD no puede procesarlas con seguridad.
+- Panorámicas grandes se redimensionan a un máximo de 8192px de ancho manteniendo proporción.
+- La salida visible sigue siendo WebP calidad 92.
+- MiDaS sigue recibiendo un JPG temporal calidad 92 separado del WebP visible.
+- Los comandos CLI se construyen con `escapeshellarg()` y se comprueba código de salida, existencia y tamaño de archivos generados.
+
+**Motivo:** permitir panorámicas reales de móvil, como 16248x3832, sin tumbar EC2 ni ampliar lógica en `PositionController`.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
