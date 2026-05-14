@@ -1471,3 +1471,14 @@ Se ajustaron accesos de previsualización y textos visibles sin tocar subida, BD
 - `dashboard.css`: los botones de preview usan borde/acento ámbar como acción secundaria destacada.
 
 **Motivo:** facilitar la validación manual de Sprint 1 desde el dashboard y evitar que el creador vea direcciones internas `N/S/E/O/360`.
+
+## 2026-05-14 — Ajuste UX de cards de posiciones
+
+Se rediseñaron las cards de posiciones en la gestión de tour sin tocar backend, rutas, visor ni BD.
+
+**Qué se cambió:**
+- `tours/manage.php`: la card separa cabecera y acciones. El título queda a la izquierda, el orden y la papelera discreta a la derecha.
+- `dashboard.css`: el grid de posiciones usa cards más anchas y responsive, las acciones principales quedan en dos botones flexibles y "Ver posición" no parte línea.
+- En móvil, las acciones pasan a columna y ocupan el ancho completo.
+
+**Motivo:** evitar overflow tras añadir "Ver posición" y mantener una UI limpia para Gestionar, previsualizar y futura eliminación.

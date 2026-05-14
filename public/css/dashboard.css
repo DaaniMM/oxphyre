@@ -1098,7 +1098,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 .db-pos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 0.75rem;
 }
 
@@ -1109,16 +1109,34 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
   transition: border-color 0.2s var(--ox-ease);
+  min-width: 0;
 }
 
 .db-pos-card:hover { border-color: var(--ox-border-strong); }
+
+.db-pos-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.875rem;
+}
 
 .db-pos-card-title {
   font-weight: 600;
   font-size: 0.9375rem;
   color: var(--ox-text);
+  line-height: 1.35;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.db-pos-card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .db-pos-card-order {
@@ -1127,10 +1145,51 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   font-family: 'JetBrains Mono', monospace;
 }
 
+.db-pos-card-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid oklch(0.42 0.08 25 / 0.65);
+  border-radius: 8px;
+  color: oklch(0.74 0.13 25);
+  background: oklch(0.22 0.06 25 / 0.22);
+  cursor: not-allowed;
+  opacity: 0.58;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
 .db-pos-card-actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  min-width: 0;
+}
+
+.db-pos-card-action {
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
+  min-height: 38px;
+  font-size: 0.8125rem;
+}
+
+.db-pos-card-action--preview {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .db-pos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .db-pos-card-actions {
+    flex-direction: column;
+  }
+
+  .db-pos-card-action {
+    width: 100%;
+  }
 }
 
 

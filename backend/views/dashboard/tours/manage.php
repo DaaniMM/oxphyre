@@ -249,30 +249,32 @@
           <div class="db-pos-grid">
             <?php foreach ($positions as $pos): ?>
               <article class="db-pos-card">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                <div class="db-pos-card-header">
                   <h3 class="db-pos-card-title"><?= htmlspecialchars($pos['name']) ?></h3>
-                  <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
+                  <div class="db-pos-card-meta">
+                    <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
+                    <button type="button" class="db-pos-card-delete"
+                      disabled
+                      title="Próximamente"
+                      aria-label="Eliminar posición próximamente">
+                      <i data-lucide="trash-2" width="13" height="13" aria-hidden="true"></i>
+                    </button>
+                  </div>
                 </div>
                 <div class="db-pos-card-actions">
                   <a href="/dashboard/posicion/upload?position=<?= (int) $pos['id'] ?>&negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"
-                     class="db-btn-secondary" style="font-size:0.8125rem;flex:1;justify-content:center;">
+                     class="db-btn-secondary db-pos-card-action">
                     Gestionar
                   </a>
                   <?php if ($isPublished): ?>
                     <a href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $pos['id'] ?>"
-                       class="db-btn-secondary db-btn-brand-outline"
-                       style="font-size:0.8125rem;flex:1;justify-content:center;"
+                       class="db-btn-secondary db-btn-brand-outline db-pos-card-action db-pos-card-action--preview"
                        target="_blank"
                        rel="noopener">
                       <i data-lucide="external-link" width="13" height="13" aria-hidden="true"></i>
                       Ver posición
                     </a>
                   <?php endif; ?>
-                  <button type="button" class="db-btn-danger"
-                    style="opacity:0.5;cursor:not-allowed;" disabled
-                    title="Próximamente">
-                    <i data-lucide="trash-2" width="13" height="13" aria-hidden="true"></i>
-                  </button>
                 </div>
               </article>
             <?php endforeach; ?>
