@@ -1786,3 +1786,45 @@ Antes de escribir código se documenta la arquitectura decidida para que quede r
 
 ### Código modificado
 Ninguno. Solo documentación.
+
+## 2026-05-14 — Cloudflare DNS + R2 Fase 0
+
+Tipo: infraestructura/configuración. Sin cambios de código, BD, upload, visor ni dashboard.
+
+### Cloudflare DNS
+- Dominio oxphyre.com conectado a Cloudflare en plan Free mediante "Connect a domain" (no transfer). IONOS sigue siendo el registrador del dominio.
+- Nameservers actualizados en IONOS a:
+  - `elliot.ns.cloudflare.com`
+  - `julissa.ns.cloudflare.com`
+- Cloudflare marca oxphyre.com como protegido/activo. Web https://oxphyre.com carga correctamente.
+- DNS importados y revisados:
+  - `A oxphyre.com → 13.62.93.7` (Proxied)
+  - `A www → 13.62.93.7` (Proxied)
+  - `MX IONOS` — DNS only (para no romper correo)
+  - `TXT SPF` — DNS only
+  - `CNAME autodiscover` — DNS only
+  - `CNAME _dmarc` — DNS only
+  - `CNAME _domainconnect` — DNS only
+  - `CNAME s1-ionos._domainkey` — añadido en DNS only
+  - `CNAME s2-ionos._domainkey` — añadido en DNS only
+
+### R2
+- Bucket `oxphyre-assets` — ya existía; se mantiene solo para assets/demo/landing. No se usa para fotos reales de usuarios.
+- Bucket `oxphyre-tour-media` — **creado**; será el bucket de WebP finales de posiciones/tours de usuarios.
+- Custom domain `media.oxphyre.com` configurado en R2 con TLS mínimo 1.2 y Access enabled.
+- Estado al cerrar sesión: **Initializing** — puede tardar minutos/horas en pasar a Active.
+
+### Qué NO se hizo
+- No se tocó ningún archivo PHP, JS, CSS, SQL ni vista.
+- No se creó R2StorageService.php.
+- No se modificaron .env, .env.example ni config.php.
+- No se tocó BD.
+- No se subió ninguna imagen real de usuario a R2.
+- No se hizo commit ni push.
+
+### Pendientes para la próxima sesión
+1. Verificar que `media.oxphyre.com` pase a estado **Active** en el dashboard de Cloudflare.
+2. Confirmar que `https://media.oxphyre.com` resuelve (test con un objeto de prueba en el bucket).
+3. Añadir credenciales R2 (Account ID, Access Key ID, Secret Access Key) a `.env` y documentar en `.env.example`.
+4. Diseñar migración SQL: columnas `storage_provider`, `storage_key`, `public_url` en tabla `photos`.
+5. Implementar `R2StorageService.php` (upload, getUrl, delete) sin tocar upload/visor todavía.

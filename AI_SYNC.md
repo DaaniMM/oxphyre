@@ -125,22 +125,35 @@ Pendiente:
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
 - Ruido/granulado residual en panorámicas interiores: mejora opcional/no bloqueante. La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp; el ruido restante probablemente viene de captura en interior/poca luz + ruido real de cámara + visualización fullscreen. No aplicar denoise por defecto todavía porque puede suavizar demasiado o generar efecto acuarela.
 
-### Almacenamiento en Cloudflare R2 (decisión arquitectónica — pendiente de implementación)
+### Almacenamiento en Cloudflare R2 — Fase 0 en progreso
 
-Estrategia decidida, sin código escrito todavía:
+**Estado (2026-05-14):** Infraestructura Cloudflare configurada. Sin código de aplicación escrito todavía.
 
-- **EC2** actúa como procesador/temporal: valida, convierte a WebP, genera depth map y luego sube el WebP final a R2.
-- **Cloudflare R2** actúa como almacenamiento final y CDN de WebP visibles. El visor público cargará imágenes desde R2, no desde EC2.
-- **Buckets:**
-  - `oxphyre-assets` — ya existe; se mantiene exclusivamente para assets de landing, demo e imágenes estáticas. **No se usa para fotos de tours de usuarios.**
-  - `oxphyre-tour-media` — bucket nuevo a crear para WebP finales reales de posiciones/tours de usuarios.
-- **Custom domain:** `media.oxphyre.com` (Cloudflare zone ya existe; añadir CNAME a R2 cuando se cree el bucket).
-- **Depth maps:** quedan fuera del scope R2 por ahora. Siguen en EC2 hasta decisión posterior.
-- **Migración de fotos antiguas:** postergada. No se migrarán las fotos existentes hasta que R2 esté validado en producción.
-- **Limpieza física en EC2:** no se borrará el archivo físico local hasta confirmar que R2 lo tiene y lo sirve correctamente.
-- **Fallback local obligatorio:** si R2 falla o la subida falla, el WebP queda en EC2 y el visor lo sirve desde `/uploads/` como ahora. No debe romperse el flujo si R2 no está disponible.
-- **Restricción crítica — coste 0€:** usar R2 dentro del free tier. Free tier actual: 10 GB de almacenamiento, 1 millón de operaciones de escritura/mes, 10 millones de lectura/mes, sin coste de egress (bandwidth gratuito). Vigilar consumo; no activar planes de pago ni Workers, Streams u otros servicios de pago mientras no haya ingresos.
-- **BD:** añadir columnas `storage_provider` (enum: 'local'|'r2'), `storage_key` (ruta en R2) y `public_url` a la tabla `photos`. Migración SQL pendiente de diseñar.
+**Cloudflare DNS:**
+- oxphyre.com conectado a Cloudflare en plan Free mediante "Connect a domain" (NO transfer). IONOS sigue siendo el registrador del dominio.
+- Nameservers en IONOS apuntando a `elliot.ns.cloudflare.com` y `julissa.ns.cloudflare.com`.
+- Dominio activo/protegido en Cloudflare. Web https://oxphyre.com carga correctamente.
+- DNS importados y revisados: A records hacia EC2 (13.62.93.7), MX/TXT/CNAME de correo en DNS only para no romper IONOS mail.
+
+**R2 buckets:**
+- `oxphyre-assets` — ya existía; se mantiene exclusivamente para assets de landing, demo e imágenes estáticas. **No se usa para fotos de tours de usuarios.**
+- `oxphyre-tour-media` — **creado**; será el bucket para WebP finales reales de posiciones/tours de usuarios.
+
+**Custom domain:**
+- `media.oxphyre.com` configurado en R2 con TLS mínimo 1.2. **Estado al cerrar: Initializing** (puede tardar minutos/horas en activarse).
+- Hasta que no esté Active, no se puede verificar que las URLs `https://media.oxphyre.com/...` resuelven correctamente.
+
+**Estrategia de almacenamiento:**
+- **EC2** = procesamiento temporal: valida, convierte a WebP, genera depth map, sube a R2 y guarda URL en BD.
+- **Cloudflare R2** = almacenamiento final y CDN de WebP visibles. Bandwidth gratuito (sin coste de egress).
+- **Depth maps:** quedan en EC2 fuera del scope R2 por ahora.
+- **Migración de fotos antiguas:** postergada hasta validar R2 en producción.
+- **Limpieza física en EC2:** solo después de confirmar que R2 sirve el archivo correctamente.
+- **Fallback local obligatorio:** si R2 falla, el WebP queda en EC2 y el visor lo sirve desde `/uploads/` como ahora.
+- **Restricción crítica — coste 0€:** free tier R2: 10 GB almacenamiento, 1M escrituras/mes, 10M lecturas/mes, egress gratuito. No activar Workers, Streams ni servicios de pago mientras no haya ingresos.
+- **BD:** añadir `storage_provider` (enum: 'local'|'r2'), `storage_key` y `public_url` a `photos`. Migración SQL pendiente.
+
+**No implementado todavía:** código de aplicación, R2StorageService.php, integración en upload/visor, cambios en BD.
 
 ### MiDaS
 - Servidor t3.small: MiDaS Small con CPU, viable para demo/subida puntual.
@@ -279,9 +292,10 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. **R2/CDN — Fase 0 + Fase 1** (siguiente bloque principal):
-   - Fase 0: crear bucket `oxphyre-tour-media` en Cloudflare, configurar CNAME `media.oxphyre.com`, añadir credenciales a `.env` y documentar en `.env.example`. Sin tocar código de aplicación todavía.
-   - Fase 1: implementar `R2StorageService.php` (upload, url, delete). Sin tocar `PositionController`, `PhotoModel`, upload.php ni visor. Solo crear el servicio y los tests mínimos en desarrollo.
+1. **R2/CDN — completar Fase 0 y comenzar Fase 1** (siguiente bloque principal):
+   - Fase 0 completada: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` configurado.
+   - Fase 0 pendiente: verificar que `media.oxphyre.com` pase de Initializing a **Active** antes de continuar.
+   - Fase 1 (cuando custom domain esté Active): añadir credenciales R2 a `.env` y documentar en `.env.example`; diseñar migración SQL (`storage_provider`, `storage_key`, `public_url` en `photos`); implementar `R2StorageService.php` (upload, getUrl, delete). Sin tocar `PositionController`, `PhotoModel`, upload.php ni visor todavía.
 2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.
