@@ -245,6 +245,37 @@ class PositionController extends BaseController
         $errors        = [];
         $directions    = ['N', 'S', 'E', 'O'];
 
+        // Procesar primero la panorámica principal: es la vista obligatoria y la
+        // petición puede alargarse si se suben también las 4 fotos de Room.
+        if (isset($_FILES['photo_360']) && $_FILES['photo_360']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $result = $imageService->processUpload(
+                $_FILES['photo_360'],
+                $uploadDir,
+                '360',
+                '360_'
+            );
+
+            if ($result['success']) {
+                $depthFile = $this->processDepthMap($miDaS, $result['midasTempPath'], $uploadDir, pathinfo($result['filename'], PATHINFO_FILENAME));
+                @unlink($result['midasTempPath']);
+                $photoModel->create(
+                    (int) $position['id'],
+                    '360',
+                    $result['filename'],
+                    htmlspecialchars($result['originalName']),
+                    $depthFile,
+                    $depthFile !== ''
+                );
+                $processed++;
+                if ($result['warning'] !== '') {
+                    $warnings[] = $result['warning'];
+                }
+            } else {
+                $failed++;
+                $errors[] = $result['message'];
+            }
+        }
+
         foreach ($directions as $dir) {
             $fieldName = "photo_{$dir}";
 
@@ -281,35 +312,6 @@ class PositionController extends BaseController
             }
         }
 
-        // ── Foto panorámica 360° ─────────────────────────────────────────────────
-        if (isset($_FILES['photo_360']) && $_FILES['photo_360']['error'] !== UPLOAD_ERR_NO_FILE) {
-            $result = $imageService->processUpload(
-                $_FILES['photo_360'],
-                $uploadDir,
-                '360',
-                '360_'
-            );
-
-            if ($result['success']) {
-                $depthFile = $this->processDepthMap($miDaS, $result['midasTempPath'], $uploadDir, pathinfo($result['filename'], PATHINFO_FILENAME));
-                @unlink($result['midasTempPath']);
-                $photoModel->create(
-                    (int) $position['id'],
-                    '360',
-                    $result['filename'],
-                    htmlspecialchars($result['originalName']),
-                    $depthFile,
-                    $depthFile !== ''
-                );
-                $processed++;
-                if ($result['warning'] !== '') {
-                    $warnings[] = $result['warning'];
-                }
-            } else {
-                $failed++;
-                $errors[] = $result['message'];
-            }
-        }
         if ($processed === 0 && $failed === 0) {
             $this->flash('error', 'No se seleccionó ninguna imagen.');
         } elseif ($failed > 0) {

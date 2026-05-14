@@ -1619,3 +1619,17 @@ Se extrajo el pipeline local de imágenes desde `PositionController.php` a un se
 **Verificación técnica local:**
 - `php -l` no disponible en el PATH local de Windows.
 - `git diff --check` correcto.
+
+## 2026-05-14 — Prioridad de subida para panorámica principal
+
+Se corrigió el caso en el que al seleccionar N/S/E/O + panorámica en el mismo envío la panorámica podía quedarse sin procesar.
+
+**Qué se cambió:**
+- `PositionController.php`: la panorámica `photo_360` se procesa antes que las 4 fotos de Oxphyre Room.
+- `upload.php`: revisado; `photo_360` ya estaba dentro del mismo formulario `multipart/form-data` y no requería cambios.
+
+**Motivo:** la panorámica es la vista obligatoria y antes quedaba al final del procesado, después de 4 llamadas potencialmente lentas a MiDaS.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
