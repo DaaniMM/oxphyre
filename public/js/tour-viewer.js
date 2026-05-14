@@ -196,6 +196,8 @@ function initMainPanorama(url) {
       const image = texture.image || {};
       const aspect = image.width && image.height ? image.width / image.height : 2.6;
       const coverageDeg = THREE.MathUtils.clamp(aspect * 55, 110, 240);
+      const diagnosticRadius = 5.2;
+      const diagnosticHeight = 4.8;
 
       state.texture = texture;
       state.geometry = createMainPanoramaGeometry(THREE.MathUtils.degToRad(coverageDeg));
@@ -208,6 +210,21 @@ function initMainPanorama(url) {
 
       updateMainLimits();
       resizeMainRenderer();
+      console.info('[Oxphyre panorama diagnostics]', {
+        imageWidth: image.width || null,
+        imageHeight: image.height || null,
+        imageAspectRatio: aspect,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        rendererWidth: renderer.domElement.width,
+        rendererHeight: renderer.domElement.height,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        fov: MAIN_DEFAULT_FOV,
+        cylinderHeight: diagnosticHeight,
+        cylinderRadius: diagnosticRadius,
+        coverageDeg,
+        yawLimit: state.yawLimit,
+      });
       animateMainPanorama();
     },
     undefined,
