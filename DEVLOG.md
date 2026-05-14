@@ -1603,3 +1603,19 @@ Se redujo de nuevo solo la altura vertical del cilindro principal para comparar 
 **Verificación técnica local:**
 - `node --check public/js/tour-viewer.js` correcto.
 - `git diff --check` correcto.
+
+## 2026-05-14 — Fase 1.1 ImageProcessingService
+
+Se extrajo el pipeline local de imágenes desde `PositionController.php` a un servicio dedicado sin cambiar el comportamiento funcional.
+
+**Qué se cambió:**
+- `backend/services/ImageProcessingService.php`: nuevo servicio para validar errores de upload, aplicar límites por dirección, detectar MIME real, leer dimensiones, proteger GD frente a imágenes demasiado grandes, convertir JPG/PNG/WebP a WebP visible, generar JPG temporal para MiDaS, detectar baja calidad y devolver metadata estructurada.
+- `PositionController.php`: mantiene CSRF, ownership, creación de directorio, bucles de subida, llamada al servicio, llamada a MiDaS, guardado de depth map, `PhotoModel` y construcción del flash final.
+- El servicio no escribe en BD ni llama a MiDaS.
+- MiDaS sigue usando el JPG temporal y el WebP visible no se sobrescribe.
+
+**Motivo:** mantener controller delgado y preparar el pipeline para la Fase 1.2 sin seguir acumulando lógica central de imagen dentro del controlador.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
