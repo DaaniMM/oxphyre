@@ -1652,3 +1652,19 @@ Se añadió soporte de procesamiento con libvips CLI para panorámicas principal
 **Verificación técnica local:**
 - `php -l` no disponible en el PATH local de Windows.
 - `git diff --check` correcto.
+
+## 2026-05-14 — Prueba de calidad WebP en panorámica principal
+
+Se ajustó solo la calidad del WebP visible de la panorámica principal para comprobar si reduce artefactos/granulado.
+
+**Qué se cambió:**
+- `ImageProcessingService.php`: separadas constantes de calidad WebP por tipo de imagen.
+- N/S/E/O mantienen WebP calidad 92.
+- Panorámica `360` pasa a WebP calidad 96, tanto si la convierte GD como si la convierte libvips.
+- JPG temporal para MiDaS se mantiene en calidad 92.
+
+**Motivo:** probar más calidad visual en la panorámica final sin tocar ancho máximo, visor, geometría, color, MiDaS ni BD.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.

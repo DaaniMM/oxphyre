@@ -10,7 +10,8 @@ class ImageProcessingService
 {
     public const LOW_QUALITY_RECOMMENDATION = 'Recomendación de Oxphyre: evita pasar las fotos por WhatsApp, Instagram u otras apps antes de subirlas, porque pueden reducir la calidad.';
 
-    private const WEBP_QUALITY = 92;
+    private const WEBP_QUALITY_NORMAL = 92;
+    private const WEBP_QUALITY_PANORAMA = 96;
     private const MIDAS_JPEG_QUALITY = 92;
     private const MEMORY_SAFETY_BYTES = 33554432; // 32 MB de margen para evitar OOM en GD.
     private const PANORAMA_MAX_UPLOAD_SIZE = 15 * 1024 * 1024;
@@ -115,10 +116,10 @@ class ImageProcessingService
             return $this->convertPanoramaWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $width, $height);
         }
 
-        return $this->convertToWebp($sourcePath, $mime, $webpPath, $midasTempPath);
+        return $this->convertToWebp($sourcePath, $mime, $webpPath, $midasTempPath, $this->webpQualityForDirection($direction));
     }
 
-    private function convertToWebp(string $sourcePath, string $mime, string $webpPath, string $midasTempPath): bool
+    private function convertToWebp(string $sourcePath, string $mime, string $webpPath, string $midasTempPath, int $webpQuality): bool
     {
         if (!function_exists('imagewebp') || !function_exists('imagejpeg')) {
             error_log('ImageProcessingService: GD/WebP no disponible en el servidor');
@@ -140,11 +141,16 @@ class ImageProcessingService
         imagealphablending($image, true);
         imagesavealpha($image, true);
 
-        $webpOk = imagewebp($image, $webpPath, self::WEBP_QUALITY);
+        $webpOk = imagewebp($image, $webpPath, $webpQuality);
         $jpegOk = imagejpeg($image, $midasTempPath, self::MIDAS_JPEG_QUALITY);
         imagedestroy($image);
 
         return $webpOk && $jpegOk && is_file($webpPath) && filesize($webpPath) > 0;
+    }
+
+    private function webpQualityForDirection(string $direction): int
+    {
+        return $direction === '360' ? self::WEBP_QUALITY_PANORAMA : self::WEBP_QUALITY_NORMAL;
     }
 
     private function convertPanoramaWithVips(
@@ -156,7 +162,7 @@ class ImageProcessingService
         int $height
     ): bool {
         $shouldResize = $width > self::PANORAMA_MAX_FINAL_WIDTH;
-        $webpTarget = $webpPath . '[Q=' . self::WEBP_QUALITY . ',strip]';
+        $webpTarget = $webpPath . '[Q=' . self::WEBP_QUALITY_PANORAMA . ',strip]';
         $jpegTarget = $midasTempPath . '[Q=' . self::MIDAS_JPEG_QUALITY . ',strip]';
 
         if ($shouldResize) {
