@@ -1523,6 +1523,29 @@ Se ajustó solo la interacción horizontal y la estimación de cobertura de la p
 - `node --check public/js/tour-viewer.js` correcto.
 - `git diff --check` correcto.
 
+## 2026-05-14 — Fase 1 pipeline WebP seguro
+
+Se implementó la primera fase del pipeline de imágenes sin HEIC/HEIF ni R2.
+
+**Qué se cambió:**
+- `PositionController.php`: las subidas JPG/PNG/WebP se validan por MIME real y se convierten a WebP visible con GD (`imagewebp`) a calidad 92.
+- `PositionController.php`: corregido el bug de WebP permitido pero guardado con extensión `.jpg`; la imagen visible final se guarda como `.webp` en `photos.filename`.
+- `PositionController.php`: MiDaS procesa una copia temporal JPG generada durante la conversión, sin tocar ni sobrescribir el WebP visible.
+- `PositionController.php`: los temporales internos para MiDaS se eliminan tras el procesado.
+- `PositionController.php`: añadidos mensajes friendly para formato no soportado, imagen demasiado grande, error de conversión y baja resolución.
+- `PositionController.php`: añadida detección no bloqueante de baja calidad: panorámicas con alto ratio y altura < 700px, y fotos normales con width < 1000 o height < 700.
+- `PositionController.php`: añadida comprobación preventiva de memoria antes de decodificar con GD para evitar OOM en EC2.
+
+**Decisiones:**
+- No se modifica BD en esta fase; las dimensiones se usan solo para avisos durante el upload.
+- No se conserva el original de usuario; solo queda el WebP final visible y el depth map si MiDaS responde.
+- CLAHE sigue sin aplicarse a la imagen visible.
+- HEIC/HEIF y Cloudflare R2 quedan para fases posteriores.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
+
 ## 2026-05-14 — Experimento de altura en cilindro panorámico
 
 Se redujo solo la altura vertical del cilindro de la panorámica principal.
