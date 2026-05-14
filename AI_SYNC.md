@@ -38,10 +38,21 @@ Estado implementado:
 - Creación, edición, publicación y soft delete de tours.
 - Creación de posiciones.
 - Subida de fotos por posición.
+- Pipeline de imágenes Fase 1.2 implementado:
+  - `backend/services/ImageProcessingService.php` concentra validación, conversión, warnings, metadata y temporales.
+  - JPG/PNG/WebP se convierten a WebP visible.
+  - Fotos N/S/E/O se guardan como WebP quality 92.
+  - Panorámica `360` se guarda como WebP quality 96.
+  - Panorámicas grandes usan libvips CLI y se redimensionan a un máximo de 8192px de ancho manteniendo proporción.
+  - Panorámica iPhone 16248x3832 validada en servidor: WebP final aprox. 8192x1932.
+  - MiDaS procesa un JPG temporal separado quality 92; el WebP visible no se sobrescribe.
+  - Temporales internos se limpian tras procesado.
+  - Subida conjunta de 5 imágenes por posición funciona: N/S/E/O + `photo_360`.
+  - Imágenes de baja resolución/compresión tipo WhatsApp se detectan y muestran aviso friendly con recomendación secundaria.
 - Procesado MiDaS en servidor mediante microservicio Flask.
 - CLAHE disponible en el microservicio, pero no aplicado a la imagen visible en Sprint 1.
 - Visor público Sprint 1 sin Photo Sphere Viewer: panorámica parcial horizontal con pitch limitado.
-- Sprint 1 Oxphyre Room Free/base implementado, pendiente de validación manual: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
+- Sprint 1 Oxphyre Room Free/base implementado: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
 - Soft delete en businesses, tours, positions y photos.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
 
@@ -69,10 +80,10 @@ Estado implementado:
 - El visor público Sprint 1 usa Three.js vanilla para la panorámica principal adaptativa y Oxphyre Room.
 - La panorámica principal no debe tratarse como esfera/equirectangular 360 completa: se renderiza como vista cilíndrica parcial, con arrastre horizontal y pitch muy limitado.
 - Photo Sphere Viewer v4 queda retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al forzarlas como esfera completa.
-- La imagen visible siempre debe ser la foto original subida por el usuario; MiDaS/CLAHE quedan como procesado interno o futuro, no como textura pública en Sprint 1.
+- La imagen visible siempre debe ser el WebP final optimizado y fiel a la imagen subida; MiDaS/CLAHE quedan como procesado interno o futuro, no como textura pública en Sprint 1.
 
 ### Sistema de fotos por posición
-Sprint 1 implementado, pendiente de validación manual:
+Sprint 1 implementado:
 - `photos.direction = '360'` define la panorámica principal obligatoria de una posición.
 - `photos.direction = N/S/E/O` define las 4 fotos que activan Oxphyre Room como vista opcional de detalle.
 - El visor público entra siempre en la panorámica principal.
@@ -84,15 +95,33 @@ Las panorámicas de smartphone pueden ser parciales, no necesariamente 360° equ
 
 ### Pipeline de imágenes y almacenamiento
 
-Decisión técnica para próximas iteraciones:
-- El usuario podrá subir imágenes en formatos habituales de móvil, incluyendo HEIC/HEIF, JPG, PNG y WebP si el servidor lo soporta.
-- Oxphyre no debe depender de que el usuario cambie ajustes del móvil ni convierta manualmente archivos.
-- EC2 usará las imágenes originales como temporales de procesamiento, no como almacenamiento permanente.
-- El formato visible final del visor será WebP optimizado.
-- Cloudflare R2/CDN será el destino recomendado para servir imágenes finales del visor y reducir carga, tráfico y almacenamiento persistente en EC2.
-- La BD debe guardar la referencia al archivo final WebP y metadatos útiles: formato original, dimensiones originales, dimensiones finales, tamaño final, storage provider/key y estado de procesamiento.
-- En la versión TFG/MVP no se conservarán originales de usuario indefinidamente. La conservación de originales queda como posible feature Pro/Business o política temporal futura.
-- Si una imagen llega con baja resolución o parece comprimida, la UI debe avisar al usuario de forma clara y no técnica.
+Estado implementado:
+- `ImageProcessingService.php` es el servicio responsable del pipeline local de imágenes.
+- El usuario puede subir JPG, PNG y WebP; se valida MIME real con `finfo`.
+- El formato visible final del visor es WebP optimizado.
+- `php8.1-gd` está instalado y validado con soporte JPEG/PNG/WebP.
+- `libvips-tools` está instalado y validado: vips 8.12.1, ruta `/usr/bin/vips`, WebP load/save confirmado.
+- Límites reales actuales del servidor: `upload_max_filesize=15M`, `post_max_size=20M`, `nginx client_max_body_size=20M`.
+- N/S/E/O usan WebP quality 92.
+- `direction='360'` usa WebP quality 96.
+- Panorámicas grandes usan libvips CLI si GD no puede procesarlas con seguridad o si superan 8192px de ancho.
+- El ancho final máximo de panorámica es 8192px, manteniendo proporción.
+- MiDaS recibe un JPG temporal quality 92 separado; CLAHE/MiDaS no sobrescriben la imagen visible.
+- Prueba real validada en servidor: panorámica iPhone original 16248x3832 procesada con libvips a WebP final aprox. 8192x1932, ~2.9MB, `processed=1` en BD.
+- Subida conjunta de 5 imágenes validada: `photo_360` + N/S/E/O en un solo envío.
+- Delete de fotos validado.
+- Panorámica WhatsApp 1600x377 detectada como baja calidad/compresión con mensaje friendly.
+- Los originales nuevos de usuario se usan solo como temporales de procesamiento en EC2; no quedan como imagen visible final ni se conservan indefinidamente en TFG/MVP.
+- Matiz importante: WebP/depth antiguos asociados a fotos con soft delete siguen ocupando almacenamiento hasta implementar limpieza física.
+- La UI muestra mensajes friendly para formato no soportado, exceso de tamaño, baja resolución/compresión y error interno.
+- Si una imagen parece comprimida, aparece recomendación secundaria: evitar WhatsApp, Instagram u otras apps antes de subir.
+
+Pendiente:
+- HEIC/HEIF de iPhone sigue pendiente. No implementado todavía.
+- Cloudflare R2/CDN sigue pendiente para servir imágenes finales y reducir carga persistente en EC2.
+- BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, storage_provider, storage_key, public_url, processing_status/error_code.
+- Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
+- Ruido/granulado residual en panorámicas interiores: mejora opcional/no bloqueante. La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp; el ruido restante probablemente viene de captura en interior/poca luz + ruido real de cámara + visualización fullscreen. No aplicar denoise por defecto todavía porque puede suavizar demasiado o generar efecto acuarela.
 
 ### MiDaS
 - Servidor t3.small: MiDaS Small con CPU, viable para demo/subida puntual.
@@ -140,7 +169,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Si n8n entra en el TFG o queda documentado como integración futura.
 - Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
 - Existe una propuesta consolidada en `Planes_Oxphyre.md` para redefinir Free/Pro/Business: Free como prueba limitada con 3 posiciones, Pro como plan comercial profesional y Business como premium/Gaussian. Todavía no es decisión definitiva; no aplicar a código ni documentación principal hasta validar el visor Free y confirmar la estrategia comercial.
-- Existe `Oxphyre_Room_Free_Flow.md` como especificación funcional propuesta del nuevo flujo Free/base: panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos, hotspots sobre panorámica y botón "Ver detalles" si hay 4 fotos completas. Sprint 1 está implementado y queda pendiente de validación manual antes de convertirlo en decisión oficial o sincronizarlo en `CLAUDE.md`.
+- `Oxphyre_Room_Free_Flow.md` describe el flujo Free/base ya implementado para Sprint 1: panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos y botón "Ver detalles" si hay 4 fotos completas. Hotspots sobre panorámica siguen pendientes.
 
 ---
 
@@ -175,7 +204,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar responsive en móvil/tablet.
 - Revisar SEO técnico final: sitemap, robots, schema, metas, Open Graph.
 - Revisar PageSpeed final.
-- Revisar pipeline de imágenes: aceptar HEIC/HEIF de iPhone, convertir a WebP optimizado, detectar imágenes comprimidas y mostrar mensajes de subida más claros.
+- Pipeline de imágenes: HEIC/HEIF de iPhone pendiente; WebP/libvips para JPG/PNG/WebP ya implementado.
 
 ### Prioridad media
 - QR descargable con analíticas.
@@ -187,13 +216,15 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Página 404/500 personalizada si no está completa.
 - Legal/RGPD: privacidad, términos, cookies.
 - PWA: manifest y service worker.
-- Evaluar integración de Cloudflare R2/CDN para servir imágenes finales del visor y reducir carga persistente en EC2.
+- Cloudflare R2/CDN para servir imágenes finales del visor y reducir carga persistente en EC2.
+- Limpieza física de archivos asociados a fotos con soft delete.
+- Reducir ruido/granulado residual en panorámica si sobra tiempo tras tareas críticas.
 
 ### Deuda técnica
 - Unificar métodos duplicados de controllers en BaseController.
 - `UserModel::create()` tiene rol `business_free` hardcodeado; refactorizar cuando existan más roles reales.
 - Gmail SMTP sirve para TFG, pero en producción migrar a Resend, SendGrid o Mailgun.
-- Reimplementar o decidir si se descarta el shader MiDaS/parallax sobre PSV.
+- Reimplementar o decidir si se descarta el shader MiDaS/parallax sobre el visor Three.js actual.
 - Script local Windows para procesado DPT-Hybrid + CUDA con RTX 3060.
 - Revisar si queda documentación antigua diciendo que MiDaS Small/swap/microservicio están pendientes, porque ya se implementaron.
 
@@ -202,13 +233,20 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Última sesión de implementación:
+- Pipeline de imágenes Fase 1.2 cerrado para JPG/PNG/WebP:
+  - `ImageProcessingService.php` centraliza validación, conversión y temporales.
+  - N/S/E/O se guardan como WebP quality 92.
+  - Panorámica `360` se guarda como WebP quality 96.
+  - Panorámicas grandes se procesan con libvips CLI y máximo 8192px de ancho.
+  - MiDaS procesa JPG temporal separado quality 92.
+  - Subida conjunta de 5 imágenes y delete de fotos funcionan.
 - Sprint 1 Oxphyre Room Free/base implementado en pantalla de subida y visor público.
 - La pantalla de subida muestra panorámica principal obligatoria, Oxphyre Room opcional 4/4 y hotspots como próximo sprint.
 - El visor público filtra posiciones sin panorámica, entra siempre en `direction='360'` y muestra "Ver detalles" solo si hay N/S/E/O completas.
 - Oxphyre Room MVP carga las 4 fotos en una escena Three.js tipo Direction Sphere, con paneles curvos, arrastre, brújula N/E/S/O y botón "Volver a vista principal".
 - Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
-- Estado: pendiente de validación manual visual/funcional antes de actualizar `CLAUDE.md` como decisión oficial.
+- Estado: flujo base y pipeline WebP/libvips validados en servidor; quedan pendientes HEIC/HEIF, R2/CDN, QR, limpieza física de soft delete y posibles mejoras de ruido/granulado.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.
@@ -220,20 +258,16 @@ Sesión anterior importante:
 
 ## Próximo paso recomendado
 
-Antes de cerrar la validación visual de panorámica, analizar viabilidad del pipeline HEIC/HEIF → WebP optimizado. La prueba real con iPhone confirmó que WhatsApp comprime la panorámica de 16248x3832 a 1600x377, provocando pixelación. El flujo objetivo debe permitir subir desde móvil sin barreras y evitar mensajes técnicos como “MIME inválido”.
-Validar manualmente Sprint 1 de `Oxphyre_Room_Free_Flow.md` antes de seguir con otras features:
+Siguiente orden recomendado para cerrar antes del TFG:
 
-**Nota operativa:** aunque `CLAUDE.md` y parte de la documentación histórica describen el sistema vigente basado en `positions.active_mode` como selector entre `4photos` y `panoramic`, el flujo que se va a probar ahora es el definido en `Oxphyre_Room_Free_Flow.md`. Sigue siendo propuesta hasta validar Sprint 1, pero es la referencia operativa actual para la siguiente implementación.
+1. HEIC/HEIF → WebP: aceptar formato real de iPhone y convertir a WebP usando una herramienta robusta. No implementado todavía.
+2. R2/CDN: subir WebP final a Cloudflare R2 y guardar provider/key/url/metadatos mínimos. No implementado todavía.
+3. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía.
+4. QR descargable con analíticas. No implementado todavía.
+5. Hotspots de navegación entre posiciones. No implementado todavía.
+6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 
-- Probar posición sin panorámica: debe aparecer incompleta en dashboard y no mostrarse en visor público.
-- Probar panorámica subida: el visor debe entrar en la panorámica principal.
-- Probar 1, 2 o 3 fotos N/S/E/O: contador parcial en dashboard y sin botón "Ver detalles" público.
-- Probar 4/4 fotos: estado "4/4 · Disponible" y botón "Ver detalles" público.
-- Probar abrir Oxphyre Room, arrastrar para mirar y volver a vista principal.
-- Comprobar en Oxphyre Room que N = Frente, E = Derecha, S = Fondo y O = Izquierda.
-- Revisar responsive básico y consola JS.
-- Mantener `positions.active_mode` como lógica actual/compatibilidad durante la transición; el documento propone dejarlo como campo heredado cuando el nuevo flujo esté implementado y validado.
-- No actualizar `CLAUDE.md` como decisión oficial hasta validar Sprint 1 funcionando.
+Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo público actual depende de `photos.direction='360'` para la panorámica principal y N/S/E/O para Oxphyre Room.
 
 ---
 

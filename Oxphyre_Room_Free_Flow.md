@@ -2,13 +2,28 @@
 
 ## Estado del documento
 
-**Estado:** especificación funcional propuesta para implementar y validar.
+**Estado:** Sprint 1 implementado y validado en servidor para el flujo base de subida/visualización.
 
-Este documento define el nuevo flujo de creación y visualización de posiciones en Oxphyre para el modo Free/base.
+Este documento define el flujo de creación y visualización de posiciones en Oxphyre para el modo Free/base.
 
-No sustituye todavía la definición oficial de `CLAUDE.md` ni debe aplicarse como documentación definitiva hasta validar el Sprint 1 funcionando en la app real.
+El Sprint 1 ya está implementado en la app real:
+- pantalla de subida con panorámica principal obligatoria;
+- Oxphyre Room opcional con 4 fotos N/S/E/O;
+- visor público entrando siempre por la panorámica;
+- botón "Ver detalles" solo si existen las 4 fotos;
+- retorno desde Oxphyre Room a vista principal;
+- subida conjunta de N/S/E/O + `photo_360`;
+- pipeline WebP/libvips en `ImageProcessingService`.
 
-Cuando el Sprint 1 esté implementado y probado, se deberá sincronizar:
+Quedan pendientes para fases posteriores:
+- editor real de hotspots;
+- QR;
+- R2/CDN;
+- HEIC/HEIF;
+- limpieza física de archivos asociados a soft delete;
+- pulido opcional de ruido/granulado.
+
+Documentos que deben permanecer sincronizados cuando cambie este flujo:
 
 - `CLAUDE.md`
 - `AI_SYNC.md`
@@ -712,6 +727,8 @@ Convertir la posición en:
 Panorámica principal obligatoria
 +
 Oxphyre Room opcional con 4 fotos
+
+**Estado:** implementado y validado en servidor.
 #### Incluye
 
 Dashboard / pantalla de subida:
@@ -786,14 +803,14 @@ Bloquear si hay menos de 2 posiciones completas.
 
 Modal inicial de ayuda.
 Tooltips.
-Avisos de baja resolución.
-Aviso evitar WhatsApp.
+Avisos de baja resolución. Implementado en subida.
+Aviso evitar WhatsApp/Instagram como recomendación secundaria. Implementado en subida.
 Auto-rotación suave.
 Giroscopio móvil discreto.
 Responsive fino.
 Microanimaciones.
 ### Orden definitivo
-1. Sprint 1 — Nuevo flujo base completo: subida + visor público.
+1. Sprint 1 — Nuevo flujo base completo: subida + visor público. Implementado.
 2. Sprint 2 — Validaciones y estados.
 3. Sprint 3 — Hotspots de navegación.
 4. Sprint 4 — Pulido UX premium.
@@ -997,5 +1014,8 @@ Pro/Business podrán añadir más capacidad, publicación profesional, QR, embed
 
 ### Prioridad inmediata
 
-Pedir a Codex/Claude Code el Sprint 1:
-adaptar pantalla de subida + adaptar visor público al nuevo flujo panorámica principal / Oxphyre Room opcional.
+El Sprint 1 base ya está implementado. Siguientes pasos posibles:
+- HEIC/HEIF si se prioriza captación móvil real de iPhone.
+- R2/CDN si se prioriza hosting/rendimiento/producción.
+- QR descargable si se prioriza demo comercial y tribunal.
+- Hotspots si se prioriza navegación entre posiciones.

@@ -15,41 +15,39 @@
 
 **Estado actual:** Oxphyre es un SaaS de tours virtuales inmersivos para pequeños negocios locales y, a la vez, el proyecto TFG de 2º DAW. El dueño crea un negocio, crea tours, añade posiciones, sube fotos por posición y publica una experiencia visitable mediante URL pública, QR o embed según el plan. El producto mantiene la visión completa: posiciones conectadas, mapas de profundidad MiDaS, editor canvas drag & drop, QR descargable, embed, hotspots, minimapa, analíticas, planes Free/Pro/Business y evolución comercial real.
 
-El visor público vigente usa **Photo Sphere Viewer v4**, basado en Three.js. Three.js sigue formando parte del proyecto, especialmente en la landing, efectos visuales y como base técnica del ecosistema PSV, pero el visor público manual anterior en Three.js ya no es la solución principal.
+El visor público vigente usa **Three.js vanilla**: panorámica principal cilíndrica/adaptativa y Oxphyre Room como vista opcional de detalle con 4 fotos. Three.js también sigue formando parte de la landing y efectos visuales. Photo Sphere Viewer v4 quedó retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al tratarlas como esferas completas.
 
 **Nota histórica:** El planteamiento inicial era un visor Three.js propio: esfera navegable, shader de profundidad, giroscopio, hotspots, minimapa y cambio de texturas implementados a mano. Ese enfoque permitió validar el concepto y construir una primera versión inmersiva, pero al probar fotos reales de smartphone aparecieron problemas críticos: FOV/zoom incorrecto, distorsión en panorámicas, depth map visible como textura, touch y giroscopio frágiles.
 
-**Decisión vigente:** No volver al visor público Three.js manual salvo problema claro, justificado y aprobado. Mantener Photo Sphere Viewer v4 como visor público actual. Mantener Three.js como parte activa del stack para la landing, efectos visuales y base interna de PSV. El producto sigue orientado a PYMES con smartphone normal: no exigir cámara 360° profesional ni hardware especial.
+**Decisión vigente:** Mantener el visor público actual en Three.js vanilla sin reintroducir Photo Sphere Viewer salvo problema claro, justificado y aprobado. El producto sigue orientado a PYMES con smartphone normal: no exigir cámara 360° profesional ni hardware especial.
 
 #### -- 08/05/2026 -- Decisión crítica sobre el visor y upload de fotos
 ### Sistema de subida de fotos por posición
 
-**Estado actual:** Cada posición acepta dos modos de imagen. Ambos pueden coexistir en BD, pero solo uno queda activo para el visor mediante `positions.active_mode`.
+**Estado actual:** Cada posición se entiende como panorámica principal obligatoria + Oxphyre Room opcional.
 
-**Modo 4 fotos** (`active_mode='4photos'`, default):
-- El usuario sube hasta 4 fotos normales con su móvil.
-- Etiquetas UI: Frente/Fondo/Izquierda/Derecha.
-- Internamente se guardan como N/S/E/O en `photos.direction`.
-- PSV muestra la foto correspondiente según la dirección de mirada.
-- Es el modo principal porque funciona con cualquier smartphone normal, sin hardware adicional.
-
-**Modo panorámica** (`active_mode='panoramic'`):
-- El usuario sube una panorámica.
+**Panorámica principal**:
 - Se guarda con `photos.direction='360'`.
+- Es la vista de entrada de cada posición pública.
 - Puede ser panorámica parcial de smartphone, no necesariamente equirectangular 360°x180° real.
-- PSV debe mostrarla sin distorsión grave y la UI no debe prometer cobertura total cuando la imagen no la tenga.
+- El visor la renderiza como cilindro parcial/adaptativo y la UI no promete cobertura total cuando la imagen no la tenga.
 
-**BD:** `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'`.
-**Visor:** usa `active_mode` para decidir qué imagen cargar y cómo renderizar la posición.
+**Oxphyre Room**:
+- Se activa cuando existen las 4 fotos N/S/E/O.
+- Etiquetas UI: Frente/Fondo/Derecha/Izquierda.
+- El visitante entra desde la panorámica mediante "Ver detalles".
+
+**BD:** `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` se mantiene como campo heredado/compatibilidad.
+**Visor:** ya no debe usar `active_mode` como decisión principal del flujo público nuevo; usa `photos.direction='360'` para la panorámica y N/S/E/O completas para Oxphyre Room.
 
 **Nota histórica:** El 08/05/2026 se decidió permitir una panorámica 360° equirectangular como alternativa ideal al modo de 4 fotos. El 09/05/2026, tras probar fotos reales de iPhone/smartphone, se ajustó la decisión: muchos móviles generan panorámicas cilíndricas o parciales (~270°), no equirectangulares completas. Photo Sphere Viewer v4 se eligió porque gestiona mejor panorámicas, touch, giroscopio y FOV que el visor manual.
 
-**Decisión vigente:** Mantener el sistema dual `4photos`/`panoramic`. No exigir cámaras 360°. No recomendar gran angular como solución principal porque sacrifica calidad. No prometer 360° completo si el usuario sube una panorámica parcial. Si una parte antigua habla de “panorámica 360° equirectangular”, debe leerse como el ideal histórico, no como requisito actual.
+**Decisión vigente:** Mantener el flujo panorámica principal + Oxphyre Room opcional. No exigir cámaras 360°. No recomendar gran angular como solución principal porque sacrifica calidad. No prometer 360° completo si el usuario sube una panorámica parcial. Si una parte antigua habla de “panorámica 360° equirectangular”, debe leerse como el ideal histórico, no como requisito actual.
 
 ## Stack técnico
-- **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js + Photo Sphere Viewer v4
-- **Visor público:** Photo Sphere Viewer v4, basado en Three.js
-- **Uso directo de Three.js:** landing, hero, efectos visuales y base técnica del ecosistema PSV
+- **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js
+- **Visor público:** Three.js vanilla, panorámica principal cilíndrica/adaptativa + Oxphyre Room
+- **Uso directo de Three.js:** landing, hero, efectos visuales y visor público
 - **Backend:** PHP 8.1 puro, patrón MVC, Front Controller (todo pasa por index.php)
 - **BD:** MySQL 8.0 · BD: `oxphyre` · usuario: `oxphyre`@`localhost`
 - **Python servidor:** Flask + Pillow + OpenCV/CLAHE + MiDaS Small (Intel, open source, profundidad real con IA gratuita)
@@ -59,16 +57,16 @@ El visor público vigente usa **Photo Sphere Viewer v4**, basado en Three.js. Th
 - **OS servidor:** Ubuntu 22.04 · Nginx · PHP-FPM · Let's Encrypt
 - **Repo:** /var/www/oxphyre en servidor · github.com/DaaniMM/oxphyre
 
-**Nota histórica:** El stack empezó con Three.js como visor público propio. La migración a PSV v4 no cambia la arquitectura base: sigue siendo JS vanilla y Three.js sigue presente, pero delega el visor público a una librería especializada y mantenida.
+**Nota histórica:** El stack empezó con Three.js como visor público propio, migró temporalmente a PSV v4 y volvió a Three.js vanilla para el Sprint 1 al comprobar que PSV deformaba panorámicas parciales de móvil.
 
-**Decisión vigente:** Mantener PHP puro MVC, MySQL, JS vanilla, Three.js/PSV y Python Flask. No introducir React, Vue, Angular, Laravel, Symfony, Bootstrap ni frameworks no autorizados.
+**Decisión vigente:** Mantener PHP puro MVC, MySQL, JS vanilla, Three.js y Python Flask. No introducir React, Vue, Angular, Laravel, Symfony, Bootstrap ni frameworks no autorizados.
 
 ## Estructura del proyecto
 oxphyre/
 public/              → frontend servido por Nginx
 assets/            → imágenes, iconos, fuentes
 css/               → estilos compilados
-js/                → scripts vanilla + Three.js + visor PSV
+js/                → scripts vanilla + Three.js + visor público
 uploads/           → fotos procesadas de los negocios
 backend/
 controllers/       → lógica de negocio
@@ -77,7 +75,7 @@ views/             → templates PHP
 routes/            → mini-router
 middleware/        → auth, roles, rate limiting
 config/            → BD, constantes, .env loader
-services/          → servicios PHP como MiDaSService para hablar con Flask
+services/          → servicios PHP como MiDaSService e ImageProcessingService
 python-service/      → Flask + Pillow + OpenCV/CLAHE + MiDaS Small
 venv/              → en .gitignore, no se sube
 docs/                → memoria TFG
@@ -91,12 +89,12 @@ CLAUDE.md            → este archivo
 **Estado actual:** Tablas principales: `users`, `businesses`, `plans`, `tours`, `positions`, `photos`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent`, `login_attempts`.
 
 **Campos y reglas importantes:**
-- `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` decide qué modo usa el visor.
+- `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` queda como compatibilidad heredada.
 - `photos.direction='360'` identifica la panorámica de una posición.
 - `login_attempts` existe para rate limiting de login.
 - `businesses`, `tours`, `positions` y `photos` tienen soft delete con `deleted_at`.
 
-**Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan y que el dueño elija qué modo queda activo.
+**Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan, pero el flujo público Sprint 1 usa panorámica principal + Oxphyre Room opcional.
 
 **Decisión vigente:** Todos los modelos deben usar prepared statements. En tablas con soft delete, no usar `DELETE FROM`; usar `UPDATE ... SET deleted_at = NOW()` y filtrar `deleted_at IS NULL` en todos los SELECT.
 
@@ -110,11 +108,27 @@ CLAUDE.md            → este archivo
 
 ## Estado implementado resumido
 
-**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo (registro, verificación email, login, logout y recuperación de contraseña), dashboard base con navegación/métricas/layout, wizard de creación de negocio, listado y gestión de negocios, creación/edición/publicación/soft delete de tours, creación de posiciones, subida de fotos por posición, procesado MiDaS en servidor mediante Flask, CLAHE para mejora automática de imagen, visor público con Photo Sphere Viewer v4, sistema dual de fotos por posición y soft delete en `businesses`, `tours`, `positions` y `photos`.
+**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions` y `photos`.
 
 **Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
 
 **Decisión vigente:** Antes de implementar algo, comprobar si ya existe. Si se necesita el estado vivo y la prioridad inmediata, consultar `AI_SYNC.md`.
+
+### Pipeline de imágenes actual
+
+**Estado actual:** `backend/services/ImageProcessingService.php` concentra el pipeline local de imágenes. Valida errores de upload, tamaño por dirección, MIME real, dimensiones, protección de memoria, conversión, warnings de calidad, metadata y temporales.
+
+- JPG/PNG/WebP se convierten a WebP visible.
+- N/S/E/O se guardan como WebP quality 92.
+- Panorámica `360` se guarda como WebP quality 96.
+- Panorámicas grandes usan libvips CLI y se limitan a 8192px de ancho manteniendo proporción.
+- MiDaS procesa un JPG temporal separado quality 92.
+- El WebP visible no se sobrescribe con MiDaS ni CLAHE.
+- El flujo TFG actual genera depth maps cuando MiDaS responde, pero la imagen pública visible sigue siendo el WebP optimizado.
+- La definición comercial de planes podrá limitar créditos MiDaS en el futuro; esa política de producto no cambia el pipeline actual.
+- HEIC/HEIF, Cloudflare R2/CDN y metadata avanzada en BD quedan pendientes.
+
+**Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
 ## Propuesta provisional de tiers
 
@@ -126,7 +140,7 @@ CLAUDE.md            → este archivo
 
 **Estado actual:** Los planes Free, Pro y Business siguen siendo la definición técnica y comercial del producto. Esta sección conserva precios, límites, features y posicionamiento de cada plan porque forma parte de la visión comercial y del TFG. Algunas capacidades están implementadas, otras están en desarrollo TFG y otras pertenecen al roadmap.
 
-**Nota histórica:** Parte de esta definición se escribió cuando el visor principal era Three.js manual. Tras la migración a PSV, las referencias a “esfera Three.js” deben interpretarse como visor público navegable basado en PSV/Three.js, no como obligación de volver al visor manual anterior.
+**Nota histórica:** Parte de esta definición se escribió cuando el visor principal era Three.js manual y después PSV. En el estado actual, las referencias antiguas a PSV deben interpretarse como visor público navegable Three.js vigente, no como obligación de reintroducir Photo Sphere Viewer.
 
 **Decisión vigente:** No simplificar ni borrar la definición comercial de planes. Al implementar una feature concreta, verificar en `AI_SYNC.md` y `DEVLOG.md` si está lista, pendiente o en roadmap.
 
@@ -134,7 +148,7 @@ CLAUDE.md            → este archivo
 - 1 tour, 1 negocio (no se pueden crear más tours ni negocios adicionales)
 - Hasta 5 posiciones por tour
 - 1 posición con MiDaS real incluida como crédito de prueba permanente
-- Las otras 4 posiciones: visor navegable basado en PSV/Three.js, sin profundidad IA (foto plana). Históricamente se planteó como esfera Three.js con efecto parallax/giroscopio; tras la migración a PSV, el shader/parallax MiDaS sobre PSV queda pendiente de reimplementar o descartar.
+- Las otras 4 posiciones: visor navegable Three.js, sin profundidad IA aplicada a la textura visible. Históricamente se planteó como esfera/paneles con efecto parallax/giroscopio; el shader/parallax MiDaS queda pendiente de reimplementar sobre el visor actual o descartar.
 - Todas las posiciones conectadas con hotspots navegables (misma estructura que Pro)
 - Sin minimapa
 - Sin embed/iframe — solo enlace público oxphyre.com/[slug-negocio]
@@ -302,11 +316,11 @@ La UX debe camuflar el tiempo de espera:
 - Script Python local para procesado con GPU en Windows usando DPT-Hybrid + CUDA.
 - Preparar 1-2 tours demo pregenerados visualmente impecables.
 - Revisar/afinar UX de progreso durante procesado si el tribunal prueba subida en directo.
-- Reimplementar o decidir si se descarta el shader/parallax MiDaS sobre PSV.
+- Reimplementar o decidir si se descarta el shader/parallax MiDaS sobre el visor Three.js actual.
 
 **Nota histórica:** Antes estaban pendientes: swap de 2GB, instalar MiDaS Small, levantar microservicio Flask funcional y cerrar el flujo PHP → Flask → mapa de profundidad → BD. Esos puntos ya se completaron durante la integración del microservicio y la subida de fotos.
 
-**Decisión vigente:** No tratar Flask/MiDaS Small/swap/flujo PHP-Flask como tareas pendientes. La prioridad pendiente real es demo local de alta calidad y decisiones sobre parallax MiDaS en PSV.
+**Decisión vigente:** No tratar Flask/MiDaS Small/swap/flujo PHP-Flask como tareas pendientes. La prioridad pendiente real es demo local de alta calidad y decisiones sobre parallax MiDaS en el visor actual.
 
 ---
 
@@ -669,7 +683,7 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`.
 - `UserModel::create()` tiene el rol "business_free" hardcodeado en SQL. Refactorizar cuando existan más roles: pasar `$role` como parámetro o definir constante `ROLE_DEFAULT` en config.php.
 - Emails transaccionales: actualmente PHPMailer + Gmail SMTP con cuenta `danimm3097@gmail.com` (válido para TFG). La cuenta `digitechfp.com` se descartó porque el centro educativo tiene SMTP capado. En producción real migrar a Resend, SendGrid o Mailgun con dominio propio `noreply@oxphyre.com` — Gmail muestra la cuenta del remitente en lugar de una dirección de marca y tiene límite de ~500 emails/día.
 - Gmail SMTP requiere App Password en `.env`, no la contraseña de cuenta. `MAIL_USERNAME` y `MAIL_FROM` deben ser el mismo email o Gmail rechazará la conexión.
-- Shader MiDaS sobre PSV: el efecto de profundidad (ShaderMaterial con depth map) está pendiente de reimplementar sobre PSV tras la migración. En esta versión PSV muestra foto plana en todos los planes hasta que se integre o se descarte el shader.
+- Shader MiDaS/parallax: el efecto de profundidad con depth map está pendiente de reimplementar sobre el visor Three.js actual o descartarse. En esta versión la imagen visible no se sobrescribe ni se altera con CLAHE/MiDaS.
 - Script Python local (Windows) para procesar tours de demo con MiDaS DPT-Hybrid + CUDA (RTX 3060) antes de la exposición del TFG. Genera calidad máxima en 2-3 segundos por foto. Pendiente de crear el script.
 
 #### Roadmap/futuro

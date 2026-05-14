@@ -1643,8 +1643,9 @@ Se añadió soporte de procesamiento con libvips CLI para panorámicas principal
 - Fotos N/S/E/O siguen usando GD como antes.
 - Panorámicas `360` usan libvips si superan el ancho final recomendado o si GD no puede procesarlas con seguridad.
 - Panorámicas grandes se redimensionan a un máximo de 8192px de ancho manteniendo proporción.
-- La salida visible sigue siendo WebP calidad 92.
-- MiDaS sigue recibiendo un JPG temporal calidad 92 separado del WebP visible.
+- La salida visible sigue siendo WebP; en la prueba posterior quedó fijada en quality 96 para panorámica `360`.
+- N/S/E/O siguen en WebP quality 92.
+- MiDaS sigue recibiendo un JPG temporal quality 92 separado del WebP visible.
 - Los comandos CLI se construyen con `escapeshellarg()` y se comprueba código de salida, existencia y tamaño de archivos generados.
 
 **Motivo:** permitir panorámicas reales de móvil, como 16248x3832, sin tumbar EC2 ni ampliar lógica en `PositionController`.
@@ -1668,3 +1669,31 @@ Se ajustó solo la calidad del WebP visible de la panorámica principal para com
 **Verificación técnica local:**
 - `php -l` no disponible en el PATH local de Windows.
 - `git diff --check` correcto.
+
+## 2026-05-14 — Sincronización de documentación del pipeline de imágenes
+
+Se sincronizó la documentación de estado tras cerrar el bloque WebP/libvips.
+
+**Qué se cambió:**
+- `AI_SYNC.md`: actualizado el estado vivo con `ImageProcessingService`, WebP quality 92/96, libvips para panorámicas grandes, temporales MiDaS, subida de 5 imágenes y pendientes reales.
+- `CLAUDE.md`: actualizado el contexto general para reflejar visor Three.js vigente, `active_mode` como compatibilidad e `ImageProcessingService` como servicio responsable de imágenes.
+- `Oxphyre_Room_Free_Flow.md`: marcado Sprint 1 como implementado y listados los pendientes posteriores.
+
+**Motivo:** dejar claro para la siguiente sesión qué está implementado, qué queda pendiente y cuál es el siguiente paso recomendado.
+
+**Verificación técnica local:**
+- `git diff --check` correcto.
+
+**Validación real en servidor:**
+- `php -l backend/controllers/PositionController.php` correcto.
+- `php -l backend/services/ImageProcessingService.php` correcto.
+- `php8.1-gd` validado con soporte JPEG/PNG/WebP.
+- `libvips-tools` validado: vips 8.12.1, ruta `/usr/bin/vips`, WebP load/save confirmado.
+- Panorámica iPhone 16248x3832 procesada con libvips a WebP aprox. 8192x1932, ~2.9MB, `processed=1`.
+- Subida conjunta `photo_360` + N/S/E/O validada.
+- Delete de fotos validado.
+
+**Pendiente opcional:**
+- La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp, pero queda ruido/granulado residual en zonas oscuras de interiores.
+- Causa probable: captura en interior/poca luz, ruido real de cámara y visualización fullscreen.
+- No aplicar denoise por defecto todavía: podría suavizar demasiado o generar efecto acuarela.
