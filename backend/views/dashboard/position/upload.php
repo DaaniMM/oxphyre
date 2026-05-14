@@ -132,6 +132,11 @@
             : 'background:oklch(0.35 0.12 25/0.2);border:1px solid oklch(0.55 0.15 25/0.4);color:oklch(0.80 0.10 25);'
           ?>">
           <?= htmlspecialchars($flash['message']) ?>
+          <?php if (!empty($flash['secondary'])): ?>
+            <div style="margin-top:0.45rem;font-size:0.78rem;line-height:1.5;color:var(--ox-text-muted);">
+              <?= htmlspecialchars($flash['secondary']) ?>
+            </div>
+          <?php endif; ?>
         </div>
       <?php endif; ?>
 

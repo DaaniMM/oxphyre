@@ -1546,6 +1546,21 @@ Se implementó la primera fase del pipeline de imágenes sin HEIC/HEIF ni R2.
 - `php -l` no disponible en el PATH local de Windows.
 - `git diff --check` correcto.
 
+## 2026-05-14 — Recomendación secundaria en avisos de calidad
+
+Se ajustó la UX de los mensajes de subida cuando una imagen se detecta como comprimida o de baja resolución.
+
+**Qué se cambió:**
+- `BaseController.php`: `flash()` acepta una línea secundaria opcional sin romper llamadas existentes.
+- `PositionController.php`: cuando hay warnings de calidad, añade la recomendación secundaria de Oxphyre sobre evitar WhatsApp, Instagram u otras apps antes de subir fotos.
+- `upload.php`: renderiza `flash['secondary']` debajo del mensaje principal con tamaño menor y color suave.
+
+**Motivo:** mantener el éxito/aviso principal claro y añadir una recomendación educativa sin presentarla como error grave.
+
+**Verificación técnica local:**
+- `php -l` no disponible en el PATH local de Windows.
+- `git diff --check` correcto.
+
 ## 2026-05-14 — Experimento de altura en cilindro panorámico
 
 Se redujo solo la altura vertical del cilindro de la panorámica principal.

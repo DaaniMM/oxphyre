@@ -6,6 +6,7 @@ class PositionController extends BaseController
 {
     private const WEBP_QUALITY = 92;
     private const MEMORY_SAFETY_BYTES = 33554432; // 32 MB de margen para evitar OOM en GD.
+    private const LOW_QUALITY_RECOMMENDATION = 'Recomendación de Oxphyre: evita pasar las fotos por WhatsApp, Instagram u otras apps antes de subirlas, porque pueden reducir la calidad.';
 
     // Etiquetas de plan para mostrar en el sidebar
     private static array $planLabels = [
@@ -304,13 +305,13 @@ class PositionController extends BaseController
             if (!empty($warnings)) {
                 $message .= ' ' . implode(' ', array_unique($warnings));
             }
-            $this->flash('error', trim($message));
+            $this->flash('error', trim($message), !empty($warnings) ? self::LOW_QUALITY_RECOMMENDATION : null);
         } else {
             $message = "{$processed} imagen(es) subidas y optimizadas correctamente.";
             if (!empty($warnings)) {
                 $message .= ' ' . implode(' ', array_unique($warnings));
             }
-            $this->flash('success', trim($message));
+            $this->flash('success', trim($message), !empty($warnings) ? self::LOW_QUALITY_RECOMMENDATION : null);
         }
 
         $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");

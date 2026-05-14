@@ -9,8 +9,11 @@ class BaseController
         }
     }
 
-    protected function flash(string $type, string $message): void
+    protected function flash(string $type, string $message, ?string $secondary = null): void
     {
         $_SESSION['flash'] = ['type' => $type, 'message' => $message];
+        if ($secondary !== null && $secondary !== '') {
+            $_SESSION['flash']['secondary'] = $secondary;
+        }
     }
 }
