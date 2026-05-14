@@ -1522,3 +1522,17 @@ Se ajustó solo la interacción horizontal y la estimación de cobertura de la p
 **Verificación técnica local:**
 - `node --check public/js/tour-viewer.js` correcto.
 - `git diff --check` correcto.
+
+## 2026-05-14 — Experimento de altura en cilindro panorámico
+
+Se redujo solo la altura vertical del cilindro de la panorámica principal.
+
+**Qué se cambió:**
+- `tour-viewer.js`: `createMainPanoramaGeometry()` pasa de `height = 6.1` a `height = 5.3`, manteniendo `radius = 5.2`.
+- `tour.php`: cache-busting actualizado a `tour-viewer.js?v=20260514-5`.
+
+**Motivo:** comprobar si una menor escala vertical reduce la percepción de imagen ampliada/pixelada sin tocar color, drag, cobertura horizontal, FOV, pitch ni Oxphyre Room.
+
+**Verificación técnica local:**
+- `node --check public/js/tour-viewer.js` correcto.
+- `git diff --check` correcto.

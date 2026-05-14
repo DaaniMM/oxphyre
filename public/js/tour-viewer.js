@@ -225,7 +225,7 @@ function initMainPanorama(url) {
   resizeMainRenderer();
 }
 
-function createMainPanoramaGeometry(widthAngle, radius = 5.2, height = 6.1, widthSegments = 96, heightSegments = 16) {
+function createMainPanoramaGeometry(widthAngle, radius = 5.2, height = 5.3, widthSegments = 96, heightSegments = 16) {
   const positions = [];
   const uvs = [];
   const indices = [];

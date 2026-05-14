@@ -78,7 +78,7 @@
 <!-- Three.js para panorámica adaptativa y Oxphyre Room -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
 <!-- Lógica del visor (después de Three.js, sin defer) -->
-<script src="/js/tour-viewer.js?v=20260514-4"></script>
+<script src="/js/tour-viewer.js?v=20260514-5"></script>
 
 </body>
 </html>
