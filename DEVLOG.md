@@ -1484,3 +1484,22 @@ Se rediseñaron las cards de posiciones en la gestión de tour sin tocar backend
 - "Ver posición" no parte línea y, en móvil o cards estrechas, los botones pasan a columna y ocupan el ancho completo.
 
 **Motivo:** evitar overflow tras añadir "Ver posición" y mantener una UI limpia para Gestionar, previsualizar y futura eliminación.
+
+## 2026-05-14 — Ajuste neutral de color en panorámica principal
+
+Se corrigió el pipeline de color/render del visor público para que la panorámica principal respete mejor el archivo original subido.
+
+**Qué se cambió:**
+- `tour-viewer.js`: añadido `configureNeutralRenderer()` para fijar salida sRGB (`outputColorSpace` si existe, `outputEncoding` en Three r147), `NoToneMapping` y exposición `1`.
+- `tour-viewer.js`: añadido `configureNeutralTexture()` para marcar las texturas fotográficas como sRGB sin tocar filtros, material ni geometría.
+- `tour.php`: actualizado cache-busting del visor a `tour-viewer.js?v=20260514-3`.
+
+**Motivo:** la textura se estaba declarando como sRGB, pero el renderer no tenía salida sRGB explícita. En Three r147 eso puede producir conversión incompleta de color y hacer que la imagen se vea más oscura o con dominante no deseada frente al archivo original.
+
+**Se mantiene:**
+- Sin cambios en geometría, FOV, cobertura angular, yaw/pitch ni navegación.
+- Sin Photo Sphere Viewer.
+- Sin CLAHE ni mejoras visuales sobre la imagen visible.
+
+**Verificación técnica local:**
+- `node --check public/js/tour-viewer.js` correcto.

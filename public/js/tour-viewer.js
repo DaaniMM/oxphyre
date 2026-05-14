@@ -26,6 +26,28 @@ const ROOM_TARGET_YAW = {
 };
 const ROOM_PITCH_LIMIT_DEG = 24;
 
+function configureNeutralRenderer(renderer) {
+  if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) {
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  }
+  if ('outputEncoding' in renderer && THREE.sRGBEncoding) {
+    renderer.outputEncoding = THREE.sRGBEncoding;
+  }
+  if (THREE.NoToneMapping !== undefined) {
+    renderer.toneMapping = THREE.NoToneMapping;
+  }
+  renderer.toneMappingExposure = 1;
+}
+
+function configureNeutralTexture(texture) {
+  if ('colorSpace' in texture && THREE.SRGBColorSpace) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+  }
+  if ('encoding' in texture && THREE.sRGBEncoding) {
+    texture.encoding = THREE.sRGBEncoding;
+  }
+}
+
 function getPositions() {
   if (typeof TOUR_DATA === 'undefined') return [];
   return Array.isArray(TOUR_DATA?.positions) ? TOUR_DATA.positions : [];
@@ -145,6 +167,7 @@ function initMainPanorama(url) {
     alpha: false,
     powerPreference: 'high-performance',
   });
+  configureNeutralRenderer(renderer);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x050505, 1);
   container.appendChild(renderer.domElement);
@@ -165,8 +188,7 @@ function initMainPanorama(url) {
 
       if (loadingEl) loadingEl.hidden = true;
 
-      texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
-      texture.encoding = THREE.sRGBEncoding || texture.encoding;
+      configureNeutralTexture(texture);
       texture.anisotropy = renderer.capabilities.getMaxAnisotropy?.() || 1;
       texture.minFilter = THREE.LinearFilter;
       texture.magFilter = THREE.LinearFilter;
@@ -516,6 +538,7 @@ function initRoomScene(room) {
     alpha: false,
     powerPreference: 'high-performance',
   });
+  configureNeutralRenderer(renderer);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x030201, 1);
   container.appendChild(renderer.domElement);
@@ -548,8 +571,7 @@ function initRoomScene(room) {
       loadedTexture.needsUpdate = true;
     });
 
-    texture.colorSpace = THREE.SRGBColorSpace || texture.colorSpace;
-    texture.encoding = THREE.sRGBEncoding || texture.encoding;
+    configureNeutralTexture(texture);
     texture.anisotropy = maxAnisotropy;
     roomState.textures.push(texture);
 
