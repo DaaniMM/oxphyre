@@ -2064,3 +2064,49 @@ Tipo: herramienta temporal de verificación. Sin integración en pipeline real.
 - No se modificó `.env`, `.env.example` ni BD.
 - No se ejecutó el test real desde local.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Validación real de R2StorageService y política de caché
+
+Tipo: validación real en servidor y decisión técnica. Sin integración en pipeline real.
+
+### Comandos ejecutados en servidor
+```bash
+php -l scripts/test_r2_service.php
+php scripts/test_r2_service.php
+```
+
+### Resultado
+- `php -l` no mostró errores de sintaxis.
+- `.env` cargado correctamente.
+- `R2StorageService` instanciado con variables R2 reales del servidor.
+- WebP temporal creado en `/tmp`.
+- `getPublicUrl()` generó `https://media.oxphyre.com/tests/r2-probe/360/r2-test-probe.webp`.
+- `upload()` subió correctamente el WebP a Cloudflare R2.
+- La URL pública respondió HTTP 200.
+- `delete()` eliminó el objeto de R2 correctamente.
+- La limpieza final confirmó borrado.
+- El archivo temporal local se eliminó.
+
+### Warning de caché Cloudflare
+Después del `delete()`, la comprobación HEAD seguía devolviendo HTTP 200 porque Cloudflare servía caché:
+- `cf-cache-status=HIT`
+- `cache-control=max-age=14400`
+- `age=701`
+
+Esto no se considera fallo de `R2StorageService.php`: el objeto ya no aparece en el bucket R2 y el 200 venía de caché CDN.
+
+### Decisión
+- No implementar purga activa de caché en TFG/MVP inicial.
+- Nunca reutilizar `storage_key`.
+- Cada upload debe generar una key única e irrepetible.
+- Si una foto se sustituye, se sube como objeto nuevo con nueva key.
+- La BD decide qué foto está activa.
+- El visor solo debe usar fotos activas desde BD.
+- Los objetos huérfanos/antiguos se limpiarán en una fase posterior.
+
+### Qué NO se hizo
+- No se tocó código PHP, JS, CSS, SQL ejecutable ni vistas en esta documentación.
+- No se modificó `R2StorageService.php` ni `scripts/test_r2_service.php`.
+- No se tocó BD.
+- No se integró R2 en upload, visor ni dashboard.
+- No se hizo commit ni push.

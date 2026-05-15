@@ -121,7 +121,7 @@ Estado implementado:
 
 Pendiente:
 - HEIC/HEIF implementado en código y soportado por servidor vía libvips/libheif. Prueba real desde iPhone validada: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente, aunque iOS/Safari entregó el archivo como `IMG_8024.jpeg` y no como `.heic` puro. Queda pendiente probar un archivo `.heic` real sin conversión automática.
-- Cloudflare R2/CDN sigue pendiente para servir imágenes finales y reducir carga persistente en EC2.
+- Cloudflare R2/CDN sigue pendiente de integración en upload/visor/dashboard para servir imágenes finales y reducir carga persistente en EC2.
 - BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, processing_status/error_code.
 - BD metadata R2 en `photos` ejecutada en servidor: `storage_provider`, `storage_key`, `public_url`.
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
@@ -160,9 +160,11 @@ Pendiente:
 - La URL pública del tour/visor sigue siendo `oxphyre.com/...`; `media.oxphyre.com/...webp` solo sirve imágenes internas del visor y normalmente no es visible para el visitante salvo en red/devtools.
 - Fotos antiguas siguen compatibles: `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`.
 
-**No implementado todavía:** código de aplicación, R2StorageService.php e integración en upload/visor/dashboard. Upload/visor/dashboard aún no usan los campos R2.
+**Servicio R2:** `backend/services/R2StorageService.php` implementado y validado en test aislado real contra Cloudflare R2. Upload, URL pública y delete funcionan.
 
-### R2/CDN Fase 1 planificada (pendiente de implementación)
+**No implementado todavía:** integración en upload/visor/dashboard. Upload/visor/dashboard aún no usan los campos R2 ni el servicio.
+
+### R2/CDN Fase 1 validada de forma aislada
 
 Decisión definitiva para Fase 1:
 - Usar cURL puro con firma AWS Signature Version 4 manual para Cloudflare R2.
@@ -185,7 +187,7 @@ Reglas para keys:
 - `direction` limitada a `360`, `N`, `S`, `E`, `O`.
 - `validateKey()` debe llamarse al inicio de `upload()`, `getPublicUrl()` y `delete()`.
 
-Fase 1 sigue pendiente de implementación. Alcance exacto — en este orden, sin saltarse pasos:
+Estado Fase 1:
 
 1. **No crear Composer ni instalar AWS SDK**: la revisión del proyecto confirmó que no existe `composer.json`, `composer.lock` ni `vendor/`, y `public/index.php` no carga autoloader de Composer. Implementar R2 con cURL puro + AWS Signature V4 manual.
 
@@ -204,9 +206,18 @@ Fase 1 sigue pendiente de implementación. Alcance exacto — en este orden, sin
 
 3. **Migración SQL de metadata en `photos` — ejecutada**: `photos` ya tiene `storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local'`, `storage_key VARCHAR(512) NULL` y `public_url VARCHAR(1024) NULL`. No implica integración R2 en upload/visor/dashboard.
 
-4. **`backend/services/R2StorageService.php`**: crear el servicio con métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Leer credenciales desde `$_ENV`, pero no leer ni decidir `R2_ENABLED`. Usar cURL puro, endpoint virtual-host style, upload por streaming y firma AWS Signature V4 en métodos privados. El constructor falla con `RuntimeException` si faltan credenciales críticas. Fallo operativo silencioso: si upload/delete falla, devolver `false` y el caller decide si usar fallback local. No escribir en BD desde el servicio.
+4. **`backend/services/R2StorageService.php` — implementado y validado**: métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Lee credenciales desde `$_ENV`, pero no lee ni decide `R2_ENABLED`. Usa cURL puro, endpoint virtual-host style, upload por streaming y firma AWS Signature V4 en métodos privados. El constructor falla con `RuntimeException` si faltan credenciales críticas. Fallo operativo silencioso: si upload/delete falla, devuelve `false` y el caller decide si usar fallback local. No escribe en BD.
 
-5. **Test aislado del servicio**: probar `R2StorageService::upload()` con un WebP de prueba real, verificar que la URL pública resuelve y que `delete()` limpia el objeto. Sin integrar aún en el pipeline.
+5. **Test aislado del servicio — validado en servidor**: `php -l scripts/test_r2_service.php` correcto. `php scripts/test_r2_service.php` cargó `.env`, instanció el servicio, creó WebP temporal en `/tmp`, generó `https://media.oxphyre.com/tests/r2-probe/360/r2-test-probe.webp`, subió a R2, obtuvo HTTP 200, ejecutó `delete()` y confirmó limpieza final. Sin integrar aún en el pipeline.
+
+Política de caché Cloudflare/R2 para Fase 2:
+- Cloudflare puede seguir sirviendo un objeto cacheado durante horas aunque ya se haya borrado del bucket R2. En el test real, tras `delete()` la URL siguió devolviendo HTTP 200 con `cf-cache-status=HIT`, `cache-control=max-age=14400`, `age=701`.
+- Ese 200 post-delete por caché CDN no es fallo de `R2StorageService.php` si el objeto ya no aparece en el bucket.
+- No implementar purga activa de caché en TFG/MVP inicial.
+- Regla absoluta: nunca reutilizar `storage_key`.
+- Cada upload debe generar una key única e irrepetible. Si una foto se sustituye, se sube como objeto nuevo con nueva key.
+- La BD decide qué foto está activa; el visor solo debe usar fotos activas desde BD.
+- Objetos huérfanos/antiguos se limpiarán en una fase posterior.
 
 No pedir en Fase 1:
 - Presigned URLs.
@@ -364,9 +375,10 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. **R2/CDN — completar Fase 0 y comenzar Fase 1** (siguiente bloque principal):
+1. **R2/CDN — comenzar Fase 2 de integración en upload nuevo** (siguiente bloque principal):
    - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
-   - Fase 1 **planificada** (ver subsección "R2/CDN Fase 1 planificada" en Decisiones activas): variables R2 en `.env.example` añadidas y migración SQL metadata `photos` ejecutada; queda crear `R2StorageService.php` con cURL puro + AWS Signature V4 manual y test aislado. Sin tocar upload/visor/dashboard todavía.
+   - Fase 1 **validada de forma aislada**: variables R2 en `.env.example`, migración SQL metadata `photos`, `R2StorageService.php` y test CLI real contra R2 completados.
+   - Fase 2 pendiente: integrar nuevas subidas con R2 usando fallback local obligatorio, keys únicas por upload y sin reutilizar `storage_key`. El visor/dashboard deben seguir basándose en BD.
 2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.

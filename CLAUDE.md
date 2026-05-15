@@ -130,7 +130,7 @@ CLAUDE.md            → este archivo
 - HEIC/HEIF implementado en pipeline y soportado por servidor vía libvips/libheif.
 - Flujo iPhone normal validado: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente. En esa prueba iOS/Safari entregó el archivo como JPEG, no como `.heic` puro.
 - Queda pendiente probar un archivo `.heic` puro sin conversión automática.
-- Cloudflare R2/CDN queda pendiente de integración en el pipeline. La metadata R2 básica en BD (`storage_provider`, `storage_key`, `public_url`) ya fue añadida a `photos`.
+- Cloudflare R2/CDN queda pendiente de integración en el pipeline. La metadata R2 básica en BD (`storage_provider`, `storage_key`, `public_url`) ya fue añadida a `photos` y `R2StorageService.php` está implementado y validado de forma aislada.
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
@@ -161,10 +161,10 @@ CLAUDE.md            → este archivo
 **BD:** migración SQL de metadata R2 ejecutada en servidor. La tabla `photos` ya tiene `storage_provider` ('local'|'r2', default 'local'), `storage_key` y `public_url`.
 `storage_key` es la referencia principal dentro del bucket R2; `public_url` es una comodidad regenerable desde `R2_PUBLIC_BASE_URL + storage_key` si cambia el dominio CDN. Las fotos antiguas siguen compatibles como `local` con `storage_key` y `public_url` en `NULL`.
 
-**Fase 1 prevista (no implementada todavía):**
+**Fase 1 validada de forma aislada:**
 - Los controllers no deben contener lógica R2. `R2StorageService.php` centraliza upload/getUrl/delete.
 - Decisión arquitectónica: no introducir Composer ni AWS SDK para R2. El proyecto no tiene `composer.json`, `composer.lock` ni `vendor/`, `public/index.php` no carga autoloader de Composer y añadir un SDK pesado no compensa para tres operaciones.
-- `R2StorageService.php` usará cURL puro: `upload()` hará PUT firmado, `delete()` hará DELETE firmado y `getPublicUrl()` concatenará `R2_PUBLIC_BASE_URL` + `storage_key`.
+- `R2StorageService.php` usa cURL puro: `upload()` hace PUT firmado, `delete()` hace DELETE firmado y `getPublicUrl()` concatena `R2_PUBLIC_BASE_URL` + `storage_key`.
 - `R2StorageService.php` no decide si R2 está habilitado. `R2_ENABLED` queda para el caller en Fase 2; si el servicio se instancia, asume que se quiere usar R2.
 - El constructor debe lanzar `RuntimeException` si faltan credenciales críticas o configuración necesaria.
 - Endpoint firmado: usar virtual-host style `https://{bucket}.{accountId}.r2.cloudflarestorage.com/{key}`. No usar path-style. La firma debe coincidir exactamente con el host usado por cURL.
@@ -173,9 +173,16 @@ CLAUDE.md            → este archivo
 - La firma AWS Signature Version 4 quedará encapsulada en métodos privados del servicio. PUT firma como mínimo `content-type`, `host`, `x-amz-content-sha256`, `x-amz-date`; DELETE firma `host`, `x-amz-content-sha256`, `x-amz-date`. PUT usa `hash_file('sha256', $localPath)`, DELETE usa SHA256 de string vacío y fechas UTC con `gmdate()`.
 - Las keys serán seguras y controladas: `tours/{tourId}/positions/{positionId}/{direction}/{filename}.webp`, sin espacios, sin `..`, sin barra inicial, solo caracteres seguros y `direction` limitada a `360`, `N`, `S`, `E`, `O`. `validateKey()` debe llamarse al inicio de `upload()`, `getPublicUrl()` y `delete()`.
 - El servicio lee credenciales desde `$_ENV`; fallo silencioso (devuelve `false`) para que el caller pueda aplicar fallback local sin romper el flujo.
-- `PhotoModel` persistirá `storage_provider`, `storage_key` y `public_url` solo cuando se integre en Fase 2. Fase 1 solo crea el servicio y lo prueba de forma aislada.
+- Validación real en servidor: `php -l scripts/test_r2_service.php` sin errores; `php scripts/test_r2_service.php` subió WebP temporal a `https://media.oxphyre.com/tests/r2-probe/360/r2-test-probe.webp`, obtuvo HTTP 200, ejecutó `delete()` y confirmó limpieza.
+- `PhotoModel` persistirá `storage_provider`, `storage_key` y `public_url` solo cuando se integre en Fase 2. El servicio ya está probado, pero no integrado en pipeline real.
 - Criterio de coste: mantener 0€; Composer/AWS SDK queda descartado por ahora; no subir originales ni depth maps a R2; no dejar objetos de prueba en el bucket; vigilar consumo del free tier.
 - No incluir en Fase 1: presigned URLs, reintentos automáticos, integración con upload ni cambios en visor/dashboard.
+
+**Política de caché Cloudflare/R2:**
+- Cloudflare puede servir objetos cacheados durante unas horas aunque ya se hayan borrado del bucket R2. Un HTTP 200 post-delete con `cf-cache-status=HIT`, `cache-control=max-age=14400` y `age` no es fallo del servicio si el objeto ya no existe en el bucket.
+- No se implementará purga activa de caché en el TFG/MVP inicial.
+- Regla permanente para Fase 2: nunca reutilizar `storage_key`. Cada upload genera una key única e irrepetible; si una foto se sustituye, se sube como objeto nuevo con nueva key.
+- La BD decide qué foto está activa y el visor solo debe consumir fotos activas desde BD. Los objetos huérfanos/antiguos se limpiarán en una fase posterior.
 
 ## Propuesta provisional de tiers
 
