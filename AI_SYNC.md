@@ -219,6 +219,47 @@ Política de caché Cloudflare/R2 para Fase 2:
 - La BD decide qué foto está activa; el visor solo debe usar fotos activas desde BD.
 - Objetos huérfanos/antiguos se limpiarán en una fase posterior.
 
+### R2/CDN Fase 2A planificada (pendiente de implementación)
+
+Objetivo: integrar R2 solo para nuevas subidas, manteniendo copia local en EC2 como fallback temporal.
+
+Aclaración de almacenamiento:
+- **Local** = archivo físico en EC2: `/public/uploads/{positionId}/...`.
+- **BD** = metadata/referencias; no almacena imágenes.
+- **R2** = almacenamiento final futuro de WebP visibles.
+
+Plan por fases:
+- **Fase 2A:** nuevas subidas guardan WebP local como hasta ahora y, si `R2_ENABLED=true`, también intentan subir el WebP final a R2. Si R2 funciona, la BD guarda `storage_provider='r2'`, `storage_key` y `public_url`. El visor sigue usando local.
+- **Fase 2B:** visor/dashboard usarán `public_url` si existe y fallback local si no.
+- **Fase 3:** limpieza local/R2 de objetos huérfanos, cuando R2 esté validado en flujo real.
+
+La copia local + R2 en Fase 2A es temporal y deliberada: valida R2 en flujo real sin riesgo de perder imágenes ni romper el visor actual. No contradice la arquitectura final; EC2 seguirá siendo procesador/temporal y R2 almacenamiento final, pero la limpieza local queda para Fase 3.
+
+Reglas Fase 2A:
+- No borrar WebP local todavía.
+- No tocar visor/dashboard/TourController todavía.
+- No migrar fotos antiguas.
+- No subir depth maps ni originales a R2.
+- No purgar caché Cloudflare.
+- Cada upload debe generar `storage_key` única e irrepetible.
+- Nunca reutilizar keys al sustituir fotos.
+- Si R2 falla, la subida debe seguir funcionando en local.
+- `R2_ENABLED` lo decide el caller, no `R2StorageService`.
+- No meter lógica pesada R2 en `PositionController`; usar métodos privados pequeños tipo `resolveStorage()` y `buildR2Key()`.
+
+Archivos previstos para Fase 2A:
+- `backend/models/PhotoModel.php`
+- `backend/controllers/PositionController.php`
+- `backend/services/R2StorageService.php` solo si aparece bug.
+
+Archivos que no deberían tocarse en Fase 2A salvo necesidad justificada:
+- `backend/services/ImageProcessingService.php`
+- Visor público
+- Dashboard
+- `backend/controllers/TourController.php`
+
+Siguiente microbloque real: **Fase 2A.1 ampliar `PhotoModel::create()` con campos R2 opcionales**.
+
 No pedir en Fase 1:
 - Presigned URLs.
 - Reintentos automáticos.
@@ -375,10 +416,11 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. **R2/CDN — comenzar Fase 2 de integración en upload nuevo** (siguiente bloque principal):
+1. **R2/CDN — Fase 2A.1 `PhotoModel::create()`** (siguiente bloque principal):
    - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
    - Fase 1 **validada de forma aislada**: variables R2 en `.env.example`, migración SQL metadata `photos`, `R2StorageService.php` y test CLI real contra R2 completados.
-   - Fase 2 pendiente: integrar nuevas subidas con R2 usando fallback local obligatorio, keys únicas por upload y sin reutilizar `storage_key`. El visor/dashboard deben seguir basándose en BD.
+   - Fase 2A **planificada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
+   - Siguiente microbloque exacto: ampliar `PhotoModel::create()` con parámetros opcionales `storage_provider`, `storage_key`, `public_url`, sin tocar visor/dashboard.
 2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.

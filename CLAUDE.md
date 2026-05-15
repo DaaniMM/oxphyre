@@ -184,6 +184,26 @@ CLAUDE.md            → este archivo
 - Regla permanente para Fase 2: nunca reutilizar `storage_key`. Cada upload genera una key única e irrepetible; si una foto se sustituye, se sube como objeto nuevo con nueva key.
 - La BD decide qué foto está activa y el visor solo debe consumir fotos activas desde BD. Los objetos huérfanos/antiguos se limpiarán en una fase posterior.
 
+**Fase 2A prevista (pendiente de implementación):**
+- Local significa archivo físico en EC2: `/public/uploads/{positionId}/...`.
+- BD significa metadata/referencias; la BD no almacena imágenes.
+- R2 será el almacenamiento final futuro de WebP visibles.
+- En Fase 2A, las nuevas subidas seguirán guardando el WebP local como hasta ahora y, si `R2_ENABLED=true`, también intentarán subir el WebP final a R2.
+- Si R2 funciona, la BD guardará metadata R2 (`storage_provider='r2'`, `storage_key`, `public_url`). Si R2 falla, la subida debe seguir funcionando en local.
+- El visor seguirá usando local durante Fase 2A. Este almacenamiento doble es temporal y deliberado para validar R2 en flujo real sin perder imágenes ni romper el visor actual.
+- Esto no contradice la arquitectura final: EC2 será procesador/temporal y R2 almacenamiento final, pero la limpieza local queda para Fase 3.
+
+**Secuencia futura R2:**
+- **2A:** nuevas subidas = WebP local + intento R2 + metadata R2 si funciona. No tocar visor/dashboard.
+- **2B:** visor/dashboard usan `public_url` si existe y fallback local si no.
+- **3:** limpieza de WebP locales y objetos R2 huérfanos/antiguos cuando el flujo real esté validado.
+
+**Alcance Fase 2A:**
+- Archivos previstos: `backend/models/PhotoModel.php`, `backend/controllers/PositionController.php`; `R2StorageService.php` solo si aparece bug.
+- No deberían tocarse `ImageProcessingService.php`, visor, dashboard ni `TourController.php` salvo necesidad justificada.
+- No migrar fotos antiguas, no subir depth maps/originales, no purgar caché Cloudflare y no reutilizar keys.
+- Siguiente microbloque: ampliar `PhotoModel::create()` con campos R2 opcionales.
+
 ## Propuesta provisional de tiers
 
 **Estado actual:** Existe `Planes_Oxphyre.md` como propuesta candidata/provisional para redefinir Free/Pro/Business, creada el 12/05/2026. Se debe consultar durante las pruebas actuales del visor Free.

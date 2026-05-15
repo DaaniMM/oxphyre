@@ -2110,3 +2110,60 @@ Esto no se considera fallo de `R2StorageService.php`: el objeto ya no aparece en
 - No se tocó BD.
 - No se integró R2 en upload, visor ni dashboard.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Plan R2/CDN Fase 2A documentado
+
+Tipo: planificación/documentación. Sin cambios de código ni integración.
+
+### Contexto
+Fase 0 R2 validada, variables R2 documentadas, `.env` real del servidor configurado, metadata R2 en `photos` ejecutada, `R2StorageService.php` implementado y validado con test aislado real. R2 todavía no está integrado en el pipeline real y visor/dashboard aún no usan `public_url`.
+
+### Decisión Fase 2A
+Integrar R2 solo para nuevas subidas, manteniendo copia local en EC2 como fallback temporal.
+
+Definiciones:
+- **Local** = archivo físico en EC2: `/public/uploads/{positionId}/...`.
+- **BD** = metadata/referencias; no almacena imágenes.
+- **R2** = almacenamiento final futuro de WebP visibles.
+
+### Plan por fases
+- **Fase 2A:** nuevas subidas guardan WebP local como hasta ahora y, si `R2_ENABLED=true`, también intentan subir el WebP final a R2. La BD guarda metadata R2 si funciona. El visor sigue usando local.
+- **Fase 2B:** visor/dashboard usarán `public_url` si existe y fallback local si no.
+- **Fase 3:** limpieza local/R2 de objetos huérfanos cuando R2 esté validado en flujo real.
+
+El doble almacenamiento local + R2 en Fase 2A es temporal y deliberado: permite validar R2 sin riesgo de perder imágenes ni romper el visor actual. No contradice la arquitectura final; EC2 será procesador/temporal y R2 almacenamiento final, pero la limpieza local queda para Fase 3.
+
+### Reglas Fase 2A
+- No borrar WebP local todavía.
+- No tocar visor/dashboard/TourController todavía.
+- No migrar fotos antiguas.
+- No subir depth maps ni originales a R2.
+- No purgar caché Cloudflare.
+- Cada upload debe generar `storage_key` única e irrepetible.
+- Nunca reutilizar keys al sustituir fotos.
+- Si R2 falla, la subida debe seguir funcionando en local.
+- `R2_ENABLED` lo decide el caller, no `R2StorageService`.
+- No meter lógica pesada R2 en `PositionController`; usar métodos privados pequeños tipo `resolveStorage()` y `buildR2Key()`.
+
+### Archivos previstos
+- `backend/models/PhotoModel.php`
+- `backend/controllers/PositionController.php`
+- `backend/services/R2StorageService.php` solo si aparece bug.
+
+### Fuera de alcance Fase 2A
+- `ImageProcessingService.php` salvo necesidad justificada.
+- Visor público.
+- Dashboard.
+- `TourController.php`.
+- Migración de fotos antiguas.
+- Limpieza local/R2 de objetos huérfanos.
+
+### Siguiente microbloque
+Fase 2A.1: ampliar `PhotoModel::create()` con campos R2 opcionales (`storage_provider`, `storage_key`, `public_url`).
+
+### Qué NO se hizo
+- No se editó PHP, JS, CSS, SQL ejecutable ni vistas.
+- No se modificó `R2StorageService.php`.
+- No se tocó `.env`, `.env.example` ni BD.
+- No se integró R2 en upload, visor ni dashboard.
+- No se hizo commit ni push.
