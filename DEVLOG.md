@@ -1866,3 +1866,51 @@ Tipo: validación de infraestructura. Sin cambios de código, BD, upload, visor 
 1. Añadir credenciales R2 (Account ID, Access Key ID, Secret Access Key, bucket name, public URL base) a `.env` y documentar en `.env.example`.
 2. Diseñar y ejecutar migración SQL: columnas `storage_provider` (enum 'local'|'r2'), `storage_key` y `public_url` en tabla `photos`.
 3. Implementar `R2StorageService.php`: métodos upload(), getUrl(), delete(). Sin tocar PositionController, PhotoModel, upload.php, visor ni dashboard todavía.
+
+## 2026-05-14 — Plan técnico R2/CDN Fase 1 documentado
+
+Tipo: planificación/documentación. Sin cambios de código, BD, .env.example ni servicios.
+
+### Contexto
+Fase 0 R2 validada: bucket `oxphyre-tour-media` creado, `media.oxphyre.com` Active, WebP público servido correctamente.
+Antes de escribir código de Fase 1 se documentó el plan técnico detallado en AI_SYNC.md y CLAUDE.md.
+
+### Alcance definido para Fase 1 (en orden)
+
+1. **Revisar `composer.json`**: verificar si existe en el proyecto. Decidir SDK AWS S3 compatible con R2 (peso ~20 MB) vs cURL puro. cURL puro es suficiente para los tres métodos (upload/getUrl/delete) y más ligero para EC2 t3.small. Elegir antes de instalar.
+
+2. **`.env.example`**: documentar las variables R2 definitivas:
+   - `R2_ENABLED=false`
+   - `R2_ACCOUNT_ID=`
+   - `R2_ACCESS_KEY_ID=`
+   - `R2_SECRET_ACCESS_KEY=`
+   - `R2_BUCKET=oxphyre-tour-media`
+   - `R2_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
+   - `R2_PUBLIC_BASE_URL=https://media.oxphyre.com`
+   - `R2_REGION=auto`
+
+3. **Migración SQL**: `ALTER TABLE photos ADD COLUMN storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local', ADD COLUMN storage_key VARCHAR(512) NULL, ADD COLUMN public_url VARCHAR(1024) NULL;` (query a ejecutar manualmente vía SSH en el servidor).
+
+4. **`backend/services/R2StorageService.php`**: métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string`, `delete(string $key): bool`. Credenciales desde `$_ENV`. Sin escritura en BD. Fallo silencioso.
+
+5. **Test aislado**: subir WebP real al bucket con el servicio, verificar URL pública, eliminar el objeto. Sin integrar en pipeline todavía.
+
+### Restricciones de coste documentadas
+- Solo WebP visibles a R2; no originales, no depth maps.
+- No migrar fotos antiguas en Fase 1.
+- No dejar objetos de prueba en el bucket.
+- Controlar tamaño de dependencias nuevas.
+- Vigilar free tier R2 (10 GB, 1M escrituras, 10M lecturas).
+
+### Qué NO hace Fase 1
+- No toca `PositionController`, `TourController`, `PhotoModel`, upload.php, visor ni dashboard.
+- No integra R2 en el flujo de subida real.
+- No modifica URLs servidas al visor.
+
+### Archivos de documentación actualizados en esta sesión
+- `AI_SYNC.md`: nueva subsección "R2/CDN Fase 1 planificada" con los 5 pasos, restricciones y límites.
+- `CLAUDE.md`: bloque "Fase 1 prevista" dentro de la sección R2 con arquitectura del servicio y criterio de coste.
+- `DEVLOG.md`: esta entrada.
+
+### Código modificado
+Ninguno.

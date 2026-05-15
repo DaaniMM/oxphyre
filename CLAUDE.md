@@ -160,6 +160,12 @@ CLAUDE.md            → este archivo
 
 **BD:** añadir `storage_provider` ('local'|'r2'), `storage_key` y `public_url` a la tabla `photos`. Migración SQL pendiente de diseñar junto con el servicio.
 
+**Fase 1 prevista (no implementada todavía):**
+- Los controllers no deben contener lógica R2. `R2StorageService.php` centraliza upload/getUrl/delete.
+- El servicio lee credenciales desde `$_ENV`; fallo silencioso (devuelve `false`) para que el caller pueda aplicar fallback local sin romper el flujo.
+- `PhotoModel` persistirá `storage_provider`, `storage_key` y `public_url` solo cuando se integre en Fase 2. Fase 1 solo crea el servicio y lo prueba de forma aislada.
+- Criterio de coste: mantener 0€; no instalar dependencias pesadas sin justificar (evaluar SDK S3 vs cURL puro); no subir originales ni depth maps a R2; no dejar objetos de prueba en el bucket; vigilar consumo del free tier.
+
 ## Propuesta provisional de tiers
 
 **Estado actual:** Existe `Planes_Oxphyre.md` como propuesta candidata/provisional para redefinir Free/Pro/Business, creada el 12/05/2026. Se debe consultar durante las pruebas actuales del visor Free.
