@@ -130,7 +130,7 @@ CLAUDE.md            → este archivo
 - HEIC/HEIF implementado en pipeline y soportado por servidor vía libvips/libheif.
 - Flujo iPhone normal validado: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente. En esa prueba iOS/Safari entregó el archivo como JPEG, no como `.heic` puro.
 - Queda pendiente probar un archivo `.heic` puro sin conversión automática.
-- Cloudflare R2/CDN queda pendiente de integración en el pipeline. La metadata R2 básica en BD (`storage_provider`, `storage_key`, `public_url`) ya fue añadida a `photos` y `R2StorageService.php` está implementado y validado de forma aislada.
+- Cloudflare R2/CDN Fase 2A queda implementada y validada en servidor real. Las nuevas subidas mantienen WebP local en EC2 y, si `R2_ENABLED=true`, duplican el WebP visible final en R2 con metadata en BD. Visor/dashboard/TourController todavia no usan `public_url`.
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
@@ -184,25 +184,33 @@ CLAUDE.md            → este archivo
 - Regla permanente para Fase 2: nunca reutilizar `storage_key`. Cada upload genera una key única e irrepetible; si una foto se sustituye, se sube como objeto nuevo con nueva key.
 - La BD decide qué foto está activa y el visor solo debe consumir fotos activas desde BD. Los objetos huérfanos/antiguos se limpiarán en una fase posterior.
 
-**Fase 2A prevista (pendiente de implementación):**
+**Fase 2A implementada y validada en servidor real:**
 - Local significa archivo físico en EC2: `/public/uploads/{positionId}/...`.
 - BD significa metadata/referencias; la BD no almacena imágenes.
 - R2 será el almacenamiento final futuro de WebP visibles.
-- En Fase 2A, las nuevas subidas seguirán guardando el WebP local como hasta ahora y, si `R2_ENABLED=true`, también intentarán subir el WebP final a R2.
-- Si R2 funciona, la BD guardará metadata R2 (`storage_provider='r2'`, `storage_key`, `public_url`). Si R2 falla, la subida debe seguir funcionando en local.
-- El visor seguirá usando local durante Fase 2A. Este almacenamiento doble es temporal y deliberado para validar R2 en flujo real sin perder imágenes ni romper el visor actual.
+- En Fase 2A, las nuevas subidas guardan el WebP local como hasta ahora y, si `R2_ENABLED=true`, tambien intentan subir el WebP final visible a R2.
+- Si R2 funciona, la BD guarda metadata R2 (`storage_provider='r2'`, `storage_key`, `public_url`). Si R2 falla, la subida sigue funcionando en local.
+- El visor sigue usando local durante Fase 2A. Este almacenamiento doble es temporal y deliberado para validar R2 en flujo real sin perder imagenes ni romper el visor actual.
 - Esto no contradice la arquitectura final: EC2 será procesador/temporal y R2 almacenamiento final, pero la limpieza local queda para Fase 3.
 
-**Secuencia futura R2:**
-- **2A:** nuevas subidas = WebP local + intento R2 + metadata R2 si funciona. No tocar visor/dashboard.
-- **2B:** visor/dashboard usan `public_url` si existe y fallback local si no.
-- **3:** limpieza de WebP locales y objetos R2 huérfanos/antiguos cuando el flujo real esté validado.
+**Validacion real Fase 2A:**
+- `R2_ENABLED=false`: subida N validada como flujo legacy/local. BD id 56, `direction=N`, `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`.
+- `R2_ENABLED=true`: subida S validada con R2. BD id 57, `storage_provider='r2'`, `storage_key=tours/1/positions/2/S/S_961208678db1224b.webp`, `public_url=https://media.oxphyre.com/tours/1/positions/2/S/S_961208678db1224b.webp`. `curl -I` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`.
+- Panoramica `360` con `R2_ENABLED=true`: BD id 58, `storage_provider='r2'`, `storage_key=tours/1/positions/2/360/360_cfd6bad8b5a15a40.webp`, `public_url=https://media.oxphyre.com/tours/1/positions/2/360/360_cfd6bad8b5a15a40.webp`. `curl -I` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`. Posicion con panoramica R2 validada y visitable.
+- Fallback controlado: con `R2_ENABLED=true` y `R2_SECRET_ACCESS_KEY=INVALIDA_TEST_FALLO`, subida E guardada como local. BD id 59, `direction=E`, `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`. La subida no se rompio y `.env` fue restaurado.
+- No se suben depth maps ni originales a R2, no se borra el WebP local, no se reutiliza `storage_key`, visor/dashboard/TourController no usan todavia `public_url`.
 
-**Alcance Fase 2A:**
-- Archivos previstos: `backend/models/PhotoModel.php`, `backend/controllers/PositionController.php`; `R2StorageService.php` solo si aparece bug.
-- No deberían tocarse `ImageProcessingService.php`, visor, dashboard ni `TourController.php` salvo necesidad justificada.
-- No migrar fotos antiguas, no subir depth maps/originales, no purgar caché Cloudflare y no reutilizar keys.
-- Siguiente microbloque: ampliar `PhotoModel::create()` con campos R2 opcionales.
+**Secuencia futura R2:**
+- **2A:** implementada y validada. Nuevas subidas = WebP local + intento R2 + metadata R2 si funciona. Visor/dashboard siguen por local.
+- **2B:** pendiente. Visor/dashboard usan `public_url` si existe y fallback local si no.
+- **3:** pendiente. Limpieza de WebP locales y objetos R2 huerfanos/antiguos cuando R2 sea fuente validada del visor.
+
+**Alcance cerrado Fase 2A:**
+- Archivos modificados: `backend/models/PhotoModel.php`, `backend/controllers/PositionController.php`.
+- `R2StorageService.php` ya estaba implementado y validado; no se modifico en Fase 2A.
+- No se tocaron `ImageProcessingService.php`, visor, dashboard ni `TourController.php`.
+- No migrar fotos antiguas, no subir depth maps/originales, no purgar cache Cloudflare y no reutilizar keys.
+- Siguiente bloque recomendado: debate/plan UX de Oxphyre Room y detalles opcionales antes de seguir con R2 Fase 2B si procede.
 
 ## Propuesta provisional de tiers
 

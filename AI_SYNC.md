@@ -121,7 +121,7 @@ Estado implementado:
 
 Pendiente:
 - HEIC/HEIF implementado en código y soportado por servidor vía libvips/libheif. Prueba real desde iPhone validada: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente, aunque iOS/Safari entregó el archivo como `IMG_8024.jpeg` y no como `.heic` puro. Queda pendiente probar un archivo `.heic` real sin conversión automática.
-- Cloudflare R2/CDN sigue pendiente de integración en upload/visor/dashboard para servir imágenes finales y reducir carga persistente en EC2.
+- Cloudflare R2/CDN Fase 2A implementada y validada en servidor real: nuevas subidas mantienen WebP local en EC2 y, si `R2_ENABLED=true`, duplican el WebP visible final en R2 con metadata en BD. Visor/dashboard/TourController aun no usan `public_url`.
 - BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, processing_status/error_code.
 - BD metadata R2 en `photos` ejecutada en servidor: `storage_provider`, `storage_key`, `public_url`.
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
@@ -162,7 +162,7 @@ Pendiente:
 
 **Servicio R2:** `backend/services/R2StorageService.php` implementado y validado en test aislado real contra Cloudflare R2. Upload, URL pública y delete funcionan.
 
-**No implementado todavía:** integración en upload/visor/dashboard. Upload/visor/dashboard aún no usan los campos R2 ni el servicio.
+**Fase 2A implementada y validada:** upload real integrado en `PositionController::upload()` con `resolveStorage()` y `buildR2Key()`. Las nuevas subidas pueden guardar metadata R2 si la copia a R2 funciona, manteniendo siempre WebP local como fallback. Visor/dashboard/TourController aun no usan `public_url`.
 
 ### R2/CDN Fase 1 validada de forma aislada
 
@@ -219,21 +219,27 @@ Política de caché Cloudflare/R2 para Fase 2:
 - La BD decide qué foto está activa; el visor solo debe usar fotos activas desde BD.
 - Objetos huérfanos/antiguos se limpiarán en una fase posterior.
 
-### R2/CDN Fase 2A planificada (pendiente de implementación)
+### R2/CDN Fase 2A implementada y validada
 
-Objetivo: integrar R2 solo para nuevas subidas, manteniendo copia local en EC2 como fallback temporal.
+Objetivo cumplido: integrar R2 solo para nuevas subidas, manteniendo copia local en EC2 como fallback temporal.
 
 Aclaración de almacenamiento:
 - **Local** = archivo físico en EC2: `/public/uploads/{positionId}/...`.
 - **BD** = metadata/referencias; no almacena imágenes.
 - **R2** = almacenamiento final futuro de WebP visibles.
 
-Plan por fases:
-- **Fase 2A:** nuevas subidas guardan WebP local como hasta ahora y, si `R2_ENABLED=true`, también intentan subir el WebP final a R2. Si R2 funciona, la BD guarda `storage_provider='r2'`, `storage_key` y `public_url`. El visor sigue usando local.
-- **Fase 2B:** visor/dashboard usarán `public_url` si existe y fallback local si no.
-- **Fase 3:** limpieza local/R2 de objetos huérfanos, cuando R2 esté validado en flujo real.
+Estado por fases:
+- **Fase 2A:** implementada y validada. Nuevas subidas guardan WebP local como hasta ahora y, si `R2_ENABLED=true`, tambien intentan subir el WebP final visible a R2. Si R2 funciona, la BD guarda `storage_provider='r2'`, `storage_key` y `public_url`. El visor sigue usando local.
+- **Fase 2B:** pendiente. Visor/dashboard usaran `public_url` si existe y fallback local si no.
+- **Fase 3:** pendiente. Limpieza local/R2 de objetos huerfanos, cuando R2 sea fuente validada del visor.
 
-La copia local + R2 en Fase 2A es temporal y deliberada: valida R2 en flujo real sin riesgo de perder imágenes ni romper el visor actual. No contradice la arquitectura final; EC2 seguirá siendo procesador/temporal y R2 almacenamiento final, pero la limpieza local queda para Fase 3.
+La copia local + R2 en Fase 2A ya esta validada en flujo real. Es temporal y deliberada: valida R2 sin riesgo de perder imagenes ni romper el visor actual. No contradice la arquitectura final; EC2 seguira siendo procesador/temporal y R2 almacenamiento final, pero la limpieza local queda para Fase 3.
+
+Validacion real de Fase 2A:
+- `R2_ENABLED=false`: subida N guardada como local (`storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`).
+- `R2_ENABLED=true`: subida S guardada como R2 con `public_url` publica en `https://media.oxphyre.com/...`; `curl -I` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`.
+- `R2_ENABLED=true` con panoramica `360`: subida guardada como R2 y visitable; `curl -I` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`.
+- Fallback probado con `R2_SECRET_ACCESS_KEY=INVALIDA_TEST_FALLO`: R2 fallo, la subida E no se rompio y la BD guardo local. `.env` fue restaurado.
 
 Reglas Fase 2A:
 - No borrar WebP local todavía.
@@ -247,10 +253,10 @@ Reglas Fase 2A:
 - `R2_ENABLED` lo decide el caller, no `R2StorageService`.
 - No meter lógica pesada R2 en `PositionController`; usar métodos privados pequeños tipo `resolveStorage()` y `buildR2Key()`.
 
-Archivos previstos para Fase 2A:
+Archivos tocados en Fase 2A:
 - `backend/models/PhotoModel.php`
 - `backend/controllers/PositionController.php`
-- `backend/services/R2StorageService.php` solo si aparece bug.
+- `backend/services/R2StorageService.php` ya estaba implementado y validado; no se modifico en 2A.
 
 Archivos que no deberían tocarse en Fase 2A salvo necesidad justificada:
 - `backend/services/ImageProcessingService.php`
@@ -258,7 +264,7 @@ Archivos que no deberían tocarse en Fase 2A salvo necesidad justificada:
 - Dashboard
 - `backend/controllers/TourController.php`
 
-Siguiente microbloque real: **Fase 2A.1 ampliar `PhotoModel::create()` con campos R2 opcionales**.
+Siguiente microbloque real: **Fase 2B** para que visor/dashboard usen `public_url` si existe y fallback local si no, despues de cerrar el debate UX de Oxphyre Room.
 
 No pedir en Fase 1:
 - Presigned URLs.
@@ -372,7 +378,8 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Página 404/500 personalizada si no está completa.
 - Legal/RGPD: privacidad, términos, cookies.
 - PWA: manifest y service worker.
-- Cloudflare R2/CDN para servir imágenes finales del visor y reducir carga persistente en EC2.
+- R2/CDN Fase 2B: visor/dashboard deben usar `public_url` si existe y fallback local si no.
+- Revisar UX/concepto de Oxphyre Room: panoramica obligatoria + detalles opcionales con 1-4 fotos antes de seguir ampliando el flujo.
 - Limpieza física de archivos asociados a fotos con soft delete.
 - Reducir ruido/granulado residual en panorámica si sobra tiempo tras tareas críticas.
 
@@ -416,15 +423,18 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. **R2/CDN — Fase 2A.1 `PhotoModel::create()`** (siguiente bloque principal):
+1. **Debate/plan UX de Oxphyre Room y detalles opcionales**:
+   - Revisar si el flujo debe mantener panoramica obligatoria y permitir detalles opcionales con 1-4 fotos.
+   - Definir como se explica al usuario la diferencia entre vista principal y detalles sin confundirlo con un requisito de 4 fotos.
+2. **R2/CDN — Fase 2B**:
    - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
    - Fase 1 **validada de forma aislada**: variables R2 en `.env.example`, migración SQL metadata `photos`, `R2StorageService.php` y test CLI real contra R2 completados.
-   - Fase 2A **planificada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
-   - Siguiente microbloque exacto: ampliar `PhotoModel::create()` con parámetros opcionales `storage_provider`, `storage_key`, `public_url`, sin tocar visor/dashboard.
-2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
-3. QR descargable con analíticas. No implementado todavía.
-4. Hotspots de navegación entre posiciones. No implementado todavía.
-5. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+   - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
+   - Fase 2B pendiente: visor/dashboard usan `public_url` si existe y fallback local si no. No marcar como implementada hasta probarlo.
+3. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
+4. QR descargable con analíticas. No implementado todavía.
+5. Hotspots de navegación entre posiciones. No implementado todavía.
+6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
 

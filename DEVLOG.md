@@ -2235,3 +2235,68 @@ Tipo: ajuste de depuracion. Sin cambios de logica.
 - No se cambio flujo, validacion, firmas, metodos ni comportamiento.
 - No se tocaron visor, dashboard, servicios, modelos, vistas, JS, CSS, BD ni `.env`.
 - No se hizo commit ni push.
+
+## 2026-05-15 — R2/CDN Fase 2A validada en servidor real
+
+Tipo: documentacion de validacion. Sin cambios de codigo en esta entrada.
+
+### Contexto
+Fase 2A ya tenia implementado:
+- `R2StorageService.php` probado de forma aislada.
+- `PhotoModel::create()` con metadata R2 opcional.
+- `PositionController::upload()` con `resolveStorage()` y `buildR2Key()`.
+
+El objetivo de la prueba era confirmar el comportamiento real en servidor: WebP local siempre disponible, copia R2 solo si esta habilitada y fallback local obligatorio si R2 falla.
+
+### Pruebas realizadas
+
+1. `R2_ENABLED=false`
+- Se subio una foto N en la posicion de prueba.
+- BD: id 56, `direction=N`, `storage_provider=local`, `storage_key=NULL`, `public_url=NULL`.
+- Resultado: flujo legacy/local validado.
+
+2. `R2_ENABLED=true`
+- Se subio una foto S en la posicion de prueba.
+- BD: id 57, `direction=S`, `storage_provider=r2`.
+- `storage_key=tours/1/positions/2/S/S_961208678db1224b.webp`.
+- `public_url=https://media.oxphyre.com/tours/1/positions/2/S/S_961208678db1224b.webp`.
+- `curl -I public_url` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`.
+- Resultado: upload R2 real validado.
+
+3. Panoramica 360 con `R2_ENABLED=true`
+- Se subio una foto 360 en la posicion de prueba.
+- BD: id 58, `direction=360`, `storage_provider=r2`.
+- `storage_key=tours/1/positions/2/360/360_cfd6bad8b5a15a40.webp`.
+- `public_url=https://media.oxphyre.com/tours/1/positions/2/360/360_cfd6bad8b5a15a40.webp`.
+- `curl -I public_url` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`.
+- Resultado: posicion con panoramica R2 validada y visitable.
+
+4. Fallback R2 con fallo controlado
+- Se hizo backup de `.env`.
+- Se dejo `R2_ENABLED=true`.
+- Se cambio temporalmente `R2_SECRET_ACCESS_KEY=INVALIDA_TEST_FALLO`.
+- Se subio foto E.
+- BD: id 59, `direction=E`, `storage_provider=local`, `storage_key=NULL`, `public_url=NULL`.
+- Resultado: R2 fallo correctamente, pero la subida no se rompio y cayo a local.
+- `.env` fue restaurado correctamente.
+
+### Conclusiones
+- Fase 2A queda validada.
+- Nuevas subidas pueden guardarse local + R2.
+- Fallback local obligatorio funciona.
+- Keys unicas funcionan y no se reutiliza `storage_key`.
+- No se suben depth maps ni originales a R2.
+- No se borra el WebP local.
+- Visor sigue funcionando por local.
+- R2 todavia no es fuente principal del visor; eso queda para Fase 2B.
+- Objetos huerfanos y limpieza local quedan para Fase 3.
+
+### Que NO se hizo
+- No se toco codigo PHP, JS, CSS, SQL ejecutable, vistas ni servicios en esta entrada.
+- No se modifico `.env`, `.env.example` ni BD durante la documentacion.
+- No se tocaron `PositionController`, `PhotoModel`, `R2StorageService`, visor ni dashboard.
+- No se marco Fase 2B como implementada.
+- No se hizo commit ni push.
+
+### Siguiente bloque recomendado
+Debate/plan UX de Oxphyre Room y detalles opcionales antes de seguir con R2 Fase 2B si procede.
