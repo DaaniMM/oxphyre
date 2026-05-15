@@ -9,6 +9,7 @@ AI_SYNC.md es la fuente rápida de verdad para:
 - opciones descartadas,
 - problemas pendientes,
 - siguiente tarea recomendada.
+- Para prompts de implementación dirigidos a Codex, Claude Code u otra IA, seguir la plantilla recomendada definida en `AGENTS.md`, incluyendo alcance exacto, restricciones, verificación y comentarios por bloques cuando se modifique código con lógica relevante.
 
 Si hay contradicción entre una conversación antigua y este archivo, tiene prioridad este archivo.
 

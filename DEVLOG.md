@@ -2020,3 +2020,28 @@ Antes de implementar `R2StorageService.php`, se refinó el diseño técnico de c
 - No se tocó BD.
 - No se integró R2 en upload, visor ni dashboard.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Creación de `R2StorageService.php`
+
+Tipo: implementación aislada de servicio. Sin integración en upload, visor, dashboard ni modelos.
+
+### Qué se hizo
+- Creado `backend/services/R2StorageService.php`.
+- Implementados `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`.
+- Constructor lee configuración desde `$_ENV`, normaliza `R2_PUBLIC_BASE_URL` y lanza `RuntimeException` si falta configuración crítica.
+- Firma AWS Signature Version 4 manual con cURL puro, sin Composer ni AWS SDK.
+- Endpoint virtual-host style para firma: `https://{bucket}.{accountId}.r2.cloudflarestorage.com/{encodedKey}`.
+- Upload por streaming con `CURLOPT_UPLOAD`, `CURLOPT_INFILE` y `CURLOPT_INFILESIZE`.
+- Validación de keys al inicio de los tres métodos públicos.
+
+### Qué NO se hizo
+- No se tocó `PositionController`, `TourController`, `PhotoModel`, vistas, JS ni CSS.
+- No se escribió en BD.
+- No se leyó ni decidió `R2_ENABLED`.
+- No se implementaron presigned URLs ni reintentos automáticos.
+- No se integró R2 en el pipeline real.
+- No se hizo commit ni push.
+
+### Verificación local
+- `git diff --check` correcto.
+- `php -l backend/services/R2StorageService.php` no se pudo ejecutar en Windows local porque `php` no está disponible en el PATH.
