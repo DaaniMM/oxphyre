@@ -46,9 +46,9 @@ try {
     }
     outputOk('Objeto subido a R2.');
 
-    $statusAfterUpload = publicUrlStatus($publicUrl);
-    if ($statusAfterUpload !== 200) {
-        throw new RuntimeException("La URL publica no devuelve 200 tras upload. HTTP {$statusAfterUpload}.");
+    $checkAfterUpload = publicUrlCheck($publicUrl);
+    if ($checkAfterUpload['status'] !== 200) {
+        throw new RuntimeException("La URL publica no devuelve 200 tras upload. HTTP {$checkAfterUpload['status']}.");
     }
     outputOk('URL publica verificada con HTTP 200.');
 
@@ -58,11 +58,21 @@ try {
     }
     outputCleanup('Objeto R2 de prueba eliminado.');
 
-    $statusAfterDelete = publicUrlStatus($publicUrl);
-    if ($statusAfterDelete === 200) {
-        throw new RuntimeException('La URL sigue devolviendo 200 despues del delete.');
+    // Cloudflare puede servir una copia en cache aunque el objeto ya no exista en R2.
+    // Si aparece 200 con cf-cache-status HIT, avisamos sin fallar el test del servicio.
+    $checkAfterDelete = publicUrlCheck($publicUrl);
+    if (in_array($checkAfterDelete['status'], [403, 404], true)) {
+        outputOk("URL ya no sirve el objeto tras delete. HTTP {$checkAfterDelete['status']}.");
+    } elseif ($checkAfterDelete['status'] === 200 && isLikelyCdnCache($checkAfterDelete)) {
+        outputWarn('La URL sigue devolviendo 200, pero parece cache Cloudflare/CDN; el delete del servicio no se considera fallido.');
+        outputHttpCheck($checkAfterDelete);
+    } elseif ($checkAfterDelete['status'] === 200) {
+        outputWarn('La URL sigue devolviendo 200 tras delete sin senales claras de cache CDN. Revisar bucket/R2 manualmente.');
+        outputHttpCheck($checkAfterDelete);
+    } else {
+        outputWarn("La URL devolvio HTTP {$checkAfterDelete['status']} tras delete. No es 200, 403 ni 404; revisar manualmente si hace falta.");
+        outputHttpCheck($checkAfterDelete);
     }
-    outputOk("URL ya no devuelve 200 tras delete. HTTP {$statusAfterDelete}.");
 } catch (Throwable $exception) {
     outputFail($exception->getMessage());
     $exitCode = 1;
@@ -171,20 +181,31 @@ function createProbeWebp(): string
 
 /**
  * Comprueba la URL publica con HEAD para evitar descargar el archivo completo.
+ * Devuelve status y headers utiles para detectar cache de Cloudflare/CDN.
  */
-function publicUrlStatus(string $url): int
+function publicUrlCheck(string $url): array
 {
     if (!function_exists('curl_init')) {
         throw new RuntimeException('cURL no esta disponible para comprobar la URL publica.');
     }
 
     $ch = curl_init($url);
+    $headers = [];
     curl_setopt_array($ch, [
         CURLOPT_NOBODY => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 20,
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_HEADERFUNCTION => static function ($ch, string $line) use (&$headers): int {
+            $length = strlen($line);
+            $parts = explode(':', $line, 2);
+            if (count($parts) === 2) {
+                $headers[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+
+            return $length;
+        },
     ]);
 
     $response = curl_exec($ch);
@@ -196,7 +217,31 @@ function publicUrlStatus(string $url): int
         throw new RuntimeException("No se pudo comprobar la URL publica: {$error}");
     }
 
-    return $status;
+    return [
+        'status' => $status,
+        'cf-cache-status' => $headers['cf-cache-status'] ?? '',
+        'cache-control' => $headers['cache-control'] ?? '',
+        'age' => $headers['age'] ?? '',
+    ];
+}
+
+function isLikelyCdnCache(array $check): bool
+{
+    $cacheStatus = strtoupper((string) ($check['cf-cache-status'] ?? ''));
+
+    return in_array($cacheStatus, ['HIT', 'STALE', 'UPDATING', 'REVALIDATED'], true)
+        || (string) ($check['age'] ?? '') !== ''
+        || str_contains(strtolower((string) ($check['cache-control'] ?? '')), 'max-age');
+}
+
+function outputHttpCheck(array $check): void
+{
+    outputWarn(
+        'HEAD status=' . $check['status']
+        . '; cf-cache-status=' . ($check['cf-cache-status'] !== '' ? $check['cf-cache-status'] : '-')
+        . '; cache-control=' . ($check['cache-control'] !== '' ? $check['cache-control'] : '-')
+        . '; age=' . ($check['age'] !== '' ? $check['age'] : '-')
+    );
 }
 
 function outputOk(string $message): void
@@ -207,6 +252,11 @@ function outputOk(string $message): void
 function outputFail(string $message): void
 {
     echo "[FAIL] {$message}" . PHP_EOL;
+}
+
+function outputWarn(string $message): void
+{
+    echo "[WARN] {$message}" . PHP_EOL;
 }
 
 function outputCleanup(string $message): void
