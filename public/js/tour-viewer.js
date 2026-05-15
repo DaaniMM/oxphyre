@@ -1,4 +1,4 @@
-// Visor público Oxphyre: panorámica principal + Oxphyre Room opcional.
+// Visor público Oxphyre: panorámica principal obligatoria + fotos detalle opcionales.
 // Depende de: Three.js CDN y TOUR_DATA inyectado por PHP.
 
 'use strict';
@@ -11,18 +11,26 @@ let roomState = null;
 
 const MAIN_PITCH_LIMIT_DEG = 6;
 const MAIN_DEFAULT_FOV = 62;
-const ROOM_DIRECTIONS = ['N', 'E', 'S', 'O'];
-const ROOM_LABELS = {
-  N: 'Frente',
-  E: 'Derecha',
-  S: 'Fondo',
-  O: 'Izquierda',
+// La BD conserva N/S/E/O por compatibilidad. En el visor se traducen a
+// fotos detalle 1-4 y se renderizan solo las que existan para cada posición.
+const DETAIL_DIRECTIONS = ['N', 'S', 'E', 'O'];
+const DETAIL_LABELS = {
+  N: 'Foto detalle 1',
+  S: 'Foto detalle 2',
+  E: 'Foto detalle 3',
+  O: 'Foto detalle 4',
 };
 const ROOM_TARGET_YAW = {
   N: 0,
   E: -Math.PI / 2,
   S: Math.PI,
   O: Math.PI / 2,
+};
+const ROOM_PANEL_ANGLES = {
+  N: 0,
+  E: Math.PI / 2,
+  S: Math.PI,
+  O: -Math.PI / 2,
 };
 const ROOM_PITCH_LIMIT_DEG = 24;
 
@@ -57,6 +65,16 @@ function getPanoramaUrl(position) {
   return position?.photos?.['360']?.url || null;
 }
 
+function getDetailSlots(position) {
+  return DETAIL_DIRECTIONS
+    .filter(dir => Boolean(position?.photos?.[dir]?.url))
+    .map(dir => ({
+      dir,
+      label: DETAIL_LABELS[dir],
+      url: position.photos[dir].url,
+    }));
+}
+
 function getInitialPositionIndex(positions) {
   const requestedId = new URLSearchParams(window.location.search).get('position');
   if (!requestedId) return 0;
@@ -69,7 +87,7 @@ function getInitialPositionIndex(positions) {
 }
 
 function hasRoom(position) {
-  return ROOM_DIRECTIONS.every(dir => Boolean(position?.photos?.[dir]?.url));
+  return getDetailSlots(position).length > 0;
 }
 
 function showUnavailable() {
@@ -491,16 +509,17 @@ function createRoomParticles() {
 function createRoomCompass(room) {
   const compass = document.createElement('div');
   compass.className = 'room-compass';
-  compass.setAttribute('aria-label', 'Brújula Oxphyre Room');
+  compass.setAttribute('aria-label', 'Fotos detalle Oxphyre Room');
 
-  ROOM_DIRECTIONS.forEach(dir => {
+  (roomState?.detailSlots || []).forEach(slot => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'room-compass-btn';
-    btn.dataset.dir = dir;
-    btn.textContent = dir;
-    btn.title = ROOM_LABELS[dir];
-    btn.addEventListener('click', () => rotateRoomTo(dir));
+    btn.dataset.dir = slot.dir;
+    btn.textContent = slot.label.replace('Foto detalle ', '');
+    btn.title = slot.label;
+    btn.setAttribute('aria-label', slot.label);
+    btn.addEventListener('click', () => rotateRoomTo(slot.dir));
     compass.appendChild(btn);
   });
 
@@ -520,9 +539,13 @@ function initRoomScene(room) {
   if (!container || typeof THREE === 'undefined') return false;
 
   container.innerHTML = '';
+  const detailSlots = getDetailSlots(currentPosition);
+  if (detailSlots.length === 0) return false;
+
   roomState = {
     room,
     container,
+    detailSlots,
     renderer: null,
     scene: null,
     camera: null,
@@ -572,15 +595,9 @@ function initRoomScene(room) {
 
   const loader = new THREE.TextureLoader();
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy?.() || 1;
-  const centerAngles = {
-    N: 0,            // Frente
-    E: Math.PI / 2,  // Derecha
-    S: Math.PI,      // Fondo
-    O: -Math.PI / 2, // Izquierda
-  };
 
-  ROOM_DIRECTIONS.forEach(dir => {
-    const texture = loader.load(currentPosition.photos[dir].url, loadedTexture => {
+  roomState.detailSlots.forEach(slot => {
+    const texture = loader.load(slot.url, loadedTexture => {
       if (!roomState || roomState.disposed) {
         loadedTexture.dispose();
         return;
@@ -592,13 +609,13 @@ function initRoomScene(room) {
     texture.anisotropy = maxAnisotropy;
     roomState.textures.push(texture);
 
-    const geometry = createCurvedPanelGeometry(centerAngles[dir]);
+    const geometry = createCurvedPanelGeometry(ROOM_PANEL_ANGLES[slot.dir] ?? 0);
     const material = createRoomMaterial(texture);
     roomState.geometries.push(geometry);
     roomState.materials.push(material);
 
     const panel = new THREE.Mesh(geometry, material);
-    panel.name = `room-panel-${dir}`;
+    panel.name = `room-panel-${slot.dir}`;
     scene.add(panel);
   });
 
@@ -624,7 +641,12 @@ function initRoomScene(room) {
   roomState.materials.push(ringMaterial);
 
   roomState.compass = createRoomCompass(room);
-  updateRoomCompass('N');
+  const initialDetailDir = roomState.detailSlots[0]?.dir || null;
+  if (initialDetailDir) {
+    roomState.yaw = ROOM_TARGET_YAW[initialDetailDir] ?? 0;
+    roomState.targetYaw = roomState.yaw;
+    updateRoomCompass(initialDetailDir);
+  }
 
   const resize = () => resizeRoomRenderer();
   addRoomListener(window, 'resize', resize);
@@ -701,13 +723,25 @@ function shortestAngleDelta(from, to) {
 }
 
 function getActiveRoomDirection(yaw) {
-  const angle = ((-yaw % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-  const sector = Math.round(angle / (Math.PI / 2)) % 4;
-  return ROOM_DIRECTIONS[sector];
+  if (!roomState?.detailSlots?.length) return null;
+
+  let nearest = roomState.detailSlots[0];
+  let nearestDistance = Infinity;
+
+  roomState.detailSlots.forEach(slot => {
+    const targetYaw = ROOM_TARGET_YAW[slot.dir] ?? 0;
+    const distance = Math.abs(shortestAngleDelta(yaw, targetYaw));
+    if (distance < nearestDistance) {
+      nearest = slot;
+      nearestDistance = distance;
+    }
+  });
+
+  return nearest.dir;
 }
 
 function updateRoomCompass(activeDir) {
-  if (!roomState?.compass || roomState.activeDir === activeDir) return;
+  if (!roomState?.compass || !activeDir || roomState.activeDir === activeDir) return;
   roomState.activeDir = activeDir;
   roomState.compass.querySelectorAll('.room-compass-btn').forEach(btn => {
     const active = btn.dataset.dir === activeDir;

@@ -1,13 +1,18 @@
 <?php
-  $orientations = [
-    'N' => 'Frente',
-    'S' => 'Fondo',
-    'E' => 'Derecha',
-    'O' => 'Izquierda',
+  // Por compatibilidad, la BD mantiene N/S/E/O como direcciones internas.
+  // La UI las presenta como fotos detalle 1-4 para que Oxphyre Room no
+  // parezca un requisito tecnico de cuatro angulos obligatorios.
+  $detailSlots = [
+    'N' => 'Foto detalle 1',
+    'S' => 'Foto detalle 2',
+    'E' => 'Foto detalle 3',
+    'O' => 'Foto detalle 4',
   ];
+  $orientations = $detailSlots;
   $roomPhotoCount = $roomPhotoCount ?? 0;
   $hasPanorama = $hasPanorama ?? ($photo360 !== null);
-  $hasOxphyreRoom = $hasOxphyreRoom ?? ($roomPhotoCount === 4);
+  $hasDetailPhotos = $roomPhotoCount > 0;
+  $hasOxphyreRoom = $hasDetailPhotos;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,7 +40,7 @@
 
     <ol class="upload-tip-steps">
       <li>Sube una panorámica principal. Es obligatoria.</li>
-      <li>Añade Oxphyre Room con 4 fotos si quieres mostrar más detalle.</li>
+      <li>Añade de 1 a 4 fotos detalle para destacar partes clave de esta zona.</li>
       <li>Los hotspots servirán para conectar esta zona con otras posiciones.</li>
     </ol>
 
@@ -147,7 +152,7 @@
             <span class="db-badge db-badge--draft">Posición #<?= (int) $position['order_index'] ?></span>
           </div>
           <p class="db-manage-desc" style="margin-top:0.25rem;">
-            Completa esta posición con una panorámica principal y, si quieres, añade Oxphyre Room como vista de detalle.
+            Completa esta posición con una panorámica principal y, si quieres, añade fotos detalle para destacar zonas concretas.
           </p>
         </div>
         <div class="position-header-actions">
@@ -259,16 +264,16 @@
         <section class="upload-flow-card" aria-labelledby="room-title">
           <div class="upload-flow-card-header">
             <div>
-              <p class="upload-flow-kicker">Oxphyre Room</p>
-              <h3 class="upload-flow-title" id="room-title">Opcional recomendado</h3>
+              <p class="upload-flow-kicker">Fotos detalle</p>
+              <h3 class="upload-flow-title" id="room-title">Opcionales</h3>
             </div>
             <span class="db-badge <?= $hasOxphyreRoom ? 'db-badge--published' : 'db-badge--draft' ?>">
-              <?= $hasOxphyreRoom ? '4/4 · Disponible' : $roomPhotoCount . '/4 fotos' ?>
+              <?= $hasDetailPhotos ? $roomPhotoCount . '/4 detalles' : '0/4 detalles' ?>
             </span>
           </div>
 
           <p class="upload-flow-copy">
-            Añade 4 fotos para que tus clientes puedan ver esta zona con más detalle desde varios ángulos.
+            Añade de 1 a 4 fotos detalle para destacar partes clave de esta zona: barra, mesa, escaparate, producto, decoración o un rincón especial.
           </p>
           <p class="upload-flow-help">
             Recomendamos fotos horizontales, con buena luz y subidas directamente desde el móvil.
@@ -325,7 +330,7 @@
           </div>
 
           <p class="upload-flow-cta-note">
-            <?= $roomPhotoCount > 0 ? 'Actualizar fotos si ya existen.' : 'Subir fotos para activar la vista de detalle.' ?>
+            <?= $roomPhotoCount > 0 ? 'Puedes actualizar los detalles disponibles.' : 'La panorámica funciona sola; añade detalles si quieres destacar algo.' ?>
           </p>
         </section>
 
@@ -498,10 +503,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const direction = deleteForm.querySelector('[name="direction"]')?.value || '';
       const photoLabels = {
         '360': 'la panorámica principal',
-        N: 'la foto Frente',
-        S: 'la foto Fondo',
-        E: 'la foto Derecha',
-        O: 'la foto Izquierda',
+        N: 'la foto detalle 1',
+        S: 'la foto detalle 2',
+        E: 'la foto detalle 3',
+        O: 'la foto detalle 4',
       };
       const label = photoLabels[direction] || 'esta foto';
       if (!confirm(`¿Eliminar ${label}?`)) {

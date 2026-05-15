@@ -341,7 +341,7 @@ class TourController extends BaseController
         $positions  = $posModel->getByTour((int) $tour['id']);
 
         $tourPositions = [];
-        $roomDirections = ['N', 'S', 'E', 'O'];
+        $detailDirections = ['N', 'S', 'E', 'O'];
         foreach ($positions as $pos) {
             $photos     = $photoModel->getByPosition((int) $pos['id']);
             $photosByDir = [];
@@ -352,16 +352,17 @@ class TourController extends BaseController
                 ];
             }
 
-            // Sprint 1 Oxphyre Room: el visor público solo muestra posiciones
-            // con panorámica principal. Las 4 fotos desbloquean detalle opcional.
+            // Oxphyre Room solo es visitable con panoramica principal 360.
+            // N/S/E/O se mantienen como slots internos por compatibilidad,
+            // pero ahora representan fotos detalle opcionales de 1 a 4.
             if (empty($photosByDir['360'])) {
                 continue;
             }
 
-            $hasRoom = true;
-            foreach ($roomDirections as $dir) {
-                if (empty($photosByDir[$dir])) {
-                    $hasRoom = false;
+            $hasDetails = false;
+            foreach ($detailDirections as $dir) {
+                if (!empty($photosByDir[$dir])) {
+                    $hasDetails = true;
                     break;
                 }
             }
@@ -371,7 +372,8 @@ class TourController extends BaseController
                 'name'       => $pos['name'],
                 'order'      => (int) $pos['order_index'],
                 'activeMode' => $pos['active_mode'] ?? '4photos',
-                'hasRoom'    => $hasRoom,
+                'hasRoom'    => $hasDetails,
+                'hasDetails' => $hasDetails,
                 'photos'     => $photosByDir,
             ];
         }

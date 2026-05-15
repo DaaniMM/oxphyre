@@ -2387,3 +2387,34 @@ MySQL devolvia `ERROR 3065` porque `ORDER BY positions.order_index` no estaba en
 ### Que NO se hizo
 - No se tocaron `TourController`, vistas, R2, BD, rutas ni visor.
 - No se hizo commit ni push.
+
+## 2026-05-15 — UX de fotos detalle parciales en Oxphyre Room
+
+Tipo: UX/visor.
+
+### Que se hizo
+- `dashboard/position/upload.php`: el naming visible deja de usar Frente/Fondo/Derecha/Izquierda y pasa a mostrar Foto detalle 1-4.
+- Se mantiene el mapeo interno `N/S/E/O` por compatibilidad con la BD y el enum actual.
+- `TourController::showPublic()` sigue exigiendo panoramica `360` para que una posicion entre en el visor, pero ahora marca detalles disponibles si existe al menos una foto N/S/E/O.
+- `tour-viewer.js`: el boton "Ver detalles" aparece con 1-4 fotos detalle disponibles y el visor renderiza solo esas fotos, sin exigir las cuatro.
+
+### Motivo
+Oxphyre Room queda alineado con la nueva decision UX: la panoramica principal activa la posicion y las fotos detalle son opcionales para destacar partes concretas de la experiencia.
+
+### Que NO se hizo
+- No se migro la BD ni el enum `direction`.
+- No se cambio el contrato interno N/S/E/O.
+- No se toco R2, rutas, `.env`, subida R2 ni limpieza fisica.
+- No se hizo commit ni push.
+
+## 2026-05-15 — Ajuste visual de detalles parciales en subida
+
+Tipo: fix UX/dashboard.
+
+### Que se hizo
+- `dashboard/position/upload.php`: el estado visual del bloque de fotos detalle depende directamente de si existe al menos una foto detalle.
+- Se evita que una variable legacy con semantica antigua 4/4 deje el badge como borrador cuando ya hay 1-3 detalles subidos.
+
+### Que NO se hizo
+- No se cambio logica de BD, N/S/E/O, TourController, visor JS, R2 ni rutas.
+- No se hizo commit ni push.
