@@ -168,6 +168,12 @@ Decisión definitiva para Fase 1:
 - AWS SDK/Composer queda descartado por ahora: no existe `composer.json`, `composer.lock` ni `vendor/`; `public/index.php` no carga autoloader de Composer; no compensa añadir Composer y un SDK pesado solo para R2.
 - Motivo principal: mantener coste 0€, evitar dependencias innecesarias en EC2 t3.small y cubrir solo tres operaciones: `upload()` = PUT firmado, `delete()` = DELETE firmado y `getPublicUrl()` = concatenar `R2_PUBLIC_BASE_URL` + `storage_key`.
 - Riesgo: la firma AWS V4 manual puede fallar por canonical headers, body hash, fechas UTC o URL encoding. Mitigación: encapsular la firma en métodos privados, usar `hash_file('sha256', $localPath)` en uploads, limitar keys a formato seguro, hacer test aislado real antes de tocar upload y mantener fallback local obligatorio en Fase 2.
+- `R2StorageService` no decide si R2 está habilitado: `R2_ENABLED` lo leerá el caller cuando se integre en Fase 2. Si el servicio se instancia, asume que se quiere usar R2.
+- El constructor debe fallar con `RuntimeException` si faltan credenciales críticas: account id, access key id, secret access key, bucket, endpoint/base datos necesarios y public base URL.
+- Endpoint firmado: usar virtual-host style `https://{bucket}.{accountId}.r2.cloudflarestorage.com/{key}`. No usar path-style `https://{accountId}.r2.cloudflarestorage.com/{bucket}/{key}`. La firma debe coincidir exactamente con el host real usado en cURL.
+- Upload con streaming: usar `CURLOPT_UPLOAD`, `CURLOPT_INFILE` y `CURLOPT_INFILESIZE`; no usar `CURLOPT_POSTFIELDS` para archivos, para no cargar panorámicas grandes en memoria en EC2 t3.small.
+- Encoding de keys: codificar por segmento con `implode('/', array_map('rawurlencode', explode('/', $key)))`; no usar `urlencode($key)` porque rompe los `/`.
+- Headers mínimos firmados: PUT firma `content-type`, `host`, `x-amz-content-sha256`, `x-amz-date`; DELETE firma `host`, `x-amz-content-sha256`, `x-amz-date`. PUT usa `hash_file('sha256', $localPath)`, DELETE usa SHA256 de string vacío y las fechas van siempre en UTC con `gmdate()`.
 
 Formato previsto de `storage_key`:
 `tours/{tourId}/positions/{positionId}/{direction}/{filename}.webp`
@@ -176,6 +182,7 @@ Reglas para keys:
 - Sin espacios, sin `..` y sin barra inicial `/`.
 - Solo letras, números, guion, guion bajo, punto y `/`.
 - `direction` limitada a `360`, `N`, `S`, `E`, `O`.
+- `validateKey()` debe llamarse al inicio de `upload()`, `getPublicUrl()` y `delete()`.
 
 Fase 1 sigue pendiente de implementación. Alcance exacto — en este orden, sin saltarse pasos:
 
@@ -192,13 +199,19 @@ Fase 1 sigue pendiente de implementación. Alcance exacto — en este orden, sin
    R2_PUBLIC_BASE_URL=https://media.oxphyre.com
    R2_REGION=auto
    ```
-   `R2_ENABLED=false` permite preparar el código sin activar R2 en producción hasta validar. `R2_PUBLIC_BASE_URL` es la URL base sobre la que se concatena `storage_key` para construir la URL pública.
+   `R2_ENABLED=false` permite preparar el código sin activar R2 en producción hasta validar. `R2_ENABLED` no lo decide `R2StorageService`; queda para el caller en Fase 2. `R2_PUBLIC_BASE_URL` es la URL base sobre la que se concatena `storage_key` para construir la URL pública.
 
 3. **Migración SQL de metadata en `photos` — ejecutada**: `photos` ya tiene `storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local'`, `storage_key VARCHAR(512) NULL` y `public_url VARCHAR(1024) NULL`. No implica integración R2 en upload/visor/dashboard.
 
-4. **`backend/services/R2StorageService.php`**: crear el servicio con métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Leer credenciales desde `$_ENV`. Usar cURL puro y encapsular la firma AWS Signature V4 en métodos privados. Fallo silencioso: si upload falla, devolver `false` y el caller decide si usar fallback local. No escribir en BD desde el servicio.
+4. **`backend/services/R2StorageService.php`**: crear el servicio con métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Leer credenciales desde `$_ENV`, pero no leer ni decidir `R2_ENABLED`. Usar cURL puro, endpoint virtual-host style, upload por streaming y firma AWS Signature V4 en métodos privados. El constructor falla con `RuntimeException` si faltan credenciales críticas. Fallo operativo silencioso: si upload/delete falla, devolver `false` y el caller decide si usar fallback local. No escribir en BD desde el servicio.
 
 5. **Test aislado del servicio**: probar `R2StorageService::upload()` con un WebP de prueba real, verificar que la URL pública resuelve y que `delete()` limpia el objeto. Sin integrar aún en el pipeline.
+
+No pedir en Fase 1:
+- Presigned URLs.
+- Reintentos automáticos.
+- Integración con upload.
+- Cambios en visor/dashboard.
 
 Restricciones de coste para Fase 1:
 - No subir originales ni depth maps a R2, solo WebP visibles.

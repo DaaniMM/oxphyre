@@ -1988,3 +1988,35 @@ ALTER TABLE photos
 - No se tocó `.env.example` en esta entrada; ya había sido actualizado previamente con variables R2.
 - No se integró R2 en upload, visor ni dashboard.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Ajuste de diseño técnico para `R2StorageService.php`
+
+Tipo: ajuste de diseño/documentación. Sin cambios de código.
+
+### Motivo
+Antes de implementar `R2StorageService.php`, se refinó el diseño técnico de cURL + AWS Signature V4 para mejorar seguridad, consumo de memoria y robustez en EC2 t3.small.
+
+### Criterios actualizados
+- El servicio no decide si R2 está habilitado. `R2_ENABLED` lo leerá el caller en Fase 2; si `R2StorageService` se instancia, asume que se quiere usar R2.
+- El constructor debe lanzar `RuntimeException` si faltan credenciales críticas o configuración necesaria.
+- El endpoint firmado será virtual-host style: `https://{bucket}.{accountId}.r2.cloudflarestorage.com/{key}`. No usar path-style porque la firma debe coincidir con el host real usado en cURL.
+- Upload por streaming con `CURLOPT_UPLOAD`, `CURLOPT_INFILE` y `CURLOPT_INFILESIZE`; no usar `CURLOPT_POSTFIELDS` para archivos.
+- Keys codificadas por segmento con `implode('/', array_map('rawurlencode', explode('/', $key)))`; no usar `urlencode($key)` completo porque rompe los `/`.
+- PUT debe firmar como mínimo `content-type`, `host`, `x-amz-content-sha256`, `x-amz-date`.
+- DELETE debe firmar `host`, `x-amz-content-sha256`, `x-amz-date`.
+- PUT usará `hash_file('sha256', $localPath)`, DELETE usará SHA256 de string vacío y fechas UTC con `gmdate()`.
+- `validateKey()` debe ejecutarse al inicio de `upload()`, `getPublicUrl()` y `delete()`.
+
+### Fuera de alcance ahora
+- Presigned URLs.
+- Reintentos automáticos.
+- Integración con upload.
+- Cambios en visor/dashboard.
+
+### Qué NO se hizo
+- No se tocó código PHP, JS, CSS, SQL ejecutable ni vistas.
+- No se creó `R2StorageService.php`.
+- No se tocó `.env.example`.
+- No se tocó BD.
+- No se integró R2 en upload, visor ni dashboard.
+- No se hizo commit ni push.
