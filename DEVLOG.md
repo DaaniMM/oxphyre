@@ -2192,3 +2192,46 @@ Preparar Fase 2A para que `PositionController` pueda guardar metadata R2 cuando 
 
 ### Siguiente microbloque
 Fase 2A.2: integrar `resolveStorage()` y `buildR2Key()` en `PositionController` manteniendo fallback local.
+
+## 2026-05-15 — Fase 2A.2 R2 integrado en nuevas subidas
+
+Tipo: implementacion de integracion controlada. Sin cambios en visor, dashboard ni `TourController`.
+
+### Que se hizo
+- `PositionController::upload()` carga `R2StorageService.php` junto al resto de servicios del flujo de subida.
+- Se anadio `buildR2Key()` para generar keys unicas con `bin2hex(random_bytes(8))` y formato `tours/{tourId}/positions/{positionId}/{direction}/{direction}_{random}.webp`.
+- Se anadio `resolveStorage()` para intentar subir a R2 solo cuando `R2_ENABLED=true`.
+- La panoramica `360` y las fotos `N/S/E/O` guardan ahora metadata R2 en `PhotoModel::create()` si el upload a R2 funciona.
+- Si R2 esta desactivado, falla, no hay WebP local o aparece una excepcion, la foto se guarda como local sin interrumpir la subida.
+
+### Motivo
+Validar Cloudflare R2 en el flujo real de nuevas subidas sin romper el visor actual ni perder el fallback local. Fase 2A mantiene doble almacenamiento temporal: WebP local en EC2 y copia R2 si esta disponible.
+
+### Que NO se hizo
+- No se toco `ImageProcessingService.php`.
+- No se toco `R2StorageService.php`.
+- No se toco `PhotoModel.php`.
+- No se toco `TourController`, visor, dashboard, vistas, JS ni CSS.
+- No se modifico `.env`, `.env.example` ni BD.
+- No se suben depth maps ni originales a R2.
+- No se borra el WebP local.
+- No se hizo commit ni push.
+
+### Siguientes pruebas recomendadas
+1. `R2_ENABLED=false` -> subida local legacy.
+2. `R2_ENABLED=true` -> subida local + metadata R2.
+3. Comprobar `public_url` con `curl -I`.
+4. Comprobar que el visor sigue funcionando por local.
+
+## 2026-05-15 — Prefijo `[R2]` en logs de almacenamiento
+
+Tipo: ajuste de depuracion. Sin cambios de logica.
+
+### Que se hizo
+- Los `error_log()` de R2 en `PositionController.php` empiezan ahora por `[R2]`.
+- El objetivo es poder filtrar rapidamente logs de Nginx/PHP-FPM con `grep "\[R2\]"`.
+
+### Que NO se hizo
+- No se cambio flujo, validacion, firmas, metodos ni comportamiento.
+- No se tocaron visor, dashboard, servicios, modelos, vistas, JS, CSS, BD ni `.env`.
+- No se hizo commit ni push.

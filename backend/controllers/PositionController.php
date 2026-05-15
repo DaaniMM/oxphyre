@@ -210,6 +210,7 @@ class PositionController extends BaseController
         require_once BACKEND_PATH . '/models/PhotoModel.php';
         require_once BACKEND_PATH . '/services/ImageProcessingService.php';
         require_once BACKEND_PATH . '/services/MiDaSService.php';
+        require_once BACKEND_PATH . '/services/R2StorageService.php';
 
         // Verificar cadena de propiedad: usuario → negocio → tour → posición
         $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
@@ -258,13 +259,22 @@ class PositionController extends BaseController
             if ($result['success']) {
                 $depthFile = $this->processDepthMap($miDaS, $result['midasTempPath'], $uploadDir, pathinfo($result['filename'], PATHINFO_FILENAME));
                 @unlink($result['midasTempPath']);
+                $storage = $this->resolveStorage(
+                    $result['finalPath'],
+                    (int) $tour['id'],
+                    (int) $position['id'],
+                    '360'
+                );
                 $photoModel->create(
                     (int) $position['id'],
                     '360',
                     $result['filename'],
                     htmlspecialchars($result['originalName']),
                     $depthFile,
-                    $depthFile !== ''
+                    $depthFile !== '',
+                    $storage['storage_provider'],
+                    $storage['storage_key'],
+                    $storage['public_url']
                 );
                 $processed++;
                 if ($result['warning'] !== '') {
@@ -294,13 +304,22 @@ class PositionController extends BaseController
             if ($result['success']) {
                 $depthFile = $this->processDepthMap($miDaS, $result['midasTempPath'], $uploadDir, pathinfo($result['filename'], PATHINFO_FILENAME));
                 @unlink($result['midasTempPath']);
+                $storage = $this->resolveStorage(
+                    $result['finalPath'],
+                    (int) $tour['id'],
+                    (int) $position['id'],
+                    $dir
+                );
                 $photoModel->create(
                     (int) $position['id'],
                     $dir,
                     $result['filename'],
                     htmlspecialchars($result['originalName']),
                     $depthFile,
-                    $depthFile !== ''
+                    $depthFile !== '',
+                    $storage['storage_provider'],
+                    $storage['storage_key'],
+                    $storage['public_url']
                 );
                 $processed++;
                 if ($result['warning'] !== '') {
@@ -463,6 +482,56 @@ class PositionController extends BaseController
         }
 
         return $depthFile;
+    }
+
+    // Fase 2A: cada WebP visible se mantiene en local y, si R2 esta activo,
+    // se intenta duplicar en Cloudflare R2. Esta funcion nunca debe romper la
+    // subida: ante cualquier fallo vuelve a local y deja el visor actual intacto.
+    private function resolveStorage(string $localWebpPath, int $tourId, int $positionId, string $direction): array
+    {
+        $localStorage = [
+            'storage_provider' => 'local',
+            'storage_key' => null,
+            'public_url' => null,
+        ];
+
+        if (($_ENV['R2_ENABLED'] ?? '') !== 'true') {
+            return $localStorage;
+        }
+
+        if (!is_file($localWebpPath)) {
+            error_log("[R2] PositionController: omitido porque no existe el WebP local {$localWebpPath}");
+            return $localStorage;
+        }
+
+        try {
+            $r2 = new R2StorageService();
+            $key = $this->buildR2Key($tourId, $positionId, $direction);
+
+            if (!$r2->upload($localWebpPath, $key)) {
+                error_log("[R2] PositionController: upload fallo para {$key}; se mantiene almacenamiento local");
+                return $localStorage;
+            }
+
+            return [
+                'storage_provider' => 'r2',
+                'storage_key' => $key,
+                'public_url' => $r2->getPublicUrl($key),
+            ];
+        } catch (Throwable $e) {
+            error_log('[R2] PositionController: no disponible, fallback local. ' . $e->getMessage());
+            return $localStorage;
+        }
+    }
+
+    // Las keys no se reutilizan: el sufijo aleatorio evita colisiones y problemas
+    // de cache en Cloudflare si una foto se sustituye. El WebP local se conserva
+    // como fallback hasta una futura Fase 3 de limpieza.
+    private function buildR2Key(int $tourId, int $positionId, string $direction): string
+    {
+        $random = bin2hex(random_bytes(8));
+
+        return "tours/{$tourId}/positions/{$positionId}/{$direction}/{$direction}_{$random}.webp";
     }
 
     private function go(string $url): never
