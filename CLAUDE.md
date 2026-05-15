@@ -130,7 +130,7 @@ CLAUDE.md            → este archivo
 - HEIC/HEIF implementado en pipeline y soportado por servidor vía libvips/libheif.
 - Flujo iPhone normal validado: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente. En esa prueba iOS/Safari entregó el archivo como JPEG, no como `.heic` puro.
 - Queda pendiente probar un archivo `.heic` puro sin conversión automática.
-- Cloudflare R2/CDN y metadata avanzada en BD quedan pendientes.
+- Cloudflare R2/CDN queda pendiente de integración en el pipeline. La metadata R2 básica en BD (`storage_provider`, `storage_key`, `public_url`) ya fue añadida a `photos`.
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
@@ -158,7 +158,8 @@ CLAUDE.md            → este archivo
 - Migración de fotos antiguas: postergada hasta validar R2 en producción.
 - Limpieza física en EC2: solo después de confirmar que R2 tiene y sirve el archivo correctamente.
 
-**BD:** añadir `storage_provider` ('local'|'r2'), `storage_key` y `public_url` a la tabla `photos`. Migración SQL pendiente de diseñar junto con el servicio.
+**BD:** migración SQL de metadata R2 ejecutada en servidor. La tabla `photos` ya tiene `storage_provider` ('local'|'r2', default 'local'), `storage_key` y `public_url`.
+`storage_key` es la referencia principal dentro del bucket R2; `public_url` es una comodidad regenerable desde `R2_PUBLIC_BASE_URL + storage_key` si cambia el dominio CDN. Las fotos antiguas siguen compatibles como `local` con `storage_key` y `public_url` en `NULL`.
 
 **Fase 1 prevista (no implementada todavía):**
 - Los controllers no deben contener lógica R2. `R2StorageService.php` centraliza upload/getUrl/delete.

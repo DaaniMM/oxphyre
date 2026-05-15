@@ -121,7 +121,8 @@ Estado implementado:
 Pendiente:
 - HEIC/HEIF implementado en código y soportado por servidor vía libvips/libheif. Prueba real desde iPhone validada: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente, aunque iOS/Safari entregó el archivo como `IMG_8024.jpeg` y no como `.heic` puro. Queda pendiente probar un archivo `.heic` real sin conversión automática.
 - Cloudflare R2/CDN sigue pendiente para servir imágenes finales y reducir carga persistente en EC2.
-- BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, storage_provider, storage_key, public_url, processing_status/error_code.
+- BD de metadata avanzada pendiente: original_mime, original_width, original_height, final_width, final_height, final_size, processing_status/error_code.
+- BD metadata R2 en `photos` ejecutada en servidor: `storage_provider`, `storage_key`, `public_url`.
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
 - Ruido/granulado residual en panorámicas interiores: mejora opcional/no bloqueante. La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp; el ruido restante probablemente viene de captura en interior/poca luz + ruido real de cámara + visualización fullscreen. No aplicar denoise por defecto todavía porque puede suavizar demasiado o generar efecto acuarela.
 
@@ -152,9 +153,13 @@ Pendiente:
 - **Limpieza física en EC2:** solo después de confirmar que R2 sirve el archivo correctamente.
 - **Fallback local obligatorio:** si R2 falla, el WebP queda en EC2 y el visor lo sirve desde `/uploads/` como ahora.
 - **Restricción crítica — coste 0€:** free tier R2: 10 GB almacenamiento, 1M escrituras/mes, 10M lecturas/mes, egress gratuito. No activar Workers, Streams ni servicios de pago mientras no haya ingresos.
-- **BD:** añadir `storage_provider` (enum: 'local'|'r2'), `storage_key` y `public_url` a `photos`. Migración SQL pendiente.
+- **BD:** migración SQL de metadata R2 ejecutada en servidor. `photos` ya tiene `storage_provider` (enum: 'local'|'r2', default 'local'), `storage_key` y `public_url`.
+- `storage_key` es la referencia principal dentro del bucket R2, por ejemplo `tours/3/positions/12/360/360_xxxxx.webp`.
+- `public_url` se guarda por comodidad y lectura rápida, pero es regenerable con `R2_PUBLIC_BASE_URL + storage_key` si cambia el dominio CDN.
+- La URL pública del tour/visor sigue siendo `oxphyre.com/...`; `media.oxphyre.com/...webp` solo sirve imágenes internas del visor y normalmente no es visible para el visitante salvo en red/devtools.
+- Fotos antiguas siguen compatibles: `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`.
 
-**No implementado todavía:** código de aplicación, R2StorageService.php, integración en upload/visor, cambios en BD.
+**No implementado todavía:** código de aplicación, R2StorageService.php e integración en upload/visor/dashboard. Upload/visor/dashboard aún no usan los campos R2.
 
 ### R2/CDN Fase 1 planificada (pendiente de implementación)
 
@@ -189,7 +194,7 @@ Fase 1 sigue pendiente de implementación. Alcance exacto — en este orden, sin
    ```
    `R2_ENABLED=false` permite preparar el código sin activar R2 en producción hasta validar. `R2_PUBLIC_BASE_URL` es la URL base sobre la que se concatena `storage_key` para construir la URL pública.
 
-3. **Migración SQL de metadata en `photos`**: diseñar y ejecutar el ALTER TABLE que añade `storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local'`, `storage_key VARCHAR(512)` y `public_url VARCHAR(1024)` a la tabla `photos`. Registrar la query en DEVLOG para poder reproducirla en servidor.
+3. **Migración SQL de metadata en `photos` — ejecutada**: `photos` ya tiene `storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local'`, `storage_key VARCHAR(512) NULL` y `public_url VARCHAR(1024) NULL`. No implica integración R2 en upload/visor/dashboard.
 
 4. **`backend/services/R2StorageService.php`**: crear el servicio con métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Leer credenciales desde `$_ENV`. Usar cURL puro y encapsular la firma AWS Signature V4 en métodos privados. Fallo silencioso: si upload falla, devolver `false` y el caller decide si usar fallback local. No escribir en BD desde el servicio.
 
@@ -347,7 +352,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
 
 1. **R2/CDN — completar Fase 0 y comenzar Fase 1** (siguiente bloque principal):
    - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
-   - Fase 1 **planificada** (ver subsección "R2/CDN Fase 1 planificada" en Decisiones activas): cURL puro + AWS Signature V4 manual, añadir variables a `.env.example`, migración SQL metadata `photos`, crear `R2StorageService.php`, test aislado. Sin tocar upload/visor/dashboard todavía.
+   - Fase 1 **planificada** (ver subsección "R2/CDN Fase 1 planificada" en Decisiones activas): variables R2 en `.env.example` añadidas y migración SQL metadata `photos` ejecutada; queda crear `R2StorageService.php` con cURL puro + AWS Signature V4 manual y test aislado. Sin tocar upload/visor/dashboard todavía.
 2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.

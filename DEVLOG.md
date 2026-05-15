@@ -1953,3 +1953,38 @@ Se revisó el proyecto y no existe `composer.json`, `composer.lock` ni `vendor/`
 - No se modificó `.env.example`.
 - No se tocó upload, visor ni dashboard.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Migración SQL metadata R2 en `photos`
+
+Tipo: documentación/BD ya ejecutada en servidor. Sin cambios de código de aplicación.
+
+### Query ejecutada en MySQL
+```sql
+ALTER TABLE photos
+  ADD COLUMN storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local' AFTER processed,
+  ADD COLUMN storage_key VARCHAR(512) NULL AFTER storage_provider,
+  ADD COLUMN public_url VARCHAR(1024) NULL AFTER storage_key;
+```
+
+### Resultado verificado con `DESCRIBE photos`
+- `storage_provider enum('local','r2') NOT NULL DEFAULT 'local'`
+- `storage_key varchar(512) NULL`
+- `public_url varchar(1024) NULL`
+
+### Significado de los campos
+- `storage_provider`: indica dónde está la imagen visible final. `local` = EC2 `/uploads/`; `r2` = Cloudflare R2.
+- `storage_key`: ruta interna dentro del bucket R2 y referencia principal. Ejemplo: `tours/3/positions/12/360/360_xxxxx.webp`.
+- `public_url`: URL pública construida con `R2_PUBLIC_BASE_URL + storage_key`. Se guarda por comodidad y lectura rápida, pero puede regenerarse desde `storage_key` si cambia el dominio CDN.
+
+### Aclaraciones
+- La URL pública del tour/visor sigue siendo `oxphyre.com/...`.
+- `media.oxphyre.com/...webp` solo sirve imágenes internas del visor; el visitante normalmente no ve esas URLs salvo inspeccionando red/devtools.
+- No usar nombres originales de usuario en R2. Usar nombres técnicos y seguros generados por Oxphyre.
+- Fotos antiguas siguen compatibles: `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`.
+
+### Qué NO se hizo
+- No se tocó código PHP, JS, CSS, vistas ni servicios.
+- No se creó `R2StorageService.php`.
+- No se tocó `.env.example` en esta entrada; ya había sido actualizado previamente con variables R2.
+- No se integró R2 en upload, visor ni dashboard.
+- No se hizo commit ni push.
