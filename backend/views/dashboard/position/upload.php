@@ -229,7 +229,7 @@
               <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
                 <span class="db-upload-zone-dir">Panorámica</span>
                 <?php if ($photo360['processed']): ?>
-                  <span class="db-badge db-badge--published" style="font-size:9px;">IA OK</span>
+                  <span class="db-badge db-badge--published" style="font-size:9px;">Procesada</span>
                 <?php else: ?>
                   <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
                 <?php endif; ?>
@@ -288,7 +288,7 @@
                 <div style="display:flex;align-items:center;justify-content:space-between;">
                   <span class="db-upload-zone-dir"><?= htmlspecialchars($label) ?></span>
                   <?php if ($existing && $existing['processed']): ?>
-                    <span class="db-badge db-badge--published" style="font-size:9px;">IA OK</span>
+                    <span class="db-badge db-badge--published" style="font-size:9px;">Procesada</span>
                   <?php elseif ($existing): ?>
                     <span class="db-badge db-badge--draft" style="font-size:9px;">Sin IA</span>
                   <?php endif; ?>

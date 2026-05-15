@@ -2418,3 +2418,14 @@ Tipo: fix UX/dashboard.
 ### Que NO se hizo
 - No se cambio logica de BD, N/S/E/O, TourController, visor JS, R2 ni rutas.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Texto de estado de imagen procesada
+
+Tipo: copy UX/dashboard.
+
+### Que se hizo
+- `dashboard/position/upload.php`: el badge visible `IA OK` pasa a mostrar `Procesada`.
+
+### Que NO se hizo
+- No se cambio logica de procesado, estados, CSS, BD, R2, visor JS ni rutas.
+- No se hizo commit ni push.
