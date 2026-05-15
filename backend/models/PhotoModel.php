@@ -48,19 +48,26 @@ class PhotoModel
     // Registra una foto en BD.
     // processed=true significa que MiDaS generó el mapa de profundidad correctamente.
     // depth_map_filename queda vacío si el procesado falló — se puede reintentar después.
+    // Los campos R2 son opcionales para preparar Fase 2A sin obligar al upload
+    // actual a usar R2. Las llamadas antiguas siguen guardando fotos locales:
+    // storage_provider='local', storage_key=NULL y public_url=NULL.
     public function create(
         int $positionId,
         string $direction,
         string $filename,
         string $originalFilename,
         string $depthMapFilename,
-        bool $processed
+        bool $processed,
+        string $storageProvider = 'local',
+        ?string $storageKey = null,
+        ?string $publicUrl = null
     ): int {
         $stmt = $this->db->prepare(
             'INSERT INTO photos
                (position_id, direction, filename, original_filename,
-                depth_map_filename, processed, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, NOW())'
+                depth_map_filename, processed, storage_provider,
+                storage_key, public_url, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())'
         );
         $stmt->execute([
             $positionId,
@@ -69,6 +76,9 @@ class PhotoModel
             $originalFilename,
             $depthMapFilename,
             $processed ? 1 : 0,
+            $storageProvider,
+            $storageKey,
+            $publicUrl,
         ]);
         return (int) $this->db->lastInsertId();
     }

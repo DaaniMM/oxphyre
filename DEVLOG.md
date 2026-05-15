@@ -2167,3 +2167,28 @@ Fase 2A.1: ampliar `PhotoModel::create()` con campos R2 opcionales (`storage_pro
 - No se tocó `.env`, `.env.example` ni BD.
 - No se integró R2 en upload, visor ni dashboard.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Fase 2A.1 PhotoModel preparado para metadata R2
+
+Tipo: implementación compatible hacia atrás. Sin integración en upload/visor/dashboard.
+
+### Qué se hizo
+- `PhotoModel::create()` ahora acepta tres parámetros opcionales al final:
+  - `storageProvider = 'local'`
+  - `storageKey = null`
+  - `publicUrl = null`
+- El `INSERT` de `photos` guarda también `storage_provider`, `storage_key` y `public_url`.
+- Las llamadas actuales con 6 parámetros siguen funcionando y guardan fotos locales con `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`.
+
+### Motivo
+Preparar Fase 2A para que `PositionController` pueda guardar metadata R2 cuando una subida nueva se duplique correctamente en Cloudflare R2, sin obligar todavía al pipeline real a usar R2.
+
+### Qué NO se hizo
+- No se tocó `PositionController`, `TourController`, vistas, JS, CSS ni visor.
+- No se tocó `R2StorageService.php`.
+- No se modificó `.env`, `.env.example` ni BD.
+- No se integró R2 en upload real todavía.
+- No se hizo commit ni push.
+
+### Siguiente microbloque
+Fase 2A.2: integrar `resolveStorage()` y `buildR2Key()` en `PositionController` manteniendo fallback local.
