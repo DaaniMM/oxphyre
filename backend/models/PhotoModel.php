@@ -41,13 +41,17 @@ class PhotoModel
     public function getPanoramaPositionIdsByTour(int $tourId): array
     {
         $stmt = $this->db->prepare(
-            "SELECT DISTINCT positions.id
+            "SELECT positions.id
              FROM positions
-             INNER JOIN photos ON photos.position_id = positions.id
              WHERE positions.tour_id = ?
                AND positions.deleted_at IS NULL
-               AND photos.deleted_at IS NULL
-               AND photos.direction = '360'
+               AND EXISTS (
+                   SELECT 1
+                   FROM photos
+                   WHERE photos.position_id = positions.id
+                     AND photos.deleted_at IS NULL
+                     AND photos.direction = '360'
+               )
              ORDER BY positions.order_index ASC"
         );
         $stmt->execute([$tourId]);

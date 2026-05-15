@@ -2372,3 +2372,18 @@ Una posicion solo debe parecer visitable cuando tiene panoramica principal `360`
 - No se modifico BD ni rutas.
 - No se cambio N/S/E/O ni el enum `direction`.
 - No se hizo commit ni push.
+
+## 2026-05-15 — Correccion query de posiciones con panoramica
+
+Tipo: fix dashboard.
+
+### Que se hizo
+- `PhotoModel::getPanoramaPositionIdsByTour()` deja de usar `DISTINCT` con `ORDER BY positions.order_index`.
+- La query usa ahora `EXISTS` para detectar posiciones con panoramica `360` y mantener el orden sin romper MySQL.
+
+### Motivo
+MySQL devolvia `ERROR 3065` porque `ORDER BY positions.order_index` no estaba en el `SELECT DISTINCT`, provocando error 500 en la gestion del tour.
+
+### Que NO se hizo
+- No se tocaron `TourController`, vistas, R2, BD, rutas ni visor.
+- No se hizo commit ni push.
