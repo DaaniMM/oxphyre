@@ -2347,3 +2347,28 @@ Tooltip sugerido:
 
 ### Siguiente paso exacto
 Bloquear/desactivar "Ver posicion" si falta panoramica `360`.
+
+## 2026-05-15 — Bloqueo UX de "Ver posicion" sin panoramica 360
+
+Tipo: UX/dashboard.
+
+### Que se hizo
+- `PhotoModel.php`: añadido `getPanoramaPositionIdsByTour()` con prepared statement y JOIN con `positions` para obtener en una sola consulta las posiciones visitables de un tour.
+- `TourController.php`: `showManage()` enriquece cada posicion con `has_panorama` para evitar consultas N+1 desde la vista.
+- `dashboard/tours/manage.php`: el boton "Ver posicion" solo es enlace si la posicion tiene panoramica `360`; si no, se muestra desactivado/no clickable con `aria-disabled="true"`.
+- `dashboard/position/upload.php`: el enlace "Ver esta posicion" usa `$hasPanorama`; si falta la panoramica, se muestra desactivado/no clickable.
+
+### Motivo
+Una posicion solo debe parecer visitable cuando tiene panoramica principal `360`. Las fotos detalle 1-4 son opcionales y no desbloquean por si solas la experiencia publica de esa posicion.
+
+### Tooltip aplicado
+"Sube una panoramica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
+
+### Que NO se hizo
+- No se toco `TourController::showPublic()`, porque ya filtra posiciones sin `360`.
+- No se bloqueo "Ver tour" general en `tours/index.php`.
+- No se toco visor JS.
+- No se toco R2.
+- No se modifico BD ni rutas.
+- No se cambio N/S/E/O ni el enum `direction`.
+- No se hizo commit ni push.

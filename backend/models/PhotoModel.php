@@ -35,6 +35,26 @@ class PhotoModel
         return $photo ?: null;
     }
 
+    // Devuelve las posiciones visitables de un tour sin hacer una consulta por
+    // cada card del dashboard. Una posicion solo puede previsualizarse si tiene
+    // panoramica principal 360; las fotos detalle N/S/E/O son opcionales.
+    public function getPanoramaPositionIdsByTour(int $tourId): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT DISTINCT positions.id
+             FROM positions
+             INNER JOIN photos ON photos.position_id = positions.id
+             WHERE positions.tour_id = ?
+               AND positions.deleted_at IS NULL
+               AND photos.deleted_at IS NULL
+               AND photos.direction = '360'
+             ORDER BY positions.order_index ASC"
+        );
+        $stmt->execute([$tourId]);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
     public function softDeleteByPositionAndDirection(int $positionId, string $direction): void
     {
         $stmt = $this->db->prepare(

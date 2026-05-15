@@ -165,6 +165,7 @@ class TourController extends BaseController
         require_once BACKEND_PATH . '/models/BusinessModel.php';
         require_once BACKEND_PATH . '/models/TourModel.php';
         require_once BACKEND_PATH . '/models/PositionModel.php';
+        require_once BACKEND_PATH . '/models/PhotoModel.php';
 
         $userId   = (int) ($_SESSION['user_id'] ?? 0);
         $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
@@ -183,6 +184,16 @@ class TourController extends BaseController
         }
 
         $positions = (new PositionModel())->getByTour((int) $tour['id']);
+        $panoramaPositionIds = (new PhotoModel())->getPanoramaPositionIdsByTour((int) $tour['id']);
+        $positionIdsWithPanorama = array_fill_keys($panoramaPositionIds, true);
+
+        // El dashboard necesita saber si una posicion es visitable sin cargar
+        // todas sus fotos. La panoramica 360 activa la experiencia Oxphyre Room;
+        // las fotos detalle 1-4 siguen siendo opcionales.
+        foreach ($positions as &$pos) {
+            $pos['has_panorama'] = isset($positionIdsWithPanorama[(int) $pos['id']]);
+        }
+        unset($pos);
 
         $this->ensureCsrfToken();
 

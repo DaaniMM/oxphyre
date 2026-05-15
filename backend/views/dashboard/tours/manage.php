@@ -249,6 +249,13 @@
           <div class="db-pos-grid">
             <?php foreach ($positions as $pos): ?>
               <article class="db-pos-card">
+                <?php
+                  // Una posicion solo es visitable cuando tiene panoramica 360.
+                  // Las fotos detalle son opcionales y no desbloquean por si solas
+                  // el acceso al visor publico de esa posicion.
+                  $hasPanorama = !empty($pos['has_panorama']);
+                  $positionPreviewTooltip = 'Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales.';
+                ?>
                 <div class="db-pos-card-top">
                   <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
                   <button type="button" class="db-pos-card-delete"
@@ -266,13 +273,24 @@
                     Gestionar
                   </a>
                   <?php if ($isPublished): ?>
-                    <a href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $pos['id'] ?>"
-                       class="db-btn-secondary db-btn-brand-outline db-pos-card-action db-pos-card-action--preview"
-                       target="_blank"
-                       rel="noopener">
-                      <i data-lucide="external-link" width="13" height="13" aria-hidden="true"></i>
-                      Ver posición
-                    </a>
+                    <?php if ($hasPanorama): ?>
+                      <a href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $pos['id'] ?>"
+                         class="db-btn-secondary db-btn-brand-outline db-pos-card-action db-pos-card-action--preview"
+                         target="_blank"
+                         rel="noopener">
+                        <i data-lucide="external-link" width="13" height="13" aria-hidden="true"></i>
+                        Ver posición
+                      </a>
+                    <?php else: ?>
+                      <span class="db-btn-secondary db-pos-card-action db-pos-card-action--preview"
+                            role="button"
+                            aria-disabled="true"
+                            title="<?= htmlspecialchars($positionPreviewTooltip) ?>"
+                            style="opacity:0.55;cursor:not-allowed;filter:grayscale(0.35);">
+                        <i data-lucide="external-link" width="13" height="13" aria-hidden="true"></i>
+                        Ver posición
+                      </span>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </div>
               </article>

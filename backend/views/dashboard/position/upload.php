@@ -152,13 +152,29 @@
         </div>
         <div class="position-header-actions">
           <?php if ((bool) $tour['is_published']): ?>
-          <a class="db-preview-link"
-             href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $position['id'] ?>"
-             target="_blank"
-             rel="noopener">
-            <i data-lucide="external-link" width="15" height="15" aria-hidden="true"></i>
-            Ver esta posición
-          </a>
+            <?php
+              // La panoramica principal activa la experiencia visitable.
+              // Las fotos detalle 1-4 son opcionales y pueden completarse despues.
+              $positionPreviewTooltip = 'Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales.';
+            ?>
+            <?php if ($hasPanorama): ?>
+              <a class="db-preview-link"
+                 href="/tour/<?= htmlspecialchars($business['slug']) ?>/<?= htmlspecialchars($tour['slug']) ?>?position=<?= (int) $position['id'] ?>"
+                 target="_blank"
+                 rel="noopener">
+                <i data-lucide="external-link" width="15" height="15" aria-hidden="true"></i>
+                Ver esta posición
+              </a>
+            <?php else: ?>
+              <span class="db-preview-link"
+                    role="button"
+                    aria-disabled="true"
+                    title="<?= htmlspecialchars($positionPreviewTooltip) ?>"
+                    style="opacity:0.55;cursor:not-allowed;filter:grayscale(0.35);">
+                <i data-lucide="external-link" width="15" height="15" aria-hidden="true"></i>
+                Ver esta posición
+              </span>
+            <?php endif; ?>
           <?php endif; ?>
         <button type="button" class="db-help-icon" id="reopen-tip" aria-label="Cómo completar una posición">
           <i data-lucide="circle-help" width="18" height="18" aria-hidden="true"></i>
