@@ -125,9 +125,9 @@ Pendiente:
 - Política de limpieza de archivos físicos asociados a fotos con soft delete pendiente.
 - Ruido/granulado residual en panorámicas interiores: mejora opcional/no bloqueante. La panorámica original de iPhone ya se ve mucho mejor que la versión comprimida por WhatsApp; el ruido restante probablemente viene de captura en interior/poca luz + ruido real de cámara + visualización fullscreen. No aplicar denoise por defecto todavía porque puede suavizar demasiado o generar efecto acuarela.
 
-### Almacenamiento en Cloudflare R2 — Fase 0 en progreso
+### Almacenamiento en Cloudflare R2 — Fase 0 validada
 
-**Estado (2026-05-14):** Infraestructura Cloudflare configurada. Sin código de aplicación escrito todavía.
+**Estado (2026-05-14):** Fase 0 R2 validada. Sin código de aplicación escrito todavía.
 
 **Cloudflare DNS:**
 - oxphyre.com conectado a Cloudflare en plan Free mediante "Connect a domain" (NO transfer). IONOS sigue siendo el registrador del dominio.
@@ -140,8 +140,9 @@ Pendiente:
 - `oxphyre-tour-media` — **creado**; será el bucket para WebP finales reales de posiciones/tours de usuarios.
 
 **Custom domain:**
-- `media.oxphyre.com` configurado en R2 con TLS mínimo 1.2. **Estado al cerrar: Initializing** (puede tardar minutos/horas en activarse).
-- Hasta que no esté Active, no se puede verificar que las URLs `https://media.oxphyre.com/...` resuelven correctamente.
+- `media.oxphyre.com` configurado en R2 con TLS mínimo 1.2. **Estado: Active.**
+- Validado: WebP de prueba subido al bucket y servido correctamente desde `https://media.oxphyre.com/`. Objeto de prueba eliminado tras verificación.
+- Métricas tras la prueba: Class A Operations ~20, Class B Operations ~330 — muy por debajo del free tier. Hay que vigilar el usage para mantener coste 0€; no hacer migraciones masivas ni subir depth maps u originales a R2.
 
 **Estrategia de almacenamiento:**
 - **EC2** = procesamiento temporal: valida, convierte a WebP, genera depth map, sube a R2 y guarda URL en BD.
@@ -293,9 +294,8 @@ Sesión anterior importante:
 Siguiente orden recomendado para cerrar antes del TFG:
 
 1. **R2/CDN — completar Fase 0 y comenzar Fase 1** (siguiente bloque principal):
-   - Fase 0 completada: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` configurado.
-   - Fase 0 pendiente: verificar que `media.oxphyre.com` pase de Initializing a **Active** antes de continuar.
-   - Fase 1 (cuando custom domain esté Active): añadir credenciales R2 a `.env` y documentar en `.env.example`; diseñar migración SQL (`storage_provider`, `storage_key`, `public_url` en `photos`); implementar `R2StorageService.php` (upload, getUrl, delete). Sin tocar `PositionController`, `PhotoModel`, upload.php ni visor todavía.
+   - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
+   - Fase 1 (siguiente): añadir credenciales R2 a `.env` y documentar en `.env.example`; diseñar y ejecutar migración SQL (`storage_provider`, `storage_key`, `public_url` en tabla `photos`); implementar `R2StorageService.php` (upload, getUrl, delete). Sin tocar `PositionController`, `PhotoModel`, upload.php, visor ni dashboard todavía.
 2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.

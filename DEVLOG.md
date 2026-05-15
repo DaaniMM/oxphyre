@@ -1828,3 +1828,41 @@ Tipo: infraestructura/configuración. Sin cambios de código, BD, upload, visor 
 3. Añadir credenciales R2 (Account ID, Access Key ID, Secret Access Key) a `.env` y documentar en `.env.example`.
 4. Diseñar migración SQL: columnas `storage_provider`, `storage_key`, `public_url` en tabla `photos`.
 5. Implementar `R2StorageService.php` (upload, getUrl, delete) sin tocar upload/visor todavía.
+
+## 2026-05-14 — Cloudflare R2 Fase 0 validada
+
+Tipo: validación de infraestructura. Sin cambios de código, BD, upload, visor ni dashboard.
+
+### Estado al inicio
+`media.oxphyre.com` había quedado en estado Initializing al finalizar la sesión anterior.
+
+### Validación completada
+- `media.oxphyre.com` pasó a estado **Active** en Cloudflare R2.
+- Se subió un WebP de prueba llamado `Xiaomi 15 Ultra.webp` al bucket `oxphyre-tour-media`.
+- La URL pública `https://media.oxphyre.com/Xiaomi%2015%20Ultra.webp` cargó correctamente en el navegador.
+- El objeto de prueba fue **eliminado** del bucket tras verificar que servía correctamente.
+
+### Métricas R2 tras la prueba (aproximadas)
+- Class A Operations: ~20
+- Class B Operations: ~330
+- Estas cifras quedan muy por debajo del free tier (1M escrituras y 10M lecturas/mes).
+- Nota: vigilar el uso de operaciones y storage para mantener coste 0€; no realizar migraciones masivas de fotos existentes ni subir depth maps u originales a R2.
+
+### Resumen Fase 0
+- DNS Cloudflare: ✓ Active
+- Bucket `oxphyre-tour-media`: ✓ creado
+- Custom domain `media.oxphyre.com`: ✓ Active
+- URLs públicas WebP: ✓ verificadas
+- Coste: 0€ (dentro del free tier)
+
+### Qué NO se hizo
+- No se tocó ningún archivo PHP, JS, CSS, SQL ni vista.
+- No se creó R2StorageService.php.
+- No se modificaron .env, .env.example ni config.php.
+- No se tocó BD.
+- No se integró R2 en el pipeline de subida.
+
+### Pendientes para Fase 1
+1. Añadir credenciales R2 (Account ID, Access Key ID, Secret Access Key, bucket name, public URL base) a `.env` y documentar en `.env.example`.
+2. Diseñar y ejecutar migración SQL: columnas `storage_provider` (enum 'local'|'r2'), `storage_key` y `public_url` en tabla `photos`.
+3. Implementar `R2StorageService.php`: métodos upload(), getUrl(), delete(). Sin tocar PositionController, PhotoModel, upload.php, visor ni dashboard todavía.

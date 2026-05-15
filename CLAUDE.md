@@ -134,9 +134,9 @@ CLAUDE.md            → este archivo
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
-### Arquitectura de almacenamiento — Cloudflare R2 Fase 0 en progreso
+### Arquitectura de almacenamiento — Cloudflare R2 Fase 0 validada
 
-**Estado (2026-05-14):** Infraestructura Cloudflare configurada (Fase 0 en progreso). Sin código de aplicación escrito todavía.
+**Estado (2026-05-14):** Fase 0 R2 validada. Sin código de aplicación escrito todavía.
 
 **DNS Cloudflare:**
 - oxphyre.com gestionado por Cloudflare en plan Free. IONOS sigue siendo el registrador; solo los nameservers apuntan a Cloudflare (`elliot.ns.cloudflare.com`, `julissa.ns.cloudflare.com`).
@@ -148,7 +148,7 @@ CLAUDE.md            → este archivo
 
 **Buckets:**
 - `oxphyre-assets` — ya existe; solo para assets de landing, demo e imágenes estáticas. **No se usa para fotos reales de tours de usuarios.**
-- `oxphyre-tour-media` — **creado**; para WebP finales de posiciones de usuarios. Custom domain `media.oxphyre.com` configurado con TLS 1.2; estado al 2026-05-14: Initializing (pendiente de activarse).
+- `oxphyre-tour-media` — **creado**; para WebP finales de posiciones de usuarios. Custom domain `media.oxphyre.com` configurado con TLS 1.2; estado al 2026-05-14: **Active**. Prueba WebP pública validada: objeto subido y servido correctamente desde `https://media.oxphyre.com/`; objeto de prueba eliminado tras verificación.
 
 **Restricción crítica:** mantener coste 0€ mientras no haya ingresos. Free tier R2: 10 GB almacenamiento, 1M escrituras/mes, 10M lecturas/mes, egress gratuito. No activar Workers, Streams ni otros servicios de pago de Cloudflare hasta tener ingresos reales.
 
