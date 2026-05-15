@@ -162,9 +162,13 @@ CLAUDE.md            → este archivo
 
 **Fase 1 prevista (no implementada todavía):**
 - Los controllers no deben contener lógica R2. `R2StorageService.php` centraliza upload/getUrl/delete.
+- Decisión arquitectónica: no introducir Composer ni AWS SDK para R2. El proyecto no tiene `composer.json`, `composer.lock` ni `vendor/`, `public/index.php` no carga autoloader de Composer y añadir un SDK pesado no compensa para tres operaciones.
+- `R2StorageService.php` usará cURL puro: `upload()` hará PUT firmado, `delete()` hará DELETE firmado y `getPublicUrl()` concatenará `R2_PUBLIC_BASE_URL` + `storage_key`.
+- La firma AWS Signature Version 4 quedará encapsulada en métodos privados del servicio, con `hash_file('sha256', $localPath)` para uploads, fechas UTC, canonical headers y URL encoding controlados.
+- Las keys serán seguras y controladas: `tours/{tourId}/positions/{positionId}/{direction}/{filename}.webp`, sin espacios, sin `..`, sin barra inicial, solo caracteres seguros y `direction` limitada a `360`, `N`, `S`, `E`, `O`.
 - El servicio lee credenciales desde `$_ENV`; fallo silencioso (devuelve `false`) para que el caller pueda aplicar fallback local sin romper el flujo.
 - `PhotoModel` persistirá `storage_provider`, `storage_key` y `public_url` solo cuando se integre en Fase 2. Fase 1 solo crea el servicio y lo prueba de forma aislada.
-- Criterio de coste: mantener 0€; no instalar dependencias pesadas sin justificar (evaluar SDK S3 vs cURL puro); no subir originales ni depth maps a R2; no dejar objetos de prueba en el bucket; vigilar consumo del free tier.
+- Criterio de coste: mantener 0€; Composer/AWS SDK queda descartado por ahora; no subir originales ni depth maps a R2; no dejar objetos de prueba en el bucket; vigilar consumo del free tier.
 
 ## Propuesta provisional de tiers
 

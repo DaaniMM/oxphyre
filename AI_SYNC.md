@@ -158,9 +158,23 @@ Pendiente:
 
 ### R2/CDN Fase 1 planificada (pendiente de implementación)
 
-Alcance exacto de Fase 1 — en este orden, sin saltarse pasos:
+Decisión definitiva para Fase 1:
+- Usar cURL puro con firma AWS Signature Version 4 manual para Cloudflare R2.
+- AWS SDK/Composer queda descartado por ahora: no existe `composer.json`, `composer.lock` ni `vendor/`; `public/index.php` no carga autoloader de Composer; no compensa añadir Composer y un SDK pesado solo para R2.
+- Motivo principal: mantener coste 0€, evitar dependencias innecesarias en EC2 t3.small y cubrir solo tres operaciones: `upload()` = PUT firmado, `delete()` = DELETE firmado y `getPublicUrl()` = concatenar `R2_PUBLIC_BASE_URL` + `storage_key`.
+- Riesgo: la firma AWS V4 manual puede fallar por canonical headers, body hash, fechas UTC o URL encoding. Mitigación: encapsular la firma en métodos privados, usar `hash_file('sha256', $localPath)` en uploads, limitar keys a formato seguro, hacer test aislado real antes de tocar upload y mantener fallback local obligatorio en Fase 2.
 
-1. **Revisar `composer.json`**: verificar si ya existe en el proyecto. Si no existe, crear uno mínimo. Decidir si se instala el AWS SDK v3 (compatible con R2 por API S3) o se usa cURL puro. El SDK pesa ~20 MB; cURL puro es más liviano y suficiente para upload/getUrl/delete. Elegir en función del impacto en el servidor.
+Formato previsto de `storage_key`:
+`tours/{tourId}/positions/{positionId}/{direction}/{filename}.webp`
+
+Reglas para keys:
+- Sin espacios, sin `..` y sin barra inicial `/`.
+- Solo letras, números, guion, guion bajo, punto y `/`.
+- `direction` limitada a `360`, `N`, `S`, `E`, `O`.
+
+Fase 1 sigue pendiente de implementación. Alcance exacto — en este orden, sin saltarse pasos:
+
+1. **No crear Composer ni instalar AWS SDK**: la revisión del proyecto confirmó que no existe `composer.json`, `composer.lock` ni `vendor/`, y `public/index.php` no carga autoloader de Composer. Implementar R2 con cURL puro + AWS Signature V4 manual.
 
 2. **`.env.example`**: documentar las variables R2 definitivas. No tocar `.env` real en el repositorio.
    ```
@@ -177,7 +191,7 @@ Alcance exacto de Fase 1 — en este orden, sin saltarse pasos:
 
 3. **Migración SQL de metadata en `photos`**: diseñar y ejecutar el ALTER TABLE que añade `storage_provider ENUM('local','r2') NOT NULL DEFAULT 'local'`, `storage_key VARCHAR(512)` y `public_url VARCHAR(1024)` a la tabla `photos`. Registrar la query en DEVLOG para poder reproducirla en servidor.
 
-4. **`backend/services/R2StorageService.php`**: crear el servicio con métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Leer credenciales desde `$_ENV`. Fallo silencioso: si upload falla, devolver `false` y el caller decide si usar fallback local. No escribir en BD desde el servicio.
+4. **`backend/services/R2StorageService.php`**: crear el servicio con métodos `upload(string $localPath, string $key): bool`, `getPublicUrl(string $key): string` y `delete(string $key): bool`. Leer credenciales desde `$_ENV`. Usar cURL puro y encapsular la firma AWS Signature V4 en métodos privados. Fallo silencioso: si upload falla, devolver `false` y el caller decide si usar fallback local. No escribir en BD desde el servicio.
 
 5. **Test aislado del servicio**: probar `R2StorageService::upload()` con un WebP de prueba real, verificar que la URL pública resuelve y que `delete()` limpia el objeto. Sin integrar aún en el pipeline.
 
@@ -185,7 +199,7 @@ Restricciones de coste para Fase 1:
 - No subir originales ni depth maps a R2, solo WebP visibles.
 - No migrar fotos antiguas. Solo nuevas subidas cuando se integre en Fase 2.
 - No dejar objetos de prueba en el bucket tras los tests.
-- Revisar tamaño de dependencias nuevas antes de instalar (SDK vs cURL puro).
+- No instalar Composer ni AWS SDK en Fase 1.
 - No consumir espacio EC2 o BD innecesariamente.
 - Vigilar que el free tier de R2 no se supere en las pruebas.
 
@@ -333,7 +347,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
 
 1. **R2/CDN — completar Fase 0 y comenzar Fase 1** (siguiente bloque principal):
    - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
-   - Fase 1 **planificada** (ver subsección "R2/CDN Fase 1 planificada" en Decisiones activas): revisar Composer/SDK, añadir variables a `.env.example`, migración SQL metadata `photos`, crear `R2StorageService.php`, test aislado. Sin tocar upload/visor/dashboard todavía.
+   - Fase 1 **planificada** (ver subsección "R2/CDN Fase 1 planificada" en Decisiones activas): cURL puro + AWS Signature V4 manual, añadir variables a `.env.example`, migración SQL metadata `photos`, crear `R2StorageService.php`, test aislado. Sin tocar upload/visor/dashboard todavía.
 2. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 antes de borrar físico.
 3. QR descargable con analíticas. No implementado todavía.
 4. Hotspots de navegación entre posiciones. No implementado todavía.

@@ -1914,3 +1914,42 @@ Antes de escribir código de Fase 1 se documentó el plan técnico detallado en 
 
 ### Código modificado
 Ninguno.
+
+## 2026-05-15 — Decisión técnica R2 Fase 1: cURL puro + AWS Signature V4
+
+Tipo: decisión técnica/documentación. Sin cambios de código, BD, `.env.example` ni servicios.
+
+### Contexto
+Fase 0 R2 está validada y Fase 1 sigue pendiente de implementación.
+Se revisó el proyecto y no existe `composer.json`, `composer.lock` ni `vendor/`; `public/index.php` tampoco carga autoloader de Composer.
+
+### Decisión
+- Usar cURL puro con firma AWS Signature Version 4 manual para Cloudflare R2.
+- Descartar Composer/AWS SDK por ahora para no añadir dependencias solo por R2.
+- Evitar un `vendor/` pesado y el coste de memoria/espacio asociado al AWS SDK en EC2 t3.small.
+- Mantener `R2StorageService.php` aislado, sin escritura en BD.
+
+### Alcance previsto del servicio
+- `upload()` = PUT firmado.
+- `delete()` = DELETE firmado.
+- `getPublicUrl()` = concatenar `R2_PUBLIC_BASE_URL` + `storage_key`.
+- La firma AWS V4 se encapsulará en métodos privados.
+- Keys seguras previstas: `tours/{tourId}/positions/{positionId}/{direction}/{filename}.webp`.
+
+### Riesgos y mitigación
+- Riesgo: errores en canonical headers, hash del body, fechas UTC o URL encoding pueden romper la firma AWS V4.
+- Mitigación: métodos privados aislados, `hash_file('sha256', $localPath)` para uploads, keys controladas, test real aislado antes de tocar upload y fallback local obligatorio en Fase 2 si R2 falla.
+
+### Archivos actualizados
+- `AI_SYNC.md`: decisión viva de Fase 1 actualizada.
+- `CLAUDE.md`: decisión arquitectónica R2 documentada.
+- `DEVLOG.md`: esta entrada.
+
+### Qué NO se hizo
+- No se tocó código PHP, JS, CSS, SQL ejecutable ni vistas.
+- No se creó `composer.json`.
+- No se instalaron dependencias.
+- No se creó `R2StorageService.php`.
+- No se modificó `.env.example`.
+- No se tocó upload, visor ni dashboard.
+- No se hizo commit ni push.
