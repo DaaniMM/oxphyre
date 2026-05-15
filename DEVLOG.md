@@ -2300,3 +2300,50 @@ El objetivo de la prueba era confirmar el comportamiento real en servidor: WebP 
 
 ### Siguiente bloque recomendado
 Debate/plan UX de Oxphyre Room y detalles opcionales antes de seguir con R2 Fase 2B si procede.
+
+## 2026-05-15 — Redefinicion conceptual de Oxphyre Room
+
+Tipo: decision UX/conceptual. Solo documentacion.
+
+### Decision
+Oxphyre Room deja de entenderse como "modo 4 fotos" y pasa a ser la experiencia completa de una posicion en el visor.
+
+Nueva definicion:
+- Panoramica principal / 360 adaptativa: obligatoria para que una posicion sea visitable.
+- Fotos detalle: opcionales, de 1 a 4, para destacar zonas concretas que no se aprecian bien en la panoramica.
+- Si hay 0 fotos detalle, la posicion funciona solo con panoramica.
+- Si hay 1-4 fotos detalle, el visor debera poder mostrar las disponibles.
+- El usuario no debe estar obligado a subir las 4 fotos detalle.
+
+### Motivo
+La redefinicion mejora la claridad comercial y la flexibilidad para PYMES: las fotos detalle se venden como forma de destacar partes clave de la panoramica, como barra, mesa, escaparate, producto, decoracion o un rincon especial.
+
+### Naming UI decidido
+- No mostrar "Frente / Fondo / Izquierda / Derecha" al usuario.
+- Mostrar "Foto detalle 1", "Foto detalle 2", "Foto detalle 3" y "Foto detalle 4".
+
+### Decision tecnica temporal
+- No migrar todavia la BD ni el enum interno `direction`.
+- Backend mantiene `N = Foto detalle 1`, `S = Foto detalle 2`, `E = Foto detalle 3`, `O = Foto detalle 4`.
+- Migrar a `detail_1/detail_2/detail_3/detail_4` queda como posible mejora futura.
+
+### Regla UX critica
+Si una posicion no tiene panoramica `360`, no debe parecer visitable. El boton "Ver posicion" debe aparecer desactivado/no clickable tanto en la card/listado de posiciones como dentro de la pantalla de gestion/subida.
+
+Tooltip sugerido:
+"Sube una panoramica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
+
+### Regla de visor
+- El visor publico solo debe incluir posiciones con panoramica `360`; esto ya ocurre en `TourController::showPublic()` al descartar posiciones sin `360`.
+- Cuando haya fotos detalle parciales, el visor debera permitir mostrar las disponibles sin exigir las 4.
+
+### Que NO se hizo
+- No se toco codigo PHP, JS, CSS, SQL ejecutable, vistas ni servicios.
+- No se modifico BD.
+- No se migro el enum `direction`.
+- No se toco R2.
+- No se marcaron cambios UX como implementados.
+- No se hizo commit ni push.
+
+### Siguiente paso exacto
+Bloquear/desactivar "Ver posicion" si falta panoramica `360`.

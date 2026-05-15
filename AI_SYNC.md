@@ -24,7 +24,7 @@ Stack activo:
 - MySQL 8.0.
 - JS vanilla.
 - Three.js en landing y efectos visuales.
-- Visor público actual en Three.js vanilla: panorámica principal cilíndrica/adaptativa + Oxphyre Room.
+- Visor público actual en Three.js vanilla: panorámica principal cilíndrica/adaptativa + Oxphyre Room entendido como experiencia completa de posición.
 - Python Flask + MiDaS Small en servidor para mapas de profundidad.
 - PHPMailer + Gmail SMTP para emails transaccionales.
 - AWS EC2 t3.small, Ubuntu 22.04, Nginx, PHP-FPM, Let's Encrypt.
@@ -53,7 +53,7 @@ Estado implementado:
 - Procesado MiDaS en servidor mediante microservicio Flask.
 - CLAHE disponible en el microservicio, pero no aplicado a la imagen visible en Sprint 1.
 - Visor público Sprint 1 sin Photo Sphere Viewer: panorámica parcial horizontal con pitch limitado.
-- Sprint 1 Oxphyre Room Free/base implementado: panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos.
+- Sprint 1 Oxphyre Room Free/base implementado, con decisión UX posterior: Oxphyre Room pasa a ser la experiencia completa de posición. Panorámica `360` obligatoria para que la posición sea visitable; fotos detalle 1-4 opcionales.
 - Soft delete en businesses, tours, positions y photos.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
 
@@ -84,12 +84,17 @@ Estado implementado:
 - La imagen visible siempre debe ser el WebP final optimizado y fiel a la imagen subida; MiDaS/CLAHE quedan como procesado interno o futuro, no como textura pública en Sprint 1.
 
 ### Sistema de fotos por posición
-Sprint 1 implementado:
-- `photos.direction = '360'` define la panorámica principal obligatoria de una posición.
-- `photos.direction = N/S/E/O` define las 4 fotos que activan Oxphyre Room como vista opcional de detalle.
-- El visor público entra siempre en la panorámica principal.
-- Las posiciones sin panorámica no se muestran en el tour público.
-- El botón público "Ver detalles" solo aparece si existen las 4 fotos N/S/E/O completas.
+Decisión viva:
+- Oxphyre Room deja de entenderse como "modo 4 fotos" y pasa a ser la experiencia completa de una posición.
+- `photos.direction = '360'` define la panorámica principal obligatoria. Sin panorámica, la posición no debe parecer visitable.
+- Las fotos detalle son opcionales, de 1 a 4, para destacar zonas concretas de la panorámica: barra, mesa, escaparate, producto, decoración o rincón especial.
+- El usuario no debe estar obligado a subir las 4 fotos detalle. Si hay 0, la posición funciona solo con panorámica. Si hay 1-4, el visor deberá poder mostrar las disponibles.
+- UI visible: usar "Foto detalle 1", "Foto detalle 2", "Foto detalle 3", "Foto detalle 4"; no mostrar "Frente/Fondo/Izquierda/Derecha" al usuario.
+- Mapeo interno temporal sin migrar BD ni enum: `N = Foto detalle 1`, `S = Foto detalle 2`, `E = Foto detalle 3`, `O = Foto detalle 4`.
+- Migrar `N/S/E/O` a `detail_1/detail_2/detail_3/detail_4` queda como posible mejora futura, no ahora.
+- El visor público entra siempre en la panorámica principal y solo incluye posiciones con `360`; esto ya ocurre en `TourController::showPublic()` al descartar posiciones sin panorámica.
+- El botón "Ver posición" debe aparecer desactivado/no clickable si falta `360`, tanto en la card/listado de posiciones como dentro de la pantalla de gestión/subida.
+- Tooltip sugerido: "Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
 - `positions.active_mode` se mantiene como campo heredado/compatibilidad durante la transición, pero ya no debe controlar el nuevo flujo público.
 
 Las panorámicas de smartphone pueden ser parciales, no necesariamente 360° equirectangulares reales. La UI debe explicarlo sin prometer cobertura total cuando no exista.
@@ -331,7 +336,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Si n8n entra en el TFG o queda documentado como integración futura.
 - Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
 - Existe una propuesta consolidada en `Planes_Oxphyre.md` para redefinir Free/Pro/Business: Free como prueba limitada con 3 posiciones, Pro como plan comercial profesional y Business como premium/Gaussian. Todavía no es decisión definitiva; no aplicar a código ni documentación principal hasta validar el visor Free y confirmar la estrategia comercial.
-- `Oxphyre_Room_Free_Flow.md` describe el flujo Free/base ya implementado para Sprint 1: panorámica principal obligatoria por posición, Oxphyre Room opcional con 4 fotos y botón "Ver detalles" si hay 4 fotos completas. Hotspots sobre panorámica siguen pendientes.
+- `Oxphyre_Room_Free_Flow.md` debe leerse con la decisión UX vigente: Oxphyre Room = experiencia completa de posición, panorámica obligatoria y fotos detalle 1-4 opcionales. Hotspots sobre panorámica siguen pendientes.
 
 ---
 
@@ -379,7 +384,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Legal/RGPD: privacidad, términos, cookies.
 - PWA: manifest y service worker.
 - R2/CDN Fase 2B: visor/dashboard deben usar `public_url` si existe y fallback local si no.
-- Revisar UX/concepto de Oxphyre Room: panoramica obligatoria + detalles opcionales con 1-4 fotos antes de seguir ampliando el flujo.
+- UX dashboard: bloquear/desactivar "Ver posición" si falta panorámica `360` en listado/card y pantalla de gestión/subida.
 - Limpieza física de archivos asociados a fotos con soft delete.
 - Reducir ruido/granulado residual en panorámica si sobra tiempo tras tareas críticas.
 
@@ -404,9 +409,9 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
   - MiDaS procesa JPG temporal separado quality 92.
   - Subida conjunta de 5 imágenes y delete de fotos funcionan.
 - Sprint 1 Oxphyre Room Free/base implementado en pantalla de subida y visor público.
-- La pantalla de subida muestra panorámica principal obligatoria, Oxphyre Room opcional 4/4 y hotspots como próximo sprint.
-- El visor público filtra posiciones sin panorámica, entra siempre en `direction='360'` y muestra "Ver detalles" solo si hay N/S/E/O completas.
-- Oxphyre Room MVP carga las 4 fotos en una escena Three.js tipo Direction Sphere, con paneles curvos, arrastre, brújula N/E/S/O y botón "Volver a vista principal".
+- La pantalla de subida muestra panorámica principal obligatoria. Decisión UX posterior: fotos detalle 1-4 opcionales dentro de Oxphyre Room.
+- El visor público filtra posiciones sin panorámica y entra siempre en `direction='360'`. Queda pendiente adaptar "Ver detalles" para detalles parciales 1-4.
+- Oxphyre Room MVP histórico carga 4 fotos en una escena Three.js tipo Direction Sphere; decisión vigente: permitir detalles disponibles sin exigir 4 y ocultar direcciones N/S/E/O al usuario.
 - Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
 - Estado: flujo base y pipeline WebP/libvips validados en servidor; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes R2/CDN, QR, limpieza física de soft delete y posibles mejoras de ruido/granulado.
@@ -423,22 +428,24 @@ Sesión anterior importante:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. **Debate/plan UX de Oxphyre Room y detalles opcionales**:
-   - Revisar si el flujo debe mantener panoramica obligatoria y permitir detalles opcionales con 1-4 fotos.
-   - Definir como se explica al usuario la diferencia entre vista principal y detalles sin confundirlo con un requisito de 4 fotos.
-2. **R2/CDN — Fase 2B**:
+1. **UX dashboard — bloquear "Ver posición" si falta panorámica `360`**:
+   - En la card/listado de posiciones y dentro de la pantalla de gestión/subida, el botón debe aparecer desactivado/no clickable si la posición no tiene panorámica principal.
+   - Tooltip/mensaje sugerido: "Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
+2. **Detalles parciales de Oxphyre Room**:
+   - Adaptar UI/visor cuando proceda para usar "Foto detalle 1-4" y permitir mostrar 1-4 detalles disponibles sin exigir las 4 fotos.
+3. **R2/CDN — Fase 2B**:
    - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
    - Fase 1 **validada de forma aislada**: variables R2 en `.env.example`, migración SQL metadata `photos`, `R2StorageService.php` y test CLI real contra R2 completados.
    - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
    - Fase 2B pendiente: visor/dashboard usan `public_url` si existe y fallback local si no. No marcar como implementada hasta probarlo.
-3. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-4. QR descargable con analíticas. No implementado todavía.
-5. Hotspots de navegación entre posiciones. No implementado todavía.
-6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
+5. QR descargable con analíticas. No implementado todavía.
+6. Hotspots de navegación entre posiciones. No implementado todavía.
+7. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
 
-Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo público actual depende de `photos.direction='360'` para la panorámica principal y N/S/E/O para Oxphyre Room.
+Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo público actual depende de `photos.direction='360'` para la panorámica principal. `N/S/E/O` quedan como mapeo interno temporal de Foto detalle 1-4.
 
 ---
 

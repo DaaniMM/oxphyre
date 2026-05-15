@@ -2,15 +2,15 @@
 
 ## Estado del documento
 
-**Estado:** Sprint 1 implementado y validado en servidor para el flujo base de subida/visualización.
+**Estado:** Sprint 1 implementado y validado en servidor para el flujo base de subida/visualización. Decisión UX posterior documentada: Oxphyre Room pasa a ser la experiencia completa de una posición, no un modo dependiente de 4 fotos.
 
 Este documento define el flujo de creación y visualización de posiciones en Oxphyre para el modo Free/base.
 
 El Sprint 1 ya está implementado en la app real:
 - pantalla de subida con panorámica principal obligatoria;
-- Oxphyre Room opcional con 4 fotos N/S/E/O;
+- fotos detalle opcionales guardadas internamente como N/S/E/O;
 - visor público entrando siempre por la panorámica;
-- botón "Ver detalles" solo si existen las 4 fotos;
+- botón "Ver detalles" pendiente de adaptar para mostrar 1-4 detalles disponibles sin exigir las 4 fotos;
 - retorno desde Oxphyre Room a vista principal;
 - subida conjunta de N/S/E/O + `photo_360`;
 - pipeline WebP/libvips en `ImageProcessingService`;
@@ -19,6 +19,8 @@ El Sprint 1 ya está implementado en la app real:
 - pendiente prueba con archivo `.heic` puro sin conversión automática.
 
 Quedan pendientes para fases posteriores:
+- adaptar UX/dashboard para bloquear "Ver posición" si falta panorámica `360`;
+- adaptar UI y visor para detalles parciales 1-4 sin exigir 4 fotos;
 - editor real de hotspots;
 - QR;
 - R2/CDN;
@@ -51,19 +53,49 @@ Oxphyre es un SaaS de tours virtuales inmersivos para pequeños negocios locales
 El sistema actual ya permite subir dos tipos de imagen por posición:
 
 ```txt
-4 fotos normales
+fotos detalle opcionales
 panorámica
 ```
 
-Actualmente, la lógica documentada usa positions.active_mode para decidir si una posición se visualiza en modo 4photos o panoramic.
+Históricamente, la lógica documentada usaba `positions.active_mode` para decidir si una posición se visualizaba en modo `4photos` o `panoramic`.
 
 Esta especificación redefine el flujo de producto:
 
+Oxphyre Room = experiencia completa de posición
 Panorámica principal = vista base obligatoria
-Oxphyre Room = vista opcional de detalle con 4 fotos
+Fotos detalle = opcionales, de 1 a 4
 Hotspots = navegación entre posiciones sobre la panorámica
 
 No se elimina todavía la estructura existente. Se reutiliza para avanzar sin romper la app.
+
+## Decisión vigente — 2026-05-15
+
+Oxphyre Room deja de entenderse como "modo 4 fotos" y pasa a ser la experiencia completa de una posición en el visor.
+
+- Panorámica principal / 360 adaptativa: obligatoria para que una posición sea visitable.
+- Fotos detalle: opcionales, de 1 a 4, para destacar zonas concretas que no se aprecian bien en la panorámica.
+- Si hay 0 fotos detalle, la posición funciona solo con panorámica.
+- Si hay 1-4 fotos detalle, el visor deberá poder mostrar las disponibles.
+- El usuario no debe estar obligado a subir las 4 fotos detalle.
+
+En UI, dejar de mostrar "Frente / Fondo / Izquierda / Derecha". Usar:
+- Foto detalle 1
+- Foto detalle 2
+- Foto detalle 3
+- Foto detalle 4
+
+Decisión técnica temporal:
+- No migrar todavía la BD ni el enum interno `direction`.
+- `N = Foto detalle 1`
+- `S = Foto detalle 2`
+- `E = Foto detalle 3`
+- `O = Foto detalle 4`
+- Migrar a `detail_1/detail_2/detail_3/detail_4` queda como posible mejora futura.
+
+Regla UX crítica:
+- Si una posición no tiene panorámica `360`, no debe parecer visitable.
+- El botón "Ver posición" debe aparecer desactivado/no clickable en la card/listado y dentro de la pantalla de gestión/subida.
+- Tooltip sugerido: "Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
 
 ## 1. Nombre del sistema
 
@@ -75,7 +107,7 @@ Oxphyre Room
 
 No se debe presentar al usuario como:
 
-4 fotos
+Modo 4 fotos
 Direction Sphere
 Modo 4photos
 Esfera sectorizada
@@ -92,14 +124,14 @@ Oxphyre Room convierte fotos y panorámicas tomadas con tu móvil en una experie
 
 ### Enfoque correcto
 
-Oxphyre Room no debe entenderse únicamente como el modo de 4 fotos. Debe funcionar como nombre de marca/paraguas para la experiencia visual Free/base.
+Oxphyre Room no debe entenderse como el modo de 4 fotos. Debe funcionar como nombre de marca/paraguas para la experiencia visual completa de cada posición Free/base.
 
 Estructura conceptual:
 
 ```txt
 Oxphyre Room
 ├── Vista panorámica principal
-├── Vista de detalle con 4 fotos
+├── Fotos detalle opcionales 1-4
 └── Hotspots de navegación entre posiciones
 ```
 
@@ -200,17 +232,16 @@ La preferencia puede guardarse en localStorage, porque no es dato sensible.
 
 ### Base visual
 
-El modo de detalle se basará en el prototipo tipo Direction Sphere, pero con nombre y textos de producto.
+La vista de detalles se basará en el prototipo tipo Direction Sphere, pero con nombre y textos de producto. Debe poder funcionar con las fotos detalle disponibles, de 1 a 4, sin exigir el set completo.
 
 ### Comportamiento
-- 4 paneles curvos.
+- 1 a 4 paneles/zonas de detalle disponibles.
 - Fondo oscuro Oxphyre.
 - Partículas y glow ámbar.
 - Bordes tratados con oscuridad/glow para no fingir unión perfecta.
 - Drag con mouse o dedo para mirar.
 - Pitch vertical limitado.
-- Brújula discreta.
-- Click en brújula rota suavemente.
+- Navegación discreta entre detalles disponibles.
 - Auto-rotación suave tras unos segundos de inactividad.
 - Watermark visible en Free.
 ### Texto para visitante dentro de Oxphyre Room
@@ -233,7 +264,7 @@ Volver a vista principal
 ### Performance
 - Limitar pixel ratio a Math.min(devicePixelRatio, 2).
 - Partículas moderadas en móvil.
-- Precargar las 4 fotos antes de mostrar Oxphyre Room.
+- Precargar las fotos detalle disponibles antes de mostrarlas.
 - Error elegante si falta o falla una foto.
 ## 5. Nuevo flujo por posición
 
@@ -241,23 +272,24 @@ Volver a vista principal
 
 Cada posición se entiende así:
 
-Posición = panorámica principal obligatoria + Oxphyre Room opcional
+Posición = Oxphyre Room
+Oxphyre Room = panorámica principal obligatoria + fotos detalle opcionales 1-4
 ### Flujo final
 1. El creador crea una posición.
 2. Sube una panorámica principal.
-3. Opcionalmente añade 4 fotos para activar Oxphyre Room.
+3. Opcionalmente añade 1-4 fotos detalle para destacar zonas concretas.
 4. El visitante entra siempre en la panorámica.
 5. Sobre la panorámica aparecen hotspots.
-6. Si hay 4 fotos completas, aparece el botón “Ver detalles”.
-7. Al pulsar “Ver detalles”, entra en Oxphyre Room.
-8. Dentro de Oxphyre Room puede mirar alrededor.
+6. Si hay fotos detalle disponibles, aparece el acceso a detalles.
+7. Al pulsar “Ver detalles”, entra en la vista de detalles disponibles de esa experiencia Oxphyre Room.
+8. Dentro de detalles puede ver las zonas destacadas.
 9. Puede volver con “Volver a vista principal”.
 ### Reglas
 - Panorámica obligatoria para que la posición sea válida.
-- 4 fotos opcionales, pero recomendadas.
+- Fotos detalle 1-4 opcionales, pero recomendadas cuando ayudan a vender mejor una zona.
 - Hotspots solo sobre la panorámica.
-- El botón “Ver detalles” solo aparece si existen las 4 fotos completas.
-- Si no hay 4 fotos completas, no aparece ningún botón ni aviso al visitante.
+- El botón “Ver detalles” debe poder aparecer si existe al menos una foto detalle.
+- Si no hay fotos detalle, no aparece ningún botón ni aviso al visitante.
 - Si no hay panorámica, la posición está incompleta y no se muestra en el tour público.
 ### Cambio frente al flujo anterior
 
@@ -268,7 +300,7 @@ Elige panorámica O 4 fotos
 Ahora:
 
 Panorámica para navegar
-Oxphyre Room para explorar detalles
+Fotos detalle para destacar partes clave
 Hotspots para viajar entre posiciones
 ## 6. Hotspots de navegación
 
@@ -322,7 +354,7 @@ actualiza posición actual
 ↓
 muestra hotspots de la nueva posición
 ↓
-muestra “Ver detalles” si esa posición tiene Oxphyre Room disponible
+muestra “Ver detalles” si esa posición tiene fotos detalle disponibles
 ### Editor de hotspots para el creador
 
 El creador debe poder colocar hotspots visualmente sobre la panorámica.
@@ -395,21 +427,21 @@ Pero:
 
 Una posición sin panorámica queda incompleta y no se muestra en el tour público.
 
-### Oxphyre Room
+### Fotos detalle de Oxphyre Room
 
-Oxphyre Room es opcional.
+Las fotos detalle son opcionales dentro de la experiencia Oxphyre Room.
 
 Estados:
 
-0/4 fotos subidas
-1/4 fotos subidas
-2/4 fotos subidas
-3/4 fotos subidas
-4/4 fotos subidas · Oxphyre Room disponible
+0 fotos detalle subidas
+1 foto detalle subida
+2 fotos detalle subidas
+3 fotos detalle subidas
+4 fotos detalle subidas
 
 Mensaje de ayuda:
 
-Oxphyre Room es opcional, pero recomendado. Añade 4 fotos para que tus clientes puedan ver esta zona con más detalle desde varios ángulos.
+La panorámica principal activa esta experiencia Oxphyre Room. Las fotos detalle son opcionales y sirven para destacar partes concretas: barra, mesa, escaparate, producto, decoración o un rincón especial.
 
 ### Hotspots
 
@@ -454,8 +486,8 @@ Revisión antes de publicar
 
 ✓ 3 posiciones completas
 ✓ 2 hotspots de navegación
-✓ Oxphyre Room disponible en 1 posición
-⚠ 1 posición sin Oxphyre Room
+✓ 2 posiciones con fotos detalle
+⚠ 1 posición solo con panorámica principal
 
 Botones:
 
@@ -487,9 +519,22 @@ active_mode decide si se usa panorámica o 4 fotos
 Ahora:
 
 photo_360 existe → panorámica principal
-N/S/E/O completas → Oxphyre Room disponible
+N/S/E/O → fotos detalle opcionales disponibles
 
 positions.active_mode queda como campo heredado/compatibilidad. No debe ser la lógica principal del visor público nuevo.
+
+### Mapeo interno temporal
+
+No se migra todavía la BD ni el enum interno `direction`.
+
+```txt
+N = Foto detalle 1
+S = Foto detalle 2
+E = Foto detalle 3
+O = Foto detalle 4
+```
+
+La UI no debe mostrar Frente/Fondo/Izquierda/Derecha al usuario. Migrar a `detail_1/detail_2/detail_3/detail_4` queda como posible mejora futura, no ahora.
 
 ### Crear posición sin panorámica
 
@@ -540,7 +585,7 @@ Configurar posición
 
 Subtexto:
 
-Sube una panorámica principal para esta zona y, si quieres mejorar la experiencia, añade Oxphyre Room con 4 fotos de detalle.
+Sube una panorámica principal para activar esta experiencia Oxphyre Room y, si quieres destacar zonas concretas, añade hasta 4 fotos detalle.
 
 ### Bloque 1 — Panorámica principal
 
@@ -567,12 +612,12 @@ Cambiar panorámica
 
 ### Bloque 2 — Oxphyre Room
 
-Oxphyre Room
+Fotos detalle
 Opcional recomendado
 
 Texto:
 
-Añade 4 fotos para que tus clientes puedan ver esta zona con más detalle desde varios ángulos.
+Añade de 1 a 4 fotos detalle para destacar partes clave de esta zona: barra, mesa, escaparate, producto, decoración o un rincón especial.
 
 Ayuda:
 
@@ -580,11 +625,11 @@ Recomendamos fotos horizontales, con buena luz y subidas directamente desde el m
 
 Estado:
 
-0/4 fotos
-1/4 fotos
-2/4 fotos
-3/4 fotos
-4/4 fotos · Disponible
+0 fotos detalle
+1 foto detalle
+2 fotos detalle
+3 fotos detalle
+4 fotos detalle
 
 CTA:
 
@@ -618,8 +663,8 @@ Editar hotspots
 
 Cómo completar una posición
 
-1. Sube una panorámica principal. Es obligatoria.
-2. Añade Oxphyre Room con 4 fotos si quieres mostrar más detalle.
+1. Sube una panorámica principal. Es obligatoria para activar la posición.
+2. Añade fotos detalle si quieres mostrar mejor zonas concretas.
 3. Crea hotspots para conectar esta zona con otras posiciones.
 
 Consejo: sube las fotos originales desde el móvil y evita WhatsApp para conservar calidad.
@@ -656,7 +701,7 @@ No ve textos técnicos.
 ### Desktop
 - Drag con mouse para mirar.
 - Hotspots sobre la panorámica.
-- Botón “Ver detalles” si esa posición tiene Oxphyre Room disponible.
+- Botón “Ver detalles” si esa posición tiene al menos una foto detalle disponible.
 - Watermark Oxphyre en Free.
 - Sin toggle técnico “panorámica / 4 fotos”.
 
@@ -665,7 +710,7 @@ No ve textos técnicos.
 - Drag táctil para mirar.
 - Botón pequeño de giroscopio desactivado por defecto.
 - Hotspots tocables.
-- Botón “Ver detalles” si existe Oxphyre Room.
+- Botón “Ver detalles” si existen fotos detalle.
 - Watermark Free.
 
 ### Al clicar hotspot
@@ -680,11 +725,11 @@ actualiza posición actual
 ↓
 muestra hotspots de esa posición
 ↓
-muestra “Ver detalles” si hay Oxphyre Room
+muestra “Ver detalles” si hay fotos detalle disponibles
 
 ### Al pulsar “Ver detalles”
 
-Entra en Oxphyre Room de esa posición.
+Entra en la vista de fotos detalle de esa experiencia Oxphyre Room.
 
 HUD:
 
@@ -697,7 +742,7 @@ Volver a vista principal
 
 No hay hotspots dentro de Oxphyre Room.
 
-### Si no hay Oxphyre Room
+### Si no hay fotos detalle
 
 No aparece botón.
 
@@ -705,7 +750,7 @@ No mostrar al visitante mensajes como:
 
 Modo no disponible
 Faltan fotos
-Sube 4 fotos
+Sube fotos detalle
 
 Eso es información del creador, no del cliente final.
 
@@ -728,15 +773,15 @@ Convertir la posición en:
 
 Panorámica principal obligatoria
 +
-Oxphyre Room opcional con 4 fotos
+Fotos detalle opcionales 1-4 dentro de Oxphyre Room
 
-**Estado:** implementado y validado en servidor.
+**Estado:** Sprint 1 base implementado y validado en servidor. La decisión UX de detalles parciales queda documentada, pero no implementada todavía.
 #### Incluye
 
 Dashboard / pantalla de subida:
 
 1. Panorámica principal — Obligatoria
-2. Oxphyre Room — Opcional recomendado
+2. Fotos detalle — Opcional recomendado
 3. Hotspots — Bloque informativo / próximamente si todavía no se implementan
 
 #### Eliminar
@@ -748,20 +793,20 @@ Toggle 4 Fotos / Panorámica como modo activo
 #### Estados
 
 Panorámica: Pendiente / Completada
-Oxphyre Room: 0/4, 1/4, 2/4, 3/4, 4/4 disponible
+Fotos detalle: 0, 1, 2, 3 o 4 disponibles
 
 #### Backend
 
 No migración grande.
 Mantener active_mode por compatibilidad.
 Detectar panorámica por photos.direction='360'.
-Detectar Oxphyre Room por existencia de N/S/E/O completas.
+Detectar fotos detalle por existencia parcial de N/S/E/O.
 
 #### Visor público
 
 Entra siempre en panorámica principal.
-Muestra botón “Ver detalles” solo si hay 4 fotos completas.
-“Ver detalles” abre Oxphyre Room.
+Muestra botón “Ver detalles” si hay al menos una foto detalle disponible.
+“Ver detalles” abre los detalles disponibles de Oxphyre Room.
 Oxphyre Room tiene “Volver a vista principal”.
 No mostrar posiciones sin panorámica.
 
@@ -900,17 +945,18 @@ Para aceptar el Sprint 1, debe cumplirse:
 
 - Puedo crear una posición.
 - Puedo subir panorámica principal.
-- Puedo subir 4 fotos opcionales.
+- Puedo subir de 1 a 4 fotos detalle opcionales.
 - La UI ya no muestra “usar este modo”.
 - La UI diferencia claramente:
   Panorámica principal obligatoria
-  Oxphyre Room opcional recomendado
+  Fotos detalle opcionales
 - El tour público entra en panorámica.
-- Si hay 4/4 fotos, aparece “Ver detalles”.
-- “Ver detalles” abre Oxphyre Room.
+- Si hay al menos 1 foto detalle, aparece “Ver detalles”.
+- “Ver detalles” abre los detalles disponibles de Oxphyre Room.
 - “Volver a vista principal” funciona.
-- Si no hay 4/4 fotos, no aparece “Ver detalles”.
+- Si no hay fotos detalle, no aparece “Ver detalles”.
 - Si una posición no tiene panorámica, no aparece en el tour público.
+- Si una posición no tiene panorámica, “Ver posición” aparece desactivado/no clickable en dashboard y gestión/subida.
 - Si el tour no tiene posiciones válidas, muestra “Tour no disponible”.
 - No se rompe desktop.
 - No se rompe móvil.
@@ -952,7 +998,7 @@ Debe incluir:
 Actualizar estado vivo:
 
 Nuevo flujo validado:
-Panorámica principal obligatoria por posición + Oxphyre Room opcional con 4 fotos + hotspots sobre panorámica.
+Oxphyre Room como experiencia completa de posición: panorámica principal obligatoria + fotos detalle opcionales 1-4 + hotspots sobre panorámica.
 
 También indicar si:
 
@@ -968,7 +1014,7 @@ Cambiar la sección antigua donde dice que active_mode decide el modo visual pú
 
 Nueva idea:
 
-La panorámica es la vista principal de cada posición. Las 4 fotos activan Oxphyre Room como vista opcional de detalle. active_mode queda como campo heredado hasta refactor posterior.
+La panorámica es la vista principal obligatoria de cada posición. Las fotos detalle 1-4 son opcionales dentro de Oxphyre Room. active_mode queda como campo heredado hasta refactor posterior.
 
 ### Planes_Oxphyre.md
 
@@ -976,7 +1022,7 @@ Actualizar si el flujo afecta a Free/Pro/Business.
 
 Especialmente:
 
-Free = panorámica principal + Oxphyre Room opcional + hotspots básicos cuando estén implementados.
+Free = panorámica principal + fotos detalle opcionales dentro de Oxphyre Room + hotspots básicos cuando estén implementados.
 
 ## Decisión final global
 
@@ -984,8 +1030,8 @@ Free = panorámica principal + Oxphyre Room opcional + hotspots básicos cuando 
 
 Oxphyre Room deja de ser “4 fotos contra panorámica”.
 Pasa a ser una experiencia por posición:
-panorámica para navegar,
-4 fotos para ver detalles,
+panorámica obligatoria para navegar,
+fotos detalle opcionales 1-4 para destacar partes clave,
 hotspots para viajar entre zonas.
 
 ### Técnica
@@ -993,20 +1039,20 @@ hotspots para viajar entre zonas.
 No se rompe la BD actual.
 No se hace migración grande.
 Se reutiliza photos.direction='360' para panorámica.
-Se reutiliza N/S/E/O para Oxphyre Room.
+Se reutiliza N/S/E/O como mapeo interno temporal de Foto detalle 1-4.
 active_mode se mantiene por compatibilidad, pero deja de ser la lógica principal del nuevo visor.
 
 ### UX
 
 El creador entiende qué debe hacer:
 1. Subir panorámica.
-2. Añadir Oxphyre Room si quiere más detalle.
+2. Añadir fotos detalle si quiere destacar zonas concretas.
 3. Conectar posiciones con hotspots.
 
 El visitante entiende qué hacer:
 1. Mirar la panorámica.
 2. Usar hotspots para moverse.
-3. Pulsar “Ver detalles” si quiere explorar más esa zona.
+3. Pulsar “Ver detalles” si quiere ver las fotos detalle disponibles.
 
 ### Comercial
 

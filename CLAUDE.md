@@ -15,7 +15,7 @@
 
 **Estado actual:** Oxphyre es un SaaS de tours virtuales inmersivos para pequeños negocios locales y, a la vez, el proyecto TFG de 2º DAW. El dueño crea un negocio, crea tours, añade posiciones, sube fotos por posición y publica una experiencia visitable mediante URL pública, QR o embed según el plan. El producto mantiene la visión completa: posiciones conectadas, mapas de profundidad MiDaS, editor canvas drag & drop, QR descargable, embed, hotspots, minimapa, analíticas, planes Free/Pro/Business y evolución comercial real.
 
-El visor público vigente usa **Three.js vanilla**: panorámica principal cilíndrica/adaptativa y Oxphyre Room como vista opcional de detalle con 4 fotos. Three.js también sigue formando parte de la landing y efectos visuales. Photo Sphere Viewer v4 quedó retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al tratarlas como esferas completas.
+El visor público vigente usa **Three.js vanilla**: panorámica principal cilíndrica/adaptativa y Oxphyre Room como experiencia completa de posición. Three.js también sigue formando parte de la landing y efectos visuales. Photo Sphere Viewer v4 quedó retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al tratarlas como esferas completas.
 
 **Nota histórica:** El planteamiento inicial era un visor Three.js propio: esfera navegable, shader de profundidad, giroscopio, hotspots, minimapa y cambio de texturas implementados a mano. Ese enfoque permitió validar el concepto y construir una primera versión inmersiva, pero al probar fotos reales de smartphone aparecieron problemas críticos: FOV/zoom incorrecto, distorsión en panorámicas, depth map visible como textura, touch y giroscopio frágiles.
 
@@ -24,7 +24,7 @@ El visor público vigente usa **Three.js vanilla**: panorámica principal cilín
 #### -- 08/05/2026 -- Decisión crítica sobre el visor y upload de fotos
 ### Sistema de subida de fotos por posición
 
-**Estado actual:** Cada posición se entiende como panorámica principal obligatoria + Oxphyre Room opcional.
+**Estado actual:** Cada posición se entiende como una experiencia Oxphyre Room completa: panorámica principal obligatoria + fotos detalle opcionales.
 
 **Panorámica principal**:
 - Se guarda con `photos.direction='360'`.
@@ -33,16 +33,21 @@ El visor público vigente usa **Three.js vanilla**: panorámica principal cilín
 - El visor la renderiza como cilindro parcial/adaptativo y la UI no promete cobertura total cuando la imagen no la tenga.
 
 **Oxphyre Room**:
-- Se activa cuando existen las 4 fotos N/S/E/O.
-- Etiquetas UI: Frente/Fondo/Derecha/Izquierda.
-- El visitante entra desde la panorámica mediante "Ver detalles".
+- Deja de entenderse como "modo 4 fotos"; es la experiencia completa de una posición.
+- La panorámica principal `photos.direction='360'` es obligatoria para que la posición sea visitable.
+- Las fotos detalle son opcionales, de 1 a 4, y sirven para destacar zonas concretas que no se aprecian bien en la panorámica: barra, mesa, escaparate, producto, decoración o rincón especial.
+- UI visible: "Foto detalle 1", "Foto detalle 2", "Foto detalle 3", "Foto detalle 4". No mostrar "Frente/Fondo/Izquierda/Derecha" al usuario.
+- Mapeo técnico temporal sin migrar BD ni enum: `N = Foto detalle 1`, `S = Foto detalle 2`, `E = Foto detalle 3`, `O = Foto detalle 4`.
+- Si hay 0 fotos detalle, la posición funciona solo con panorámica. Si hay 1-4, el visor deberá poder mostrar las disponibles sin exigir 4.
+- Si una posición no tiene panorámica `360`, no debe parecer visitable. El botón "Ver posición" debe aparecer desactivado/no clickable en listado/card y en la pantalla de gestión/subida.
+- Tooltip sugerido: "Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
 
 **BD:** `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` se mantiene como campo heredado/compatibilidad.
-**Visor:** ya no debe usar `active_mode` como decisión principal del flujo público nuevo; usa `photos.direction='360'` para la panorámica y N/S/E/O completas para Oxphyre Room.
+**Visor:** ya no debe usar `active_mode` como decisión principal del flujo público nuevo; usa `photos.direction='360'` para la panorámica obligatoria y debe poder mostrar las fotos detalle disponibles. `TourController::showPublic()` ya descarta posiciones sin `360`.
 
 **Nota histórica:** El 08/05/2026 se decidió permitir una panorámica 360° equirectangular como alternativa ideal al modo de 4 fotos. El 09/05/2026, tras probar fotos reales de iPhone/smartphone, se ajustó la decisión: muchos móviles generan panorámicas cilíndricas o parciales (~270°), no equirectangulares completas. Photo Sphere Viewer v4 se eligió porque gestiona mejor panorámicas, touch, giroscopio y FOV que el visor manual.
 
-**Decisión vigente:** Mantener el flujo panorámica principal + Oxphyre Room opcional. No exigir cámaras 360°. No recomendar gran angular como solución principal porque sacrifica calidad. No prometer 360° completo si el usuario sube una panorámica parcial. Si una parte antigua habla de “panorámica 360° equirectangular”, debe leerse como el ideal histórico, no como requisito actual.
+**Decisión vigente:** Mantener Oxphyre Room como experiencia completa de posición: panorámica principal obligatoria + detalles opcionales 1-4. No exigir cámaras 360°. No recomendar gran angular como solución principal porque sacrifica calidad. No prometer 360° completo si el usuario sube una panorámica parcial. Si una parte antigua habla de “panorámica 360° equirectangular”, debe leerse como el ideal histórico, no como requisito actual. No migrar ahora la BD ni el enum `direction`; `N/S/E/O` quedan como mapeo interno temporal.
 
 ## Stack técnico
 - **Frontend:** HTML5 + CSS custom con variables globales + JS vanilla + Three.js
@@ -94,7 +99,7 @@ CLAUDE.md            → este archivo
 - `login_attempts` existe para rate limiting de login.
 - `businesses`, `tours`, `positions` y `photos` tienen soft delete con `deleted_at`.
 
-**Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan, pero el flujo público Sprint 1 usa panorámica principal + Oxphyre Room opcional.
+**Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan. La decisión vigente mantiene `360` como panorámica obligatoria y reutiliza N/S/E/O como mapeo interno temporal de Foto detalle 1-4.
 
 **Decisión vigente:** Todos los modelos deben usar prepared statements. En tablas con soft delete, no usar `DELETE FROM`; usar `UPDATE ... SET deleted_at = NOW()` y filtrar `deleted_at IS NULL` en todos los SELECT.
 
@@ -210,7 +215,7 @@ CLAUDE.md            → este archivo
 - `R2StorageService.php` ya estaba implementado y validado; no se modifico en Fase 2A.
 - No se tocaron `ImageProcessingService.php`, visor, dashboard ni `TourController.php`.
 - No migrar fotos antiguas, no subir depth maps/originales, no purgar cache Cloudflare y no reutilizar keys.
-- Siguiente bloque recomendado: debate/plan UX de Oxphyre Room y detalles opcionales antes de seguir con R2 Fase 2B si procede.
+- Siguiente bloque recomendado: bloquear/desactivar "Ver posición" si falta panorámica `360`.
 
 ## Propuesta provisional de tiers
 
