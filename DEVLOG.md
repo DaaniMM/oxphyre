@@ -2045,3 +2045,22 @@ Tipo: implementación aislada de servicio. Sin integración en upload, visor, da
 ### Verificación local
 - `git diff --check` correcto.
 - `php -l backend/services/R2StorageService.php` no se pudo ejecutar en Windows local porque `php` no está disponible en el PATH.
+
+## 2026-05-15 — Script temporal de test aislado R2
+
+Tipo: herramienta temporal de verificación. Sin integración en pipeline real.
+
+### Qué se hizo
+- Creado `scripts/test_r2_service.php`.
+- Script CLI fuera de `public/`, sin credenciales hardcodeadas y sin acceso a BD.
+- Carga `.env` con una función local mínima, sin imprimir secretos.
+- Genera un WebP temporal 10x10 en `/tmp` usando GD.
+- Usa la key de prueba `tours/0/positions/0/360/r2-test-probe.webp`.
+- Prueba `getPublicUrl()`, `upload()`, comprobación HTTP HEAD, `delete()` y verificación posterior de que la URL ya no devuelve 200.
+- Usa `try/finally` para borrar siempre el archivo temporal local y confirmar limpieza del objeto R2 de prueba.
+
+### Qué NO se hizo
+- No se tocó upload, visor, dashboard, modelos ni vistas.
+- No se modificó `.env`, `.env.example` ni BD.
+- No se ejecutó el test real desde local.
+- No se hizo commit ni push.
