@@ -149,3 +149,7 @@ python-service/venv/
 public/assets/img/carousel/*.jpg
 public/assets/img/carousel/*.png
 public/assets/img/carousel/originals/
+
+# archivos patch/diff locales
+*.patch
+*.diff
