@@ -387,7 +387,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
 
 ### Prioridad media
-- QR 1 descargable esta validado en servidor real con URL permanente `/qr/{token}` base62 de 12 caracteres. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug con `curl -I`, devolviendo el mismo status y `Location` sin body. QR 1 reutiliza un token por tour mediante logica find-or-create; `token` es UNIQUE y `tour_id` no es UNIQUE para permitir multiples tokens/campanas futuras. El PNG se genera al vuelo y no se guarda en disco ni R2. Analiticas QR siguen pendientes; HEAD no debe contarse como escaneo cuando llegue QR 2.
+- QR 1 descargable esta validado en servidor real con URL permanente `/qr/{token}` base62 de 12 caracteres. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug con `curl -I`, devolviendo el mismo status y `Location` sin body. QR 1 reutiliza un token por tour mediante logica find-or-create; `token` es UNIQUE y `tour_id` no es UNIQUE para permitir multiples tokens/campanas futuras. El PNG se genera al vuelo y no se guarda en disco ni R2. QR 2A esta implementado en local: registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. Pendiente ejecutar migracion SQL, definir `QR_HASH_SALT` en `.env` de produccion y validar en servidor real.
 - Editor canvas drag & drop.
 - Hotspots.
 - Minimap real.
@@ -426,7 +426,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Oxphyre Room MVP histórico carga 4 fotos en una escena Three.js tipo Direction Sphere; decisión vigente: permitir detalles disponibles sin exigir 4 y ocultar direcciones N/S/E/O al usuario.
 - Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
-- Estado: flujo base, pipeline WebP/libvips, R2/CDN Fase 2B y QR 1 descargable con `/qr/{token}` validados en servidor real; QR 1.1 HEAD implementado para debug; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes analiticas QR, limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
+- Estado: flujo base, pipeline WebP/libvips, R2/CDN Fase 2B y QR 1 descargable con `/qr/{token}` validados en servidor real; QR 1.1 HEAD implementado para debug; QR 2A implementado en local pendiente de migracion/validacion real; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.
@@ -451,7 +451,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
    - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
    - Fase 2B **implementada y validada en servidor real**: visor/dashboard usan `public_url` si existe y fallback local si no. CORS R2 configurado y validado para WebGL/Three.js.
 4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-5. QR 2: tracking basico con `src=qr` y contador. No implementado todavía.
+5. QR 2A: ejecutar migracion `docs/sql/2026-05-18_qr_scans_2a_privacy_dedupe.sql`, definir `QR_HASH_SALT` en `.env` de produccion y validar en servidor que GET navegador cuenta, HEAD no cuenta y curl/wget no cuentan.
 6. Hotspots de navegación entre posiciones. No implementado todavía.
 7. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 

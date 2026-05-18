@@ -67,7 +67,7 @@ class QrCodeModel
         return $row !== false ? $row : null;
     }
 
-    private function findByTourId(int $tourId): ?array
+    public function findByTourId(int $tourId): ?array
     {
         $stmt = $this->db->prepare(
             'SELECT * FROM qr_codes WHERE tour_id = ? LIMIT 1'

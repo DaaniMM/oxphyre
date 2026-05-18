@@ -146,6 +146,10 @@
               <i data-lucide="qr-code" width="14" height="14" aria-hidden="true"></i>
               Descargar QR
             </a>
+            <?php $qrScanCount = (int) ($qrScanCount ?? 0); ?>
+            <span style="font-size:0.75rem;color:var(--ox-text-muted);line-height:1.2;">
+              <?= $qrScanCount > 0 ? $qrScanCount . ' escaneos desde el QR' : 'QR listo para compartir' ?>
+            </span>
           <?php endif; ?>
 
           <button type="button" class="db-btn-secondary" id="btn-edit">

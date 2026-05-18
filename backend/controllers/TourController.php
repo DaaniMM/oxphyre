@@ -166,6 +166,8 @@ class TourController extends BaseController
         require_once BACKEND_PATH . '/models/TourModel.php';
         require_once BACKEND_PATH . '/models/PositionModel.php';
         require_once BACKEND_PATH . '/models/PhotoModel.php';
+        require_once BACKEND_PATH . '/models/QrCodeModel.php';
+        require_once BACKEND_PATH . '/models/QrScanModel.php';
 
         $userId   = (int) ($_SESSION['user_id'] ?? 0);
         $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
@@ -194,6 +196,12 @@ class TourController extends BaseController
             $pos['has_panorama'] = isset($positionIdsWithPanorama[(int) $pos['id']]);
         }
         unset($pos);
+
+        $qrScanCount = 0;
+        $qrCode = (new QrCodeModel())->findByTourId((int) $tour['id']);
+        if ($qrCode) {
+            $qrScanCount = (new QrScanModel())->countByQrCode((int) $qrCode['id']);
+        }
 
         $this->ensureCsrfToken();
 

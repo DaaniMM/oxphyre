@@ -2644,3 +2644,39 @@ Tipo: mejora menor de mantenimiento. Sin cambios en GET ni analiticas.
 - No se toco BD, Composer, R2, dashboard, `QrCodeService.php` ni `QrCodeModel.php`.
 - No se implementaron analiticas ni escritura en `qr_scans`.
 - No se hizo commit ni push.
+
+## 2026-05-18 - QR 2A tracking basico local
+
+Tipo: implementacion QR minima con privacidad. Pendiente de migracion y validacion real en servidor.
+
+### Que se hizo
+- Se creo `backend/models/QrScanModel.php` para registrar escaneos QR con prepared statements.
+- `QrScanModel::recordScan()` inserta solo `qr_code_id`, `ip_hash`, `device_type` y `scanned_at`; deja `ip_address`, `user_agent` y `country` en `NULL`.
+- `QrScanModel::isDuplicate()` deduplica por `qr_code_id + ip_hash` durante 30 minutos.
+- `QrScanModel::countByQrCode()` y `countByTour()` calculan contadores desde `qr_scans` con `COUNT(*)`.
+- `QrController::redirectToTour()` registra el escaneo solo en `GET /qr/{token}` valido, despues de validar token/tour publicado y antes del 302.
+- `HEAD /qr/{token}` sigue siendo debug y no cuenta.
+- Se filtro User-Agent vacio y bots basicos como curl, wget, bots, crawlers, headless, monitores y clientes automatizados.
+- Se deriva `device_type` simple: mobile/tablet/desktop/unknown, sin guardar el User-Agent completo.
+- El hash de IP usa `QR_HASH_SALT`; si falta, cae temporalmente a `APP_KEY` y despues a `APP_URL` para no romper local.
+- `QrCodeModel::findByTourId()` pasa a ser publico para poder leer el QR existente sin crear uno nuevo.
+- `TourController::showManage()` obtiene el contador total del QR existente sin crear token si no existe.
+- `dashboard/tours/manage.php` muestra "X escaneos desde el QR" o "QR listo para compartir" junto al boton de descarga.
+- Se creo `docs/sql/2026-05-18_qr_scans_2a_privacy_dedupe.sql` para anadir `ip_hash` e indices de deduplicacion/contador.
+- `.env.example` documenta `QR_HASH_SALT` sin valor real.
+
+### Motivo
+QR 2A activa una metrica basica util para el dashboard sin ampliar alcance a graficas, stats, PDF, campanas, QR por posicion ni analitica avanzada. La implementacion reduce datos personales: no guarda IP clara, User-Agent completo ni geolocalizacion.
+
+### Pendiente
+- Ejecutar manualmente la migracion SQL en servidor antes de validar el tracking real.
+- Definir `QR_HASH_SALT` real en `.env` de produccion.
+- Validar en servidor que GET de navegador registra una vez, que HEAD no registra y que curl/wget no registran.
+
+### Que NO se hizo
+- No se toco BD real.
+- No se toco `.env` real.
+- No se uso ni actualizo `qr_codes.total_scans`.
+- No se implementaron graficas, pagina stats, PDF, campanas, QR por posicion ni gating por plan.
+- No se toco Composer, R2, uploads ni `QrCodeService.php`.
+- No se hizo commit ni push.

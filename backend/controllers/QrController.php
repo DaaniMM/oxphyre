@@ -70,6 +70,7 @@ class QrController extends BaseController
         }
 
         require_once BACKEND_PATH . '/models/QrCodeModel.php';
+        require_once BACKEND_PATH . '/models/QrScanModel.php';
 
         $target = (new QrCodeModel())->findPublicTargetByToken($token);
         if (!$target || !(bool) $target['is_published']) {
@@ -78,6 +79,8 @@ class QrController extends BaseController
 
         $businessSlug = preg_replace('/[^a-z0-9-]/', '', (string) $target['business_slug']);
         $tourSlug = preg_replace('/[^a-z0-9-]/', '', (string) $target['tour_slug']);
+
+        $this->recordQrScanIfTrackable((int) $target['qr_id']);
 
         header('Location: /tour/' . $businessSlug . '/' . $tourSlug . '?src=qr', true, 302);
         exit();
@@ -116,5 +119,109 @@ class QrController extends BaseController
     private function isHeadRequest(): bool
     {
         return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'HEAD';
+    }
+
+    private function recordQrScanIfTrackable(int $qrCodeId): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+            return;
+        }
+
+        $userAgent = trim((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+        if ($userAgent === '' || $this->isBotUserAgent($userAgent)) {
+            return;
+        }
+
+        $clientIp = $this->getClientIp();
+        if ($clientIp === '') {
+            return;
+        }
+
+        try {
+            $ipHash = $this->hashClientIp($clientIp);
+            $deviceType = $this->detectDeviceType($userAgent);
+            (new QrScanModel())->recordScan($qrCodeId, $ipHash, $deviceType);
+        } catch (Throwable $e) {
+            error_log('QR scan tracking failed: ' . $e->getMessage());
+        }
+    }
+
+    private function isBotUserAgent(string $userAgent): bool
+    {
+        $ua = strtolower($userAgent);
+        $botPatterns = [
+            'bot',
+            'crawl',
+            'spider',
+            'slurp',
+            'curl',
+            'wget',
+            'python-requests',
+            'httpclient',
+            'headless',
+            'scrapy',
+            'monitor',
+            'uptime',
+            'pingdom',
+        ];
+
+        foreach ($botPatterns as $pattern) {
+            if (str_contains($ua, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function detectDeviceType(string $userAgent): string
+    {
+        $ua = strtolower($userAgent);
+
+        if ($ua === '') {
+            return 'unknown';
+        }
+
+        if (str_contains($ua, 'ipad') || str_contains($ua, 'tablet') || (str_contains($ua, 'android') && !str_contains($ua, 'mobile'))) {
+            return 'tablet';
+        }
+
+        if (str_contains($ua, 'mobile') || str_contains($ua, 'iphone') || str_contains($ua, 'ipod')) {
+            return 'mobile';
+        }
+
+        if (str_contains($ua, 'mozilla') || str_contains($ua, 'chrome') || str_contains($ua, 'safari') || str_contains($ua, 'firefox') || str_contains($ua, 'edge')) {
+            return 'desktop';
+        }
+
+        return 'unknown';
+    }
+
+    private function getClientIp(): string
+    {
+        $cloudflareIp = (string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? '');
+        if (filter_var($cloudflareIp, FILTER_VALIDATE_IP)) {
+            return $cloudflareIp;
+        }
+
+        $remoteIp = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+        if (filter_var($remoteIp, FILTER_VALIDATE_IP)) {
+            return $remoteIp;
+        }
+
+        return '';
+    }
+
+    private function hashClientIp(string $clientIp): string
+    {
+        $salt = (string) ($_ENV['QR_HASH_SALT'] ?? '');
+        if ($salt === '') {
+            $salt = (string) ($_ENV['APP_KEY'] ?? '');
+        }
+        if ($salt === '') {
+            $salt = (string) (defined('APP_URL') ? APP_URL : 'oxphyre');
+        }
+
+        return hash_hmac('sha256', $clientIp, $salt);
     }
 }
