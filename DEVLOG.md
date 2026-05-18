@@ -2429,3 +2429,26 @@ Tipo: copy UX/dashboard.
 ### Que NO se hizo
 - No se cambio logica de procesado, estados, CSS, BD, R2, visor JS ni rutas.
 - No se hizo commit ni push.
+
+## 2026-05-18 - R2/CDN Fase 2B inicial
+
+Tipo: integracion de URLs publicas R2 con fallback local.
+
+### Que se hizo
+- Creado `backend/services/PhotoUrlResolver.php` para centralizar la resolucion de URL visible final entre R2 y almacenamiento local.
+- `TourController::showPublic()` usa `public_url` cuando la foto esta en R2 y conserva fallback local `/uploads/{positionId}/{filename}` cuando no existe.
+- `PositionController::showUpload()` anade `resolved_url` a las fotos antes de pasarlas a la vista de subida.
+- `dashboard/position/upload.php` usa `resolved_url` para previews de panoramica y fotos detalle, con fallback local defensivo si no llega ese campo.
+- `public/index.php` permite `https://media.oxphyre.com` en `img-src` de la Content-Security-Policy.
+
+### Motivo
+Activar R2 como fuente visible para visor publico y previews del dashboard sin romper fotos antiguas ni perder el fallback local validado en Fase 2A.
+
+### Que NO se hizo
+- No se borro ningun archivo local.
+- No se migraron fotos antiguas.
+- No se toco `PhotoModel.php`.
+- No se toco la subida R2 ni `resolveStorage()`/`buildR2Key()`.
+- No se toco `R2StorageService.php`.
+- No se modifico BD, rutas, `.env`, `.env.example`, Composer/vendor, `tour-viewer.js` ni N/S/E/O.
+- No se hizo commit ni push.

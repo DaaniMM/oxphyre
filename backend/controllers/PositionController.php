@@ -132,6 +132,7 @@ class PositionController extends BaseController
         require_once BACKEND_PATH . '/models/TourModel.php';
         require_once BACKEND_PATH . '/models/PositionModel.php';
         require_once BACKEND_PATH . '/models/PhotoModel.php';
+        require_once BACKEND_PATH . '/services/PhotoUrlResolver.php';
 
         $userId   = (int) ($_SESSION['user_id'] ?? 0);
         $userRole = $_SESSION['user_role'] ?? 'business_free';
@@ -158,6 +159,7 @@ class PositionController extends BaseController
         $existingPhotos = (new PhotoModel())->getByPosition((int) $position['id']);
         $photosByDir    = [];
         foreach ($existingPhotos as $p) {
+            $p['resolved_url'] = PhotoUrlResolver::resolve($p, (int) $position['id']);
             $photosByDir[$p['direction']] = $p;
         }
         // Estado Sprint 1: la panorámica es la vista principal y las 4 fotos

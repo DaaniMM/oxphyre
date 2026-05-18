@@ -224,7 +224,8 @@
                role="region" aria-label="Foto panorámica principal">
 
             <?php if ($photo360): ?>
-              <img src="/uploads/<?= (int) $position['id'] ?>/<?= htmlspecialchars($photo360['filename']) ?>"
+              <?php $photo360Url = $photo360['resolved_url'] ?? ('/uploads/' . (int) $position['id'] . '/' . $photo360['filename']); ?>
+              <img src="<?= htmlspecialchars($photo360Url) ?>"
                    alt="Foto panorámica principal" class="db-upload-zone-360-preview" id="preview-360">
               <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
                 <span class="db-upload-zone-dir">Panorámica</span>
@@ -305,7 +306,8 @@
 
                 <div class="db-upload-preview" id="preview-<?= $dir ?>">
                   <?php if ($existing): ?>
-                    <img src="/uploads/<?= (int) $position['id'] ?>/<?= htmlspecialchars($existing['filename']) ?>"
+                    <?php $existingUrl = $existing['resolved_url'] ?? ('/uploads/' . (int) $position['id'] . '/' . $existing['filename']); ?>
+                    <img src="<?= htmlspecialchars($existingUrl) ?>"
                          alt="Foto <?= htmlspecialchars($label) ?>"
                          style="display:block;width:100%;height:100%;object-fit:cover;">
                   <?php else: ?>

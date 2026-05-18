@@ -316,6 +316,7 @@ class TourController extends BaseController
         require_once BACKEND_PATH . '/models/TourModel.php';
         require_once BACKEND_PATH . '/models/PositionModel.php';
         require_once BACKEND_PATH . '/models/PhotoModel.php';
+        require_once BACKEND_PATH . '/services/PhotoUrlResolver.php';
 
         // Acceso público: busca el negocio sin filtrar por usuario
         $business = (new BusinessModel())->getBySlugPublic($bizSlug);
@@ -347,7 +348,7 @@ class TourController extends BaseController
             $photosByDir = [];
             foreach ($photos as $photo) {
                 $photosByDir[$photo['direction']] = [
-                    'url'       => '/uploads/' . $pos['id'] . '/' . $photo['filename'],
+                    'url'       => PhotoUrlResolver::resolve($photo, (int) $pos['id']),
                     'processed' => (bool) $photo['processed'],
                 ];
             }
