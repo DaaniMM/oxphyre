@@ -6,7 +6,7 @@
   <title><?= htmlspecialchars($tour['title']) ?> — <?= htmlspecialchars($business['name']) ?></title>
   <meta name="robots" content="noindex, nofollow">
   <!-- Estilos base del visor -->
-  <link rel="stylesheet" href="/css/tour.css">
+  <link rel="stylesheet" href="/css/tour.css?v=20260518-2">
 </head>
 <body>
 
@@ -86,7 +86,7 @@
 <!-- Three.js para panorámica adaptativa y Oxphyre Room -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
 <!-- Lógica del visor (después de Three.js, sin defer) -->
-<script src="/js/tour-viewer.js?v=20260518-1"></script>
+<script src="/js/tour-viewer.js?v=20260518-2"></script>
 
 </body>
 </html>
