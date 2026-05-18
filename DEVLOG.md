@@ -2625,3 +2625,22 @@ Tipo: validacion real en produccion. Sin cambios de codigo en esta entrada.
 - No se guardo el PNG en disco ni R2.
 - No se toco BD adicional, R2, `.env`, rutas ni Composer durante esta documentacion.
 - No se hizo commit ni push.
+
+## 2026-05-18 - QR 1.1 HEAD para debug
+
+Tipo: mejora menor de mantenimiento. Sin cambios en GET ni analiticas.
+
+### Que se hizo
+- La ruta publica `/qr/{token}` acepta ahora `GET` y `HEAD` con la misma regex exacta `[A-Za-z0-9]{12}`.
+- `QrController::redirectToTour()` mantiene la misma validacion de token, existencia y publicacion.
+- `GET` conserva el comportamiento validado: devuelve 302 hacia `/tour/{businessSlug}/{tourSlug}?src=qr`.
+- `HEAD` devuelve el mismo 302 y el mismo `Location`, pero sin body, para facilitar debug con `curl -I`.
+- Token invalido o no existente devuelve 404 tambien en `HEAD`, sin body.
+
+### Decision
+`HEAD` queda solo como ayuda de mantenimiento/debug. No implementa analiticas y no debe contarse como escaneo cuando llegue QR 2.
+
+### Que NO se hizo
+- No se toco BD, Composer, R2, dashboard, `QrCodeService.php` ni `QrCodeModel.php`.
+- No se implementaron analiticas ni escritura en `qr_scans`.
+- No se hizo commit ni push.

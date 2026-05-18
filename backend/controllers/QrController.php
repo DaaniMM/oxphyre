@@ -100,6 +100,10 @@ class QrController extends BaseController
     private function serve404(): never
     {
         http_response_code(404);
+        if ($this->isHeadRequest()) {
+            exit();
+        }
+
         $view404 = VIEWS_PATH . '/errors/404.php';
         if (file_exists($view404)) {
             require_once $view404;
@@ -107,5 +111,10 @@ class QrController extends BaseController
             echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>404 - Oxphyre</title></head><body><h1>QR no encontrado</h1><p><a href="/">Volver al inicio</a></p></body></html>';
         }
         exit();
+    }
+
+    private function isHeadRequest(): bool
+    {
+        return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'HEAD';
     }
 }

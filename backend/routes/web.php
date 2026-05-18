@@ -151,7 +151,7 @@ if (isset($routes[$method][$uri])) {
     require_once BACKEND_PATH . '/controllers/TourController.php';
     (new TourController())->update();
 
-} elseif ($method === 'GET' && preg_match('#^/qr/([A-Za-z0-9]{12})$#', $uri, $m)) {
+} elseif (in_array($method, ['GET', 'HEAD'], true) && preg_match('#^/qr/([A-Za-z0-9]{12})$#', $uri, $m)) {
     $routeToken = $m[1];
     require_once BACKEND_PATH . '/controllers/QrController.php';
     (new QrController())->redirectToTour();
