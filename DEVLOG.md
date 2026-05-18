@@ -2517,3 +2517,25 @@ Tipo: validacion real de visor/dashboard con R2 como fuente visible y fallback l
 - No se migraron fotos antiguas.
 - No se toco BD, codigo, rutas, `.env`, subida R2 ni `R2StorageService.php` en esta documentacion.
 - No se hizo commit ni push.
+
+## 2026-05-18 - DEP 1 Composer normalizado para PHPMailer
+
+Tipo: deuda tecnica de dependencias. Sin cambios funcionales en QR, BD, R2 ni rutas.
+
+### Que se hizo
+- Se creo `composer.json` minimo del proyecto con PHP `>=8.1 <8.5` y la dependencia real actual `phpmailer/phpmailer`.
+- Se fijo `config.platform.php` en `8.1.0` para que Composer resuelva dependencias compatibles con el PHP objetivo del servidor.
+- Se ejecuto Composer con PHP 8.1 de WAMP y se genero `composer.lock`.
+- Composer instalo `phpmailer/phpmailer` en version `v6.12.0`.
+- Se anadio `vendor/` a `.gitignore` para que las dependencias instaladas no se versionen y puedan regenerarse con `composer install`.
+
+### Motivo
+`EmailService.php` ya dependia de `vendor/autoload.php`, pero el repo no tenia `composer.json` ni `composer.lock`. DEP 1 deja PHPMailer reproducible entre local y servidor antes de anadir QR como nueva dependencia Composer.
+
+### Que NO se hizo
+- No se implemento QR.
+- No se anadio ninguna libreria QR.
+- No se modifico `EmailService.php`.
+- No se toco BD, R2, rutas, `.env`, uploads, Python ni codigo no relacionado.
+- No se versiono `vendor/`.
+- No se hizo commit ni push.
