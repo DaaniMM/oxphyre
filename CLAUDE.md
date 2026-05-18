@@ -96,6 +96,7 @@ CLAUDE.md            → este archivo
 **Campos y reglas importantes:**
 - `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` queda como compatibilidad heredada.
 - `photos.direction='360'` identifica la panorámica de una posición.
+- `qr_codes.token` es un token base62 de 12 caracteres para URL permanente `/qr/{token}`. `token` es UNIQUE; `tour_id` NO es UNIQUE para permitir multiples tokens/campanas futuras.
 - `login_attempts` existe para rate limiting de login.
 - `businesses`, `tours`, `positions` y `photos` tienen soft delete con `deleted_at`.
 
@@ -113,7 +114,7 @@ CLAUDE.md            → este archivo
 
 ## Estado implementado resumido
 
-**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions` y `photos`.
+**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable validado en servidor real, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions` y `photos`.
 
 **Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
 
@@ -763,7 +764,7 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`.
 - Dashboard y wizard: revisar visibilidad general — inputs, labels y texto secundario tienen contraste insuficiente (texto gris oscuro sobre fondo negro). Mejorar colores para que los campos que el usuario debe rellenar sean claramente visibles. Nunca texto gris oscuro sobre fondo negro en zonas interactivas.
 
 #### Prioridad media
-- QR descargable con analíticas.
+- QR 2: analíticas de QR, registrar escaneos en `qr_scans` y mostrar contador. QR 1 descargable ya esta validado en servidor real con `/qr/{token}`.
 - Editor canvas drag & drop.
 - Hotspots.
 - Minimap real.

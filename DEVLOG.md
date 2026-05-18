@@ -2573,3 +2573,55 @@ QR 1 reutiliza un token por tour mediante logica find-or-create; `tour_id` no es
 - No se toco R2, `.env`, uploads ni logica de fotos.
 - No se versiono `vendor/`.
 - No se hizo commit ni push.
+
+## 2026-05-18 - QR 1 validado en servidor real
+
+Tipo: validacion real en produccion. Sin cambios de codigo en esta entrada.
+
+### Que se valido
+- Pull realizado en EC2.
+- `composer install --no-dev --optimize-autoloader` ejecutado correctamente en servidor.
+- `bacon/bacon-qr-code v3.1.1` instalado desde `composer.lock`.
+- `php -l` correcto en:
+  - `backend/services/QrCodeService.php`
+  - `backend/models/QrCodeModel.php`
+  - `backend/controllers/QrController.php`
+  - `backend/routes/web.php`
+  - `backend/views/dashboard/tours/manage.php`
+- Migracion `docs/sql/2026-05-18_qr_codes_token.sql` ejecutada.
+- `qr_codes` tiene `token VARCHAR(12)`, `UNIQUE KEY uq_qr_codes_token (token)` e indice normal `idx_qr_codes_tour_id (tour_id)`.
+- `tour_id` NO es UNIQUE, para permitir multiples tokens/campanas futuras.
+- El boton "Descargar QR" aparece en la gestion de un tour publicado.
+- La descarga genera PNG correctamente.
+- Escaneo real con movil redirige correctamente al tour publico.
+
+### Resultado real de BD y HTTP
+- BD confirmo fila QR:
+  - `tour_id = 1`
+  - `token = LAeYLVmf5QUb`
+  - `filename = qr_LAeYLVmf5QUb.png`
+  - `total_scans = 0`
+- `curl -s -o /dev/null -D - https://oxphyre.com/qr/LAeYLVmf5QUb` devuelve `HTTP/2 302`.
+- Header `location`: `/tour/primer-negocio-de-prueba/primer-tour-de-prueba?src=qr`.
+- `curl -L` termina en `https://oxphyre.com/tour/primer-negocio-de-prueba/primer-tour-de-prueba?src=qr`.
+
+### Decision confirmada
+- QR 1 usa URL permanente `/qr/{token}`, no URL directa con slugs.
+- `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr`.
+- El token es base62 de 12 caracteres generado desde PHP con `random_bytes()`.
+- `token` es UNIQUE.
+- `tour_id` NO es UNIQUE.
+- El PNG se genera al vuelo, no se guarda en disco ni en R2.
+- QR 1 reutiliza un token por tour mediante logica find-or-create, pero el esquema permite multiples tokens por tour para Pro/Business futuro.
+
+### Pendientes
+- QR 2: registrar escaneos en `qr_scans` y mostrar contador.
+- QR 1.1 opcional: soportar HEAD en `/qr/{token}` para que `curl -I` ayude a debug sin cambiar el comportamiento GET. Actualmente `curl -I` devuelve 404 porque la ruta solo acepta GET; no bloquea QR 1 porque moviles/navegadores usan GET.
+
+### Que NO se hizo
+- No se implementaron analiticas: `total_scans` sigue en 0.
+- No se implemento PDF.
+- No se implementaron QR por posicion, campanas, logos ni gating Free/Pro/Business.
+- No se guardo el PNG en disco ni R2.
+- No se toco BD adicional, R2, `.env`, rutas ni Composer durante esta documentacion.
+- No se hizo commit ni push.
