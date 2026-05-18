@@ -2452,3 +2452,19 @@ Activar R2 como fuente visible para visor publico y previews del dashboard sin r
 - No se toco `R2StorageService.php`.
 - No se modifico BD, rutas, `.env`, `.env.example`, Composer/vendor, `tour-viewer.js` ni N/S/E/O.
 - No se hizo commit ni push.
+
+## 2026-05-18 - URL directa a posicion sin panoramica
+
+Tipo: fix UX/visor.
+
+### Que se hizo
+- `public/js/tour-viewer.js` deja de hacer fallback silencioso a la primera posicion disponible cuando la URL trae `?position={id}` y esa posicion no esta en `TOUR_DATA`.
+- Si la posicion pedida no tiene panoramica `360` activa, el visor muestra el estado no disponible.
+- El fallback a la primera posicion disponible se mantiene solo cuando el tour se abre sin parametro `position`.
+- El visor ahora distingue entre tour completo no disponible y zona solicitada no disponible.
+- `backend/views/tour.php` anade el estado "Esta zona no esta disponible en el tour" con boton para ver el tour desde el principio sin recargar la pagina.
+- `public/css/tour.css` anade el estilo minimo del boton de vuelta al inicio.
+
+### Que NO se hizo
+- No se toco R2, logica backend de controllers/models, BD, rutas, dashboard, CSP ni N/S/E/O.
+- No se hizo commit ni push.

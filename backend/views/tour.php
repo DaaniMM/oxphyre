@@ -24,6 +24,14 @@
   <p>Este tour todavía no está listo.</p>
 </div>
 
+<div class="tour-unavailable" id="tour-position-unavailable" hidden>
+  <h1>Esta zona no está disponible en el tour</h1>
+  <p>Es posible que el enlace esté desactualizado o que esta parte del local aún no esté lista para visitar.</p>
+  <button type="button" id="tour-start-btn" class="tour-unavailable-action">
+    Ver el tour desde el principio
+  </button>
+</div>
+
 <?php if ($hasWatermark): ?>
 <!-- Marca de agua: solo visible en plan Free -->
 <div class="tour-watermark">
@@ -78,7 +86,7 @@
 <!-- Three.js para panorámica adaptativa y Oxphyre Room -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
 <!-- Lógica del visor (después de Three.js, sin defer) -->
-<script src="/js/tour-viewer.js?v=20260514-7"></script>
+<script src="/js/tour-viewer.js?v=20260518-1"></script>
 
 </body>
 </html>

@@ -77,13 +77,17 @@ function getDetailSlots(position) {
 
 function getInitialPositionIndex(positions) {
   const requestedId = new URLSearchParams(window.location.search).get('position');
+
+  // El fallback a la primera posicion disponible solo aplica cuando el visitante
+  // entra al tour sin pedir una posicion concreta. Si la URL pide una posicion
+  // que no esta en TOUR_DATA, significa que no tiene panoramica 360 activa.
   if (!requestedId) return 0;
 
   const requestedIdx = positions.findIndex(position => {
     return String(position?.id) === requestedId && Boolean(getPanoramaUrl(position));
   });
 
-  return requestedIdx >= 0 ? requestedIdx : 0;
+  return requestedIdx >= 0 ? requestedIdx : -1;
 }
 
 function hasRoom(position) {
@@ -92,6 +96,7 @@ function hasRoom(position) {
 
 function showUnavailable() {
   const unavailable = document.getElementById('tour-unavailable');
+  const positionUnavailable = document.getElementById('tour-position-unavailable');
   const viewerEl = document.getElementById('psv-viewer');
   const gyroBtn = document.getElementById('tour-gyro-btn');
   const detailsBtn = document.getElementById('tour-details-btn');
@@ -103,12 +108,67 @@ function showUnavailable() {
   if (detailsBtn) detailsBtn.hidden = true;
   if (bar) bar.hidden = true;
   if (unavailable) unavailable.hidden = false;
+  if (positionUnavailable) positionUnavailable.hidden = true;
   if (loadingEl) loadingEl.hidden = true;
+}
+
+function hideUnavailableStates() {
+  document.getElementById('tour-unavailable')?.setAttribute('hidden', '');
+  document.getElementById('tour-position-unavailable')?.setAttribute('hidden', '');
+}
+
+function restoreViewerChrome() {
+  const positions = getPositions();
+  const viewerEl = document.getElementById('psv-viewer');
+  const gyroBtn = document.getElementById('tour-gyro-btn');
+  const bar = document.getElementById('tour-positions-bar');
+
+  if (viewerEl) viewerEl.style.display = '';
+  if (gyroBtn) gyroBtn.hidden = false;
+  if (bar && positions.length > 1) bar.hidden = false;
+}
+
+// Tour completo no disponible: no hay posiciones validas en TOUR_DATA.
+// Zona solicitada no disponible: el tour existe, pero el parametro position
+// apunta a una posicion sin panoramica 360 activa o a un enlace antiguo.
+function showPositionUnavailable() {
+  const positionUnavailable = document.getElementById('tour-position-unavailable');
+  const viewerEl = document.getElementById('psv-viewer');
+  const gyroBtn = document.getElementById('tour-gyro-btn');
+  const detailsBtn = document.getElementById('tour-details-btn');
+  const bar = document.getElementById('tour-positions-bar');
+  const loadingEl = document.getElementById('psv-loading');
+
+  if (viewerEl) viewerEl.style.display = 'none';
+  if (gyroBtn) gyroBtn.hidden = true;
+  if (detailsBtn) detailsBtn.hidden = true;
+  if (bar) bar.hidden = true;
+  hideUnavailableStates();
+  if (positionUnavailable) positionUnavailable.hidden = false;
+  if (loadingEl) loadingEl.hidden = true;
+}
+
+function startTourFromBeginning() {
+  const positions = getPositions();
+  if (positions.length === 0) {
+    showUnavailable();
+    return;
+  }
+
+  hideUnavailableStates();
+  restoreViewerChrome();
+  loadPosition(0);
 }
 
 function initViewer() {
   const positions = getPositions();
   currentPositionIdx = getInitialPositionIndex(positions);
+
+  if (currentPositionIdx < 0) {
+    showPositionUnavailable();
+    return;
+  }
+
   currentPosition = positions[currentPositionIdx] || null;
   const initialUrl = getPanoramaUrl(currentPosition);
 
@@ -880,6 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('tour-details-btn')?.addEventListener('click', openRoom);
+  document.getElementById('tour-start-btn')?.addEventListener('click', startTourFromBeginning);
   document.getElementById('room-back-btn')?.addEventListener('click', closeRoom);
   setupGyro();
 });

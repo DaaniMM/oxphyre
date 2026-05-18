@@ -190,6 +190,24 @@ html, body {
   font-size: 0.95rem;
 }
 
+.tour-unavailable-action {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(254, 179, 84, 0.46);
+  border-radius: 999px;
+  background: rgba(254, 179, 84, 0.14);
+  color: #fff;
+  padding: 0.72rem 1.05rem;
+  font: 700 0.875rem 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.tour-unavailable-action:hover {
+  border-color: rgba(254, 179, 84, 0.72);
+  background: rgba(254, 179, 84, 0.22);
+  transform: translateY(-1px);
+}
+
 .tour-details-btn {
   position: fixed;
   left: 50%;
