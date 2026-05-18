@@ -155,6 +155,11 @@ function startTourFromBeginning() {
     return;
   }
 
+  const url = new URL(window.location.href);
+  url.searchParams.delete('position');
+  const nextUrl = url.pathname + (url.search ? url.search : '') + url.hash;
+  window.history.replaceState({}, '', nextUrl);
+
   hideUnavailableStates();
   restoreViewerChrome();
   loadPosition(0);

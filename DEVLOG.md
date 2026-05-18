@@ -2464,6 +2464,7 @@ Tipo: fix UX/visor.
 - El visor ahora distingue entre tour completo no disponible y zona solicitada no disponible.
 - `backend/views/tour.php` anade el estado "Esta zona no esta disponible en el tour" con boton para ver el tour desde el principio sin recargar la pagina.
 - `public/css/tour.css` anade el estilo minimo del boton de vuelta al inicio.
+- El boton de vuelta al inicio limpia el parametro `position` con History API sin recargar y usa estilo visual coherente con Oxphyre.
 
 ### Que NO se hizo
 - No se toco R2, logica backend de controllers/models, BD, rutas, dashboard, CSP ni N/S/E/O.
