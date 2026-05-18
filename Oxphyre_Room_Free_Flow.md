@@ -698,6 +698,10 @@ Panorámica a pantalla completa
 
 No ve textos técnicos.
 
+Nota tecnica vigente:
+- El visor puede cargar imagenes desde Cloudflare R2 (`media.oxphyre.com`) o desde local (`/uploads/...`) de forma transparente.
+- Esto no cambia el concepto UX: panoramica `360` obligatoria para que una posicion sea visitable y fotos detalle 1-4 opcionales.
+
 ### Desktop
 - Drag con mouse para mirar.
 - Hotspots sobre la panorámica.
@@ -1064,6 +1068,6 @@ Pro/Business podrán añadir más capacidad, publicación profesional, QR, embed
 
 El Sprint 1 base ya está implementado. Siguientes pasos posibles:
 - HEIC/HEIF si se prioriza captación móvil real de iPhone.
-- R2/CDN si se prioriza hosting/rendimiento/producción.
+- Limpieza R2/local Fase 3 si se prioriza mantenimiento de almacenamiento tras R2/CDN ya validado.
 - QR descargable si se prioriza demo comercial y tribunal.
 - Hotspots si se prioriza navegación entre posiciones.

@@ -2469,3 +2469,51 @@ Tipo: fix UX/visor.
 ### Que NO se hizo
 - No se toco R2, logica backend de controllers/models, BD, rutas, dashboard, CSP ni N/S/E/O.
 - No se hizo commit ni push.
+
+## 2026-05-18 - R2/CDN Fase 2B validada en servidor real
+
+Tipo: validacion real de visor/dashboard con R2 como fuente visible y fallback local.
+
+### Que se valido
+- `R2_ENABLED=true` en servidor.
+- Nueva panoramica subida en posicion 2 tras configurar CORS en el bucket R2.
+- BD correcta para la nueva foto: `direction='360'`, `storage_provider='r2'`, `public_url=https://media.oxphyre.com/...` y `deleted_at=NULL`.
+- `TourController::showPublic()` construye `TOUR_DATA` con `PhotoUrlResolver::resolve()`.
+- `PositionController::showUpload()` anade `resolved_url` y `upload.php` lo usa en previews.
+- `public/index.php` permite `https://media.oxphyre.com` en `img-src`.
+- Network confirmo carga mixta con HTTP 200:
+  - panoramica `360` desde `https://media.oxphyre.com/...`;
+  - detalle `S` desde `https://media.oxphyre.com/...`;
+  - detalles `N`/`E` desde `/uploads/2/...`.
+- Three.js renderiza correctamente texturas R2 y detalles mixtos R2/local.
+
+### Problema detectado y diagnostico
+- Al principio, el visor mostraba "Tour no disponible" al cargar una panoramica desde R2.
+- La imagen R2 respondia HTTP 200, la BD era correcta, `TOUR_DATA` era correcto y CSP ya permitia `media.oxphyre.com`.
+- El fallo real era que la respuesta R2 no incluia `access-control-allow-origin`, necesario para que WebGL/Three.js pueda usar la textura.
+- Una URL antigua siguio fallando porque Cloudflare tenia cacheada una respuesta sin CORS (`cf-cache-status=HIT`).
+- Al probar la misma URL con `?cors-test=1`, Cloudflare devolvio `MISS` y ya aparecio `access-control-allow-origin: https://oxphyre.com`.
+
+### Solucion aplicada
+- Configurado CORS en el bucket `oxphyre-tour-media` para `https://oxphyre.com` y `https://www.oxphyre.com`, metodos `GET`/`HEAD`, headers `*`, expose `ETag`, `Content-Length`, `Content-Type`, `MaxAgeSeconds=3600`.
+- No se purgo cache Cloudflare.
+- Se subio una nueva panoramica, generando una `storage_key` unica. La nueva URL no estaba cacheada y salio con CORS correcto.
+
+### Estado final
+- R2/CDN Fase 2B queda validada en servidor real.
+- El visor publico carga `public_url` R2 cuando existe y fallback local cuando no.
+- El dashboard de subida muestra previews R2/local mediante `resolved_url`.
+- La mezcla R2 + local funciona.
+- Las fotos legacy sin `public_url` siguen funcionando desde `/uploads/`.
+- Los detalles parciales 1-4 siguen funcionando.
+- El bug UX de `?position={id}` sin panoramica tambien queda corregido: no carga otra posicion silenciosamente, muestra "Esta zona no esta disponible en el tour".
+
+### Pendiente
+- Fase 3: limpieza local/R2 de objetos huerfanos y archivos fisicos cuando proceda.
+- Migracion futura de fotos antiguas a R2 solo si se decide; no es necesaria para el estado actual.
+
+### Que NO se hizo
+- No se borro local.
+- No se migraron fotos antiguas.
+- No se toco BD, codigo, rutas, `.env`, subida R2 ni `R2StorageService.php` en esta documentacion.
+- No se hizo commit ni push.

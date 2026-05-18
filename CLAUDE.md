@@ -135,7 +135,7 @@ CLAUDE.md            → este archivo
 - HEIC/HEIF implementado en pipeline y soportado por servidor vía libvips/libheif.
 - Flujo iPhone normal validado: la subida funcionó, generó WebP/depth y el visor móvil cargó correctamente. En esa prueba iOS/Safari entregó el archivo como JPEG, no como `.heic` puro.
 - Queda pendiente probar un archivo `.heic` puro sin conversión automática.
-- Cloudflare R2/CDN Fase 2A queda implementada y validada en servidor real. Las nuevas subidas mantienen WebP local en EC2 y, si `R2_ENABLED=true`, duplican el WebP visible final en R2 con metadata en BD. Visor/dashboard/TourController todavia no usan `public_url`.
+- Cloudflare R2/CDN Fase 2B queda implementada y validada en servidor real. Las nuevas subidas mantienen WebP local en EC2 y, si `R2_ENABLED=true`, duplican el WebP visible final en R2 con metadata en BD. Visor publico y dashboard de subida usan `public_url` si existe mediante `PhotoUrlResolver`, con fallback local si no.
 
 **Decisión vigente:** No volver a meter lógica pesada de imagen en `PositionController`. El controlador coordina CSRF, ownership, llamada al servicio, MiDaS, `PhotoModel` y flashes; el servicio procesa imágenes y no escribe en BD.
 
@@ -203,12 +203,23 @@ CLAUDE.md            → este archivo
 - `R2_ENABLED=true`: subida S validada con R2. BD id 57, `storage_provider='r2'`, `storage_key=tours/1/positions/2/S/S_961208678db1224b.webp`, `public_url=https://media.oxphyre.com/tours/1/positions/2/S/S_961208678db1224b.webp`. `curl -I` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`.
 - Panoramica `360` con `R2_ENABLED=true`: BD id 58, `storage_provider='r2'`, `storage_key=tours/1/positions/2/360/360_cfd6bad8b5a15a40.webp`, `public_url=https://media.oxphyre.com/tours/1/positions/2/360/360_cfd6bad8b5a15a40.webp`. `curl -I` devolvio HTTP/2 200, `content-type: image/webp`, `cf-cache-status: MISS`. Posicion con panoramica R2 validada y visitable.
 - Fallback controlado: con `R2_ENABLED=true` y `R2_SECRET_ACCESS_KEY=INVALIDA_TEST_FALLO`, subida E guardada como local. BD id 59, `direction=E`, `storage_provider='local'`, `storage_key=NULL`, `public_url=NULL`. La subida no se rompio y `.env` fue restaurado.
-- No se suben depth maps ni originales a R2, no se borra el WebP local, no se reutiliza `storage_key`, visor/dashboard/TourController no usan todavia `public_url`.
+- No se suben depth maps ni originales a R2, no se borra el WebP local y no se reutiliza `storage_key`.
 
 **Secuencia futura R2:**
-- **2A:** implementada y validada. Nuevas subidas = WebP local + intento R2 + metadata R2 si funciona. Visor/dashboard siguen por local.
-- **2B:** pendiente. Visor/dashboard usan `public_url` si existe y fallback local si no.
-- **3:** pendiente. Limpieza de WebP locales y objetos R2 huerfanos/antiguos cuando R2 sea fuente validada del visor.
+- **2A:** implementada y validada. Nuevas subidas = WebP local + intento R2 + metadata R2 si funciona.
+- **2B:** implementada y validada. Visor/dashboard usan `public_url` si existe y fallback local si no.
+- **3:** pendiente. Limpieza de WebP locales y objetos R2 huerfanos/antiguos. R2 ya es fuente validada del visor, pero no se borra local hasta definir esta fase.
+
+**Fase 2B validada en servidor real:**
+- `backend/services/PhotoUrlResolver.php` es el unico punto autorizado para resolver la URL visible final de una foto.
+- `PhotoModel` no debe contener logica de resolucion de URLs publicas; devuelve datos de BD.
+- Controllers preparan datos con URLs resueltas: `TourController::showPublic()` construye `TOUR_DATA` con `PhotoUrlResolver::resolve()` y `PositionController::showUpload()` anade `resolved_url`.
+- Vistas y JS consumen URL ya resuelta; solo se permite fallback defensivo local en vista si `resolved_url` no existe.
+- `R2StorageService.php` no debe tocarse salvo bug real de firma/upload/delete.
+- No borrar WebP local hasta Fase 3. La copia local sigue siendo fallback temporal y compatibilidad para fotos legacy.
+- `public/index.php` debe permitir `https://media.oxphyre.com` en `img-src`.
+- El bucket R2 `oxphyre-tour-media` necesita CORS para `https://oxphyre.com` y `https://www.oxphyre.com` con `GET`/`HEAD`; WebGL/Three.js requiere CORS aunque la imagen responda HTTP 200.
+- Si una imagen R2 devuelve 200 pero Three.js muestra negro o el visor cae a "Tour no disponible", comprobar primero CORS y cache Cloudflare. Una respuesta antigua puede venir sin CORS desde cache (`cf-cache-status=HIT`); las keys unicas por upload evitan reutilizar objetos cacheados.
 
 **Alcance cerrado Fase 2A:**
 - Archivos modificados: `backend/models/PhotoModel.php`, `backend/controllers/PositionController.php`.
