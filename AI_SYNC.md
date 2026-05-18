@@ -387,7 +387,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
 
 ### Prioridad media
-- QR descargable con analíticas.
+- QR 1 descargable esta implementado en codigo con URL permanente `/qr/{token}` base62 de 12 caracteres, pendiente de ejecutar migracion SQL y validar en servidor. QR 1 reutiliza un token por tour mediante logica find-or-create; `tour_id` no es UNIQUE para permitir multiples tokens/campanas futuras. Analiticas QR siguen pendientes.
 - Editor canvas drag & drop.
 - Hotspots.
 - Minimap real.
@@ -426,7 +426,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Oxphyre Room MVP histórico carga 4 fotos en una escena Three.js tipo Direction Sphere; decisión vigente: permitir detalles disponibles sin exigir 4 y ocultar direcciones N/S/E/O al usuario.
 - Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
-- Estado: flujo base, pipeline WebP/libvips y R2/CDN Fase 2B validados en servidor; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes QR, limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
+- Estado: flujo base, pipeline WebP/libvips y R2/CDN Fase 2B validados en servidor; QR 1 implementado en codigo con `/qr/{token}` pendiente de migracion/validacion servidor; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes analiticas QR, limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.
@@ -451,9 +451,10 @@ Siguiente orden recomendado para cerrar antes del TFG:
    - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
    - Fase 2B **implementada y validada en servidor real**: visor/dashboard usan `public_url` si existe y fallback local si no. CORS R2 configurado y validado para WebGL/Three.js.
 4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-5. QR descargable con analíticas. No implementado todavía.
-6. Hotspots de navegación entre posiciones. No implementado todavía.
-7. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+5. QR 1: ejecutar migracion `docs/sql/2026-05-18_qr_codes_token.sql`, desplegar dependencias Composer y validar descarga/redireccion `/qr/{token}` en servidor.
+6. QR 2: tracking basico con `src=qr` y contador. No implementado todavía.
+7. Hotspots de navegación entre posiciones. No implementado todavía.
+8. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
 

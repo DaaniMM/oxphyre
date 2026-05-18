@@ -2539,3 +2539,37 @@ Tipo: deuda tecnica de dependencias. Sin cambios funcionales en QR, BD, R2 ni ru
 - No se toco BD, R2, rutas, `.env`, uploads, Python ni codigo no relacionado.
 - No se versiono `vendor/`.
 - No se hizo commit ni push.
+
+## 2026-05-18 - QR 1 con URL permanente por token
+
+Tipo: implementacion QR base. Sin analiticas, sin PDF y sin guardar PNG en disco.
+
+### Que se hizo
+- Se anadio `bacon/bacon-qr-code` via Composer como dependencia QR compatible con PHP 8.1 y licencia BSD-2-Clause.
+- Se creo `QrCodeService.php` para generar PNG en memoria con `GDLibRenderer`, validando `vendor/autoload.php`, `iconv` y `gd`.
+- Se creo `QrCodeModel.php` para obtener o crear un token permanente base62 de 12 caracteres por tour usando prepared statements.
+- Se creo `QrController.php` con dos flujos:
+  - descarga protegida del QR para tours publicados pertenecientes al usuario autenticado;
+  - redireccion publica `/qr/{token}` hacia `/tour/{businessSlug}/{tourSlug}?src=qr`.
+- Se anadio la ruta protegida `/dashboard/negocios/{biz}/tours/{tour}/qr/download`.
+- Se anadio la ruta publica `/qr/{token}`.
+- Se anadio el boton "Descargar QR" en la gestion del tour, visible solo cuando el tour esta publicado.
+- Se creo `docs/sql/2026-05-18_qr_codes_token.sql` con la migracion minima para anadir `token`, hacerlo unico y dejar un indice normal en `tour_id`.
+
+### Decision
+El QR apunta a `/qr/{token}` en lugar de apuntar directamente a `/tour/{businessSlug}/{tourSlug}`. Asi, si cambian los slugs del negocio o del tour en el futuro, el QR impreso podra seguir funcionando porque el token redirige al slug actual.
+QR 1 reutiliza un token por tour mediante logica find-or-create; `tour_id` no es UNIQUE para permitir multiples tokens/campanas futuras.
+
+### Pendiente antes de validar en servidor
+- Ejecutar manualmente la migracion `docs/sql/2026-05-18_qr_codes_token.sql` en la BD antes de usar la descarga QR.
+- Ejecutar `composer install --no-dev --optimize-autoloader` en servidor para instalar `bacon/bacon-qr-code` desde `composer.lock`.
+- Probar descarga real y redireccion `/qr/{token}` en servidor.
+
+### Que NO se hizo
+- No se implementaron analiticas ni escritura en `qr_scans`.
+- No se implemento PDF.
+- No se implementaron QR por posicion ni campanas.
+- No se guardaron PNG en disco.
+- No se toco R2, `.env`, uploads ni logica de fotos.
+- No se versiono `vendor/`.
+- No se hizo commit ni push.

@@ -139,11 +139,22 @@ if (isset($routes[$method][$uri])) {
     require_once BACKEND_PATH . '/controllers/TourController.php';
     (new TourController())->showManage();
 
+} elseif ($method === 'GET' && preg_match('#^/dashboard/negocios/([a-z0-9-]+)/tours/([a-z0-9-]+)/qr/download$#', $uri, $m)) {
+    AuthMiddleware::check();
+    $routeParams = ['biz' => $m[1], 'tour' => $m[2]];
+    require_once BACKEND_PATH . '/controllers/QrController.php';
+    (new QrController())->download();
+
 } elseif ($method === 'POST' && preg_match('#^/dashboard/negocios/([a-z0-9-]+)/tours/([a-z0-9-]+)/edit$#', $uri, $m)) {
     AuthMiddleware::check();
     $routeParams = ['biz' => $m[1], 'tour' => $m[2]];
     require_once BACKEND_PATH . '/controllers/TourController.php';
     (new TourController())->update();
+
+} elseif ($method === 'GET' && preg_match('#^/qr/([A-Za-z0-9]{12})$#', $uri, $m)) {
+    $routeToken = $m[1];
+    require_once BACKEND_PATH . '/controllers/QrController.php';
+    (new QrController())->redirectToTour();
 
 } elseif ($method === 'GET' && preg_match('#^/tour/([a-z0-9-]+)/([a-z0-9-]+)$#', $uri, $m)) {
     // Visor público: sin guard auth, cualquier visitante puede ver el tour

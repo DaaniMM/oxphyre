@@ -141,6 +141,11 @@
               <i data-lucide="external-link" width="14" height="14" aria-hidden="true"></i>
               Ver tour público
             </a>
+            <a href="/dashboard/negocios/<?= htmlspecialchars($business['slug']) ?>/tours/<?= htmlspecialchars($tour['slug']) ?>/qr/download"
+               class="db-btn-secondary">
+              <i data-lucide="qr-code" width="14" height="14" aria-hidden="true"></i>
+              Descargar QR
+            </a>
           <?php endif; ?>
 
           <button type="button" class="db-btn-secondary" id="btn-edit">
