@@ -1751,6 +1751,67 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   padding: 0.5rem 0.75rem;
 }
 
+.navigation-arrows-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.navigation-arrows-status {
+  color: var(--ox-text-muted);
+  font-size: 0.8125rem;
+}
+
+.navigation-arrows-list {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.navigation-arrows-list[hidden] {
+  display: none;
+}
+
+.navigation-arrows-empty,
+.navigation-arrow-item {
+  border: 1px solid var(--ox-border);
+  border-radius: 8px;
+  background: oklch(0.16 0.02 260 / 0.46);
+  color: var(--ox-text-muted);
+  font-size: 0.8125rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.navigation-arrow-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.navigation-arrow-title {
+  color: var(--ox-text);
+  font-weight: 600;
+}
+
+.navigation-arrow-state {
+  flex-shrink: 0;
+  border: 1px solid var(--ox-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  color: var(--ox-text-dim);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.navigation-arrow-state.is-active {
+  border-color: oklch(0.55 0.12 145 / 0.48);
+  color: oklch(0.80 0.14 145);
+  background: oklch(0.35 0.10 145 / 0.16);
+}
+
 .position-header-actions {
   display: flex;
   align-items: center;

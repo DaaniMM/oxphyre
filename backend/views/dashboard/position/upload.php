@@ -41,7 +41,7 @@
     <ol class="upload-tip-steps">
       <li>Sube una panorámica principal. Es obligatoria.</li>
       <li>Añade de 1 a 4 fotos detalle para destacar partes clave de esta zona.</li>
-      <li>Los hotspots servirán para conectar esta zona con otras posiciones.</li>
+      <li>Las flechas de navegación servirán para conectar esta zona con otras posiciones.</li>
     </ol>
 
     <p class="upload-tip-footer">
@@ -336,24 +336,48 @@
           </p>
         </section>
 
-        <section class="upload-flow-card upload-flow-card--locked" aria-labelledby="hotspots-title">
+        <section class="upload-flow-card <?= $canEditNavigationArrows ? '' : 'upload-flow-card--locked' ?>"
+                 aria-labelledby="navigation-arrows-title"
+                 id="navigation-arrows-panel"
+                 data-navigation-arrows-ready="<?= $canEditNavigationArrows ? '1' : '0' ?>">
           <div class="upload-flow-card-header">
             <div>
-              <p class="upload-flow-kicker">Hotspots de navegación</p>
-              <h3 class="upload-flow-title" id="hotspots-title">Próximamente</h3>
+              <p class="upload-flow-kicker">Flechas de navegación</p>
+              <h3 class="upload-flow-title" id="navigation-arrows-title">Conecta esta zona con otras zonas del tour</h3>
             </div>
-            <span class="db-badge db-badge--draft">Sprint siguiente</span>
+            <span class="db-badge <?= $canEditNavigationArrows ? 'db-badge--published' : 'db-badge--draft' ?>">
+              <?= $canEditNavigationArrows ? 'Disponible' : 'Pendiente' ?>
+            </span>
           </div>
           <p class="upload-flow-copy">
             Conecta esta posición con otras zonas del tour.
           </p>
           <p class="upload-flow-help">
-            Los hotspots aparecerán sobre la panorámica principal y permitirán que tus clientes viajen entre posiciones.
+            Las flechas aparecerán sobre la panorámica principal y permitirán que tus clientes avancen por el recorrido.
           </p>
-          <div class="upload-flow-locked-row">
-            <i data-lucide="lock" width="16" height="16" aria-hidden="true"></i>
-            <span>Se configurará en el siguiente sprint.</span>
-          </div>
+
+          <?php if (!$hasPanorama): ?>
+            <div class="upload-flow-locked-row">
+              <i data-lucide="lock" width="16" height="16" aria-hidden="true"></i>
+              <span>Para añadir flechas de navegación, primero sube la foto panorámica de esta zona.</span>
+            </div>
+          <?php elseif ($navigationTargetCount < 1): ?>
+            <div class="upload-flow-locked-row">
+              <i data-lucide="map" width="16" height="16" aria-hidden="true"></i>
+              <span>Aún no hay más zonas a las que navegar. Añade al menos una zona más con panorámica para crear flechas de navegación.</span>
+            </div>
+          <?php else: ?>
+            <div class="navigation-arrows-actions">
+              <button type="button" class="wizard-btn-submit" id="navigation-arrows-open">
+                <i data-lucide="navigation" width="16" height="16" aria-hidden="true"></i>
+                Editar flechas de navegación
+              </button>
+              <span class="navigation-arrows-status" id="navigation-arrows-status" aria-live="polite">
+                Preparado para editar.
+              </span>
+            </div>
+            <div class="navigation-arrows-list" id="navigation-arrows-list" hidden></div>
+          <?php endif; ?>
         </section>
 
         <div class="wizard-nav" style="margin-top:1.75rem;">
@@ -395,6 +419,8 @@
 </div>
 
 <script>
+window.OXPHYRE_HOTSPOT_EDITOR = <?= json_encode($hotspotEditorConfig, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
+
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
 
@@ -518,6 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<script src="/js/hotspot-editor.js"></script>
 
 </body>
 </html>

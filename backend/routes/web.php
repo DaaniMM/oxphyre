@@ -38,6 +38,7 @@ $routes = [
         '/dashboard/business/created'  => ['BusinessController',  'showSuccess', 'auth'],
         '/dashboard/posicion/nueva'    => ['PositionController', 'showCreate',  'auth'],
         '/dashboard/posicion/upload'   => ['PositionController', 'showUpload',  'auth'],
+        '/dashboard/hotspots/list'     => ['HotspotController',  'showList',    'auth'],
     ],
     'POST' => [
         '/login'    => ['AuthController', 'login',    'guest'],
@@ -52,6 +53,10 @@ $routes = [
         '/dashboard/posicion/upload'    => ['PositionController', 'upload',        'auth'],
         '/dashboard/posicion/set-mode'  => ['PositionController', 'setActiveMode', 'auth'],
         '/dashboard/posicion/photo/delete' => ['PositionController', 'deletePhoto', 'auth'],
+        '/dashboard/hotspots/create' => ['HotspotController', 'create', 'auth'],
+        '/dashboard/hotspots/move'   => ['HotspotController', 'move',   'auth'],
+        '/dashboard/hotspots/toggle' => ['HotspotController', 'toggle', 'auth'],
+        '/dashboard/hotspots/delete' => ['HotspotController', 'delete', 'auth'],
     ],
 ];
 

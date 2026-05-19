@@ -2853,3 +2853,46 @@ Tipo: validacion visual en servidor real del render publico minimo de hotspots.
 - No se toco codigo PHP, JS, CSS ni SQL.
 - No se toco BD, visor, dashboard, fotos, R2, QR, Composer ni `.env`.
 - No se hizo commit ni push desde esta sesion.
+
+## 2026-05-19 - Hotspots 1C backend JSON seguro preparado
+
+Tipo: preparacion backend/dashboard minimo para editor de flechas de navegacion. Sin editor visual completo.
+
+### Que se hizo
+- Se amplio `backend/models/HotspotModel.php` con metodos scoped para dashboard:
+  - listar flechas de una posicion dentro de un tour;
+  - crear flechas usando `texture_x`/`texture_y` como fuente principal;
+  - mover/recolocar actualizando `texture_x`/`texture_y`;
+  - activar/desactivar;
+  - soft delete;
+  - obtener una flecha por ID dentro de posicion/tour antes de modificar.
+- Se creo `backend/controllers/HotspotController.php` para endpoints JSON protegidos.
+- El controller valida ownership completo: usuario -> negocio -> tour -> posicion.
+- Tambien valida que la posicion origen tenga panoramica `360`, que el destino pertenezca al mismo tour, que el destino tenga panoramica `360`, que no sea la misma posicion y que `texture_x`/`texture_y` esten entre 0 y 1.
+- Los POST AJAX validan CSRF sin consumir el token, siguiendo el patron de `setActiveMode()`.
+- Se registraron rutas JSON protegidas:
+  - `GET /dashboard/hotspots/list`
+  - `POST /dashboard/hotspots/create`
+  - `POST /dashboard/hotspots/move`
+  - `POST /dashboard/hotspots/toggle`
+  - `POST /dashboard/hotspots/delete`
+- En `backend/views/dashboard/position/upload.php` se sustituyo el bloque de "proximamente" por un bloque minimo visible como "Flechas de navegacion".
+- Se creo `public/js/hotspot-editor.js` como esqueleto minimo: solo carga/lista flechas al pulsar "Editar flechas de navegacion".
+- Se anadieron estilos minimos en `public/css/dashboard.css`.
+
+### Decision tecnica
+- `texture_x`/`texture_y` siguen siendo la fuente principal.
+- Al crear o mover una flecha se rellenan `yaw_rad`/`pitch_rad` como valores legacy derivados para compatibilidad, pero no controlan el render ni el editor futuro.
+- La palabra visible para el usuario es "flechas de navegacion"; no se usa "hotspot" en la UI.
+
+### Pendiente
+- Hotspots 1C visual: editor real sobre la panoramica con click/tap, preview de punto, selector de destino, mover arrastrando y guardado desde UI.
+- Pulir textos/estados si aparecen flechas que apuntan a posiciones desactualizadas.
+- Hotspots 1D: marcar `needs_review` automatico al sustituir o borrar panoramica.
+
+### Que NO se hizo
+- No se implemento el editor visual completo.
+- No se cambio la BD ni se crearon migraciones.
+- No se toco `public/js/tour-viewer.js` ni el visor publico.
+- No se tocaron `TourController.php`, pipeline de imagenes, R2, QR, landing, planes/precios, `CLAUDE.md` ni `AI_SYNC.md`.
+- No se hizo commit ni push.

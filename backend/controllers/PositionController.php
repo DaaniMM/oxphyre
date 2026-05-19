@@ -156,7 +156,8 @@ class PositionController extends BaseController
         }
 
         // Fotos ya subidas para pre-mostrar en el formulario
-        $existingPhotos = (new PhotoModel())->getByPosition((int) $position['id']);
+        $photoModel = new PhotoModel();
+        $existingPhotos = $photoModel->getByPosition((int) $position['id']);
         $photosByDir    = [];
         foreach ($existingPhotos as $p) {
             $p['resolved_url'] = PhotoUrlResolver::resolve($p, (int) $position['id']);
@@ -175,6 +176,15 @@ class PositionController extends BaseController
         $hasPanorama    = $photo360 !== null;
         $hasOxphyreRoom = $roomPhotoCount === count($roomDirections);
         $activeMode     = $position['active_mode'] ?? '4photos';
+        $completePositionIds = array_fill_keys($photoModel->getPanoramaPositionIdsByTour((int) $tour['id']), true);
+        $navigationTargetCount = 0;
+        foreach ((new PositionModel())->getByTour((int) $tour['id']) as $tourPosition) {
+            $tourPositionId = (int) $tourPosition['id'];
+            if ($tourPositionId !== (int) $position['id'] && isset($completePositionIds[$tourPositionId])) {
+                $navigationTargetCount++;
+            }
+        }
+        $canEditNavigationArrows = $hasPanorama && $navigationTargetCount > 0;
 
         $this->ensureCsrfToken();
 
@@ -183,6 +193,20 @@ class PositionController extends BaseController
         $planLabel   = self::$planLabels[$userRole] ?? 'Free';
         $userInitial = mb_strtoupper(mb_substr($_SESSION['user_name'] ?? 'U', 0, 1));
         $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+        $hotspotEditorConfig = [
+            'canEdit' => $canEditNavigationArrows,
+            'csrfToken' => $_SESSION['csrf_token'] ?? '',
+            'bizSlug' => $business['slug'],
+            'tourSlug' => $tour['slug'],
+            'positionId' => (int) $position['id'],
+            'endpoints' => [
+                'list' => '/dashboard/hotspots/list',
+                'create' => '/dashboard/hotspots/create',
+                'move' => '/dashboard/hotspots/move',
+                'toggle' => '/dashboard/hotspots/toggle',
+                'delete' => '/dashboard/hotspots/delete',
+            ],
+        ];
 
         $flash = $_SESSION['flash'] ?? null;
         unset($_SESSION['flash']);
