@@ -1779,7 +1779,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   color: var(--ox-text);
   font-size: 0.875rem;
   line-height: 1.55;
-  margin-top: 0.9rem;
+  margin-top: 10px;
 }
 
 .navigation-arrows-stage {
@@ -1905,7 +1905,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .navigation-arrow-item-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -1913,6 +1913,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   border-color: oklch(0.78 0.16 65 / 0.5);
   color: oklch(0.78 0.16 65);
   background: oklch(0.78 0.16 65 / 0.1);
+  margin-left: 10px;
 }
 
 .navigation-arrow-action-btn {
