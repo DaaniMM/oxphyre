@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-<script src="/js/hotspot-editor.js"></script>
+<script src="/js/hotspot-editor.js?v=20260519-3"></script>
 
 </body>
 </html>
