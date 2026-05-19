@@ -97,6 +97,50 @@
         </div>
       <?php endif; ?>
 
+      <?php if (!empty($arrowsNeedReviewByPosition)): ?>
+        <?php $reviewCount = count($arrowsNeedReviewByPosition); ?>
+        <div role="alert" style="display:flex;align-items:flex-start;gap:0.75rem;
+                                  padding:0.9rem 1rem;border-radius:10px;margin-bottom:1.25rem;
+                                  background:oklch(0.32 0.10 55/0.22);
+                                  border:1px solid oklch(0.65 0.16 55/0.45);">
+          <i data-lucide="triangle-alert" width="18" height="18"
+             style="flex-shrink:0;margin-top:2px;color:oklch(0.78 0.16 55);" aria-hidden="true"></i>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:0.875rem;font-weight:600;color:oklch(0.88 0.10 55);margin-bottom:0.25rem;">
+              Hay flechas de navegación pendientes de revisar
+            </p>
+            <?php if ($reviewCount === 1): ?>
+              <p style="font-size:0.8125rem;color:var(--ox-text-muted);line-height:1.5;margin-bottom:0.65rem;">
+                Has cambiado la panorámica de «<?= htmlspecialchars($arrowsNeedReviewByPosition[0]['positionName']) ?>». Algunas flechas de esa zona no aparecerán en el tour hasta que las recoloques.
+              </p>
+              <a href="/dashboard/posicion/upload?position=<?= (int) $arrowsNeedReviewByPosition[0]['positionId'] ?>&negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>#navigation-arrows-panel"
+                 class="wizard-btn-submit"
+                 style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8125rem;padding:0.45rem 0.9rem;">
+                <i data-lucide="navigation" width="14" height="14" aria-hidden="true"></i>
+                Revisar flechas
+              </a>
+            <?php else: ?>
+              <p style="font-size:0.8125rem;color:var(--ox-text-muted);line-height:1.5;margin-bottom:0.55rem;">
+                Hay flechas pendientes en varias zonas. Revísalas para que vuelvan a aparecer en el tour.
+              </p>
+              <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.35rem;">
+                <?php foreach ($arrowsNeedReviewByPosition as $reviewPos): ?>
+                  <li style="display:flex;align-items:center;gap:0.6rem;font-size:0.8125rem;color:var(--ox-text-muted);">
+                    <i data-lucide="map-pin" width="13" height="13" aria-hidden="true" style="flex-shrink:0;color:oklch(0.78 0.16 55);"></i>
+                    <?= htmlspecialchars($reviewPos['positionName']) ?>
+                    <a href="/dashboard/posicion/upload?position=<?= (int) $reviewPos['positionId'] ?>&negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>#navigation-arrows-panel"
+                       class="db-btn-ghost"
+                       style="font-size:0.75rem;padding:0.2rem 0.5rem;min-height:0;height:auto;margin-left:auto;">
+                      Revisar
+                    </a>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php endif; ?>
+          </div>
+        </div>
+      <?php endif; ?>
+
       <?php $isPublished = (bool)(int) $tour['is_published']; ?>
 
       <!-- ── BLOQUE 1: Header del tour ── -->
@@ -275,6 +319,17 @@
                 </div>
 
                 <h3 class="db-pos-card-title"><?= htmlspecialchars($pos['name']) ?></h3>
+
+                <?php if (isset($positionsWithArrowsNeedReview[(int) $pos['id']])): ?>
+                  <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.68rem;font-weight:700;
+                                padding:0.18rem 0.45rem;border-radius:999px;margin-top:0.3rem;
+                                border:1px solid oklch(0.65 0.16 55/0.5);
+                                color:oklch(0.78 0.16 55);
+                                background:oklch(0.55 0.16 40/0.12);">
+                    <i data-lucide="triangle-alert" width="10" height="10" aria-hidden="true"></i>
+                    Flechas por revisar
+                  </span>
+                <?php endif; ?>
 
                 <div class="db-pos-card-actions">
                   <a href="/dashboard/posicion/upload?position=<?= (int) $pos['id'] ?>&negocio=<?= htmlspecialchars($business['slug']) ?>&tour=<?= htmlspecialchars($tour['slug']) ?>"

@@ -197,6 +197,13 @@ class TourController extends BaseController
         }
         unset($pos);
 
+        // Flechas de navegación pendientes de revisión en este tour.
+        // Se usa en la vista para mostrar aviso global y badge en la card de cada posición afectada.
+        require_once BACKEND_PATH . '/models/HotspotModel.php';
+        $arrowsNeedReviewByPosition = (new HotspotModel())->getPositionsWithNeedsReviewByTour((int) $tour['id']);
+        // Mapa indexado por positionId para lookup O(1) en el bucle de cards.
+        $positionsWithArrowsNeedReview = array_column($arrowsNeedReviewByPosition, null, 'positionId');
+
         $qrScanCount = 0;
         $qrCode = (new QrCodeModel())->findByTourId((int) $tour['id']);
         if ($qrCode) {

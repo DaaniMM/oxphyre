@@ -409,6 +409,37 @@ class HotspotModel
         return $stmt->execute([$positionId, self::TYPE_NAVIGATION]);
     }
 
+    public function getPositionsWithNeedsReviewByTour(int $tourId): array
+    {
+        if ($tourId <= 0) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT p.id AS position_id,
+                    p.name AS position_name,
+                    COUNT(*) AS pending_count
+             FROM hotspots h
+             JOIN positions p ON p.id = h.position_id
+             WHERE p.tour_id = ?
+               AND h.type = ?
+               AND h.needs_review = 1
+               AND h.deleted_at IS NULL
+               AND p.deleted_at IS NULL
+             GROUP BY p.id, p.name
+             ORDER BY p.order_index ASC, p.id ASC'
+        );
+        $stmt->execute([$tourId, self::TYPE_NAVIGATION]);
+
+        return array_map(static function (array $row): array {
+            return [
+                'positionId'   => (int)    $row['position_id'],
+                'positionName' => (string) $row['position_name'],
+                'pendingCount' => (int)    $row['pending_count'],
+            ];
+        }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
     public function countNeedsReviewByPosition(int $positionId): int
     {
         if ($positionId <= 0) {
