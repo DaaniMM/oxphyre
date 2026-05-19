@@ -21,7 +21,7 @@ El Sprint 1 ya está implementado en la app real:
 Quedan pendientes para fases posteriores:
 - adaptar UX/dashboard para bloquear "Ver posición" si falta panorámica `360`;
 - adaptar UI y visor para detalles parciales 1-4 sin exigir 4 fotos;
-- editor real de hotspots;
+- editor de hotspots básico implementado y validado (Hotspots 1C); pendiente Hotspots 1D: `needs_review` al sustituir/borrar panorámica;
 - QR;
 - R2/CDN;
 - limpieza física de archivos asociados a soft delete;
@@ -836,18 +836,20 @@ Estados claros en dashboard.
 Aviso si solo hay 1 posición.
 ### Sprint 3 — Hotspots de navegación
 
+**Estado:** Implementado y validado en servidor real (Hotspots 1A + 1B + 1C). Pendiente Hotspots 1D y 1E para completar el bloque.
+
 #### Objetivo
 
 Convertir el tour en visita navegable real.
 
 #### Incluye
 
-Editor visual de hotspots sobre panorámica.
-PC y móvil.
-Guardar longitude/latitude o reutilizar position_x/position_y.
-Mostrar hotspots públicos.
-Click/tap → cargar posición destino.
-Bloquear si hay menos de 2 posiciones completas.
+Editor visual de hotspots sobre panorámica — implementado con modal en dashboard.
+Coordenadas `texture_x`/`texture_y` (UV relativas a la imagen) en lugar de longitude/latitude.
+Mostrar hotspots públicos — implementado con overlay Three.js anclado a la textura.
+Click/tap → cargar posición destino — implementado.
+Hover muestra "Ir a {nombre}" — implementado.
+Bloquear si hay menos de 2 posiciones completas — implementado (validación en PHP y en el listado del editor).
 ### Sprint 4 — Pulido UX premium
 
 #### Incluye
@@ -861,9 +863,9 @@ Giroscopio móvil discreto.
 Responsive fino.
 Microanimaciones.
 ### Orden definitivo
-1. Sprint 1 — Nuevo flujo base completo: subida + visor público. Implementado.
+1. Sprint 1 — Nuevo flujo base completo: subida + visor público. **Implementado.**
 2. Sprint 2 — Validaciones y estados.
-3. Sprint 3 — Hotspots de navegación.
+3. Sprint 3 — Hotspots de navegación. **Implementado (1A+1B+1C). Pendiente 1D+1E.**
 4. Sprint 4 — Pulido UX premium.
 ## 12. Sincronización entre IAs y documentación
 

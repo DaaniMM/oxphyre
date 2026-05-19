@@ -3032,3 +3032,67 @@ Razon del pivote: el usuario coloca flechas haciendo clic sobre la imagen plana 
 - No se cambio BD ni se crearon migraciones salvo la de texture coordinates ya documentada.
 - No se tocaron `TourController.php`, `PositionController.php`, pipeline de imagenes, R2, QR, MiDaS, landing ni planes.
 - No se hizo commit ni push.
+
+## 2026-05-19 - Hotspots 1C validado en servidor real + helper asset()
+
+Tipo: validacion final de Hotspots 1C en produccion y correccion de cache de assets.
+
+### Que se hizo
+
+#### Validacion de Hotspots 1C en servidor real
+
+Flujo completo validado con sesion autenticada en https://oxphyre.com:
+
+1. Dashboard → posicion con panoramica y al menos una zona destino con panoramica.
+2. Pulsar "Editar flechas de navegacion": el listado aparece con estados correctos.
+3. Zona sin flecha muestra badge "Sin flecha" y boton "Anadir flecha".
+4. Zona con flecha muestra badge "Enlazada" y botones "Editar flecha" / "Eliminar flecha".
+5. Pulsar "Anadir flecha": modal se abre con titulo "Colocar flecha hacia {nombre}", panoramica contenida, sin desbordamiento visual.
+6. Click sobre la panoramica coloca marcador provisional en la posicion pulsada.
+7. Pulsar "Cancelar": modal se cierra, flecha no se crea, estado sigue "Sin flecha".
+8. Pulsar "Guardar flecha": flecha creada, modal se cierra, listado se refresca, estado pasa a "Enlazada".
+9. Pulsar "Editar flecha": modal se abre con el marcador existente en la posicion guardada previamente; se puede recolocar y guardar con el endpoint `move`.
+10. Pulsar "Eliminar flecha": confirmacion nativa, soft delete, listado se refresca, estado vuelve a "Sin flecha".
+11. Visor publico: la flecha aparece sobre la panoramica en el punto donde se coloco.
+12. Hover sobre la flecha: muestra "Ir a" en linea superior y nombre de la posicion destino en linea inferior.
+13. Click sobre la flecha: navegacion correcta a la posicion destino.
+
+#### Helper asset() para cache-busting automatico
+
+- `backend/config/config.php`: anadida funcion `asset(string $path): string` que devuelve la URL con `?v={filemtime}` usando el timestamp real del archivo en disco. Si el archivo no existe devuelve la ruta original. Valida el path con regex para evitar rutas raras. Disponible en todas las vistas sin ningun require_once adicional porque config.php se carga en el Front Controller antes de cualquier otro archivo.
+- Vistas actualizadas para usar `asset()`:
+  - `backend/views/tour.php`: `tour.css` y `tour-viewer.js`.
+  - `backend/views/dashboard/position/upload.php`: `dashboard.css` y `hotspot-editor.js`.
+  - `backend/views/dashboard/index.php`, `business/create.php`, `business/success.php`, `negocios/index.php`, `negocios/manage.php`, `tours/index.php`, `tours/create.php`, `tours/manage.php`, `position/create.php`: `dashboard.css`.
+- El helper sustituye todos los `?v=20260519-X` manuales que habia que actualizar a mano en cada deploy. Ahora basta subir el archivo para que el version hash cambie automaticamente.
+
+#### Mejora visual en flechas del visor publico
+
+- `public/js/tour-viewer.js` + `public/css/tour.css`: el label de las flechas muestra dos lineas: "Ir a" (pequeño, 80% opacidad) arriba y el nombre de la posicion destino abajo. `aria-hidden` en el prefijo porque el `aria-label` del boton ya incluye "Ir a {nombre}".
+
+### Archivos tocados
+
+- `backend/config/config.php`
+- `backend/views/tour.php`
+- `backend/views/dashboard/position/upload.php`
+- `backend/views/dashboard/index.php`
+- `backend/views/dashboard/business/create.php`
+- `backend/views/dashboard/business/success.php`
+- `backend/views/dashboard/negocios/index.php`
+- `backend/views/dashboard/negocios/manage.php`
+- `backend/views/dashboard/tours/index.php`
+- `backend/views/dashboard/tours/create.php`
+- `backend/views/dashboard/tours/manage.php`
+- `backend/views/dashboard/position/create.php`
+- `public/js/tour-viewer.js`
+- `public/css/tour.css`
+
+### Pendiente
+
+- Hotspots 1D: marcar `needs_review=1` automaticamente cuando se sustituye o borra la panoramica de una posicion que tiene flechas activas. Mostrar aviso/confirmacion en dashboard y ocultar hotspot en visor publico hasta que el propietario lo revise.
+- Hotspots 1E: pulido UX mobile, limites de zoom/crosshair en movil, estado visual de flecha con `needs_review`.
+
+### Que NO se hizo
+- No se cambio BD ni migraciones.
+- No se tocaron R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
+

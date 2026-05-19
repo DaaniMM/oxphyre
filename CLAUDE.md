@@ -58,6 +58,7 @@ El visor público vigente usa **Three.js vanilla**: panorámica principal cilín
 - **Python servidor:** Flask + Pillow + OpenCV/CLAHE + MiDaS Small (Intel, open source, profundidad real con IA gratuita)
 - **Python local/demo:** MiDaS DPT-Hybrid + CUDA en PC local con RTX 3060 para generar tours demo de máxima calidad
 - **Emails:** PHPMailer + Gmail SMTP
+- **Cache-busting de assets:** helper `asset()` con `filemtime()` en `backend/config/config.php`, disponible en todas las vistas sin `require_once` adicional. Evita caché vieja de CSS/JS tras despliegues sin builds ni versiones manuales.
 - **Despliegue:** AWS EC2 t3.small · IP: 13.62.93.7 · Dominio: https://oxphyre.com
 - **OS servidor:** Ubuntu 22.04 · Nginx · PHP-FPM · Let's Encrypt
 - **Repo:** /var/www/oxphyre en servidor · github.com/DaaniMM/oxphyre
@@ -128,7 +129,7 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 
 ## Estado implementado resumido
 
-**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real, Hotspots 1A BD/modelo validado en servidor real, Hotspots 1B render publico validado visualmente en servidor real, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions`, `photos` y `hotspots`.
+**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real, Hotspots 1A BD/modelo validado en servidor real, Hotspots 1B render público validado visualmente en servidor real, Hotspots 1C editor dashboard validado en servidor real (listado de zonas con estados "Sin flecha"/"Enlazada", modal para colocar/editar/eliminar flechas, visor público muestra flecha en el punto colocado con hover "Ir a {posición}"), helper `asset()` con `filemtime()` en `backend/config/config.php` para cache-busting automático de CSS/JS sin versiones manuales, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions`, `photos` y `hotspots`.
 
 **Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
 
@@ -780,7 +781,7 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`, `hotspots`.
 #### Prioridad media
 - QR 2A cerrado: tracking basico con privacidad validado en servidor real. Futuro QR 2B queda para analiticas avanzadas, graficas, campanas o QR por posicion si se decide.
 - Editor canvas drag & drop.
-- Hotspots.
+- Hotspots 1A, 1B, 1C validados en servidor real. Pendiente Hotspots 1D: marcar `needs_review=1` automáticamente al sustituir o borrar la panorámica de una posición con flechas activas, ocultar esas flechas en el visor público y mostrar aviso en dashboard para revisarlas/recolocarlas.
 - Minimap real.
 - Tutorial/onboarding del editor: implementar tutorial la primera vez que el usuario accede, con botón para volver a verlo. Debe explicar la jerarquía negocio → tour → posiciones → fotos y cómo usar el canvas.
 - Dashboard: añadir tooltips de ayuda contextual en las métricas para clarificar la jerarquía del producto al usuario no técnico. Ejemplo: icono ? en "Tours activos" con tooltip "Un tour es la experiencia 360° que verán tus clientes", y en "Negocios" con "Un negocio agrupa todos tus tours".
