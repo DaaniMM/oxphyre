@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     statusEl.textContent = message;
   };
 
+  const showEditor = () => {
+    editorEl.hidden = false;
+    editorEl.removeAttribute('hidden');
+  };
+
   const buildListUrl = () => {
     const url = new URL(config.endpoints.list, window.location.origin);
     url.searchParams.set('biz_slug', config.bizSlug);
@@ -107,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       targets = payload.data?.targets || [];
       renderTargets();
       renderArrows();
+      showEditor();
       setStatus('Haz clic sobre la panorámica para colocar una flecha.');
       return true;
     } catch {
@@ -183,8 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   openBtn.addEventListener('click', async () => {
-    editorEl.hidden = false;
-    await loadEditorData();
+    if (await loadEditorData()) {
+      showEditor();
+    }
   });
 
   stageEl.addEventListener('click', handleStageClick);

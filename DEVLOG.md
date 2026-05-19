@@ -2936,3 +2936,16 @@ Tipo: implementacion minima del editor visual de flechas de navegacion en dashbo
 - No se tocaron R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
 - No se implemento recolocar flechas existentes, mobile con crosshair ni `needs_review`.
 - No se hizo commit ni push.
+
+## 2026-05-19 - Hotspots 1C-C apertura visual del editor
+
+Tipo: correccion puntual de UI del editor de flechas de navegacion.
+
+### Que se hizo
+- Se corrigio `public/js/hotspot-editor.js` para retirar el atributo `hidden` de `#navigation-arrows-editor` cuando `/dashboard/hotspots/list` carga correctamente.
+- La apertura del panel ya no depende de que existan flechas previas: si la lista viene vacia, el editor se muestra igualmente con el estado "Aun no hay flechas en esta zona.".
+
+### Que NO se hizo
+- No se tocaron backend, BD, visor publico, R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
+- No se implementaron nuevas funciones del editor.
+- No se hizo commit ni push.
