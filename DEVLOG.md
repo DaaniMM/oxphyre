@@ -2896,3 +2896,43 @@ Tipo: preparacion backend/dashboard minimo para editor de flechas de navegacion.
 - No se toco `public/js/tour-viewer.js` ni el visor publico.
 - No se tocaron `TourController.php`, pipeline de imagenes, R2, QR, landing, planes/precios, `CLAUDE.md` ni `AI_SYNC.md`.
 - No se hizo commit ni push.
+
+## 2026-05-19 - Hotspots 1C-P0 editor visual minimo
+
+Tipo: implementacion minima del editor visual de flechas de navegacion en dashboard.
+
+### Que se hizo
+- `PositionController::showUpload()` expone al JS la URL resuelta de la panoramica actual mediante `window.OXPHYRE_HOTSPOT_EDITOR.panoramaUrl`.
+- `backend/views/dashboard/position/upload.php` muestra un panel de edicion al pulsar "Editar flechas de navegacion".
+- El panel incluye:
+  - panoramica actual;
+  - instruccion clara para colocar una flecha;
+  - marcador provisional;
+  - selector de zona destino;
+  - botones "Guardar flecha" y "Cancelar";
+  - lista de flechas existentes.
+- `public/js/hotspot-editor.js` carga flechas y destinos desde `/dashboard/hotspots/list`.
+- Al hacer click sobre la panoramica calcula el punto relativo de la imagen y muestra el marcador provisional.
+- Al guardar llama a `/dashboard/hotspots/create`, refresca la lista y muestra "Flecha guardada correctamente.".
+- Si falla el guardado, muestra "No hemos podido guardar la flecha. Intentalo de nuevo.".
+- `public/css/dashboard.css` anade estilos minimos para el panel visual, marcador y formulario.
+
+### Decision
+- El usuario no escribe coordenadas: el punto se obtiene del click sobre la panoramica.
+- El editor guarda coordenadas relativas a la imagen completa, coherentes con `texture_x`/`texture_y` como fuente principal.
+- No se implementa todavia recolocar flechas existentes ni flujo movil avanzado.
+
+### Pendiente
+- Probar en servidor real con sesion autenticada:
+  - abrir posicion con panoramica y otra posicion destino;
+  - crear flecha desde el dashboard;
+  - confirmar que aparece en la lista;
+  - abrir visor publico y confirmar que aparece y navega.
+- Pulir editor visual despues de validar P0: mover flechas existentes, estados de error por flecha rota, mobile/crosshair si procede.
+
+### Que NO se hizo
+- No se toco `public/js/tour-viewer.js` ni el visor publico.
+- No se cambio BD ni migraciones.
+- No se tocaron R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
+- No se implemento recolocar flechas existentes, mobile con crosshair ni `needs_review`.
+- No se hizo commit ni push.

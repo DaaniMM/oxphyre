@@ -176,6 +176,7 @@ class PositionController extends BaseController
         $hasPanorama    = $photo360 !== null;
         $hasOxphyreRoom = $roomPhotoCount === count($roomDirections);
         $activeMode     = $position['active_mode'] ?? '4photos';
+        $panoramaUrl = $photo360 ? ($photo360['resolved_url'] ?? ('/uploads/' . (int) $position['id'] . '/' . $photo360['filename'])) : null;
         $completePositionIds = array_fill_keys($photoModel->getPanoramaPositionIdsByTour((int) $tour['id']), true);
         $navigationTargetCount = 0;
         foreach ((new PositionModel())->getByTour((int) $tour['id']) as $tourPosition) {
@@ -199,6 +200,7 @@ class PositionController extends BaseController
             'bizSlug' => $business['slug'],
             'tourSlug' => $tour['slug'],
             'positionId' => (int) $position['id'],
+            'panoramaUrl' => $panoramaUrl,
             'endpoints' => [
                 'list' => '/dashboard/hotspots/list',
                 'create' => '/dashboard/hotspots/create',

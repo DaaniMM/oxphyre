@@ -1764,6 +1764,82 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   font-size: 0.8125rem;
 }
 
+.navigation-arrows-editor {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.navigation-arrows-editor[hidden],
+.navigation-arrows-form[hidden] {
+  display: none;
+}
+
+.navigation-arrows-instructions {
+  color: var(--ox-text);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.navigation-arrows-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ox-border);
+  border-radius: 10px;
+  background: #050505;
+  cursor: crosshair;
+}
+
+.navigation-arrows-image {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: fill;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.navigation-arrows-marker {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--ox-amber);
+  border-radius: 50%;
+  background: oklch(0.78 0.16 65 / 0.22);
+  box-shadow: 0 0 18px oklch(0.78 0.16 65 / 0.42);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.navigation-arrows-marker::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--ox-amber);
+}
+
+.navigation-arrows-form {
+  border: 1px solid var(--ox-border);
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: oklch(0.16 0.02 260 / 0.46);
+}
+
+.navigation-arrows-form-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.55rem;
+}
+
+.navigation-arrows-form-row .db-form-input {
+  min-width: min(100%, 260px);
+  flex: 1;
+}
+
 .navigation-arrows-list {
   display: grid;
   gap: 0.5rem;

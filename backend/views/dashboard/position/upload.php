@@ -376,7 +376,31 @@
                 Preparado para editar.
               </span>
             </div>
-            <div class="navigation-arrows-list" id="navigation-arrows-list" hidden></div>
+            <div class="navigation-arrows-editor" id="navigation-arrows-editor" hidden>
+              <p class="navigation-arrows-instructions">
+                Haz clic sobre la panorámica para colocar una flecha. Después elige a qué zona llevará.
+              </p>
+              <div class="navigation-arrows-stage" id="navigation-arrows-stage">
+                <img src="<?= htmlspecialchars((string) $panoramaUrl) ?>"
+                     alt="Panorámica actual de esta zona"
+                     class="navigation-arrows-image"
+                     id="navigation-arrows-image">
+                <span class="navigation-arrows-marker" id="navigation-arrows-marker" hidden></span>
+              </div>
+              <div class="navigation-arrows-form" id="navigation-arrows-form" hidden>
+                <label class="db-form-label" for="navigation-arrows-target">¿A qué zona lleva esta flecha?</label>
+                <div class="navigation-arrows-form-row">
+                  <select class="db-form-input" id="navigation-arrows-target"></select>
+                  <button type="button" class="wizard-btn-submit" id="navigation-arrows-save">
+                    Guardar flecha
+                  </button>
+                  <button type="button" class="db-btn-ghost" id="navigation-arrows-cancel">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+              <div class="navigation-arrows-list" id="navigation-arrows-list"></div>
+            </div>
           <?php endif; ?>
         </section>
 
