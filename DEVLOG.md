@@ -2754,3 +2754,33 @@ No anadir columna tipo `veces_escaneado`. La fuente de verdad es `qr_scans`: cad
 - No se modifico BD adicional.
 - No se toco Composer, R2, `.env`, uploads ni codigo de fotos.
 - No se hizo commit ni push.
+
+## 2026-05-19 - Hotspots 1A contrato BD/modelo
+
+Tipo: base tecnica para hotspots de navegacion. Sin editor visual ni render publico.
+
+### Que se hizo
+- Se creo `docs/sql/2026-05-19_hotspots_navigation_coordinates.sql` como migracion defensiva para `hotspots`.
+- La migracion crea la tabla si no existe y, si ya existe una tabla legacy, anade columnas nuevas sin borrar columnas antiguas como `photo_id`.
+- Se definio que los hotspots de navegacion se guardan como `yaw_rad` y `pitch_rad` en radianes relativos al cilindro de la panoramica principal, no como pixeles de pantalla ni porcentajes 2D.
+- Se anadio `position_id` como origen logico del hotspot, `target_position_id` como destino y `panorama_photo_id` para saber sobre que panoramica se coloco.
+- Se anadieron `needs_review`, `is_active`, `updated_at` y `deleted_at` para permitir ocultar hotspots desactualizados, desactivar sin borrar y aplicar soft delete.
+- Se creo `backend/models/HotspotModel.php` con prepared statements para listar, listar publicos, crear hotspots de navegacion, soft delete, activar/desactivar y marcar una posicion como pendiente de revision.
+- El modelo valida IDs positivos, `yaw_rad` entre `-M_PI` y `M_PI`, `pitch_rad` entre `-M_PI/2` y `M_PI/2`, y limpia `label` con `strip_tags()` limitandola a 80 caracteres.
+
+### Decision
+El contrato de coordenadas queda preparado para el visor Three.js actual: panoramica cilindrica parcial/adaptativa, FOV responsive y proyeccion futura a pantalla desde coordenadas angulares.
+
+### Pendiente
+- Ejecutar la migracion manualmente en servidor antes de usar hotspots.
+- Hotspots 1B: inyectar hotspots validos en `TOUR_DATA` y render publico minimo con overlay HTML proyectado desde yaw/pitch usando datos manuales/de prueba. No editor todavia.
+- Hotspots 1C: editor dashboard para crear/recolocar hotspots con click sobre la panoramica.
+- Hotspots 1D: conectar `markNeedsReviewByPosition()` al flujo de sustitucion/borrado de panoramica y mostrar aviso/confirmacion en dashboard.
+- Hotspots 1E: pulido UX/mobile/labels/limites si procede.
+
+### Que NO se hizo
+- No se ejecuto la migracion en BD real.
+- No se implemento editor visual.
+- No se implemento render publico.
+- No se toco `TourController::showPublic()`, `backend/views/tour.php`, `public/js/tour-viewer.js`, `public/css/tour.css`, dashboard, fotos, R2, QR, Composer ni `.env`.
+- No se hizo commit ni push.

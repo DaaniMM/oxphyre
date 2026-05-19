@@ -95,6 +95,17 @@ Estado implementado:
 - Photo Sphere Viewer v4 queda retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al forzarlas como esfera completa.
 - La imagen visible siempre debe ser el WebP final optimizado y fiel a la imagen subida; MiDaS/CLAHE quedan como procesado interno o futuro, no como textura pública en Sprint 1.
 
+### Hotspots de navegacion
+- Hotspots 1A deja preparado el contrato BD/modelo, pero todavia no hay editor visual ni render publico.
+- Los hotspots de navegacion van sobre la panoramica principal `photos.direction='360'`, nunca sobre fotos detalle.
+- El hotspot pertenece logicamente a `position_id` y navega hacia `target_position_id`.
+- Las coordenadas se guardan como `yaw_rad` y `pitch_rad` en radianes relativos al cilindro de la panoramica principal. No usar pixeles de pantalla ni porcentajes 2D como coordenada principal.
+- `panorama_photo_id` guarda con que panoramica se coloco el hotspot. Si la panoramica cambia en un bloque posterior, se debera marcar `needs_review=1` y ocultar el hotspot en publico hasta revisarlo.
+- `is_active` permite desactivar sin borrar y `deleted_at` aplica soft delete.
+- `backend/models/HotspotModel.php` existe con prepared statements para listar, listar publicos, crear, soft delete, activar/desactivar y marcar `needs_review` por posicion.
+- La migracion `docs/sql/2026-05-19_hotspots_navigation_coordinates.sql` existe, pero no debe asumirse ejecutada en servidor hasta validacion manual.
+- Orden vigente: Hotspots 1B = `TOUR_DATA` + render publico minimo con overlay HTML proyectado desde yaw/pitch usando datos manuales/de prueba; Hotspots 1C = editor dashboard con click sobre panoramica; Hotspots 1D = `needs_review` automatico al sustituir/borrar panoramica + aviso/confirmacion en dashboard; Hotspots 1E = pulido UX/mobile/labels/limites.
+
 ### Sistema de fotos por posición
 Decisión viva:
 - Oxphyre Room deja de entenderse como "modo 4 fotos" y pasa a ser la experiencia completa de una posición.
