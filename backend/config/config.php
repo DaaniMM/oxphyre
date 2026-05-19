@@ -93,7 +93,7 @@ define('SESSION_LIFETIME', 3600);
 
 // ─── Helper de assets con cache-busting automático ───────────────────────────
 // Devuelve la URL del asset con ?v={filemtime} para forzar recarga tras despliegues.
-// Uso en vistas: <?= asset('/css/dashboard.css') ?>
+// Uso en vistas: echo asset('/css/dashboard.css');
 // Si el archivo no existe devuelve la ruta original como fallback seguro.
 if (!function_exists('asset')) {
     function asset(string $path): string
