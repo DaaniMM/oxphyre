@@ -486,46 +486,53 @@ function createHotspotOverlay() {
 }
 
 function updateHotspotOverlay() {
-  if (!mainState?.hotspotBtns?.length || !mainState.camera) return;
+  if (!mainState?.hotspotBtns?.length || !mainState.camera || !mainState.mesh) return;
 
-  const camera = mainState.camera;
-  const fovVRad = THREE.MathUtils.degToRad(camera.fov);
-  const fovHRad = 2 * Math.atan(Math.tan(fovVRad / 2) * camera.aspect);
-  const halfFovH = fovHRad / 2;
-  const halfFovV = fovVRad / 2;
-  const widthAngle = mainState.mesh?.geometry?.userData?.widthAngle;
-  const halfWidth = widthAngle !== undefined ? widthAngle / 2 : null;
+  const camera    = mainState.camera;
+  const widthAngle = mainState.mesh.geometry?.userData?.widthAngle;
+  const halfWidth  = widthAngle !== undefined ? widthAngle / 2 : null;
 
   mainState.hotspotBtns.forEach(({ btn, hotspot }) => {
     const yawRad   = Number(hotspot.yawRad);
     const pitchRad = Number(hotspot.pitchRad);
+
     if (!Number.isFinite(yawRad) || !Number.isFinite(pitchRad)) {
       btn.hidden = true;
       return;
     }
 
+    // Fuera del arco del cilindro: ocultar sin proyectar
     if (halfWidth !== null && Math.abs(yawRad) > halfWidth) {
       btn.hidden = true;
       return;
     }
 
-    const yawRel   = normalizeHotspotAngle(yawRad - mainState.yaw);
-    const pitchRel = pitchRad - mainState.pitch;
-    const normX = yawRel / halfFovH;
-    const normY = -(pitchRel / halfFovV);
-
-    const visible =
-      Math.abs(normX) <= 1.1 &&
-      Math.abs(normY) <= 1.2 &&
-      Math.abs(yawRel) < Math.PI / 2;
-
-    if (visible) {
-      btn.hidden = false;
-      btn.style.left = (normX * 0.5 + 0.5) * 100 + '%';
-      btn.style.top  = (normY * 0.5 + 0.5) * 100 + '%';
-    } else {
+    // Pre-filtro angular: más de ±90° del centro de cámara es definitivamente trasero
+    if (Math.abs(normalizeHotspotAngle(yawRad - mainState.yaw)) >= Math.PI / 2) {
       btn.hidden = true;
+      return;
     }
+
+    // Punto 3D sobre el cilindro, mismo sistema que createMainPanoramaGeometry
+    const point = new THREE.Vector3(
+      Math.sin(yawRad) * 5.2,
+      Math.tan(pitchRad) * 5.2,
+      -Math.cos(yawRad) * 5.2
+    );
+
+    // Proyectar con la matriz view-projection real de la cámara
+    // (matrixWorldInverse actualizada explícitamente antes en animateMainPanorama).
+    point.project(camera);
+
+    // z > 1: punto detrás de cámara o fuera del frustum
+    if (point.z > 1 || Math.abs(point.x) > 1.1 || Math.abs(point.y) > 1.2) {
+      btn.hidden = true;
+      return;
+    }
+
+    btn.hidden = false;
+    btn.style.left = ( point.x * 0.5 + 0.5) * 100 + '%';
+    btn.style.top  = (-point.y * 0.5 + 0.5) * 100 + '%';
   });
 }
 
@@ -535,6 +542,7 @@ function animateMainPanorama() {
   mainState.yaw += (mainState.targetYaw - mainState.yaw) * 0.14;
   mainState.pitch += (mainState.targetPitch - mainState.pitch) * 0.12;
   mainState.camera.rotation.set(mainState.pitch, mainState.yaw, 0);
+  mainState.camera.updateMatrixWorld(true);
   updateHotspotOverlay();
   mainState.renderer.render(mainState.scene, mainState.camera);
   mainState.frameId = requestAnimationFrame(animateMainPanorama);
