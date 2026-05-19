@@ -52,6 +52,51 @@ class HotspotModel
         return $stmt->fetchAll();
     }
 
+    public function getValidForPublic(int $positionId, int $tourId): array
+    {
+        if ($positionId <= 0 || $tourId <= 0) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT h.id,
+                    h.yaw_rad,
+                    h.pitch_rad,
+                    COALESCE(NULLIF(h.label, \'\'), NULLIF(h.title, \'\'), p_dest.name) AS hotspot_label,
+                    h.target_position_id
+             FROM hotspots h
+             JOIN positions p_dest
+                  ON p_dest.id = h.target_position_id
+                 AND p_dest.tour_id = ?
+                 AND p_dest.deleted_at IS NULL
+             WHERE h.position_id = ?
+               AND h.type = ?
+               AND h.is_active = 1
+               AND h.needs_review = 0
+               AND h.deleted_at IS NULL
+               AND EXISTS (
+                   SELECT 1
+                   FROM photos ph_dest
+                   WHERE ph_dest.position_id = p_dest.id
+                     AND ph_dest.direction = \'360\'
+                     AND ph_dest.deleted_at IS NULL
+                   LIMIT 1
+               )
+             ORDER BY h.created_at ASC, h.id ASC'
+        );
+        $stmt->execute([$tourId, $positionId, self::TYPE_NAVIGATION]);
+
+        return array_map(static function (array $row): array {
+            return [
+                'id'               => (int)    $row['id'],
+                'yawRad'           => (float)  $row['yaw_rad'],
+                'pitchRad'         => (float)  $row['pitch_rad'],
+                'label'            => (string) ($row['hotspot_label'] ?? ''),
+                'targetPositionId' => (int)    $row['target_position_id'],
+            ];
+        }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
     public function createNavigation(array $data): int
     {
         $positionId = (int) ($data['position_id'] ?? 0);

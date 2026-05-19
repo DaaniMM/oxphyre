@@ -228,6 +228,8 @@ function initMainPanorama(url) {
     mesh: null,
     frameId: null,
     listeners: [],
+    overlay: null,
+    hotspotBtns: [],
     yaw: 0,
     targetYaw: 0,
     pitch: 0,
@@ -258,6 +260,7 @@ function initMainPanorama(url) {
   mainState.scene = scene;
   mainState.camera = camera;
   mainState.renderer = renderer;
+  createHotspotOverlay();
 
   const state = mainState;
   const loader = new THREE.TextureLoader();
@@ -433,12 +436,106 @@ function addMainPointerListeners(container) {
   addMainListener(container, 'pointercancel', stopDrag);
 }
 
+function normalizeHotspotAngle(angle) {
+  return Math.atan2(Math.sin(angle), Math.cos(angle));
+}
+
+function createHotspotOverlay() {
+  if (!mainState) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'hotspot-overlay';
+  mainState.container.appendChild(overlay);
+  mainState.overlay = overlay;
+  mainState.hotspotBtns = [];
+
+  const hotspots = currentPosition?.hotspots || [];
+  hotspots.forEach(hs => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hotspot-btn';
+    btn.setAttribute('aria-label', `Ir a ${hs.label || 'siguiente zona'}`);
+    btn.dataset.hotspotId = String(hs.id);
+    btn.dataset.targetPositionId = String(hs.targetPositionId);
+    btn.hidden = true;
+
+    const icon = document.createElement('span');
+    icon.className = 'hotspot-icon';
+    icon.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.className = 'hotspot-label';
+    label.textContent = hs.label || '';
+
+    btn.appendChild(icon);
+    btn.appendChild(label);
+
+    btn.addEventListener('pointerdown', e => e.stopPropagation());
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const targetId = parseInt(btn.dataset.targetPositionId, 10);
+      const positions = getPositions();
+      const idx = positions.findIndex(p => p.id === targetId);
+      if (idx >= 0) loadPosition(idx);
+    });
+
+    overlay.appendChild(btn);
+    mainState.hotspotBtns.push({ btn, hotspot: hs });
+  });
+}
+
+function updateHotspotOverlay() {
+  if (!mainState?.hotspotBtns?.length || !mainState.camera) return;
+
+  const camera = mainState.camera;
+  const fovVRad = THREE.MathUtils.degToRad(camera.fov);
+  const fovHRad = 2 * Math.atan(Math.tan(fovVRad / 2) * camera.aspect);
+  const halfFovH = fovHRad / 2;
+  const halfFovV = fovVRad / 2;
+  const widthAngle = mainState.mesh?.geometry?.userData?.widthAngle;
+  const halfWidth = widthAngle !== undefined ? widthAngle / 2 : null;
+
+  mainState.hotspotBtns.forEach(({ btn, hotspot }) => {
+    const yawRad   = Number(hotspot.yawRad);
+    const pitchRad = Number(hotspot.pitchRad);
+    if (!Number.isFinite(yawRad) || !Number.isFinite(pitchRad)) {
+      btn.hidden = true;
+      return;
+    }
+
+    if (halfWidth !== null && Math.abs(yawRad) > halfWidth) {
+      btn.hidden = true;
+      return;
+    }
+
+    const yawRel   = normalizeHotspotAngle(yawRad - mainState.yaw);
+    const pitchRel = pitchRad - mainState.pitch;
+    const normX = yawRel / halfFovH;
+    const normY = -(pitchRel / halfFovV);
+
+    const visible =
+      Math.abs(normX) <= 1.1 &&
+      Math.abs(normY) <= 1.2 &&
+      Math.abs(yawRel) < Math.PI / 2;
+
+    if (visible) {
+      btn.hidden = false;
+      btn.style.left = (normX * 0.5 + 0.5) * 100 + '%';
+      btn.style.top  = (normY * 0.5 + 0.5) * 100 + '%';
+    } else {
+      btn.hidden = true;
+    }
+  });
+}
+
 function animateMainPanorama() {
   if (!mainState || mainState.disposed || !mainState.mesh) return;
 
   mainState.yaw += (mainState.targetYaw - mainState.yaw) * 0.14;
   mainState.pitch += (mainState.targetPitch - mainState.pitch) * 0.12;
   mainState.camera.rotation.set(mainState.pitch, mainState.yaw, 0);
+  updateHotspotOverlay();
   mainState.renderer.render(mainState.scene, mainState.camera);
   mainState.frameId = requestAnimationFrame(animateMainPanorama);
 }
@@ -456,6 +553,8 @@ function disposeMainPanorama() {
   mainState.texture?.dispose();
   mainState.renderer?.dispose();
   mainState.renderer?.domElement?.remove();
+  mainState.overlay?.remove();
+  mainState.hotspotBtns = [];
   mainState.container.classList.remove('is-dragging');
   mainState.container.innerHTML = '';
   mainState = null;

@@ -324,6 +324,7 @@ class TourController extends BaseController
         require_once BACKEND_PATH . '/models/TourModel.php';
         require_once BACKEND_PATH . '/models/PositionModel.php';
         require_once BACKEND_PATH . '/models/PhotoModel.php';
+        require_once BACKEND_PATH . '/models/HotspotModel.php';
         require_once BACKEND_PATH . '/services/PhotoUrlResolver.php';
 
         // Acceso público: busca el negocio sin filtrar por usuario
@@ -345,9 +346,10 @@ class TourController extends BaseController
         $hasMinimapa  = $planId >= PLAN_PRO;
 
         // Cargar posiciones con sus fotos organizadas por dirección
-        $posModel   = new PositionModel();
-        $photoModel = new PhotoModel();
-        $positions  = $posModel->getByTour((int) $tour['id']);
+        $posModel     = new PositionModel();
+        $photoModel   = new PhotoModel();
+        $hotspotModel = new HotspotModel();
+        $positions    = $posModel->getByTour((int) $tour['id']);
 
         $tourPositions = [];
         $detailDirections = ['N', 'S', 'E', 'O'];
@@ -384,6 +386,7 @@ class TourController extends BaseController
                 'hasRoom'    => $hasDetails,
                 'hasDetails' => $hasDetails,
                 'photos'     => $photosByDir,
+                'hotspots'   => $hotspotModel->getValidForPublic((int) $pos['id'], (int) $tour['id']),
             ];
         }
 
