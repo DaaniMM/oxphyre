@@ -489,16 +489,25 @@ function createHotspotOverlay() {
 
 // Activa solo para depuración local. Dejar en false en producción.
 const DEBUG_HOTSPOTS = false;
+// Signo del ángulo de yaw al construir el punto 3D del cilindro.
+// Valor normal: 1.  Cambiar a -1 para probar eje invertido sin reescribir la lógica.
+const HOTSPOT_YAW_SIGN = 1;
 
 function updateHotspotOverlay() {
   if (!mainState?.hotspotBtns?.length || !mainState.camera || !mainState.mesh) return;
 
   const camera   = mainState.camera;
   const userData = mainState.mesh.geometry?.userData ?? {};
-  // Leer del mismo geometry que createMainPanoramaGeometry() construyó.
   const radius    = userData.radius    ?? 5.2;
   const cylHeight = userData.height    ?? 4.8;
   const halfWidth = userData.widthAngle != null ? userData.widthAngle / 2 : null;
+
+  // Rect del canvas una vez por frame — base para la conversión NDC → píxeles.
+  const canvasRect = mainState.renderer.domElement.getBoundingClientRect();
+  let _cRect;
+  if (DEBUG_HOTSPOTS) {
+    _cRect = mainState.container.getBoundingClientRect();
+  }
 
   mainState.hotspotBtns.forEach(({ btn, hotspot }) => {
     const yawRad   = Number(hotspot.yawRad);
@@ -515,31 +524,59 @@ function updateHotspotOverlay() {
       return;
     }
 
-    // Pre-filtro angular: cámara en yaw=Y mira al ángulo de cilindro -Y,
-    // por lo que la distancia angular real al hotspot es yawRad + mainState.yaw.
-    // Más de ±90° del centro de cámara: definitivamente detrás o fuera de FOV.
-    if (Math.abs(normalizeHotspotAngle(yawRad + mainState.yaw)) >= Math.PI / 2) {
+    // theta: ángulo efectivo del hotspot sobre el cilindro.
+    // HOTSPOT_YAW_SIGN=1 mantiene el convenio actual; -1 invierte el eje para diagnóstico.
+    const theta = yawRad * HOTSPOT_YAW_SIGN;
+
+    // Pre-filtro: cámara en yaw=Y mira al cilindro en ángulo -Y, por lo que
+    // la distancia angular real al hotspot es (theta + mainState.yaw).
+    const yawRel = normalizeHotspotAngle(theta + mainState.yaw);
+    if (Math.abs(yawRel) >= Math.PI / 2) {
+      if (DEBUG_HOTSPOTS) {
+        // eslint-disable-next-line no-console
+        console.log('[hs FILTERED]', {
+          yawRad, theta, camYaw: mainState.yaw.toFixed(4), yawRel: yawRel.toFixed(4),
+        });
+      }
       btn.hidden = true;
       return;
     }
 
     // Punto 3D sobre el cilindro, mismo sistema que createMainPanoramaGeometry().
-    //   x = sin(yaw) * r,  z = -cos(yaw) * r  (igual que los vértices)
+    //   x = sin(theta)*r,  z = -cos(theta)*r  (misma fórmula que los vértices)
     //   y: mapeo lineal pitchRad ∈ [-π/2, π/2] → [-height/2, +height/2]
-    //   porque el cilindro usa py = (0.5 - v) * height (lineal, no tan).
     const point = new THREE.Vector3(
-      Math.sin(yawRad) * radius,
+      Math.sin(theta) * radius,
       pitchRad / (Math.PI / 2) * (cylHeight / 2),
-      -Math.cos(yawRad) * radius
+      -Math.cos(theta) * radius
     );
 
-    // matrixWorldInverse ya está actualizado por camera.updateMatrixWorld(true)
-    // llamado inmediatamente antes en animateMainPanorama().
+    // matrixWorldInverse actualizado por camera.updateMatrixWorld(true) en animateMainPanorama.
     point.project(camera);
+
+    // NDC → desplazamiento en px desde el centro del canvas.
+    // Patrón Bruno Simon: translateX = ndc.x * width * 0.5
+    const translateX =  point.x * canvasRect.width  * 0.5;
+    const translateY = -point.y * canvasRect.height * 0.5;
 
     if (DEBUG_HOTSPOTS) {
       // eslint-disable-next-line no-console
-      console.log('[hs]', { yawRad, pitchRad, x: point.x.toFixed(3), y: point.y.toFixed(3), z: point.z.toFixed(3) });
+      console.log('[hs]', {
+        yawRad,
+        theta,
+        camYaw:    mainState.yaw.toFixed(4),
+        targetYaw: mainState.targetYaw.toFixed(4),
+        yawRel:    yawRel.toFixed(4),
+        ndcX:  point.x.toFixed(4),
+        ndcY:  point.y.toFixed(4),
+        ndcZ:  point.z.toFixed(4),
+        txPx:  translateX.toFixed(1),
+        tyPx:  translateY.toFixed(1),
+        canvasW:    canvasRect.width,
+        canvasH:    canvasRect.height,
+        containerW: _cRect?.width,
+        containerH: _cRect?.height,
+      });
     }
 
     // z > 1: detrás de cámara o fuera del frustum tras proyección perspectiva.
@@ -549,10 +586,8 @@ function updateHotspotOverlay() {
     }
 
     btn.hidden = false;
-    // NDC x: -1 = borde izquierdo, +1 = borde derecho.
-    // NDC y: -1 = borde inferior, +1 = borde superior → invertido para CSS top.
-    btn.style.left = ( point.x * 0.5 + 0.5) * 100 + '%';
-    btn.style.top  = (-point.y * 0.5 + 0.5) * 100 + '%';
+    btn.style.setProperty('--hs-x', `${translateX}px`);
+    btn.style.setProperty('--hs-y', `${translateY}px`);
   });
 }
 
