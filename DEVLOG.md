@@ -3096,3 +3096,64 @@ Flujo completo validado con sesion autenticada en https://oxphyre.com:
 - No se cambio BD ni migraciones.
 - No se tocaron R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
 
+## 2026-05-19 - Hotspots 1D-B/C/D implementado y validado en servidor real
+
+Tipo: automatizacion de `needs_review` al cambiar/borrar panoramica + avisos en dashboard.
+
+### Que se hizo
+
+#### 1D-B — Trigger automatico de needs_review
+
+- `PositionController::deletePhoto()`: si `direction === '360'`, despues de `softDeleteByPositionAndDirection` se llama a `HotspotModel::markNeedsReviewByPosition((int) $position['id'])`. Las flechas de esa posicion pasan a `needs_review=1` y quedan ocultas en el visor publico.
+- `PositionController::upload()`: dentro del bloque que procesa `photo_360` con exito, despues de `$photoModel->create()`, se llama a `markNeedsReviewByPosition($positionId)`. Una panoramica nueva puede descolocar flechas ya colocadas sobre la anterior; si no hay flechas, la llamada es no-op seguro.
+- `HotspotModel::updateTextureScoped()`: anadido `h.needs_review = 0` al SET. Cuando el usuario recoloca y guarda una flecha, `needs_review` vuelve a 0 y la flecha vuelve a aparecer en el visor publico. Cierra el ciclo.
+- `hotspot-editor.js`: `renderTargetList()` detecta `arrow.needsReview === true` y muestra badge "Revisar" en lugar de "Enlazada", y boton "Recolocar flecha" en lugar de "Editar flecha".
+- `dashboard.css`: nueva clase `.navigation-arrow-state.is-review` con tono naranja/ambar.
+
+#### 1D-C — Aviso en pantalla de gestion de posicion
+
+- `HotspotModel::countNeedsReviewByPosition(int $positionId): int` anadido. Query COUNT(*) con filtros type/needs_review/deleted_at.
+- `PositionController::showUpload()`: calcula `$navigationArrowsNeedReviewCount` y lo pasa a la vista.
+- `upload.php`: aviso ambar visible entre flash y header cuando contador > 0. Titulo, texto sin jerga tecnica y boton/enlace "Revisar flechas" con anchor `#navigation-arrows-panel`.
+
+#### 1D-D — Aviso en pantalla de gestion del tour
+
+- `HotspotModel::getPositionsWithNeedsReviewByTour(int $tourId): array` anadido. JOIN con `positions`, GROUP BY posicion, devuelve `positionId`, `positionName`, `pendingCount` ordenado por `order_index`.
+- `TourController::showManage()`: calcula `$arrowsNeedReviewByPosition` y mapa `$positionsWithArrowsNeedReview` indexado por positionId.
+- `tours/manage.php`:
+  - Aviso global ambar entre flash y header. Rama de 1 posicion (nombre + "Revisar flechas") y varias (lista con "Revisar" individual).
+  - Badge pequeño "Flechas por revisar" en la card de cada posicion afectada.
+  - Todos los enlaces apuntan al anchor `#navigation-arrows-panel` de la posicion correcta.
+
+### Flujo validado en servidor real
+
+1. Posicion con flecha activa, flecha aparece en visor publico.
+2. Subir nueva panoramica 360, flecha pasa a badge "Revisar", desaparece del visor.
+3. Aviso ambar visible en pantalla de posicion y en gestion del tour.
+4. Badge "Flechas por revisar" en card de la posicion afectada.
+5. Pulsar "Revisar flechas" / "Recolocar flecha", modal con nueva panoramica.
+6. Guardar flecha, `needs_review=0`, vuelve a "Enlazada", vuelve a aparecer en visor.
+7. Recargar cualquier pagina, avisos desaparecen.
+
+### Deuda tecnica pendiente P1
+
+- Los avisos en `upload.php` y `tours/manage.php` usan estilos inline. Funciona correctamente. Mover a clases reutilizables en `dashboard.css` en un paso de modularizacion posterior.
+
+### Pendiente de validacion
+
+- Probar borrar panoramica (no solo sustituir) para confirmar el mismo ciclo.
+
+### Archivos tocados
+
+- `backend/controllers/PositionController.php`
+- `backend/controllers/TourController.php`
+- `backend/models/HotspotModel.php`
+- `backend/views/dashboard/position/upload.php`
+- `backend/views/dashboard/tours/manage.php`
+- `public/js/hotspot-editor.js`
+- `public/css/dashboard.css`
+
+### Que NO se hizo
+- No se cambio BD ni migraciones.
+- No se tocaron R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
+
