@@ -146,6 +146,30 @@
         </div>
       <?php endif; ?>
 
+      <?php if (($navigationArrowsNeedReviewCount ?? 0) > 0): ?>
+        <div role="alert" style="display:flex;align-items:flex-start;gap:0.75rem;
+                                  padding:0.9rem 1rem;border-radius:10px;margin-bottom:1.25rem;
+                                  background:oklch(0.32 0.10 55/0.22);
+                                  border:1px solid oklch(0.65 0.16 55/0.45);">
+          <i data-lucide="triangle-alert" width="18" height="18"
+             style="flex-shrink:0;margin-top:1px;color:oklch(0.78 0.16 55);" aria-hidden="true"></i>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:0.875rem;font-weight:600;color:oklch(0.88 0.10 55);margin-bottom:0.2rem;">
+              Hay flechas de navegación pendientes de revisar
+            </p>
+            <p style="font-size:0.8125rem;color:var(--ox-text-muted);line-height:1.5;margin-bottom:0.65rem;">
+              Has cambiado o eliminado la panorámica de esta zona. Algunas flechas no aparecerán en el tour hasta que las recoloques.
+            </p>
+            <a href="#navigation-arrows-panel"
+               class="wizard-btn-submit"
+               style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8125rem;padding:0.45rem 0.9rem;">
+              <i data-lucide="navigation" width="14" height="14" aria-hidden="true"></i>
+              Revisar flechas
+            </a>
+          </div>
+        </div>
+      <?php endif; ?>
+
       <div class="db-manage-header" style="margin-bottom:1.25rem;">
         <div class="db-manage-header-left">
           <div class="db-manage-header-top">

@@ -187,6 +187,11 @@ class PositionController extends BaseController
         }
         $canEditNavigationArrows = $hasPanorama && $navigationTargetCount > 0;
 
+        // Flechas pendientes de revisión: panorámica cambiada o borrada desde que se colocaron.
+        // Si el contador > 0 la vista mostrará un aviso visible al propietario.
+        require_once BACKEND_PATH . '/models/HotspotModel.php';
+        $navigationArrowsNeedReviewCount = (new HotspotModel())->countNeedsReviewByPosition((int) $position['id']);
+
         $this->ensureCsrfToken();
 
         $userName    = htmlspecialchars($_SESSION['user_name']  ?? '');

@@ -409,6 +409,25 @@ class HotspotModel
         return $stmt->execute([$positionId, self::TYPE_NAVIGATION]);
     }
 
+    public function countNeedsReviewByPosition(int $positionId): int
+    {
+        if ($positionId <= 0) {
+            return 0;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT COUNT(*)
+             FROM hotspots
+             WHERE position_id = ?
+               AND type = ?
+               AND needs_review = 1
+               AND deleted_at IS NULL'
+        );
+        $stmt->execute([$positionId, self::TYPE_NAVIGATION]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     private function formatDashboardRow(array $row): array
     {
         return [
