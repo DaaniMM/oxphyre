@@ -2,19 +2,23 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const config = window.OXPHYRE_HOTSPOT_EDITOR;
-  const openBtn = document.getElementById('navigation-arrows-open');
-  const statusEl = document.getElementById('navigation-arrows-status');
-  const editorEl = document.getElementById('navigation-arrows-editor');
-  const stageEl = document.getElementById('navigation-arrows-stage');
-  const imageEl = document.getElementById('navigation-arrows-image');
-  const markerEl = document.getElementById('navigation-arrows-marker');
-  const formEl = document.getElementById('navigation-arrows-form');
-  const targetSelect = document.getElementById('navigation-arrows-target');
-  const saveBtn = document.getElementById('navigation-arrows-save');
-  const cancelBtn = document.getElementById('navigation-arrows-cancel');
-  const listEl = document.getElementById('navigation-arrows-list');
+  const openBtn        = document.getElementById('navigation-arrows-open');
+  const statusEl       = document.getElementById('navigation-arrows-status');
+  const editorEl       = document.getElementById('navigation-arrows-editor');
+  const listEl         = document.getElementById('navigation-arrows-list');
+  const modalEl        = document.getElementById('navigation-arrows-modal');
+  const modalOverlayEl = document.getElementById('navigation-arrows-modal-overlay');
+  const modalTitleEl   = document.getElementById('nar-modal-title');
+  const stageEl        = document.getElementById('navigation-arrows-stage');
+  const imageEl        = document.getElementById('navigation-arrows-image');
+  const markerEl       = document.getElementById('navigation-arrows-marker');
+  const targetInput    = document.getElementById('navigation-arrows-target');
+  const saveBtn        = document.getElementById('navigation-arrows-save');
+  const cancelBtn      = document.getElementById('navigation-arrows-cancel');
 
-  if (!config?.canEdit || !openBtn || !statusEl || !editorEl || !stageEl || !imageEl || !markerEl || !formEl || !targetSelect || !saveBtn || !cancelBtn || !listEl) {
+  if (!config?.canEdit || !openBtn || !statusEl || !editorEl || !listEl ||
+      !modalEl || !modalOverlayEl || !modalTitleEl ||
+      !stageEl || !imageEl || !markerEl || !targetInput || !saveBtn || !cancelBtn) {
     return;
   }
 
@@ -33,12 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
     editorEl.hidden = false;
   };
 
-  const showStage = () => {
-    stageEl.hidden = false;
+  const openModal = targetName => {
+    modalTitleEl.textContent = `Colocar flecha hacia ${targetName}`;
+    modalEl.hidden = false;
+    document.body.style.overflow = 'hidden';
   };
 
-  const hideStage = () => {
-    stageEl.hidden = true;
+  const closeModal = () => {
+    modalEl.hidden = true;
+    document.body.style.overflow = '';
   };
 
   const buildListUrl = () => {
@@ -49,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return url;
   };
 
-  // Normaliza a camelCase y snake_case por si el backend cambia formato.
   const getArrowForTarget = targetId =>
     arrows.find(a => Number(a.targetPositionId ?? a.target_position_id) === targetId) ?? null;
 
@@ -119,15 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
     stageMode = existingArrow ? 'edit' : 'add';
     activeTargetId = targetId;
     activeArrowId = existingArrow ? Number(existingArrow.id) : null;
+    targetInput.value = String(targetId);
     clearDraft();
-
-    // Pre-llenar el select con solo este destino (ya está elegido desde el listado).
-    targetSelect.innerHTML = '';
-    const target = targets.find(t => t.id === targetId);
-    const opt = document.createElement('option');
-    opt.value = String(targetId);
-    opt.textContent = target?.name || 'Zona del tour';
-    targetSelect.appendChild(opt);
 
     if (existingArrow) {
       const tx = Number(existingArrow.textureX ?? existingArrow.texture_x);
@@ -137,9 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    showStage();
-    stageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    setStatus('Haz clic sobre la panorámica para colocar la flecha.');
+    const target = targets.find(t => t.id === targetId);
+    openModal(target?.name || 'zona');
   };
 
   const closeStage = () => {
@@ -147,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stageMode = null;
     activeTargetId = null;
     activeArrowId = null;
-    hideStage();
+    closeModal();
     setStatus('Preparado para editar.');
   };
 
@@ -156,13 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
     markerEl.hidden = false;
     markerEl.style.left = `${point.x * 100}%`;
     markerEl.style.top = `${point.y * 100}%`;
-    formEl.hidden = false;
   };
 
   const clearDraft = () => {
     draftPoint = null;
     markerEl.hidden = true;
-    formEl.hidden = true;
   };
 
   const loadEditorData = async () => {
@@ -185,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
       targets = payload.data?.targets || [];
       renderTargetList();
       showEditor();
-      hideStage();
       setStatus('Preparado para editar.');
       return true;
     } catch {
@@ -204,17 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (x < 0 || x > 1 || y < 0 || y > 1) return;
 
     updateDraftMarker({ x, y });
-    setStatus('Pulsa "Guardar flecha" para confirmar.');
   };
 
   const saveDraft = async () => {
     if (!draftPoint || !activeTargetId) {
-      setStatus('Haz clic sobre la imagen para colocar la flecha primero.');
       return;
     }
 
     saveBtn.disabled = true;
-    setStatus('Guardando flecha...');
 
     try {
       let endpoint, body;
@@ -311,6 +303,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   stageEl.addEventListener('click', handleStageClick);
+  modalOverlayEl.addEventListener('click', closeStage);
   saveBtn.addEventListener('click', saveDraft);
   cancelBtn.addEventListener('click', closeStage);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !modalEl.hidden) closeStage();
+  });
 });

@@ -349,11 +349,8 @@
               <?= $canEditNavigationArrows ? 'Disponible' : 'Pendiente' ?>
             </span>
           </div>
-          <p class="upload-flow-copy">
-            Conecta esta posición con otras zonas del tour.
-          </p>
           <p class="upload-flow-help">
-            Las flechas aparecerán sobre la panorámica principal y permitirán que tus clientes avancen por el recorrido.
+            Las flechas aparecerán sobre la panorámica y permitirán que tus clientes avancen por el recorrido.
           </p>
 
           <?php if (!$hasPanorama): ?>
@@ -378,27 +375,8 @@
             </div>
             <div class="navigation-arrows-editor" id="navigation-arrows-editor" hidden>
               <p class="navigation-arrows-instructions">
-                Haz clic sobre la panorámica para colocar una flecha. Después elige a qué zona llevará.
+                Listado de zonas disponibles. Pulsa una zona para añadir o editar su flecha de navegación.
               </p>
-              <div class="navigation-arrows-stage" id="navigation-arrows-stage" hidden>
-                <img src="<?= htmlspecialchars((string) $panoramaUrl) ?>"
-                     alt="Panorámica actual de esta zona"
-                     class="navigation-arrows-image"
-                     id="navigation-arrows-image">
-                <span class="navigation-arrows-marker" id="navigation-arrows-marker" hidden></span>
-              </div>
-              <div class="navigation-arrows-form" id="navigation-arrows-form" hidden>
-                <label class="db-form-label" for="navigation-arrows-target">¿A qué zona lleva esta flecha?</label>
-                <div class="navigation-arrows-form-row">
-                  <select class="db-form-input" id="navigation-arrows-target"></select>
-                  <button type="button" class="wizard-btn-submit" id="navigation-arrows-save">
-                    Guardar flecha
-                  </button>
-                  <button type="button" class="db-btn-ghost" id="navigation-arrows-cancel">
-                    Cancelar
-                  </button>
-                </div>
-              </div>
               <div class="navigation-arrows-list" id="navigation-arrows-list"></div>
             </div>
           <?php endif; ?>
@@ -438,6 +416,33 @@
           </form>
         <?php endif; ?>
       <?php endforeach; ?>
+
+      <?php if ($canEditNavigationArrows): ?>
+      <div class="navigation-arrows-modal" id="navigation-arrows-modal" hidden
+           role="dialog" aria-modal="true" aria-labelledby="nar-modal-title">
+        <div class="navigation-arrows-modal-overlay" id="navigation-arrows-modal-overlay"></div>
+        <div class="navigation-arrows-modal-box">
+          <p class="navigation-arrows-modal-title" id="nar-modal-title">Colocar flecha</p>
+          <p class="navigation-arrows-modal-hint">Haz clic en la imagen donde quieres que aparezca la flecha.</p>
+          <div class="navigation-arrows-stage" id="navigation-arrows-stage">
+            <img src="<?= htmlspecialchars((string) $panoramaUrl) ?>"
+                 alt="Panorámica de esta zona"
+                 class="navigation-arrows-image"
+                 id="navigation-arrows-image">
+            <span class="navigation-arrows-marker" id="navigation-arrows-marker" hidden></span>
+          </div>
+          <input type="hidden" id="navigation-arrows-target" value="">
+          <div class="navigation-arrows-modal-actions">
+            <button type="button" class="wizard-btn-submit" id="navigation-arrows-save">
+              Guardar flecha
+            </button>
+            <button type="button" class="db-btn-ghost" id="navigation-arrows-cancel">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+      <?php endif; ?>
     </div>
   </main>
 </div>
@@ -568,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-<script src="/js/hotspot-editor.js?v=20260519-3"></script>
+<script src="/js/hotspot-editor.js?v=20260519-4"></script>
 
 </body>
 </html>

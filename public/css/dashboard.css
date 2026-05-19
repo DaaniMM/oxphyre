@@ -1930,6 +1930,74 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   border-color: oklch(0.55 0.15 25 / 0.6);
 }
 
+/* ── Modal de colocación de flecha ──────────────────────────────────────────── */
+
+.navigation-arrows-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.navigation-arrows-modal[hidden] {
+  display: none;
+}
+
+.navigation-arrows-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.navigation-arrows-modal-box {
+  position: relative;
+  width: min(92vw, 860px);
+  background: #0e0e12;
+  border: 1px solid var(--ox-border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.navigation-arrows-modal-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ox-text);
+  margin: 0;
+}
+
+.navigation-arrows-modal-hint {
+  font-size: 0.8125rem;
+  color: var(--ox-text-muted);
+  margin: -0.35rem 0 0;
+}
+
+/* Imagen contenida dentro del modal */
+.navigation-arrows-modal-box .navigation-arrows-stage {
+  max-height: none;
+  cursor: crosshair;
+}
+
+.navigation-arrows-modal-box .navigation-arrows-image {
+  max-height: 60vh;
+  object-fit: fill;
+}
+
+.navigation-arrows-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .position-header-actions {
   display: flex;
   align-items: center;
