@@ -2817,3 +2817,39 @@ Tipo: validacion real de migracion BD/modelo base de hotspots.
 - No se cambio codigo durante esta validacion documental.
 - No se toco visor, dashboard, fotos, R2, QR, Composer ni `.env`.
 - No se hizo commit ni push desde esta sesion.
+
+## 2026-05-19 - Hotspots 1B render publico validado visualmente
+
+Tipo: validacion visual en servidor real del render publico minimo de hotspots.
+
+### Que se valido
+- Se pivoto de `yaw_rad`/`pitch_rad` como fuente principal a `texture_x`/`texture_y`.
+- Se creo y ejecuto la migracion `docs/sql/2026-05-19_hotspots_texture_coordinates.sql`.
+- La tabla `hotspots` tiene `texture_x` y `texture_y`.
+- Hotspot de prueba validado:
+  - `position_id = 1`
+  - `target_position_id = 2`
+  - `texture_x = 0.5`
+  - `texture_y = 0.5`
+  - `label = 'Ir a probando R2'`
+- `TOUR_DATA` trae el hotspot en la posicion 1 y `[]` en la posicion 2.
+- El overlay aparece en el visor publico.
+- El hotspot se mantiene anclado sobre la cortina al mover el visor horizontalmente.
+- El hotspot se mantiene correctamente al modificar el tamano de ventana y con F12 responsive.
+
+### Decision
+- `texture_x` y `texture_y` pasan a ser la fuente principal para render publico y futuro editor visual.
+- `yaw_rad` y `pitch_rad` quedan como legacy/derivadas futuras.
+- La razon del cambio es UX/implementacion: el usuario crea hotspots haciendo click sobre la imagen, no introduciendo coordenadas angulares.
+- `texture_x` y `texture_y` representan un punto relativo de la panoramica/textura. No son pixeles de pantalla ni posicion del visor.
+
+### Pendiente
+- Confirmar o documentar aparte si el click del hotspot ya navega a la posicion destino.
+- Hotspots 1C: editor dashboard para crear/recolocar hotspots con click sobre la panoramica usando `texture_x`/`texture_y`.
+- Hotspots 1D: `needs_review` automatico al sustituir/borrar panoramica + aviso/confirmacion en dashboard.
+- Hotspots 1E: pulido UX/mobile/labels/limites si procede.
+
+### Que NO se hizo en esta actualizacion documental
+- No se toco codigo PHP, JS, CSS ni SQL.
+- No se toco BD, visor, dashboard, fotos, R2, QR, Composer ni `.env`.
+- No se hizo commit ni push desde esta sesion.
