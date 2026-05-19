@@ -2762,6 +2762,7 @@ Tipo: base tecnica para hotspots de navegacion. Sin editor visual ni render publ
 ### Que se hizo
 - Se creo `docs/sql/2026-05-19_hotspots_navigation_coordinates.sql` como migracion defensiva para `hotspots`.
 - La migracion crea la tabla si no existe y, si ya existe una tabla legacy, anade columnas nuevas sin borrar columnas antiguas como `photo_id`.
+- `photo_id` queda como columna legacy nullable para compatibilidad con produccion; el nuevo flujo no la usa como origen principal y guarda el origen logico en `position_id`.
 - Se definio que los hotspots de navegacion se guardan como `yaw_rad` y `pitch_rad` en radianes relativos al cilindro de la panoramica principal, no como pixeles de pantalla ni porcentajes 2D.
 - Se anadio `position_id` como origen logico del hotspot, `target_position_id` como destino y `panorama_photo_id` para saber sobre que panoramica se coloco.
 - Se anadieron `needs_review`, `is_active`, `updated_at` y `deleted_at` para permitir ocultar hotspots desactualizados, desactivar sin borrar y aplicar soft delete.

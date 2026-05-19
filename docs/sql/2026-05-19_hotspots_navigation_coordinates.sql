@@ -27,6 +27,20 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS oxphyre_add_hotspots_column//
 DROP PROCEDURE IF EXISTS oxphyre_add_hotspots_index//
 
+CREATE PROCEDURE oxphyre_make_hotspots_photo_id_nullable()
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'hotspots'
+      AND COLUMN_NAME = 'photo_id'
+      AND IS_NULLABLE = 'NO'
+  ) THEN
+    ALTER TABLE hotspots MODIFY photo_id INT UNSIGNED NULL;
+  END IF;
+END//
+
 CREATE PROCEDURE oxphyre_add_hotspots_column(IN p_column_name VARCHAR(64), IN p_column_definition TEXT)
 BEGIN
   IF NOT EXISTS (
@@ -61,6 +75,8 @@ END//
 
 DELIMITER ;
 
+CALL oxphyre_make_hotspots_photo_id_nullable();
+
 CALL oxphyre_add_hotspots_column('position_id', 'position_id INT UNSIGNED NULL');
 CALL oxphyre_add_hotspots_column('target_position_id', 'target_position_id INT UNSIGNED NULL');
 CALL oxphyre_add_hotspots_column('panorama_photo_id', 'panorama_photo_id INT UNSIGNED NULL');
@@ -78,5 +94,6 @@ CALL oxphyre_add_hotspots_index('idx_hotspots_position', '(position_id, deleted_
 CALL oxphyre_add_hotspots_index('idx_hotspots_target_position', '(target_position_id)');
 CALL oxphyre_add_hotspots_index('idx_hotspots_public', '(position_id, type, is_active, needs_review, deleted_at)');
 
+DROP PROCEDURE IF EXISTS oxphyre_make_hotspots_photo_id_nullable;
 DROP PROCEDURE IF EXISTS oxphyre_add_hotspots_column;
 DROP PROCEDURE IF EXISTS oxphyre_add_hotspots_index;
