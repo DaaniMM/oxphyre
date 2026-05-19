@@ -55,6 +55,7 @@ Estado implementado:
 - Visor público Sprint 1 sin Photo Sphere Viewer: panorámica parcial horizontal con pitch limitado.
 - Sprint 1 Oxphyre Room Free/base implementado, con decisión UX posterior: Oxphyre Room pasa a ser la experiencia completa de posición. Panorámica `360` obligatoria para que la posición sea visitable; fotos detalle 1-4 opcionales.
 - Soft delete en businesses, tours, positions y photos.
+- QR 1 descargable y QR 2A validados en servidor real: `/qr/{token}` redirige a tour publico, `GET` valido registra escaneo pseudonimizado en `qr_scans`, `HEAD` y bots no cuentan, y el contador simple se calcula con `COUNT(*)`.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
 
 ---
@@ -76,6 +77,17 @@ Estado implementado:
 - Escapar salida con htmlspecialchars().
 - Sanitizar entrada con strip_tags() cuando corresponda.
 - Credenciales siempre en .env, nunca en código ni GitHub.
+
+### QR y analitica basica
+- QR 2A esta cerrado y validado en servidor real.
+- `qr_scans` es la fuente de verdad de analitica QR. Cada fila representa un escaneo contado.
+- El contador se calcula con `COUNT(*)` sobre `qr_scans`; no se usa ni actualiza `qr_codes.total_scans`.
+- Solo `GET /qr/{token}` valido y no bot registra escaneo. `HEAD /qr/{token}` queda para debug y no cuenta.
+- No se guarda IP real, User-Agent completo ni pais: `ip_address`, `user_agent` y `country` quedan en `NULL`.
+- Se guarda solo `qr_code_id`, `ip_hash`, `device_type` y `scanned_at`.
+- La deduplicacion usa `qr_code_id + ip_hash` durante 30 minutos.
+- En produccion, Nginx debe pasar `HTTP_CF_CONNECTING_IP` a PHP. Si se vacia esa cabecera, PHP cae a `REMOTE_ADDR`; detras de Cloudflare puede variar el edge entre requests y romper la deduplicacion por cambio de `ip_hash`.
+- Configuracion Nginx validada para QR 2A: `fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;` y `fastcgi_param HTTP_X_FORWARDED_FOR $http_x_forwarded_for;`.
 
 ### Visor público
 - El visor público Sprint 1 usa Three.js vanilla para la panorámica principal adaptativa y Oxphyre Room.
@@ -387,7 +399,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
 
 ### Prioridad media
-- QR 1 descargable esta validado en servidor real con URL permanente `/qr/{token}` base62 de 12 caracteres. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug con `curl -I`, devolviendo el mismo status y `Location` sin body. QR 1 reutiliza un token por tour mediante logica find-or-create; `token` es UNIQUE y `tour_id` no es UNIQUE para permitir multiples tokens/campanas futuras. El PNG se genera al vuelo y no se guarda en disco ni R2. QR 2A esta implementado en local: registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. Pendiente ejecutar migracion SQL, definir `QR_HASH_SALT` en `.env` de produccion y validar en servidor real.
+- QR 1 descargable y QR 2A estan validados en servidor real. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug sin contar escaneo. QR 2A registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. La incidencia de deduplicacion por `REMOTE_ADDR` variable detras de Cloudflare quedo resuelta pasando `HTTP_CF_CONNECTING_IP` desde Nginx a PHP.
 - Editor canvas drag & drop.
 - Hotspots.
 - Minimap real.
@@ -426,7 +438,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Oxphyre Room MVP histórico carga 4 fotos en una escena Three.js tipo Direction Sphere; decisión vigente: permitir detalles disponibles sin exigir 4 y ocultar direcciones N/S/E/O al usuario.
 - Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
 - Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
-- Estado: flujo base, pipeline WebP/libvips, R2/CDN Fase 2B y QR 1 descargable con `/qr/{token}` validados en servidor real; QR 1.1 HEAD implementado para debug; QR 2A implementado en local pendiente de migracion/validacion real; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
+- Estado: flujo base, pipeline WebP/libvips, R2/CDN Fase 2B, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real; QR 1.1 HEAD implementado para debug sin contar escaneo; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
 
 Sesión anterior importante:
 - Migración del visor público a Photo Sphere Viewer v4.
@@ -451,9 +463,8 @@ Siguiente orden recomendado para cerrar antes del TFG:
    - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
    - Fase 2B **implementada y validada en servidor real**: visor/dashboard usan `public_url` si existe y fallback local si no. CORS R2 configurado y validado para WebGL/Three.js.
 4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-5. QR 2A: ejecutar migracion `docs/sql/2026-05-18_qr_scans_2a_privacy_dedupe.sql`, definir `QR_HASH_SALT` en `.env` de produccion y validar en servidor que GET navegador cuenta, HEAD no cuenta y curl/wget no cuentan.
-6. Hotspots de navegación entre posiciones. No implementado todavía.
-7. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+5. Hotspots de navegación entre posiciones. No implementado todavía.
+6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
 

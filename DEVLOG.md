@@ -2680,3 +2680,77 @@ QR 2A activa una metrica basica util para el dashboard sin ampliar alcance a gra
 - No se implementaron graficas, pagina stats, PDF, campanas, QR por posicion ni gating por plan.
 - No se toco Composer, R2, uploads ni `QrCodeService.php`.
 - No se hizo commit ni push.
+
+## 2026-05-19 - QR 2A validado en servidor real
+
+Tipo: cierre de analitica QR basica con privacidad e incidencia Nginx/Cloudflare resuelta.
+
+### Que se valido
+- La migracion `docs/sql/2026-05-18_qr_scans_2a_privacy_dedupe.sql` se ejecuto correctamente en servidor.
+- `qr_scans` tiene `ip_hash VARCHAR(64)`, indice `idx_qr_scans_dedupe (qr_code_id, ip_hash, scanned_at)` e indice `idx_qr_scans_qr_code_scanned_at (qr_code_id, scanned_at)`.
+- `GET /qr/{token}` valido registra escaneo en `qr_scans`.
+- `HEAD /qr/{token}` no registra escaneo.
+- curl, wget y bots filtrados por User-Agent no registran escaneo.
+- No se guarda IP real: `ip_address = NULL`.
+- No se guarda User-Agent completo: `user_agent = NULL`.
+- No se guarda pais/geolocalizacion: `country = NULL`.
+- Cada escaneo contado guarda solo `qr_code_id`, `ip_hash`, `device_type` y `scanned_at`.
+- El contador simple se calcula desde `qr_scans` con `COUNT(*)` y aparece junto al boton "Descargar QR" en `manage.php`.
+- `qr_codes.total_scans` queda como columna legacy/cache futura; QR 2A no la usa ni la actualiza para evitar inconsistencias.
+
+### Incidencia encontrada
+Durante la validacion inicial, dos GET con User-Agent de navegador en menos de 30 minutos crearon dos filas distintas:
+- id 1, hash8 `99e2c11f`
+- id 2, hash8 `ca3a6e14`
+
+La deduplicacion no fallaba por SQL. El problema era que PHP recibia una IP distinta entre peticiones. En Nginx se encontro que el bloque PHP-FPM vaciaba las cabeceras:
+
+```nginx
+fastcgi_param HTTP_X_FORWARDED_FOR "";
+fastcgi_param HTTP_CF_CONNECTING_IP "";
+```
+
+Al no llegar `HTTP_CF_CONNECTING_IP`, `QrController::getClientIp()` caia a `REMOTE_ADDR`. Detras de Cloudflare, `REMOTE_ADDR` puede ser el edge de Cloudflare y variar entre requests; al cambiar la IP usada para el hash, cambiaba `ip_hash` y la deduplicacion no podia encontrar duplicado.
+
+### Solucion aplicada en servidor
+Se cambio el bloque PHP-FPM de Nginx para pasar las cabeceras reales:
+
+```nginx
+fastcgi_param HTTP_X_FORWARDED_FOR $http_x_forwarded_for;
+fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
+```
+
+Despues se valido Nginx con:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Validacion final
+Se ejecutaron dos GET con User-Agent de navegador separados por 10 segundos:
+
+```bash
+TOKEN="LAeYLVmf5QUb"
+
+curl -A "Mozilla/5.0 QRTest" -s -o /dev/null -D - "https://oxphyre.com/qr/$TOKEN"
+sleep 10
+curl -A "Mozilla/5.0 QRTest" -s -o /dev/null -D - "https://oxphyre.com/qr/$TOKEN"
+```
+
+Resultado: solo se creo una fila nueva:
+- id 3
+- hash8 `319ee091`
+- `device_type = desktop`
+- `scanned_at = 2026-05-19 08:42:11`
+
+No aparecio id 4. La deduplicacion de 30 minutos quedo validada.
+
+### Decision
+No anadir columna tipo `veces_escaneado`. La fuente de verdad es `qr_scans`: cada fila representa un escaneo contado. `COUNT(*) FROM qr_scans WHERE qr_code_id = ?` es el contador real y permite futuras analiticas por dia, dispositivo y evolucion temporal.
+
+### Que NO se hizo
+- No se cambio codigo PHP durante este cierre documental.
+- No se modifico BD adicional.
+- No se toco Composer, R2, `.env`, uploads ni codigo de fotos.
+- No se hizo commit ni push.
