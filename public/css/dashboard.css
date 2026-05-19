@@ -1916,6 +1916,13 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   margin-left: 10px;
 }
 
+.navigation-arrow-state.is-review {
+  border-color: oklch(0.65 0.18 40 / 0.55);
+  color: oklch(0.78 0.16 40);
+  background: oklch(0.55 0.16 40 / 0.12);
+  margin-left: 10px;
+}
+
 .navigation-arrow-action-btn {
   font-size: 0.72rem;
   padding: 0.25rem 0.55rem;

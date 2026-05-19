@@ -304,6 +304,10 @@ class PositionController extends BaseController
                     $storage['storage_key'],
                     $storage['public_url']
                 );
+                // Una panorámica nueva puede descolocar flechas ya colocadas sobre la anterior.
+                // Si no hay flechas, la llamada es un no-op seguro (afecta 0 filas en BD).
+                require_once BACKEND_PATH . '/models/HotspotModel.php';
+                (new HotspotModel())->markNeedsReviewByPosition($positionId);
                 $processed++;
                 if ($result['warning'] !== '') {
                     $warnings[] = $result['warning'];
@@ -484,6 +488,14 @@ class PositionController extends BaseController
         }
 
         $photoModel->softDeleteByPositionAndDirection((int) $position['id'], $direction);
+
+        // Al borrar la panorámica principal las flechas apuntan a una vista ya inexistente:
+        // se marcan para revisión y quedan ocultas en el visor público hasta recolocarlas.
+        if ($direction === '360') {
+            require_once BACKEND_PATH . '/models/HotspotModel.php';
+            (new HotspotModel())->markNeedsReviewByPosition((int) $position['id']);
+        }
+
         $this->flash('success', 'Foto eliminada correctamente.');
         $this->go("/dashboard/posicion/upload?position={$posId}&negocio={$bizSlug}&tour={$tourSlug}");
     }

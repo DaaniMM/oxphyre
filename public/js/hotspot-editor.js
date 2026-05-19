@@ -84,9 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
       nameEl.className = 'navigation-arrow-title';
       nameEl.textContent = target.name || 'Zona del tour';
 
+      const needsReview = hasArrow && Boolean(arrow.needsReview ?? arrow.needs_review);
+
       const stateEl = document.createElement('span');
-      stateEl.className = 'navigation-arrow-state' + (hasArrow ? ' is-linked' : '');
-      stateEl.textContent = hasArrow ? 'Enlazada' : 'Sin flecha';
+      if (!hasArrow) {
+        stateEl.className = 'navigation-arrow-state';
+        stateEl.textContent = 'Sin flecha';
+      } else if (needsReview) {
+        stateEl.className = 'navigation-arrow-state is-review';
+        stateEl.textContent = 'Revisar';
+      } else {
+        stateEl.className = 'navigation-arrow-state is-linked';
+        stateEl.textContent = 'Enlazada';
+      }
 
       info.append(nameEl, stateEl);
 
@@ -104,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const editBtn = document.createElement('button');
         editBtn.type = 'button';
         editBtn.className = 'db-btn-ghost navigation-arrow-action-btn';
-        editBtn.textContent = 'Editar flecha';
+        editBtn.textContent = needsReview ? 'Recolocar flecha' : 'Editar flecha';
         editBtn.addEventListener('click', () => openStageForTarget(target.id, arrow));
         actionsEl.appendChild(editBtn);
 

@@ -283,6 +283,7 @@ class HotspotModel
 
         $legacyAngles = $this->deriveLegacyAngles($textureX, $textureY);
 
+        // Guardar/recolocar confirma que la flecha fue revisada sobre la panorámica actual.
         $stmt = $this->db->prepare(
             'UPDATE hotspots h
              JOIN positions p_origin
@@ -293,6 +294,7 @@ class HotspotModel
                  h.texture_y = ?,
                  h.yaw_rad = ?,
                  h.pitch_rad = ?,
+                 h.needs_review = 0,
                  h.updated_at = NOW()
              WHERE h.id = ?
                AND h.position_id = ?
