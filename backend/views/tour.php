@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title><?= htmlspecialchars($tour['title']) ?> — <?= htmlspecialchars($business['name']) ?></title>
   <meta name="robots" content="noindex, nofollow">
-  <!-- Estilos base del visor -->
-  <link rel="stylesheet" href="/css/tour.css?v=20260518-2">
+  <!-- Estilos base del visor — versión automática vía filemtime para evitar caché vieja -->
+  <link rel="stylesheet" href="<?= asset('/css/tour.css') ?>">
 </head>
 <body>
 
@@ -85,8 +85,8 @@
 
 <!-- Three.js para panorámica adaptativa y Oxphyre Room -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.147/build/three.min.js"></script>
-<!-- Lógica del visor (después de Three.js, sin defer) -->
-<script src="/js/tour-viewer.js?v=20260518-2"></script>
+<!-- Lógica del visor (después de Three.js, sin defer) — versión automática vía filemtime -->
+<script src="<?= asset('/js/tour-viewer.js') ?>"></script>
 
 </body>
 </html>

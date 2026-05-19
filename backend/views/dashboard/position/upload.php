@@ -25,7 +25,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
-  <link rel="stylesheet" href="/css/dashboard.css?v=20260519-2">
+  <!-- Versión automática vía filemtime para evitar caché vieja tras despliegues -->
+  <link rel="stylesheet" href="<?= asset('/css/dashboard.css') ?>">
 </head>
 <body>
 
@@ -573,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-<script src="/js/hotspot-editor.js?v=20260519-4"></script>
+<script src="<?= asset('/js/hotspot-editor.js') ?>"></script>
 
 </body>
 </html>
