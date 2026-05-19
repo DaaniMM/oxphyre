@@ -2785,3 +2785,35 @@ El contrato de coordenadas queda preparado para el visor Three.js actual: panora
 - No se implemento render publico.
 - No se toco `TourController::showPublic()`, `backend/views/tour.php`, `public/js/tour-viewer.js`, `public/css/tour.css`, dashboard, fotos, R2, QR, Composer ni `.env`.
 - No se hizo commit ni push.
+
+## 2026-05-19 - Hotspots 1A validado en servidor real
+
+Tipo: validacion real de migracion BD/modelo base de hotspots.
+
+### Que se valido
+- Se ejecuto en EC2: `mysql -u oxphyre -p oxphyre < docs/sql/2026-05-19_hotspots_navigation_coordinates.sql`.
+- La tabla legacy `hotspots` ya existia en produccion con `photo_id INT UNSIGNED NOT NULL`, `type enum('navigation','info','link')`, `title`, `description`, `target_position_id`, `position_x`, `position_y` y `created_at`.
+- La migracion se aplico correctamente sin romper columnas legacy.
+- `photo_id` quedo nullable para compatibilidad con el nuevo flujo, pero no pasa a ser el origen principal.
+- La tabla ahora incluye `position_id`, `panorama_photo_id`, `label`, `yaw_rad`, `pitch_rad`, `needs_review`, `is_active`, `updated_at` y `deleted_at`.
+- Indices confirmados:
+  - `idx_hotspots_position (position_id, deleted_at)`
+  - `idx_hotspots_target_position (target_position_id)`
+  - `idx_hotspots_public (position_id, type, is_active, needs_review, deleted_at)`
+
+### Decision confirmada
+- El nuevo origen logico de hotspots de navegacion es `position_id`, no `photo_id`.
+- `photo_id`, `position_x` y `position_y` quedan como columnas legacy; el nuevo sistema no las usa como coordenadas principales.
+- Las coordenadas principales son `yaw_rad` y `pitch_rad` en radianes relativos al cilindro de la panoramica principal.
+- `panorama_photo_id` permitira detectar sustituciones de panoramica.
+- `needs_review` permitira ocultar hotspots en publico hasta que se revisen.
+
+### Siguiente bloque
+- Hotspots 1B: inyectar hotspots validos en `TOUR_DATA` y render publico minimo con overlay HTML proyectado desde yaw/pitch usando datos manuales/de prueba. No editor todavia.
+
+### Que NO se hizo
+- No se implemento editor visual.
+- No se implemento render publico.
+- No se cambio codigo durante esta validacion documental.
+- No se toco visor, dashboard, fotos, R2, QR, Composer ni `.env`.
+- No se hizo commit ni push desde esta sesion.

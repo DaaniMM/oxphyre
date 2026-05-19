@@ -96,11 +96,12 @@ CLAUDE.md            → este archivo
 **Campos y reglas importantes:**
 - `positions.active_mode ENUM('4photos','panoramic') DEFAULT '4photos'` queda como compatibilidad heredada.
 - `photos.direction='360'` identifica la panorámica de una posición.
+- `hotspots` conserva columnas legacy como `photo_id`, `position_x` y `position_y`, pero el nuevo flujo de navegacion usa `position_id` como origen logico, `target_position_id` como destino, `panorama_photo_id` para detectar sustituciones de panoramica y `yaw_rad`/`pitch_rad` como coordenadas principales. `photo_id` queda nullable legacy.
 - `qr_codes.token` es un token base62 de 12 caracteres para URL permanente `/qr/{token}`. `token` es UNIQUE; `tour_id` NO es UNIQUE para permitir multiples tokens/campanas futuras.
 - `qr_scans` es la fuente de verdad de analitica QR 2A: guarda `qr_code_id`, `ip_hash`, `device_type` y `scanned_at`; `ip_address`, `user_agent` y `country` quedan en `NULL` por privacidad.
 - El contador QR se calcula con `COUNT(*)` sobre `qr_scans`; `qr_codes.total_scans` queda como columna legacy/cache futura y QR 2A no la usa ni la actualiza.
 - `login_attempts` existe para rate limiting de login.
-- `businesses`, `tours`, `positions` y `photos` tienen soft delete con `deleted_at`.
+- `businesses`, `tours`, `positions`, `photos` y `hotspots` tienen soft delete con `deleted_at`.
 
 **Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan. La decisión vigente mantiene `360` como panorámica obligatoria y reutiliza N/S/E/O como mapeo interno temporal de Foto detalle 1-4.
 
@@ -127,7 +128,7 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 
 ## Estado implementado resumido
 
-**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions` y `photos`.
+**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real, Hotspots 1A BD/modelo validado en servidor real, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions`, `photos` y `hotspots`.
 
 **Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
 
@@ -749,12 +750,12 @@ Para producción real con clientes:
 
 ### Regla global: Soft delete
 
-**Estado actual:** Soft delete activo en `businesses`, `tours`, `positions` y `photos`.
+**Estado actual:** Soft delete activo en `businesses`, `tours`, `positions`, `photos` y `hotspots`.
 
-Soft delete activo en `businesses`, `tours`, `positions`, `photos`.
+Soft delete activo en `businesses`, `tours`, `positions`, `photos`, `hotspots`.
 - **NUNCA usar `DELETE FROM`** en estos modelos — siempre `UPDATE ... SET deleted_at = NOW() WHERE id = ?`
 - **Todos los `SELECT`** de estos modelos deben incluir `WHERE deleted_at IS NULL` (o `AND deleted_at IS NULL` si ya hay `WHERE`)
-- Las tablas `users`, `plans`, `hotspots`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent` y `login_attempts` **no tienen soft delete** — en ellas sí se puede usar `DELETE FROM`
+- Las tablas `users`, `plans`, `qr_codes`, `qr_scans`, `contact_messages`, `cookies_consent` y `login_attempts` **no tienen soft delete** — en ellas sí se puede usar `DELETE FROM`
 
 **Nota histórica:** Esta regla se añadió tras implementar borrado lógico en negocios, tours, posiciones y fotos para evitar pérdida definitiva de datos y mantener consistencia en el dashboard.
 
