@@ -511,14 +511,29 @@ body.room-is-open #hotspot-overlay {
   font-weight: 600;
   color: #fff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-  white-space: nowrap;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  max-width: 140px;
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
+}
+
+.hotspot-label-prefix {
+  font-size: 0.62rem;
+  font-weight: 500;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.hotspot-label-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 .hotspot-btn:hover .hotspot-icon,

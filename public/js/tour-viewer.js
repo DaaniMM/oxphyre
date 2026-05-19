@@ -463,7 +463,18 @@ function createHotspotOverlay() {
 
     const label = document.createElement('span');
     label.className = 'hotspot-label';
-    label.textContent = hs.label || '';
+
+    const labelPrefix = document.createElement('span');
+    labelPrefix.className = 'hotspot-label-prefix';
+    labelPrefix.textContent = 'Ir a';
+    labelPrefix.setAttribute('aria-hidden', 'true');
+
+    const labelName = document.createElement('span');
+    labelName.className = 'hotspot-label-name';
+    labelName.textContent = hs.label || '';
+
+    label.appendChild(labelPrefix);
+    label.appendChild(labelName);
 
     btn.appendChild(icon);
     btn.appendChild(label);
