@@ -21,14 +21,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let arrows = [];
   let targets = [];
   let draftPoint = null;
+  let stageMode = null; // 'add' | 'edit'
+  let activeTargetId = null;
+  let activeArrowId = null;
 
-  const setStatus = message => {
-    statusEl.textContent = message;
+  const setStatus = msg => {
+    statusEl.textContent = msg;
   };
 
   const showEditor = () => {
     editorEl.hidden = false;
-    editorEl.removeAttribute('hidden');
+  };
+
+  const showStage = () => {
+    stageEl.hidden = false;
+  };
+
+  const hideStage = () => {
+    stageEl.hidden = true;
   };
 
   const buildListUrl = () => {
@@ -39,43 +49,106 @@ document.addEventListener('DOMContentLoaded', () => {
     return url;
   };
 
-  const renderTargets = () => {
-    targetSelect.innerHTML = '';
+  // Normaliza a camelCase y snake_case por si el backend cambia formato.
+  const getArrowForTarget = targetId =>
+    arrows.find(a => Number(a.targetPositionId ?? a.target_position_id) === targetId) ?? null;
 
-    targets.forEach(target => {
-      const option = document.createElement('option');
-      option.value = String(target.id);
-      option.textContent = target.name || 'Zona del tour';
-      targetSelect.appendChild(option);
-    });
-  };
-
-  const renderArrows = () => {
+  const renderTargetList = () => {
     listEl.innerHTML = '';
 
-    if (!arrows.length) {
+    if (!targets.length) {
       const empty = document.createElement('p');
       empty.className = 'navigation-arrows-empty';
-      empty.textContent = 'Aún no hay flechas en esta zona.';
+      empty.textContent = 'Aún no hay más zonas a las que navegar. Añade al menos una zona más con panorámica para crear flechas de navegación.';
       listEl.appendChild(empty);
       return;
     }
 
-    arrows.forEach(arrow => {
+    targets.forEach(target => {
+      const arrow = getArrowForTarget(target.id);
+      const hasArrow = arrow !== null;
+
       const item = document.createElement('div');
       item.className = 'navigation-arrow-item';
 
-      const title = document.createElement('span');
-      title.className = 'navigation-arrow-title';
-      title.textContent = arrow.targetPositionName || 'Zona del tour';
+      const info = document.createElement('div');
+      info.className = 'navigation-arrow-item-info';
 
-      const state = document.createElement('span');
-      state.className = arrow.isActive ? 'navigation-arrow-state is-active' : 'navigation-arrow-state';
-      state.textContent = arrow.isActive ? 'Activa' : 'Pausada';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'navigation-arrow-title';
+      nameEl.textContent = target.name || 'Zona del tour';
 
-      item.append(title, state);
+      const stateEl = document.createElement('span');
+      stateEl.className = 'navigation-arrow-state' + (hasArrow ? ' is-linked' : '');
+      stateEl.textContent = hasArrow ? 'Enlazada' : 'Sin flecha';
+
+      info.append(nameEl, stateEl);
+
+      const actionsEl = document.createElement('div');
+      actionsEl.className = 'navigation-arrow-item-actions';
+
+      if (!hasArrow) {
+        const addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'db-btn-ghost navigation-arrow-action-btn';
+        addBtn.textContent = 'Añadir flecha';
+        addBtn.addEventListener('click', () => openStageForTarget(target.id, null));
+        actionsEl.appendChild(addBtn);
+      } else {
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'db-btn-ghost navigation-arrow-action-btn';
+        editBtn.textContent = 'Editar flecha';
+        editBtn.addEventListener('click', () => openStageForTarget(target.id, arrow));
+        actionsEl.appendChild(editBtn);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'db-btn-ghost navigation-arrow-action-btn navigation-arrow-action-btn--danger';
+        delBtn.textContent = 'Eliminar flecha';
+        delBtn.addEventListener('click', () => deleteArrow(Number(arrow.id), item));
+        actionsEl.appendChild(delBtn);
+      }
+
+      item.append(info, actionsEl);
       listEl.appendChild(item);
     });
+  };
+
+  const openStageForTarget = (targetId, existingArrow) => {
+    stageMode = existingArrow ? 'edit' : 'add';
+    activeTargetId = targetId;
+    activeArrowId = existingArrow ? Number(existingArrow.id) : null;
+    clearDraft();
+
+    // Pre-llenar el select con solo este destino (ya está elegido desde el listado).
+    targetSelect.innerHTML = '';
+    const target = targets.find(t => t.id === targetId);
+    const opt = document.createElement('option');
+    opt.value = String(targetId);
+    opt.textContent = target?.name || 'Zona del tour';
+    targetSelect.appendChild(opt);
+
+    if (existingArrow) {
+      const tx = Number(existingArrow.textureX ?? existingArrow.texture_x);
+      const ty = Number(existingArrow.textureY ?? existingArrow.texture_y);
+      if (Number.isFinite(tx) && Number.isFinite(ty)) {
+        updateDraftMarker({ x: tx, y: ty });
+      }
+    }
+
+    showStage();
+    stageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setStatus('Haz clic sobre la panorámica para colocar la flecha.');
+  };
+
+  const closeStage = () => {
+    clearDraft();
+    stageMode = null;
+    activeTargetId = null;
+    activeArrowId = null;
+    hideStage();
+    setStatus('Preparado para editar.');
   };
 
   const updateDraftMarker = point => {
@@ -110,10 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       arrows = payload.data?.arrows || [];
       targets = payload.data?.targets || [];
-      renderTargets();
-      renderArrows();
+      renderTargetList();
       showEditor();
-      setStatus('Haz clic sobre la panorámica para colocar una flecha.');
+      hideStage();
+      setStatus('Preparado para editar.');
       return true;
     } catch {
       setStatus('No hemos podido cargar las flechas.');
@@ -123,30 +196,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // La vista de subida usa una imagen plana de la panorámica. El punto guardado
-  // es relativo a esa imagen completa, que es el mismo contrato que consume el
-  // visor público mediante texture_x/texture_y.
   const handleStageClick = event => {
-    if (!targets.length) {
-      setStatus('Aún no hay más zonas a las que navegar.');
-      return;
-    }
-
     const rect = imageEl.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
 
-    if (x < 0 || x > 1 || y < 0 || y > 1) {
-      return;
-    }
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
 
     updateDraftMarker({ x, y });
-    setStatus('Elige a qué zona llevará esta flecha.');
+    setStatus('Pulsa "Guardar flecha" para confirmar.');
   };
 
   const saveDraft = async () => {
-    if (!draftPoint || !targetSelect.value) {
-      setStatus('Elige un punto y una zona de destino.');
+    if (!draftPoint || !activeTargetId) {
+      setStatus('Haz clic sobre la imagen para colocar la flecha primero.');
       return;
     }
 
@@ -154,37 +217,90 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus('Guardando flecha...');
 
     try {
-      const response = await fetch(config.endpoints.create, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({
+      let endpoint, body;
+
+      if (stageMode === 'edit' && activeArrowId) {
+        endpoint = config.endpoints.move;
+        body = {
           csrf_token: config.csrfToken,
           biz_slug: config.bizSlug,
           tour_slug: config.tourSlug,
           position_id: config.positionId,
-          target_position_id: targetSelect.value,
+          hotspot_id: activeArrowId,
           texture_x: draftPoint.x,
           texture_y: draftPoint.y,
-        }),
+        };
+      } else {
+        endpoint = config.endpoints.create;
+        body = {
+          csrf_token: config.csrfToken,
+          biz_slug: config.bizSlug,
+          tour_slug: config.tourSlug,
+          position_id: config.positionId,
+          target_position_id: activeTargetId,
+          texture_x: draftPoint.x,
+          texture_y: draftPoint.y,
+        };
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
       });
       const payload = await response.json();
 
       if (!response.ok || !payload.success) {
-        setStatus('No hemos podido guardar la flecha. Inténtalo de nuevo.');
+        setStatus(payload.message || 'No hemos podido guardar la flecha. Inténtalo de nuevo.');
         return;
       }
 
-      clearDraft();
+      closeStage();
       await loadEditorData();
       setStatus('Flecha guardada correctamente.');
     } catch {
       setStatus('No hemos podido guardar la flecha. Inténtalo de nuevo.');
     } finally {
       saveBtn.disabled = false;
+    }
+  };
+
+  const deleteArrow = async (arrowId, itemEl) => {
+    if (!confirm('¿Eliminar esta flecha de navegación?')) return;
+
+    setStatus('Eliminando flecha...');
+    itemEl.style.opacity = '0.5';
+    itemEl.style.pointerEvents = 'none';
+
+    try {
+      const response = await fetch(config.endpoints.delete, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          csrf_token: config.csrfToken,
+          biz_slug: config.bizSlug,
+          tour_slug: config.tourSlug,
+          position_id: config.positionId,
+          hotspot_id: arrowId,
+        }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        setStatus(payload.message || 'No hemos podido eliminar la flecha. Inténtalo de nuevo.');
+        itemEl.style.opacity = '';
+        itemEl.style.pointerEvents = '';
+        return;
+      }
+
+      await loadEditorData();
+      setStatus('Flecha eliminada correctamente.');
+    } catch {
+      setStatus('No hemos podido eliminar la flecha. Inténtalo de nuevo.');
+      itemEl.style.opacity = '';
+      itemEl.style.pointerEvents = '';
     }
   };
 
@@ -196,8 +312,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   stageEl.addEventListener('click', handleStageClick);
   saveBtn.addEventListener('click', saveDraft);
-  cancelBtn.addEventListener('click', () => {
-    clearDraft();
-    setStatus('Haz clic sobre la panorámica para colocar una flecha.');
-  });
+  cancelBtn.addEventListener('click', closeStage);
 });

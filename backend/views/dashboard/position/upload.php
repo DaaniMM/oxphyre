@@ -380,7 +380,7 @@
               <p class="navigation-arrows-instructions">
                 Haz clic sobre la panorámica para colocar una flecha. Después elige a qué zona llevará.
               </p>
-              <div class="navigation-arrows-stage" id="navigation-arrows-stage">
+              <div class="navigation-arrows-stage" id="navigation-arrows-stage" hidden>
                 <img src="<?= htmlspecialchars((string) $panoramaUrl) ?>"
                      alt="Panorámica actual de esta zona"
                      class="navigation-arrows-image"
