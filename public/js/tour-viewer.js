@@ -361,6 +361,8 @@ function createMainPanoramaGeometry(widthAngle, radius = 5.2, height = 4.8, widt
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
   geometry.userData.widthAngle = widthAngle;
+  geometry.userData.radius = radius;
+  geometry.userData.height = height;
   return geometry;
 }
 
@@ -485,47 +487,72 @@ function createHotspotOverlay() {
   });
 }
 
-function updateHotspotOverlay() {
-  if (!mainState?.hotspotBtns?.length || !mainState.camera) return;
+// Activa solo para depuración local. Dejar en false en producción.
+const DEBUG_HOTSPOTS = false;
 
-  const camera = mainState.camera;
-  const fovVRad = THREE.MathUtils.degToRad(camera.fov);
-  const fovHRad = 2 * Math.atan(Math.tan(fovVRad / 2) * camera.aspect);
-  const halfFovH = fovHRad / 2;
-  const halfFovV = fovVRad / 2;
-  const widthAngle = mainState.mesh?.geometry?.userData?.widthAngle;
-  const halfWidth = widthAngle !== undefined ? widthAngle / 2 : null;
+function updateHotspotOverlay() {
+  if (!mainState?.hotspotBtns?.length || !mainState.camera || !mainState.mesh) return;
+
+  const camera   = mainState.camera;
+  const userData = mainState.mesh.geometry?.userData ?? {};
+  // Leer del mismo geometry que createMainPanoramaGeometry() construyó.
+  const radius    = userData.radius    ?? 5.2;
+  const cylHeight = userData.height    ?? 4.8;
+  const halfWidth = userData.widthAngle != null ? userData.widthAngle / 2 : null;
 
   mainState.hotspotBtns.forEach(({ btn, hotspot }) => {
     const yawRad   = Number(hotspot.yawRad);
     const pitchRad = Number(hotspot.pitchRad);
+
     if (!Number.isFinite(yawRad) || !Number.isFinite(pitchRad)) {
       btn.hidden = true;
       return;
     }
 
+    // Arco del cilindro: hotspot fuera del ángulo máximo no tiene textura.
     if (halfWidth !== null && Math.abs(yawRad) > halfWidth) {
       btn.hidden = true;
       return;
     }
 
-    const yawRel   = normalizeHotspotAngle(yawRad - mainState.yaw);
-    const pitchRel = pitchRad - mainState.pitch;
-    const normX = yawRel / halfFovH;
-    const normY = -(pitchRel / halfFovV);
-
-    const visible =
-      Math.abs(normX) <= 1.1 &&
-      Math.abs(normY) <= 1.2 &&
-      Math.abs(yawRel) < Math.PI / 2;
-
-    if (visible) {
-      btn.hidden = false;
-      btn.style.left = (normX * 0.5 + 0.5) * 100 + '%';
-      btn.style.top  = (normY * 0.5 + 0.5) * 100 + '%';
-    } else {
+    // Pre-filtro angular: cámara en yaw=Y mira al ángulo de cilindro -Y,
+    // por lo que la distancia angular real al hotspot es yawRad + mainState.yaw.
+    // Más de ±90° del centro de cámara: definitivamente detrás o fuera de FOV.
+    if (Math.abs(normalizeHotspotAngle(yawRad + mainState.yaw)) >= Math.PI / 2) {
       btn.hidden = true;
+      return;
     }
+
+    // Punto 3D sobre el cilindro, mismo sistema que createMainPanoramaGeometry().
+    //   x = sin(yaw) * r,  z = -cos(yaw) * r  (igual que los vértices)
+    //   y: mapeo lineal pitchRad ∈ [-π/2, π/2] → [-height/2, +height/2]
+    //   porque el cilindro usa py = (0.5 - v) * height (lineal, no tan).
+    const point = new THREE.Vector3(
+      Math.sin(yawRad) * radius,
+      pitchRad / (Math.PI / 2) * (cylHeight / 2),
+      -Math.cos(yawRad) * radius
+    );
+
+    // matrixWorldInverse ya está actualizado por camera.updateMatrixWorld(true)
+    // llamado inmediatamente antes en animateMainPanorama().
+    point.project(camera);
+
+    if (DEBUG_HOTSPOTS) {
+      // eslint-disable-next-line no-console
+      console.log('[hs]', { yawRad, pitchRad, x: point.x.toFixed(3), y: point.y.toFixed(3), z: point.z.toFixed(3) });
+    }
+
+    // z > 1: detrás de cámara o fuera del frustum tras proyección perspectiva.
+    if (point.z > 1 || Math.abs(point.x) > 1.1 || Math.abs(point.y) > 1.2) {
+      btn.hidden = true;
+      return;
+    }
+
+    btn.hidden = false;
+    // NDC x: -1 = borde izquierdo, +1 = borde derecho.
+    // NDC y: -1 = borde inferior, +1 = borde superior → invertido para CSS top.
+    btn.style.left = ( point.x * 0.5 + 0.5) * 100 + '%';
+    btn.style.top  = (-point.y * 0.5 + 0.5) * 100 + '%';
   });
 }
 
@@ -535,6 +562,7 @@ function animateMainPanorama() {
   mainState.yaw += (mainState.targetYaw - mainState.yaw) * 0.14;
   mainState.pitch += (mainState.targetPitch - mainState.pitch) * 0.12;
   mainState.camera.rotation.set(mainState.pitch, mainState.yaw, 0);
+  mainState.camera.updateMatrixWorld(true);
   updateHotspotOverlay();
   mainState.renderer.render(mainState.scene, mainState.camera);
   mainState.frameId = requestAnimationFrame(animateMainPanorama);
