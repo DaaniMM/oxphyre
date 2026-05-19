@@ -2949,3 +2949,86 @@ Tipo: correccion puntual de UI del editor de flechas de navegacion.
 - No se tocaron backend, BD, visor publico, R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
 - No se implementaron nuevas funciones del editor.
 - No se hizo commit ni push.
+
+## 2026-05-19 - Hotspots 1B.1 y 1C listado visual + modal
+
+Tipo: pivote de coordenadas a texture_x/texture_y, listado dashboard con estados y modal de colocacion.
+
+### Que se hizo
+
+#### Hotspots 1B.1 — coordenadas de textura
+
+- `docs/sql/2026-05-19_hotspots_texture_coordinates.sql`: migracion idempotente que anade `texture_x FLOAT NULL` y `texture_y FLOAT NULL` a `hotspots` despues de `pitch_rad`. No modifica `yaw_rad` ni `pitch_rad`.
+- `backend/models/HotspotModel.php`: `getValidForPublic()` ampliado para incluir `h.texture_x` y `h.texture_y` en SELECT y filtrar con `IS NOT NULL` y `BETWEEN 0 AND 1`. El array de retorno incluye `textureX` y `textureY`; `yawRad` y `pitchRad` quedan como legacy.
+- `public/js/tour-viewer.js`: `updateHotspotOverlay()` reescrito para usar `textureX`/`textureY` como fuente principal de proyeccion. Formula: `theta = (u - 0.5) * widthAngle`, punto 3D con `(sin(theta)*r, (0.5-v)*h, -cos(theta)*r)`, identica a la que usa `createMainPanoramaGeometry()`. Eliminados `HOTSPOT_YAW_SIGN`, `normalizeHotspotAngle` y prefiltro de yaw que ya no son necesarios. `DEBUG_HOTSPOTS=false` conservado.
+
+Razon del pivote: el usuario coloca flechas haciendo clic sobre la imagen plana en el dashboard, no introduciendo angulos. La coordenada UV directa elimina la fuente principal de desincronizacion entre el click del editor y la posicion en el visor.
+
+#### Hotspots 1C — listado visual con estados
+
+- `public/js/hotspot-editor.js`: `renderArrows()` sustituido por `renderTargetList()` que cruza `data.targets` con `data.arrows`:
+  - Si no hay flecha hacia un destino: badge "Sin flecha" + boton "Anadir flecha".
+  - Si ya existe flecha: badge "Enlazada" + botones "Editar flecha" y "Eliminar flecha".
+  - Si `targets` viene vacio: mensaje "Aun no hay mas zonas..." en lugar del error anterior.
+- `backend/views/dashboard/position/upload.php`:
+  - Eliminado parrafo duplicado `upload-flow-copy` ("Conecta esta posicion con otras zonas del tour") que repetia el h3.
+  - Texto de instrucciones cambiado a "Listado de zonas disponibles. Pulsa una zona para anadir o editar su flecha de navegacion."
+  - `navigation-arrows-stage` marcado con `hidden` para que no aparezca al abrir el editor.
+- `public/css/dashboard.css`: nuevas clases `.navigation-arrow-item-info`, `.navigation-arrow-item-actions`, `.navigation-arrow-state.is-linked` (badge ambar) y `.navigation-arrow-action-btn`/`--danger`.
+
+#### Hotspots 1C — modal de colocacion
+
+- `backend/views/dashboard/position/upload.php`: stage y form movidos fuera del editor inline y dentro de un modal `#navigation-arrows-modal` con overlay oscuro. El modal se renderiza condicionalmente solo cuando `$canEditNavigationArrows` es verdadero y siempre fuera del `<form id="upload-form">`. El `<select>` de destino fue sustituido por `<input type="hidden" id="navigation-arrows-target">` ya que el destino es siempre conocido al abrir el modal desde el listado.
+- `public/js/hotspot-editor.js`: logica modal completa:
+  - `openModal(targetName)` abre el modal con titulo "Colocar flecha hacia {nombre}", bloquea scroll de `body`.
+  - `closeModal()` cierra el modal, restaura scroll.
+  - `openStageForTarget(targetId, existingArrow)` abre el modal con modo add/edit, pre-llena `targetInput.value` y, si era edicion, muestra el marcador existente en la posicion guardada.
+  - Clic en overlay y tecla Escape cierran el modal.
+  - `saveDraft()` usa endpoint `create` en modo add y endpoint `move` en modo edit.
+  - `deleteArrow()` usa endpoint `delete` con `confirm()` nativo.
+  - Guard actualizado para referenciar nuevos elementos `modalEl`, `modalTitleEl`, `modalOverlayEl`, `targetInput` en lugar de `formEl` y `targetSelect`.
+- `public/css/dashboard.css`: estilos del modal: `.navigation-arrows-modal` (fixed overlay), `.navigation-arrows-modal-overlay`, `.navigation-arrows-modal-box`, `.navigation-arrows-modal-title`, `.navigation-arrows-modal-hint`, `.navigation-arrows-modal-actions`. Override de imagen dentro del modal con `max-height: 60vh`.
+
+#### Ajustes de espaciado CSS
+
+- `.navigation-arrows-instructions`: `margin-top: 10px`.
+- `.navigation-arrow-state.is-linked`: `margin-left: 10px`.
+- `.navigation-arrow-item-actions`: `gap: 10px`.
+- `.navigation-arrow-item-info`: `flex-wrap: wrap`, `gap: 0.6rem`.
+
+### Problemas encontrados y soluciones
+
+1. **Cache JS en produccion**: `hotspot-editor.js` cargaba version antigua porque el `<script src>` no tenia versioning. Se anadio `?v=20260519-4` al `<script src>` en `upload.php`. Diagnostico: consola mostraba `loadArrows @ hotspot-editor.js:55` (funcion antigua) mientras que `fetch('/js/hotspot-editor.js?v=' + Date.now())` confirmaba que el archivo en servidor ya tenia el codigo nuevo.
+
+2. **Cache CSS en produccion**: `getComputedStyle(.navigation-arrows-instructions).marginTop` devolvia `0px` aunque el CSS nuevo en servidor contenia `margin-top: 10px`. Se anadio `?v=20260519-2` al `<link rel="stylesheet" href="/css/dashboard.css">` en `upload.php`.
+
+3. **Listado oculto**: al pulsar "Editar flechas de navegacion", el editor no mostraba nada cuando `data.arrows` venia vacio porque `renderArrows()` solo iteraba flechas existentes. Se reemplazo por `renderTargetList()` que itera siempre `data.targets` y cruza con `data.arrows`.
+
+4. **Panoramica gigante en pagina**: al abrir el editor, `navigation-arrows-stage` aparecia a pantalla completa sin restriccion porque no tenia `hidden` y su imagen no tenia `max-height` efectiva en ese contexto. Solucion: `hidden` en el elemento PHP y mover la panoramica a un modal con `max-height: 60vh`.
+
+### Decisiones UX
+
+- Texto publico: "flechas de navegacion", nunca "hotspots", "texture_x/y", "yaw/pitch" ni coordenadas.
+- Estados del listado: "Sin flecha" (gris) y "Enlazada" (ambar).
+- Botones por zona: "Anadir flecha", "Editar flecha", "Eliminar flecha".
+- Destino siempre conocido antes de abrir el modal: el usuario elige la zona en el listado, no en un select dentro del editor.
+- El marcador de edicion ya existente se muestra en el modal al abrir en modo edit.
+- Eliminar flecha desde el listado (no desde el modal): es la accion destructiva, mejor separada del flujo de colocacion.
+
+### Pendiente
+
+- Validar en servidor real con sesion autenticada:
+  1. Pulsar "Editar flechas de navegacion" y confirmar que el listado muestra zonas con estado correcto.
+  2. Pulsar "Anadir flecha" y confirmar que el modal abre con panoramica contenida.
+  3. Hacer clic sobre la imagen, guardar y confirmar flecha en listado.
+  4. Pulsar "Editar flecha" y confirmar que el marcador existente se muestra en la posicion guardada.
+  5. Abrir visor publico y confirmar que la flecha aparece anclada a la textura al arrastrar.
+- Si el marcador en modo edit no aparece en la posicion correcta, revisar normalizacion de `textureX`/`textureY` desde `formatDashboardRow`.
+- Hotspots 1D: `needs_review` automatico al sustituir o borrar panoramica.
+- Hotspots 1E: pulido mobile/labels/limites y estado de flecha rota.
+
+### Que NO se hizo
+- No se toco `public/js/tour-viewer.js` salvo cambio ya documentado en Hotspots 1B.1.
+- No se cambio BD ni se crearon migraciones salvo la de texture coordinates ya documentada.
+- No se tocaron `TourController.php`, `PositionController.php`, pipeline de imagenes, R2, QR, MiDaS, landing ni planes.
+- No se hizo commit ni push.

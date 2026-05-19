@@ -98,18 +98,25 @@ Estado implementado:
 ### Hotspots de navegacion
 - Hotspots 1A esta implementado, pusheado y validado en servidor real. La migracion `docs/sql/2026-05-19_hotspots_navigation_coordinates.sql` se ejecuto correctamente en EC2.
 - Hotspots 1B esta validado visualmente en servidor real: `TOUR_DATA` incluye hotspots, el overlay aparece y queda anclado a la panoramica al mover el visor horizontalmente y al cambiar tamano/responsive.
+- Hotspots 1B.1 implementado: `texture_x`/`texture_y` como coordenadas principales en render publico. `public/js/tour-viewer.js` usa formula UV directa identica a la geometria del cilindro; `yaw_rad`/`pitch_rad` quedan como legacy.
+- Hotspots 1C en progreso — listado y modal implementados, pendiente de validacion en servidor real:
+  - El dashboard muestra un listado de zonas destino cruzando `data.targets` con `data.arrows`.
+  - Cada zona muestra badge "Sin flecha" (gris) o "Enlazada" (ambar) y botones "Anadir/Editar/Eliminar flecha".
+  - Al pulsar "Anadir/Editar flecha" se abre un modal con overlay oscuro, panoramica contenida (max-height 60vh) y marcador provisional.
+  - Al guardar usa endpoint `create` (modo add) o `move` (modo edit). Al eliminar usa endpoint `delete`.
+  - La panoramica ya no aparece gigante en la pagina: solo se ve dentro del modal.
 - Los hotspots de navegacion van sobre la panoramica principal `photos.direction='360'`, nunca sobre fotos detalle.
 - El hotspot pertenece logicamente a `position_id` y navega hacia `target_position_id`.
 - Las coordenadas principales del nuevo flujo son `texture_x` y `texture_y`: punto relativo de la panoramica/textura. No son pixeles de pantalla ni posicion del visor.
-- `yaw_rad` y `pitch_rad` quedan como legacy/derivadas futuras; no son la fuente principal del render publico ni del futuro editor visual.
+- `yaw_rad` y `pitch_rad` quedan como legacy/derivadas futuras; no son la fuente principal del render publico ni del editor visual.
 - La razon del pivote es UX: el usuario coloca hotspots haciendo click sobre la imagen, no introduciendo coordenadas angulares.
 - `panorama_photo_id` guarda con que panoramica se coloco el hotspot. Si la panoramica cambia en un bloque posterior, se debera marcar `needs_review=1` y ocultar el hotspot en publico hasta revisarlo.
 - `is_active` permite desactivar sin borrar y `deleted_at` aplica soft delete.
-- `backend/models/HotspotModel.php` existe con prepared statements para listar, listar publicos, crear, soft delete, activar/desactivar y marcar `needs_review` por posicion.
-- La tabla legacy `hotspots` conserva columnas antiguas como `photo_id`, `position_x` y `position_y`; quedan como legacy. `photo_id` fue convertido a nullable para compatibilidad, pero el nuevo flujo no lo usa como origen principal.
-- La migracion `docs/sql/2026-05-19_hotspots_texture_coordinates.sql` fue creada y ejecutada; `hotspots` tiene `texture_x` y `texture_y`.
+- `backend/models/HotspotModel.php` tiene prepared statements para listar dashboard, listar publicos, crear con texture coords, move, toggle, soft delete y marcar `needs_review` por posicion.
+- La tabla legacy `hotspots` conserva columnas antiguas como `photo_id`, `position_x` y `position_y`; quedan como legacy.
+- La migracion `docs/sql/2026-05-19_hotspots_texture_coordinates.sql` fue creada; ejecutar en servidor antes de validar 1C.
 - Indices validados: `idx_hotspots_position`, `idx_hotspots_target_position` e `idx_hotspots_public`.
-- Orden vigente: Hotspots 1C = editor dashboard con click sobre panoramica usando `texture_x`/`texture_y`; Hotspots 1D = `needs_review` automatico al sustituir/borrar panoramica + aviso/confirmacion en dashboard; Hotspots 1E = pulido UX/mobile/labels/limites.
+- Orden vigente: Hotspots 1C = validar en servidor lo implementado; Hotspots 1D = `needs_review` automatico al sustituir/borrar panoramica + aviso en dashboard; Hotspots 1E = pulido UX/mobile/labels/limites.
 
 ### Sistema de fotos por posición
 Decisión viva:
@@ -417,7 +424,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ### Prioridad media
 - QR 1 descargable y QR 2A estan validados en servidor real. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug sin contar escaneo. QR 2A registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. La incidencia de deduplicacion por `REMOTE_ADDR` variable detras de Cloudflare quedo resuelta pasando `HTTP_CF_CONNECTING_IP` desde Nginx a PHP.
 - Editor canvas drag & drop.
-- Hotspots 1B validado visualmente en servidor real; sigue pendiente Hotspots 1C: editor dashboard para crear/recolocar hotspots con click sobre panoramica usando `texture_x`/`texture_y`.
+- Hotspots 1B validado visualmente. Hotspots 1C en progreso: listado y modal implementados, pendiente de validacion en servidor real.
 - Minimap real.
 - Tutorial/onboarding del editor.
 - Tooltips de ayuda en métricas del dashboard.
@@ -440,27 +447,18 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
-Última sesión de implementación:
-- Pipeline de imágenes Fase 1.2 cerrado para JPG/PNG/WebP y ampliado a HEIC/HEIF:
-  - `ImageProcessingService.php` centraliza validación, conversión y temporales.
-  - N/S/E/O se guardan como WebP quality 92.
-  - Panorámica `360` se guarda como WebP quality 96.
-  - Panorámicas grandes y HEIC/HEIF se procesan con libvips CLI; 360 usa máximo 8192px de ancho.
-  - MiDaS procesa JPG temporal separado quality 92.
-  - Subida conjunta de 5 imágenes y delete de fotos funcionan.
-- Sprint 1 Oxphyre Room Free/base implementado en pantalla de subida y visor público.
-- La pantalla de subida muestra panorámica principal obligatoria. Decisión UX posterior: fotos detalle 1-4 opcionales dentro de Oxphyre Room.
-- El visor público filtra posiciones sin panorámica y entra siempre en `direction='360'`. Queda pendiente adaptar "Ver detalles" para detalles parciales 1-4.
-- Oxphyre Room MVP histórico carga 4 fotos en una escena Three.js tipo Direction Sphere; decisión vigente: permitir detalles disponibles sin exigir 4 y ocultar direcciones N/S/E/O al usuario.
-- Corrección visual posterior: CLAHE ya no sobrescribe la imagen visible, `depthUrl` no se expone en el JSON público y la panorámica principal se renderiza como cilindro parcial Three.js con pitch limitado.
-- Corrección operativa posterior: `tour-viewer.js` carga con cache-busting para evitar copias antiguas con PSV, y la pantalla de posición permite borrar fotos/panorámica con soft delete y previsualizar el tour público.
-- Estado: flujo base, pipeline WebP/libvips, R2/CDN Fase 2B, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real; QR 1.1 HEAD implementado para debug sin contar escaneo; HEIC/HEIF implementado pendiente de prueba real tras deploy; quedan pendientes limpieza física de soft delete/Fase 3 y posibles mejoras de ruido/granulado.
+Última sesión de implementación (2026-05-19):
+- Hotspots 1B.1: `tour-viewer.js` usa `textureX`/`textureY` como coordenadas principales en render publico. Formula UV directa identica a la geometria del cilindro. `yaw_rad`/`pitch_rad` quedan como legacy.
+- Hotspots 1C listado visual: `hotspot-editor.js` cruzas `data.targets` con `data.arrows`; cada zona muestra estado "Sin flecha"/"Enlazada" con botones de accion. La panoramica ya no aparece gigante en la pagina.
+- Hotspots 1C modal: panoramica movida a un modal con overlay oscuro, titulo dinamico "Colocar flecha hacia {nombre}", `max-height: 60vh` y logica completa de add/edit/delete.
+- Problemas de cache resueltos: `?v=20260519-4` en `hotspot-editor.js` y `?v=20260519-2` en `dashboard.css`.
+- Ajustes UX CSS: margin-top en instrucciones, margin-left en badge, gap en botones de accion.
+- Hotspots 1C pendiente de validacion en servidor real.
 
 Sesión anterior importante:
-- Migración del visor público a Photo Sphere Viewer v4.
-- CLAHE integrado en el microservicio Python.
-- Correcciones de API PSV v4.
-- Visor Three.js manual descartado como solución principal.
+- Hotspots 1A validado en servidor real; migracion SQL ejecutada.
+- Hotspots 1B validado visualmente: overlay anclado a panoramica al arrastrar.
+- Pipeline de imagenes Fase 1.2, R2/CDN Fase 2B, QR 1 y QR 2A validados en servidor real.
 
 ---
 
@@ -479,7 +477,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
    - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
    - Fase 2B **implementada y validada en servidor real**: visor/dashboard usan `public_url` si existe y fallback local si no. CORS R2 configurado y validado para WebGL/Three.js.
 4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-5. Hotspots 1C: editor dashboard para crear/recolocar hotspots con click sobre panoramica usando `texture_x`/`texture_y`. Hotspots 1B ya esta validado visualmente en servidor real.
+5. Hotspots 1C: listado y modal implementados. Pendiente de validar en servidor real. Ejecutar la migracion `docs/sql/2026-05-19_hotspots_texture_coordinates.sql` en EC2 antes de la validacion.
 6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
