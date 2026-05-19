@@ -438,10 +438,6 @@ function addMainPointerListeners(container) {
   addMainListener(container, 'pointercancel', stopDrag);
 }
 
-function normalizeHotspotAngle(angle) {
-  return Math.atan2(Math.sin(angle), Math.cos(angle));
-}
-
 function createHotspotOverlay() {
   if (!mainState) return;
 
@@ -489,18 +485,15 @@ function createHotspotOverlay() {
 
 // Activa solo para depuración local. Dejar en false en producción.
 const DEBUG_HOTSPOTS = false;
-// Signo del ángulo de yaw al construir el punto 3D del cilindro.
-// Valor normal: 1.  Cambiar a -1 para probar eje invertido sin reescribir la lógica.
-const HOTSPOT_YAW_SIGN = 1;
 
 function updateHotspotOverlay() {
   if (!mainState?.hotspotBtns?.length || !mainState.camera || !mainState.mesh) return;
 
-  const camera   = mainState.camera;
-  const userData = mainState.mesh.geometry?.userData ?? {};
-  const radius    = userData.radius    ?? 5.2;
-  const cylHeight = userData.height    ?? 4.8;
-  const halfWidth = userData.widthAngle != null ? userData.widthAngle / 2 : null;
+  const camera     = mainState.camera;
+  const userData   = mainState.mesh.geometry?.userData ?? {};
+  const radius     = userData.radius     ?? 5.2;
+  const cylHeight  = userData.height     ?? 4.8;
+  const widthAngle = userData.widthAngle ?? Math.PI;
 
   // Rect del canvas una vez por frame — base para la conversión NDC → píxeles.
   const canvasRect = mainState.renderer.domElement.getBoundingClientRect();
@@ -510,44 +503,24 @@ function updateHotspotOverlay() {
   }
 
   mainState.hotspotBtns.forEach(({ btn, hotspot }) => {
-    const yawRad   = Number(hotspot.yawRad);
-    const pitchRad = Number(hotspot.pitchRad);
+    const u = Number(hotspot.textureX);
+    const v = Number(hotspot.textureY);
 
-    if (!Number.isFinite(yawRad) || !Number.isFinite(pitchRad)) {
+    if (!Number.isFinite(u) || !Number.isFinite(v) || u < 0 || u > 1 || v < 0 || v > 1) {
       btn.hidden = true;
       return;
     }
 
-    // Arco del cilindro: hotspot fuera del ángulo máximo no tiene textura.
-    if (halfWidth !== null && Math.abs(yawRad) > halfWidth) {
-      btn.hidden = true;
-      return;
-    }
+    // theta: ángulo del punto sobre el cilindro, mismo sistema que createMainPanoramaGeometry().
+    // u=0.5 → theta=0 (centro), u=0 → -widthAngle/2, u=1 → +widthAngle/2
+    const theta = (u - 0.5) * widthAngle;
 
-    // theta: ángulo efectivo del hotspot sobre el cilindro.
-    // HOTSPOT_YAW_SIGN=1 mantiene el convenio actual; -1 invierte el eje para diagnóstico.
-    const theta = yawRad * HOTSPOT_YAW_SIGN;
-
-    // Pre-filtro: cámara en yaw=Y mira al cilindro en ángulo -Y, por lo que
-    // la distancia angular real al hotspot es (theta + mainState.yaw).
-    const yawRel = normalizeHotspotAngle(theta + mainState.yaw);
-    if (Math.abs(yawRel) >= Math.PI / 2) {
-      if (DEBUG_HOTSPOTS) {
-        // eslint-disable-next-line no-console
-        console.log('[hs FILTERED]', {
-          yawRad, theta, camYaw: mainState.yaw.toFixed(4), yawRel: yawRel.toFixed(4),
-        });
-      }
-      btn.hidden = true;
-      return;
-    }
-
-    // Punto 3D sobre el cilindro, mismo sistema que createMainPanoramaGeometry().
-    //   x = sin(theta)*r,  z = -cos(theta)*r  (misma fórmula que los vértices)
-    //   y: mapeo lineal pitchRad ∈ [-π/2, π/2] → [-height/2, +height/2]
+    // Punto 3D sobre el cilindro — idéntica fórmula a los vértices de la geometría.
+    //   x = sin(theta)*r,  z = -cos(theta)*r
+    //   y: v=0 → techo (+height/2),  v=1 → suelo (-height/2)
     const point = new THREE.Vector3(
       Math.sin(theta) * radius,
-      pitchRad / (Math.PI / 2) * (cylHeight / 2),
+      (0.5 - v) * cylHeight,
       -Math.cos(theta) * radius
     );
 
@@ -562,11 +535,8 @@ function updateHotspotOverlay() {
     if (DEBUG_HOTSPOTS) {
       // eslint-disable-next-line no-console
       console.log('[hs]', {
-        yawRad,
-        theta,
-        camYaw:    mainState.yaw.toFixed(4),
-        targetYaw: mainState.targetYaw.toFixed(4),
-        yawRel:    yawRel.toFixed(4),
+        u: u.toFixed(4), v: v.toFixed(4),
+        theta: theta.toFixed(4),
         ndcX:  point.x.toFixed(4),
         ndcY:  point.y.toFixed(4),
         ndcZ:  point.z.toFixed(4),

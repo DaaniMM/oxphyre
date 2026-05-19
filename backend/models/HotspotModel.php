@@ -62,6 +62,8 @@ class HotspotModel
             'SELECT h.id,
                     h.yaw_rad,
                     h.pitch_rad,
+                    h.texture_x,
+                    h.texture_y,
                     COALESCE(NULLIF(h.label, \'\'), NULLIF(h.title, \'\'), p_dest.name) AS hotspot_label,
                     h.target_position_id
              FROM hotspots h
@@ -74,6 +76,10 @@ class HotspotModel
                AND h.is_active = 1
                AND h.needs_review = 0
                AND h.deleted_at IS NULL
+               AND h.texture_x IS NOT NULL
+               AND h.texture_y IS NOT NULL
+               AND h.texture_x BETWEEN 0 AND 1
+               AND h.texture_y BETWEEN 0 AND 1
                AND EXISTS (
                    SELECT 1
                    FROM photos ph_dest
@@ -91,6 +97,8 @@ class HotspotModel
                 'id'               => (int)    $row['id'],
                 'yawRad'           => (float)  $row['yaw_rad'],
                 'pitchRad'         => (float)  $row['pitch_rad'],
+                'textureX'         => (float)  $row['texture_x'],
+                'textureY'         => (float)  $row['texture_y'],
                 'label'            => (string) ($row['hotspot_label'] ?? ''),
                 'targetPositionId' => (int)    $row['target_position_id'],
             ];
