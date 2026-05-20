@@ -3175,3 +3175,20 @@ Tipo: ajuste puntual de flujo tras guardar/procesar fotos.
 - No se tocaron HotspotModel, HotspotController, visor publico, BD, R2, QR, MiDaS, pipeline pesado ni planes.
 - No se hizo commit ni push.
 
+## 2026-05-20 - Limpieza CSS avisos de flechas por revisar
+
+Tipo: cierre de deuda tecnica P1 de Hotspots 1D.
+
+### Que se hizo
+
+- `public/css/dashboard.css`: creadas clases reutilizables `navigation-review-alert`, `navigation-review-alert__icon`, `navigation-review-alert__content`, `navigation-review-alert__title`, `navigation-review-alert__text`, `navigation-review-alert__list`, `navigation-review-alert__item`, `navigation-review-alert__item-icon`, `navigation-review-alert__action`, `navigation-review-alert__action--compact` y `navigation-review-badge`.
+- `backend/views/dashboard/position/upload.php`: el aviso de flechas pendientes deja de usar CSS inline propio y usa las clases reutilizables.
+- `backend/views/dashboard/tours/manage.php`: el aviso global y el badge "Flechas por revisar" dejan de usar CSS inline propio y usan las clases reutilizables.
+- `AI_SYNC.md` y `CLAUDE.md`: actualizados para reflejar que la deuda P1 de estilos inline quedo cerrada.
+
+### Que NO se hizo
+
+- No se cambio logica PHP, textos, enlaces, JS ni carga de CSS.
+- No se tocaron BD, R2, QR, MiDaS, pipeline, landing, planes ni visor publico.
+- No se hizo commit ni push.
+

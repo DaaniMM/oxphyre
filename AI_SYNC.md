@@ -110,7 +110,7 @@ Estado implementado:
   - `updateTextureScoped` resetea `needs_review=0` al recolocar una flecha.
   - Editor muestra badge "Revisar" y boton "Recolocar flecha" cuando `needsReview=true`.
   - Aviso ambar en `upload.php` y badge en cards de `tours/manage.php` para posiciones afectadas.
-  - Deuda tecnica P1: estilos inline en los avisos; mover a clases CSS reutilizables en limpieza futura.
+  - Deuda tecnica P1 de estilos inline cerrada: los avisos y el badge "Flechas por revisar" usan clases reutilizables en `public/css/dashboard.css`.
 - Los hotspots de navegacion van sobre la panoramica principal `photos.direction='360'`, nunca sobre fotos detalle.
 - El hotspot pertenece logicamente a `position_id` y navega hacia `target_position_id`.
 - Las coordenadas principales son `texture_x` y `texture_y`: punto relativo de la panoramica/textura.
@@ -429,7 +429,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ### Prioridad media
 - QR 1 descargable y QR 2A estan validados en servidor real. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug sin contar escaneo. QR 2A registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. La incidencia de deduplicacion por `REMOTE_ADDR` variable detras de Cloudflare quedo resuelta pasando `HTTP_CF_CONNECTING_IP` desde Nginx a PHP.
 - Editor canvas drag & drop.
-- Hotspots 1B, 1C y 1D implementados. 1D pendiente de confirmar ciclo completo con borrado de panoramica. Deuda tecnica P1: mover estilos inline de avisos a clases CSS.
+- Hotspots 1B, 1C y 1D implementados. 1D pendiente de confirmar ciclo completo con borrado de panoramica. Deuda P1 de estilos inline de avisos cerrada en `dashboard.css`.
 - Minimap real.
 - Tutorial/onboarding del editor.
 - Tooltips de ayuda en métricas del dashboard.
@@ -479,7 +479,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
    - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
    - Fase 2B **implementada y validada en servidor real**: visor/dashboard usan `public_url` si existe y fallback local si no. CORS R2 configurado y validado para WebGL/Three.js.
 4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-5. **Hotspots 1D**: implementado y validado parcialmente. Pendiente: confirmar ciclo completo con borrado de panoramica. Deuda P1: mover estilos inline de avisos a clases CSS en `dashboard.css`.
+5. **Hotspots 1D**: implementado y validado parcialmente. Pendiente: confirmar ciclo completo con borrado de panoramica. La deuda P1 de estilos inline de avisos ya esta cerrada en `dashboard.css`.
    **Hotspots 1E**: pulido UX mobile/labels/limites — siguiente bloque.
 6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
 

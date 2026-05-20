@@ -781,7 +781,7 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`, `hotspots`.
 #### Prioridad media
 - QR 2A cerrado: tracking basico con privacidad validado en servidor real. Futuro QR 2B queda para analiticas avanzadas, graficas, campanas o QR por posicion si se decide.
 - Editor canvas drag & drop.
-- Hotspots 1A, 1B, 1C y 1D implementados. 1D validado parcialmente en servidor real: `needs_review` automático al subir/borrar panorámica, ciclo de revisión/recolocación cerrado, avisos en dashboard de posición y de tour. Pendiente confirmar ciclo completo con borrado de panorámica y mover estilos inline de avisos a clases CSS (deuda P1). Hotspots 1E: pulido UX mobile/labels/límites.
+- Hotspots 1A, 1B, 1C y 1D implementados. 1D validado parcialmente en servidor real: `needs_review` automático al subir/borrar panorámica, ciclo de revisión/recolocación cerrado, avisos en dashboard de posición y de tour. La deuda P1 de estilos inline de esos avisos ya está cerrada en `dashboard.css`. Pendiente confirmar ciclo completo con borrado de panorámica. Hotspots 1E: pulido UX mobile/labels/límites.
 - Minimap real.
 - Tutorial/onboarding del editor: implementar tutorial la primera vez que el usuario accede, con botón para volver a verlo. Debe explicar la jerarquía negocio → tour → posiciones → fotos y cómo usar el canvas.
 - Dashboard: añadir tooltips de ayuda contextual en las métricas para clarificar la jerarquía del producto al usuario no técnico. Ejemplo: icono ? en "Tours activos" con tooltip "Un tour es la experiencia 360° que verán tus clientes", y en "Negocios" con "Un negocio agrupa todos tus tours".
