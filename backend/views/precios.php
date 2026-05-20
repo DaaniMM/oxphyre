@@ -209,9 +209,15 @@
     }
 
     /* Features "Próximamente" en card Business */
-    .plan-features li.soon-feature::before { content: '○'; color: var(--text-3); }
+    .plan-features li.soon-feature::before { content: '○'; color: var(--text-3); flex-shrink: 0; }
     .plan-features li.soon-feature { color: var(--text-3); }
-    .plan-features li.soon-feature .soon { margin-left: 6px; vertical-align: middle; }
+    .plan-features li.soon-feature .soon-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+    }
+    .plan-features li.soon-feature .soon { margin: 0; }
 
     /* Etiqueta "Activo" en nav link de precios */
     .nav-link-active {
@@ -355,10 +361,10 @@
           <p class="plan-annual-total" data-i18n="pricing.biz_annual_total">470€/año · Ahorras 118€</p>
           <ul class="plan-features" aria-label="Características del plan Business">
             <li data-i18n="pricing.biz_f1">Negocios y posiciones ilimitadas</li>
-            <li class="soon-feature">Dominio personalizado · Marca blanca <span class="soon">Próximamente</span></li>
-            <li class="soon-feature">Analíticas avanzadas <span class="soon">Próximamente</span></li>
+            <li class="soon-feature"><span class="soon-inner">Dominio personalizado · Marca blanca<span class="soon">Próximamente</span></span></li>
+            <li class="soon-feature"><span class="soon-inner">Analíticas avanzadas<span class="soon">Próximamente</span></span></li>
             <li data-i18n="pricing.biz_f4">Soporte prioritario + onboarding</li>
-            <li class="soon-feature">API access <span class="soon">Próximamente</span></li>
+            <li class="soon-feature"><span class="soon-inner">API access<span class="soon">Próximamente</span></span></li>
           </ul>
           <a href="mailto:hola@oxphyre.com" class="plan-cta" data-i18n="pricing.cta_biz_contact">Contactar</a>
           <p class="plan-micro-note" data-i18n="pricing.biz_note">Acceso completo. Sin límites.</p>
