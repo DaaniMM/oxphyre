@@ -397,6 +397,16 @@ class TourController extends BaseController
             ];
         }
 
+        $businessLocation = [
+            'hasCoords'  => !empty($business['latitude']) && !empty($business['longitude']),
+            'lat'        => !empty($business['latitude'])  ? (float) $business['latitude']  : null,
+            'lng'        => !empty($business['longitude']) ? (float) $business['longitude'] : null,
+            'address'    => $business['address']     ?? null,
+            'city'       => $business['city']        ?? null,
+            'postalCode' => $business['postal_code'] ?? null,
+            'country'    => $business['country']     ?? null,
+        ];
+
         $tourData = [
             'tourId'    => (int) $tour['id'],
             'tourTitle' => $tour['title'],
@@ -406,6 +416,11 @@ class TourController extends BaseController
                 'midas'     => $hasMiDaS,
                 'watermark' => $hasWatermark,
                 'minimap'   => $hasMinimapa,
+            ],
+            'location'  => [
+                'hasCoords' => $businessLocation['hasCoords'],
+                'lat'       => $businessLocation['lat'],
+                'lng'       => $businessLocation['lng'],
             ],
         ];
 

@@ -1065,7 +1065,7 @@ function setupGyro() {
 }
 
 function handleGyro(e) {
-  if (!gyroActive || !mainState || e.alpha === null || document.body.classList.contains('room-is-open')) return;
+  if (!gyroActive || !mainState || e.alpha === null || document.body.classList.contains('room-is-open') || document.body.classList.contains('location-sheet-open')) return;
 
   mainState.targetYaw = THREE.MathUtils.clamp(
     -THREE.MathUtils.degToRad(e.alpha),

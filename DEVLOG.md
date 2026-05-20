@@ -3225,5 +3225,4 @@ Tipo: preparacion de base de datos, modelo, controller y formularios para SEO lo
 
 - No se implemento Nominatim, Leaflet, boton "Buscar en el mapa", card publica "Donde estamos" ni cambios CSP.
 - No se tocaron tour publico, Hotspots, QR, R2, MiDaS, pipeline, landing ni planes.
-- No se hizo commit ni push.
 
