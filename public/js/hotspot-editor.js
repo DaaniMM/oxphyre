@@ -22,12 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  const reviewNoticeEl = document.createElement('p');
+  reviewNoticeEl.className = 'navigation-arrows-review-notice';
+  reviewNoticeEl.textContent = 'Esta flecha no se ve en el tour porque cambiaste la panorámica. Colócala de nuevo para que vuelva a aparecer.';
+  reviewNoticeEl.hidden = true;
+  modalTitleEl.insertAdjacentElement('afterend', reviewNoticeEl);
+
   let arrows = [];
   let targets = [];
   let draftPoint = null;
   let stageMode = null; // 'add' | 'edit'
   let activeTargetId = null;
   let activeArrowId = null;
+  let activeArrowNeedsReview = false;
 
   const setStatus = msg => {
     statusEl.textContent = msg;
@@ -37,14 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     editorEl.hidden = false;
   };
 
-  const openModal = targetName => {
+  const openModal = (targetName, needsReview = false) => {
     modalTitleEl.textContent = `Colocar flecha hacia ${targetName}`;
+    reviewNoticeEl.hidden = !needsReview;
     modalEl.hidden = false;
     document.body.style.overflow = 'hidden';
   };
 
   const closeModal = () => {
     modalEl.hidden = true;
+    reviewNoticeEl.hidden = true;
     document.body.style.overflow = '';
   };
 
@@ -135,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stageMode = existingArrow ? 'edit' : 'add';
     activeTargetId = targetId;
     activeArrowId = existingArrow ? Number(existingArrow.id) : null;
+    activeArrowNeedsReview = existingArrow ? Boolean(existingArrow.needsReview ?? existingArrow.needs_review) : false;
     targetInput.value = String(targetId);
     clearDraft();
 
@@ -147,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const target = targets.find(t => t.id === targetId);
-    openModal(target?.name || 'zona');
+    openModal(target?.name || 'zona', activeArrowNeedsReview);
   };
 
   const closeStage = () => {
@@ -155,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stageMode = null;
     activeTargetId = null;
     activeArrowId = null;
+    activeArrowNeedsReview = false;
     closeModal();
     setStatus('Preparado para editar.');
   };
@@ -258,9 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      const savedReviewArrow = activeArrowNeedsReview;
       closeStage();
       await loadEditorData();
-      setStatus('Flecha guardada correctamente.');
+      setStatus(savedReviewArrow ? '¡Listo! La flecha ya vuelve a verse en el tour.' : 'Flecha guardada correctamente.');
     } catch {
       setStatus('No hemos podido guardar la flecha. Inténtalo de nuevo.');
     } finally {

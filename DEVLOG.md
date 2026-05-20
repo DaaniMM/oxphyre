@@ -3192,3 +3192,18 @@ Tipo: cierre de deuda tecnica P1 de Hotspots 1D.
 - No se tocaron BD, R2, QR, MiDaS, pipeline, landing, planes ni visor publico.
 - No se hizo commit ni push.
 
+## 2026-05-20 - Microfix UX en flechas pendientes de revisar
+
+Tipo: mejora puntual de claridad en Hotspots 1D.
+
+### Que se hizo
+
+- `public/js/hotspot-editor.js`: al abrir el modal de una flecha con `needsReview`, se muestra el aviso "Esta flecha no se ve en el tour porque cambiaste la panorámica. Colócala de nuevo para que vuelva a aparecer.".
+- `public/js/hotspot-editor.js`: al guardar una flecha que estaba en revision, el estado muestra "¡Listo! La flecha ya vuelve a verse en el tour."; las flechas normales mantienen "Flecha guardada correctamente.".
+- `public/css/dashboard.css`: añadida la clase `navigation-arrows-review-notice` para el aviso dentro del modal.
+
+### Que NO se hizo
+
+- No se toco backend, BD, visor publico, endpoints, logica de guardado ni JS ajeno al editor.
+- No se hizo commit ni push.
+

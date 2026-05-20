@@ -2078,6 +2078,21 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   margin: -0.35rem 0 0;
 }
 
+.navigation-arrows-review-notice {
+  border: 1px solid oklch(0.65 0.16 55 / 0.45);
+  border-radius: 8px;
+  background: oklch(0.32 0.10 55 / 0.22);
+  color: oklch(0.88 0.10 55);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  margin: -0.2rem 0 0;
+  padding: 0.7rem 0.8rem;
+}
+
+.navigation-arrows-review-notice[hidden] {
+  display: none;
+}
+
 /* Imagen contenida dentro del modal */
 .navigation-arrows-modal-box .navigation-arrows-stage {
   max-height: none;
