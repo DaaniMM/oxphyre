@@ -352,11 +352,14 @@ Lo que **no** hace Fase 1:
 - Nunca depender de procesado en directo en la exposición; los tours pregenerados son el plan A.
 
 ### Planes SaaS
-- Free, Pro y Business definidos en CLAUDE.md.
-- Free: 1 negocio, 1 tour, hasta 5 posiciones.
-- Pro: MiDaS en todas las posiciones, más negocios, más posiciones, QR, embed, minimapa, hotspots, analíticas básicas.
-- Business: funciones avanzadas, dominio personalizado, usuarios, API, analíticas avanzadas y features futuras.
+- Free, Pro y Business definidos en CLAUDE.md y Planes_Oxphyre.md.
+- **FREE (decisión vigente 2026-05-20):** 1 negocio, 1 tour, hasta 3 posiciones por tour. QR básico con branding Oxphyre incluido. Flechas de navegación básicas incluidas. Mapa/ubicación del negocio incluido. Sin embed/iframe. Sin analíticas. Marca de agua visible y agresiva: overlay semitransparente en el visor + badge "Creado con Oxphyre" clicable hacia /precios.
+- **PRO:** hasta 5 negocios, tours ilimitados, hasta 20 posiciones por tour. Sin marca de agua. QR profesional. Embed/iframe. Analíticas básicas. Hotspots informativos (pines con texto/precio/CTA). Más personalización. Soporte email.
+- **BUSINESS:** negocios y posiciones ilimitados, marca blanca, dominio personalizado, múltiples usuarios, API, analíticas avanzadas, soporte prioritario, features avanzadas como roadmap.
 - Agente IA completo queda como roadmap/post-TFG salvo decisión contraria.
+- QR disponible en todos los planes: básico (Free, con branding) y profesional (Pro/Business).
+- Embed/iframe: solo Pro y Business. Free solo tiene enlace público.
+- La diferencia Free→Pro es cantidad (3 vs 20 posiciones) + distribución (QR básico vs profesional, sin embed, watermark visible) + features (analíticas, hotspots informativos, personalización).
 
 ### Ubicacion de negocios y mapa publico
 - La ubicacion pertenece al negocio, no al tour.

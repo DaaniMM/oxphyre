@@ -270,16 +270,17 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 **Decisión vigente:** No simplificar ni borrar la definición comercial de planes. Al implementar una feature concreta, verificar en `AI_SYNC.md` y `DEVLOG.md` si está lista, pendiente o en roadmap.
 
 ### FREE (0€)
-- 1 tour, 1 negocio (no se pueden crear más tours ni negocios adicionales)
-- Hasta 5 posiciones por tour
-- 1 posición con MiDaS real incluida como crédito de prueba permanente
-- Las otras 4 posiciones: visor navegable Three.js, sin profundidad IA aplicada a la textura visible. Históricamente se planteó como esfera/paneles con efecto parallax/giroscopio; el shader/parallax MiDaS queda pendiente de reimplementar sobre el visor actual o descartar.
-- Todas las posiciones conectadas con hotspots navegables (misma estructura que Pro)
+- 1 negocio, 1 tour, hasta 3 posiciones por tour
+- Enlace público bajo oxphyre.com incluido
+- QR básico descargable con branding Oxphyre incluido (no QR profesional)
+- Flechas de navegación básicas entre posiciones incluidas (no hotspots informativos con texto/precio/CTA)
+- Mapa/ubicación del negocio (Leaflet/OSM) visible en el visor público
 - Sin minimapa
-- Sin embed/iframe — solo enlace público oxphyre.com/[slug-negocio]
-- Marca de agua Oxphyre visible dentro del visor
+- Sin embed/iframe — solo enlace público, no se puede incrustar en web propia
+- Marca de agua Oxphyre visible dentro del visor: overlay semitransparente sobre el visor (no solo etiqueta discreta en esquina) + badge opcional "Creado con Oxphyre" clicable hacia /precios. Diseñada para incentivar upgrade a Pro sin destruir la experiencia del visitante.
 - URL siempre bajo dominio oxphyre.com (nunca dominio propio)
-- Objetivo estratégico: el contraste entre la posición MiDaS y las 4 planas genera disonancia que impulsa el upgrade a Pro
+- Sin analíticas
+- **Nota histórica:** La estrategia anterior contemplaba 5 posiciones y "1 posición con MiDaS como crédito de prueba". Decisión vigente (2026-05-20): 3 posiciones, sin crédito MiDaS diferenciado. La watermark más visible es el principal mecanismo de incentivo a upgrade.
 
 ### PRO (19€/mes — 182€/año)
 - MiDaS activado en todas las posiciones (profundidad 3D real)

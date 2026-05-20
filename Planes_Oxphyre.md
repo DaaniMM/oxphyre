@@ -17,14 +17,14 @@ La idea clave es que Free permita entender el valor del producto, pero no sea su
 ### Objetivo
 Permitir que un pequeño negocio pruebe Oxphyre y cree una visita básica real, pero con límites claros que incentiven el paso a Pro.
 
-### Límites
-- 1 negocio.
-- 1 tour.
-- Hasta 3 posiciones por tour.
-- URL pública bajo dominio oxphyre.com.
-- Marca de agua Oxphyre visible.
-- Sin embed/iframe.
-- Sin QR descargable profesional.
+### Límites y funciones
+- 1 negocio, 1 tour, hasta 3 posiciones por tour.
+- Enlace público bajo dominio oxphyre.com incluido.
+- QR básico descargable con branding Oxphyre incluido (no QR profesional ni analíticas QR avanzadas).
+- Flechas de navegación básicas entre posiciones incluidas (no hotspots informativos con texto/precio/CTA).
+- Mapa/ubicación del negocio (Leaflet/OpenStreetMap) visible en el visor público.
+- Marca de agua Oxphyre visible en el visor: overlay semitransparente (no solo etiqueta discreta en esquina) + badge "Creado con Oxphyre" clicable hacia /precios. Diseñada para incentivar upgrade a Pro sin destruir la experiencia del visitante.
+- Sin embed/iframe — solo enlace público; el tour no se puede incrustar en web propia.
 - Sin analíticas.
 - Sin minimapa.
 - Sin dominio personalizado.
@@ -91,8 +91,8 @@ Ser el plan principal para negocios que quieren usar Oxphyre de verdad para capt
 
 ### Funciones principales
 - Todo lo incluido en Free, más:
-- QR descargable profesional.
-- Embed/iframe para insertar el tour en la web del negocio.
+- QR profesional (no básico Free, sino QR para uso profesional con analíticas asociadas).
+- Embed/iframe para insertar el tour en la web del negocio (solo disponible desde Pro).
 - Hotspots completos:
   - navegación;
   - texto;
@@ -197,3 +197,26 @@ Comunicar Pro:
 
 Comunicar Business:
 “Recorrido 3D fotorrealista y solución premium para negocios avanzados.”
+
+---
+
+## Decisiones cerradas (2026-05-20) — pre /precios
+
+Las siguientes decisiones quedan cerradas para implementar `/precios` sin contradicciones:
+
+| Decisión | Valor |
+|---|---|
+| Posiciones Free | **3** (no 5 como en definiciones antiguas) |
+| QR | Todos los planes: básico (Free, con branding Oxphyre) y profesional (Pro/Business) |
+| Embed/iframe | Solo Pro y Business. Free solo tiene enlace público |
+| Watermark Free | Overlay semitransparente en el visor + badge clicable “Creado con Oxphyre” hacia /precios |
+| Mapa/ubicación | Incluido en Free (Leaflet/OSM, ya implementado en Mapa 1C) |
+| Flechas navegación | Incluidas en Free (básicas, sin pines de texto/precio/CTA) |
+| MiDaS crédito Free | Eliminado de la definición vigente; era estrategia anterior |
+
+**Contradicciones resueltas:**
+- `CLAUDE.md` y `AI_SYNC.md` decían 5 posiciones Free → actualizado a 3.
+- `CLAUDE.md` ponía QR solo en Pro → actualizado: QR básico en Free, profesional en Pro.
+- Watermark Free era solo “visible” → actualizada a overlay semitransparente más agresivo.
+- Mapa/ubicación no aparecía en ningún plan → añadido a Free (ya implementado).
+- “1 posición con MiDaS como crédito” en `CLAUDE.md` → estrategia histórica eliminada.

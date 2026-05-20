@@ -3226,6 +3226,35 @@ Tipo: preparacion de base de datos, modelo, controller y formularios para SEO lo
 - No se implemento Nominatim, Leaflet, boton "Buscar en el mapa", card publica "Donde estamos" ni cambios CSP.
 - No se tocaron tour publico, Hotspots, QR, R2, MiDaS, pipeline, landing ni planes.
 
+## 2026-05-20 - Cierre de decisiones comerciales de planes pre-/precios
+
+Tipo: decision comercial/documentacion. Sin cambios de codigo.
+
+### Decision
+
+Antes de implementar `/precios` se cerraron las contradicciones entre `Planes_Oxphyre.md`, `CLAUDE.md`, `AI_SYNC.md` y la definicion viva del producto:
+
+- **Free**: 3 posiciones (no 5 como decian CLAUDE.md y AI_SYNC.md). QR basico con branding Oxphyre incluido. Flechas de navegacion basicas incluidas. Mapa/ubicacion del negocio incluido. Sin embed. Watermark mas visible: overlay semitransparente + badge "Creado con Oxphyre" clicable hacia /precios.
+- **Pro**: QR profesional (distinto del QR basico de Free). Embed/iframe solo desde Pro. Sin marca de agua.
+- **Business**: negocios y posiciones ilimitadas, marca blanca, dominio personalizado, API, features avanzadas como roadmap.
+- **QR en todos los planes**: Free = basico con branding; Pro/Business = profesional con analiticas.
+- **Embed solo Pro+**: Free solo enlace publico, no incrustable en web propia.
+- Se elimina de la definicion vigente la estrategia historica de "1 posicion con MiDaS como credito de prueba" — era una propuesta anterior, no el estado actual.
+
+### Archivos actualizados
+
+- `Planes_Oxphyre.md`: contradicciones resueltas en seccion FREE, PRO actualizado con QR profesional/embed, tabla de decisiones cerradas añadida al final.
+- `CLAUDE.md`: seccion `### FREE (0€)` actualizada con 3 posiciones, QR basico, mapa, watermark agresiva, nota historica de la estrategia anterior.
+- `AI_SYNC.md`: seccion `### Planes SaaS` reescrita con decision vigente completa.
+- `DEVLOG.md`: esta entrada.
+
+### Que NO se hizo
+
+- No se toco codigo funcional.
+- No se implemento `/precios`.
+- No se modifico ningun controller, modelo, vista ni JS.
+- No se hizo commit ni push.
+
 ## 2026-05-20 - Mapa 1B/1C — Geocodificacion Nominatim y mapa publico Leaflet
 
 Tipo: implementacion de API externa (requisito tribunal TFG) + SEO local. Validado en servidor real.
