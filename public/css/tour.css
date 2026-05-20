@@ -563,7 +563,8 @@ body.room-is-open #hotspot-overlay {
 #tour-location-btn {
   position: fixed;
   top: 1rem;
-  right: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -617,8 +618,8 @@ body.location-sheet-open #tour-location-btn {
   left: 50%;
   transform: translateX(-50%) translateY(100%);
   z-index: 250;
-  width: min(calc(100vw - 2rem), 720px);
-  max-height: 70vh;
+  width: min(860px, calc(100vw - 32px));
+  max-height: 78vh;
   display: flex;
   flex-direction: column;
   background: #0A0A0A;
@@ -679,6 +680,13 @@ body.location-sheet-open #tour-location-btn {
   overscroll-behavior: contain;
 }
 
+.tour-location-biz-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
 .tour-location-address {
   font-style: normal;
   font-size: 0.875rem;
@@ -688,7 +696,7 @@ body.location-sheet-open #tour-location-btn {
 
 .tour-location-map {
   width: 100%;
-  height: 240px;
+  height: 320px;
   border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
@@ -722,5 +730,9 @@ body.location-sheet-open #tour-location-btn {
     max-height: 78vh;
     border-left: none;
     border-right: none;
+  }
+
+  .tour-location-map {
+    height: 240px;
   }
 }

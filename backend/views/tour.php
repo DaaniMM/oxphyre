@@ -118,6 +118,7 @@ echo json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON
     </button>
   </div>
   <div class="tour-location-body">
+    <p class="tour-location-biz-name"><?= htmlspecialchars($business['name']) ?></p>
     <?php
     $addrParts = array_filter([
         $businessLocation['address'],
