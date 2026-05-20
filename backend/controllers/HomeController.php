@@ -22,4 +22,9 @@ class HomeController
         // Así la ruta es absoluta y no depende del directorio de trabajo del servidor.
         require_once VIEWS_PATH . '/home.php';
     }
+
+    public function showPricing(): void
+    {
+        require_once VIEWS_PATH . '/precios.php';
+    }
 }

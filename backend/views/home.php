@@ -60,10 +60,10 @@
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      { "@type": "Question", "name": "¿Necesito equipo especial para hacer el tour?", "acceptedAnswer": { "@type": "Answer", "text": "No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente y genera la profundidad con inteligencia artificial (MiDaS de Intel)." } },
-      { "@type": "Question", "name": "¿Cuánto tiempo tarda en estar listo el tour?", "acceptedAnswer": { "@type": "Answer", "text": "Con el plan Free, el tour está listo en minutos. Con los planes Pro y Business, el procesado con IA de profundidad tarda entre 5 y 15 minutos." } },
-      { "@type": "Question", "name": "¿Puedo insertar el tour en mi web existente?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Todos los planes incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace." } },
-      { "@type": "Question", "name": "¿Qué pasa si cancelo mi suscripción?", "acceptedAnswer": { "@type": "Answer", "text": "Tus tours siguen siendo accesibles en modo Free (1 tour, 5 posiciones). Si tenías más tours, quedan archivados." } },
+      { "@type": "Question", "name": "¿Necesito equipo especial para hacer el tour?", "acceptedAnswer": { "@type": "Answer", "text": "No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente para generar la experiencia inmersiva. Nada de cámaras 360 ni software de edición." } },
+      { "@type": "Question", "name": "¿Cuánto tiempo tarda en estar listo el tour?", "acceptedAnswer": { "@type": "Answer", "text": "Con cualquier plan, el tour está listo en pocos minutos. La subida y el procesado automático de fotos es rápido y no requiere conocimientos técnicos." } },
+      { "@type": "Question", "name": "¿Puedo insertar el tour en mi web existente?", "acceptedAnswer": { "@type": "Answer", "text": "Sí, en los planes Pro y Business. Incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace. El plan Free solo incluye enlace público." } },
+      { "@type": "Question", "name": "¿Qué pasa si cancelo mi suscripción?", "acceptedAnswer": { "@type": "Answer", "text": "Tus tours siguen siendo accesibles en modo Free (1 tour, 3 posiciones). Si tenías más tours o posiciones, quedan archivados y se pueden reactivar al volver a suscribirte." } },
       { "@type": "Question", "name": "¿Funciona en móviles y tablets?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. El tour funciona en cualquier dispositivo con un navegador moderno." } },
       { "@type": "Question", "name": "¿Mis fotos y datos están seguros?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Las fotos se almacenan en servidores propios con cifrado. Cumplimos con el RGPD europeo." } },
       { "@type": "Question", "name": "¿Puedo probar Oxphyre antes de pagar?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. El plan Free es gratuito para siempre, sin tarjeta de crédito. Crea tu primer tour, compártelo y decide si quieres crecer con un plan de pago." } }
@@ -482,10 +482,12 @@
         <!-- BUG 8: espacio reservado siempre visible aunque Free no tenga ahorro anual -->
         <p class="plan-annual-total" aria-hidden="true">&nbsp;</p>
         <ul class="plan-features" aria-label="Características del plan Free">
-          <li data-i18n="pricing.free_f1">1 tour activo</li>
-          <li data-i18n="pricing.free_f2">Hasta 5 posiciones</li>
-          <li data-i18n="pricing.free_f3">QR descargable</li>
-          <li data-i18n="pricing.free_f4">Marca de agua Oxphyre</li>
+          <li data-i18n="pricing.free_f1">1 negocio · 1 tour activo</li>
+          <li data-i18n="pricing.free_f2">Hasta 3 posiciones/zonas</li>
+          <li data-i18n="pricing.free_f3">QR básico con branding Oxphyre</li>
+          <li data-i18n="pricing.free_f4">Flechas de navegación básicas</li>
+          <li data-i18n="pricing.free_f5">Mapa de ubicación del negocio</li>
+          <li data-i18n="pricing.free_f6">Marca de agua Oxphyre en el visor</li>
         </ul>
         <a href="/registro" class="plan-cta" data-i18n="pricing.cta_free">Empezar gratis</a>
         <p class="plan-micro-note" data-i18n="pricing.free_note">Sin tarjeta. Sin compromiso.</p>
@@ -501,11 +503,11 @@
         </div>
         <p class="plan-annual-total" data-i18n="pricing.pro_annual_total">182€/año · Ahorras 46€</p>
         <ul class="plan-features" aria-label="Características del plan Pro">
-          <li data-i18n="pricing.pro_f1">Tours ilimitados</li>
-          <li data-i18n="pricing.pro_f2">Hasta 20 posiciones</li>
-          <li data-i18n="pricing.pro_f3">MiDaS IA profundidad</li>
-          <li data-i18n="pricing.pro_f4">Analíticas básicas</li>
-          <li data-i18n="pricing.pro_f5">Sin marca de agua</li>
+          <li data-i18n="pricing.pro_f1">Hasta 5 negocios · Tours ilimitados</li>
+          <li data-i18n="pricing.pro_f2">Hasta 20 posiciones por tour</li>
+          <li data-i18n="pricing.pro_f3">Sin marca de agua</li>
+          <li data-i18n="pricing.pro_f4">Embed/iframe en tu web</li>
+          <li data-i18n="pricing.pro_f5">Analíticas básicas · QR profesional</li>
         </ul>
         <a href="/registro" class="plan-cta featured-cta" data-i18n="pricing.cta_pro">Empezar con Pro</a>
         <p class="plan-micro-note" data-i18n="pricing.pro_note">Actualiza o cancela en cualquier momento.</p>
@@ -513,18 +515,18 @@
 
       <article class="pricing-card animate-on-scroll">
         <p class="plan-name" data-i18n="pricing.biz_name">Business</p>
-        <p class="plan-desc" data-i18n="pricing.biz_desc">Para cadenas y agencias de marketing.</p>
+        <p class="plan-desc" data-i18n="pricing.biz_desc">Para empresas con necesidades avanzadas.</p>
         <div class="plan-price">
           <span class="price-amount" data-monthly="49€" data-annual="39€">49€</span>
           <span class="price-period" data-i18n="pricing.per_month">/mes</span>
         </div>
         <p class="plan-annual-total" data-i18n="pricing.biz_annual_total">470€/año · Ahorras 118€</p>
         <ul class="plan-features" aria-label="Características del plan Business">
-          <li data-i18n="pricing.biz_f1">Todo ilimitado</li>
-          <li data-i18n="pricing.biz_f2">MiDaS máxima calidad</li>
-          <li data-i18n="pricing.biz_f3">Analíticas avanzadas</li>
-          <li data-i18n="pricing.biz_f4">Dominio personalizado</li>
-          <li data-i18n="pricing.biz_f5">API access</li>
+          <li data-i18n="pricing.biz_f1">Negocios y posiciones ilimitadas</li>
+          <li data-i18n="pricing.biz_f2">Dominio personalizado (próximamente)</li>
+          <li data-i18n="pricing.biz_f3">Analíticas avanzadas (próximamente)</li>
+          <li data-i18n="pricing.biz_f4">Soporte prioritario + onboarding</li>
+          <li data-i18n="pricing.biz_f5">API access (próximamente)</li>
         </ul>
         <a href="/registro" class="plan-cta" data-i18n="pricing.cta_biz">Empezar con Business</a>
         <p class="plan-micro-note" data-i18n="pricing.biz_note">Acceso completo. Sin límites.</p>
@@ -551,7 +553,7 @@
           <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
-          <p data-i18n="faq.a1">No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente y genera la profundidad con inteligencia artificial (MiDaS de Intel). Nada de cámaras 360 ni software de edición.</p>
+          <p data-i18n="faq.a1">No. Solo necesitas un smartphone con cámara decente. Nuestro sistema procesa las fotos automáticamente para generar la experiencia inmersiva. Nada de cámaras 360 ni software de edición.</p>
         </div>
       </div>
 
@@ -561,7 +563,7 @@
           <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
-          <p data-i18n="faq.a2">Con el plan Free, el tour está listo en minutos. Con los planes Pro y Business, el procesado con IA de profundidad (MiDaS) tarda entre 5 y 15 minutos según el número de posiciones.</p>
+          <p data-i18n="faq.a2">Con cualquier plan, el tour está listo en pocos minutos. La subida y el procesado automático de fotos es rápido y no requiere conocimientos técnicos.</p>
         </div>
       </div>
 
@@ -571,7 +573,7 @@
           <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
-          <p data-i18n="faq.a3">Sí. Todos los planes incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace. El plan Business incluye además dominio personalizado.</p>
+          <p data-i18n="faq.a3">Sí, en los planes Pro y Business. Incluyen un código embed (iframe) que puedes pegar en cualquier web, WordPress, Wix o Squarespace. El plan Free solo incluye enlace público.</p>
         </div>
       </div>
 
@@ -581,7 +583,7 @@
           <i data-lucide="chevron-down" class="faq-question-icon" aria-hidden="true"></i>
         </button>
         <div class="faq-answer" role="region">
-          <p data-i18n="faq.a4">Tus tours siguen siendo accesibles en modo Free (1 tour, 5 posiciones). Si tenías más tours, quedan archivados y los puedes reactivar cuando vuelvas a suscribirte.</p>
+          <p data-i18n="faq.a4">Tus tours siguen siendo accesibles en modo Free (1 tour, 3 posiciones). Si tenías más tours o posiciones, quedan archivados y los puedes reactivar cuando vuelvas a suscribirte.</p>
         </div>
       </div>
 

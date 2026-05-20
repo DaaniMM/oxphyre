@@ -24,6 +24,7 @@
 $routes = [
     'GET' => [
         '/'          => ['HomeController',      'index'],
+        '/precios'   => ['HomeController',      'showPricing'],
         '/login'     => ['AuthController',      'showLogin',    'guest'],
         '/register'  => ['AuthController',      'showRegister', 'guest'],
         '/registro'  => ['AuthController',      'showRegister', 'guest'],
