@@ -3157,3 +3157,21 @@ Tipo: automatizacion de `needs_review` al cambiar/borrar panoramica + avisos en 
 - No se cambio BD ni migraciones.
 - No se tocaron R2, QR, MiDaS, pipeline de imagenes, landing ni planes.
 
+## 2026-05-20 - UX upload vuelve a la misma posicion
+
+Tipo: ajuste puntual de flujo tras guardar/procesar fotos.
+
+### Que se hizo
+
+- `PositionController::upload()`: la redireccion final tras procesar fotos ahora vuelve a `/dashboard/posicion/upload?position={positionId}&negocio={bizSlug}&tour={tourSlug}` en lugar de volver al listado de posiciones del tour.
+- Se mantienen los flash success/error/warnings existentes y no se cambia la logica de procesado de imagenes.
+
+### Motivo
+
+- Al subir o actualizar una panoramica, el propietario necesita revisar la misma posicion y recolocar flechas marcadas como "Revisar" sin perder el contexto de trabajo.
+
+### Que NO se hizo
+
+- No se tocaron HotspotModel, HotspotController, visor publico, BD, R2, QR, MiDaS, pipeline pesado ni planes.
+- No se hizo commit ni push.
+

@@ -384,7 +384,7 @@ class PositionController extends BaseController
             $this->flash('success', trim($message), !empty($warnings) ? ImageProcessingService::LOW_QUALITY_RECOMMENDATION : null);
         }
 
-        $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+        $this->go("/dashboard/posicion/upload?position={$positionId}&negocio={$bizSlug}&tour={$tourSlug}");
     }
 
     // ── Cambiar modo activo del visor (AJAX) ─────────────────────────────────
