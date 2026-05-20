@@ -1349,6 +1349,43 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   margin-top: 10px;
 }
 
+.pricing-details-cta {
+  max-width: 420px;
+  margin: 42px auto 0;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-details-cta-text {
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.pricing-details-cta-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(254, 179, 84, 0.28);
+  background: rgba(254, 179, 84, 0.08);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition), background var(--transition);
+}
+
+.pricing-details-cta-link:hover {
+  border-color: rgba(254, 179, 84, 0.52);
+  background: rgba(254, 179, 84, 0.12);
+  box-shadow: 0 0 28px rgba(254, 179, 84, 0.18);
+  transform: translateY(-2px);
+}
+
 
 /* ── 12. S7 — FAQ ────────────────────────────────────────────────────── */
 

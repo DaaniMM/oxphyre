@@ -3314,3 +3314,20 @@ Nominatim/OpenStreetMap cubre el **requisito de API externa del tribunal**: llam
 - No se tocaron Hotspots, QR, R2, MiDaS, pipeline, landing ni planes.
 - No se hizo commit ni push.
 
+## 2026-05-20 - Coherencia visual entre landing precios y /precios
+
+Tipo: ajuste visual acotado.
+
+### Que se hizo
+
+- `backend/views/home.php`: se anadio un CTA debajo de las cards de la seccion `#precios` hacia `/precios`, sin cambiar cards ni layout.
+- `public/css/main.css`: se anadieron solo clases nuevas para el CTA de la landing.
+- `public/js/i18n.js`: se anadieron claves ES/EN para el nuevo CTA.
+- `backend/views/precios.php`: se aumento el aire del bloque superior, se anadio un halo/esfera CSS estatico local y se corrigio la card Business para que los textos `Próximamente` queden en linea.
+
+### Que NO se hizo
+
+- No se cargo `main.js` ni Three.js en `/precios`.
+- No se tocaron rutas, dashboard, BD, Hotspots, QR, R2, mapa publico ni pipeline.
+- No se hizo commit ni push.
+

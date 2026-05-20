@@ -54,14 +54,49 @@
     /* Contenedor principal */
     .precios-page {
       padding-top: var(--nav-h);
+      position: relative;
+      overflow: hidden;
+    }
+    .precios-page::before {
+      content: '';
+      position: absolute;
+      top: 120px;
+      left: 50%;
+      width: min(780px, 86vw);
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(254, 179, 84, 0.16), rgba(254, 179, 84, 0.045) 34%, transparent 66%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06), transparent 58%);
+      filter: blur(2px);
+      opacity: 0.9;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .precios-page::after {
+      content: '';
+      position: absolute;
+      top: 172px;
+      left: 50%;
+      width: min(560px, 72vw);
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 1px solid rgba(254, 179, 84, 0.14);
+      box-shadow: inset 0 0 80px rgba(254, 179, 84, 0.055), 0 0 120px rgba(254, 179, 84, 0.08);
+      pointer-events: none;
+      z-index: 0;
     }
 
     /* Hero de la página */
     .pricing-page-hero {
       text-align: center;
-      padding: 64px 40px 0;
+      padding: 96px 40px 20px;
       max-width: 680px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
     .pricing-page-h1 {
       font-family: var(--font-display);
@@ -84,7 +119,12 @@
     /* Sección de cards: anular min-height 100vh del CSS de landing */
     #precios {
       min-height: auto !important;
-      padding: 0 40px 72px !important;
+      padding: 16px 40px 88px !important;
+      position: relative;
+      z-index: 1;
+    }
+    #precios .pricing-toggle {
+      margin-top: 40px;
     }
 
     /* Tabla comparativa */
@@ -92,6 +132,8 @@
       max-width: 920px;
       margin: 0 auto;
       padding: 0 40px 80px;
+      position: relative;
+      z-index: 1;
     }
     .pricing-compare h2 {
       font-family: var(--font-display);
@@ -164,6 +206,8 @@
       max-width: 680px;
       margin: 0 auto;
       padding: 0 40px 80px;
+      position: relative;
+      z-index: 1;
     }
     .pricing-faq-section h2 {
       font-family: var(--font-display);
@@ -180,6 +224,8 @@
       padding: 0 40px 80px;
       border-top: 1px solid rgba(255,255,255,0.05);
       padding-top: 64px;
+      position: relative;
+      z-index: 1;
     }
     .pricing-cta-section p {
       font-size: 22px;
@@ -211,22 +257,16 @@
     /* Features "Próximamente" en card Business */
     .plan-features li.soon-feature::before { content: '○'; color: var(--text-3); flex-shrink: 0; }
     .plan-features li.soon-feature { color: var(--text-3); }
-    .plan-features li.soon-feature .soon-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 3px;
-    }
-    .plan-features li.soon-feature .soon { margin: 0; }
-
     /* Etiqueta "Activo" en nav link de precios */
     .nav-link-active {
       color: var(--accent) !important;
     }
 
     @media (max-width: 768px) {
-      .pricing-page-hero { padding: 40px 20px 0; }
-      #precios { padding: 0 20px 56px !important; }
+      .precios-page::before { top: 96px; width: 110vw; opacity: 0.62; }
+      .precios-page::after { top: 146px; width: 82vw; opacity: 0.68; }
+      .pricing-page-hero { padding: 64px 20px 14px; }
+      #precios { padding: 10px 20px 64px !important; }
       .pricing-compare { padding: 0 20px 60px; }
       .pricing-faq-section { padding: 0 20px 60px; }
       .pricing-cta-section { padding: 48px 20px 60px; }
@@ -299,7 +339,7 @@
     <section id="precios" aria-labelledby="pricing-cards-label">
       <p id="pricing-cards-label" class="sr-only">Planes y precios</p>
 
-      <div class="pricing-toggle" style="margin-top:40px;">
+      <div class="pricing-toggle">
         <span class="toggle-label monthly" data-i18n="pricing.toggle_monthly">Mensual</span>
         <button id="billing-toggle" role="switch" aria-checked="false" aria-label="Cambiar entre facturación mensual y anual"></button>
         <span class="toggle-label annual" data-i18n="pricing.toggle_annual">Anual</span>
@@ -361,10 +401,10 @@
           <p class="plan-annual-total" data-i18n="pricing.biz_annual_total">470€/año · Ahorras 118€</p>
           <ul class="plan-features" aria-label="Características del plan Business">
             <li data-i18n="pricing.biz_f1">Negocios y posiciones ilimitadas</li>
-            <li class="soon-feature"><span class="soon-inner">Dominio personalizado · Marca blanca<span class="soon">Próximamente</span></span></li>
-            <li class="soon-feature"><span class="soon-inner">Analíticas avanzadas<span class="soon">Próximamente</span></span></li>
+            <li class="soon-feature" data-i18n="pricing.biz_f2">Dominio personalizado (próximamente)</li>
+            <li class="soon-feature" data-i18n="pricing.biz_f3">Analíticas avanzadas (próximamente)</li>
             <li data-i18n="pricing.biz_f4">Soporte prioritario + onboarding</li>
-            <li class="soon-feature"><span class="soon-inner">API access<span class="soon">Próximamente</span></span></li>
+            <li class="soon-feature" data-i18n="pricing.biz_f5">API access (próximamente)</li>
           </ul>
           <a href="mailto:hola@oxphyre.com" class="plan-cta" data-i18n="pricing.cta_biz_contact">Contactar</a>
           <p class="plan-micro-note" data-i18n="pricing.biz_note">Acceso completo. Sin límites.</p>

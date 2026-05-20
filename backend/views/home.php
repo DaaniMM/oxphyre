@@ -364,6 +364,11 @@
       </article>
 
     </div>
+
+    <div class="pricing-details-cta animate-on-scroll">
+      <p class="pricing-details-cta-text" data-i18n="pricing.details_cta_text">¿Quieres comparar todos los detalles?</p>
+      <a href="/precios" class="pricing-details-cta-link" data-i18n="pricing.details_cta_link">Ver comparativa completa</a>
+    </div>
   </section>
 
 
@@ -717,4 +722,3 @@
 
 </body>
 </html>
-
