@@ -513,6 +513,36 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   min-height: 1rem;
 }
 
+.business-location-section {
+  border-top: 1px solid var(--ox-border);
+  margin-top: 0.25rem;
+  padding-top: 1.25rem;
+}
+
+.business-location-title {
+  color: var(--ox-text);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.business-location-help {
+  color: var(--ox-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
+.business-location-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
+}
+
+.business-location-fields .db-form-group:last-child {
+  margin-bottom: 0;
+}
+
 /* Slug preview */
 .slug-row { display: flex; align-items: stretch; gap: 0; }
 
@@ -2203,6 +2233,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 
 @media (max-width: 480px) {
+  .business-location-fields { grid-template-columns: 1fr; }
   .upload-tip-cols { grid-template-columns: 1fr; }
   .upload-flow-card-header { flex-direction: column; }
   .upload-tip-actions { justify-content: stretch; }

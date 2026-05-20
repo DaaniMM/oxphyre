@@ -119,7 +119,15 @@
             <p class="db-manage-desc"><?= htmlspecialchars($business['description']) ?></p>
           <?php endif; ?>
 
-          <?php if (!empty($business['phone']) || !empty($business['address'])): ?>
+          <?php
+            $locationParts = array_filter([
+              $business['address'] ?? null,
+              $business['postal_code'] ?? null,
+              $business['city'] ?? null,
+              $business['country'] ?? null,
+            ]);
+          ?>
+          <?php if (!empty($business['phone']) || !empty($locationParts)): ?>
             <div class="db-manage-meta">
               <?php if (!empty($business['phone'])): ?>
                 <span class="db-manage-meta-row">
@@ -127,10 +135,10 @@
                   <?= htmlspecialchars($business['phone']) ?>
                 </span>
               <?php endif; ?>
-              <?php if (!empty($business['address'])): ?>
+              <?php if (!empty($locationParts)): ?>
                 <span class="db-manage-meta-row">
                   <i data-lucide="map-pin" width="13" height="13" aria-hidden="true"></i>
-                  <?= htmlspecialchars($business['address']) ?>
+                  <?= htmlspecialchars(implode(', ', $locationParts)) ?>
                 </span>
               <?php endif; ?>
             </div>
@@ -178,10 +186,37 @@
                 maxlength="20" value="<?= htmlspecialchars($business['phone'] ?? '') ?>">
             </div>
 
-            <div class="db-form-group" style="margin-bottom:0;">
-              <label class="db-form-label" for="edit-address">Dirección</label>
-              <input class="db-form-input" type="text" id="edit-address" name="address"
-                maxlength="200" value="<?= htmlspecialchars($business['address'] ?? '') ?>">
+            <div class="db-manage-edit-full business-location-section">
+              <h3 class="business-location-title">Ubicación de tu negocio</h3>
+              <p class="business-location-help">
+                Escribe la dirección de tu local y la mostraremos en tu tour para que tus clientes sepan cómo llegar.
+              </p>
+
+              <div class="db-form-group">
+                <label class="db-form-label" for="edit-address">Dirección</label>
+                <input class="db-form-input" type="text" id="edit-address" name="address"
+                  maxlength="200" placeholder="Ej: Calle Mayor 12" value="<?= htmlspecialchars($business['address'] ?? '') ?>">
+              </div>
+
+              <div class="business-location-fields">
+                <div class="db-form-group">
+                  <label class="db-form-label" for="edit-city">Ciudad</label>
+                  <input class="db-form-input" type="text" id="edit-city" name="city"
+                    maxlength="100" placeholder="Ej: Madrid" value="<?= htmlspecialchars($business['city'] ?? '') ?>">
+                </div>
+
+                <div class="db-form-group">
+                  <label class="db-form-label" for="edit-postal-code">Código postal</label>
+                  <input class="db-form-input" type="text" id="edit-postal-code" name="postal_code"
+                    maxlength="20" placeholder="Ej: 28013" value="<?= htmlspecialchars($business['postal_code'] ?? '') ?>">
+                </div>
+
+                <div class="db-form-group">
+                  <label class="db-form-label" for="edit-country">País</label>
+                  <input class="db-form-input" type="text" id="edit-country" name="country"
+                    maxlength="100" placeholder="Ej: España" value="<?= htmlspecialchars($business['country'] ?? '') ?>">
+                </div>
+              </div>
             </div>
           </div>
 

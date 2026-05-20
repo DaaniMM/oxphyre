@@ -88,6 +88,9 @@ class BusinessController extends BaseController
         $description = strip_tags(trim($_POST['description'] ?? ''));
         $phone       = strip_tags(trim($_POST['phone']       ?? ''));
         $address     = strip_tags(trim($_POST['address']     ?? ''));
+        $city        = strip_tags(trim($_POST['city']        ?? ''));
+        $postalCode  = strip_tags(trim($_POST['postal_code'] ?? ''));
+        $country     = strip_tags(trim($_POST['country']     ?? ''));
 
         $errors = [];
         if ($name === '' || mb_strlen($name) > 100) {
@@ -95,6 +98,15 @@ class BusinessController extends BaseController
         }
         if ($description !== '' && mb_strlen($description) > 300) {
             $errors[] = 'La descripción no puede superar 300 caracteres.';
+        }
+        if ($city !== '' && mb_strlen($city) > 100) {
+            $errors[] = 'La ciudad no puede superar 100 caracteres.';
+        }
+        if ($postalCode !== '' && mb_strlen($postalCode) > 20) {
+            $errors[] = 'El código postal no puede superar 20 caracteres.';
+        }
+        if ($country !== '' && mb_strlen($country) > 100) {
+            $errors[] = 'El país no puede superar 100 caracteres.';
         }
 
         if (!empty($errors)) {
@@ -115,7 +127,10 @@ class BusinessController extends BaseController
             $name,
             $description !== '' ? $description : null,
             $phone       !== '' ? $phone       : null,
-            $address     !== '' ? $address     : null
+            $address     !== '' ? $address     : null,
+            $city        !== '' ? $city        : null,
+            $postalCode  !== '' ? $postalCode  : null,
+            $country     !== '' ? $country     : null
         );
 
         $this->flash('success', 'Negocio actualizado correctamente.');
@@ -191,6 +206,9 @@ class BusinessController extends BaseController
         $description = strip_tags(trim($_POST['description'] ?? ''));
         $phone       = strip_tags(trim($_POST['phone']       ?? ''));
         $address     = strip_tags(trim($_POST['address']     ?? ''));
+        $city        = strip_tags(trim($_POST['city']        ?? ''));
+        $postalCode  = strip_tags(trim($_POST['postal_code'] ?? ''));
+        $country     = strip_tags(trim($_POST['country']     ?? ''));
 
         $errors = [];
         if ($name === '' || mb_strlen($name) > 100) {
@@ -201,6 +219,15 @@ class BusinessController extends BaseController
         }
         if ($description !== '' && mb_strlen($description) > 300) {
             $errors[] = 'La descripción no puede superar 300 caracteres.';
+        }
+        if ($city !== '' && mb_strlen($city) > 100) {
+            $errors[] = 'La ciudad no puede superar 100 caracteres.';
+        }
+        if ($postalCode !== '' && mb_strlen($postalCode) > 20) {
+            $errors[] = 'El código postal no puede superar 20 caracteres.';
+        }
+        if ($country !== '' && mb_strlen($country) > 100) {
+            $errors[] = 'El país no puede superar 100 caracteres.';
         }
 
         if (!empty($errors)) {
@@ -225,7 +252,10 @@ class BusinessController extends BaseController
             $userId, $name, $slug,
             $description !== '' ? $description : null,
             $phone       !== '' ? $phone       : null,
-            $address     !== '' ? $address     : null
+            $address     !== '' ? $address     : null,
+            $city        !== '' ? $city        : null,
+            $postalCode  !== '' ? $postalCode  : null,
+            $country     !== '' ? $country     : null
         );
 
         $_SESSION['created_business'] = ['id' => $businessId, 'name' => $name, 'slug' => $slug];

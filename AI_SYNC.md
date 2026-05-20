@@ -57,6 +57,7 @@ Estado implementado:
 - Soft delete en businesses, tours, positions y photos.
 - QR 1 descargable y QR 2A validados en servidor real: `/qr/{token}` redirige a tour publico, `GET` valido registra escaneo pseudonimizado en `qr_scans`, `HEAD` y bots no cuentan, y el contador simple se calcula con `COUNT(*)`.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
+- Mapa 1A implementado en local: migracion SQL preparada para campos de ubicacion estructurada en `businesses`; crear/editar negocio ya guarda direccion, ciudad, codigo postal y pais. Nominatim/Leaflet/mapa publico quedan pendientes.
 
 ---
 
@@ -354,6 +355,14 @@ Lo que **no** hace Fase 1:
 - Pro: MiDaS en todas las posiciones, más negocios, más posiciones, QR, embed, minimapa, hotspots, analíticas básicas.
 - Business: funciones avanzadas, dominio personalizado, usuarios, API, analíticas avanzadas y features futuras.
 - Agente IA completo queda como roadmap/post-TFG salvo decisión contraria.
+
+### Ubicacion de negocios y mapa publico
+- La ubicacion pertenece al negocio, no al tour.
+- `businesses.address` sigue siendo el campo principal visible.
+- Mapa 1A deja preparados `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider` mediante migracion en `docs/sql/2026-05-20_business_location_fields.sql`.
+- Los formularios de crear y editar negocio guardan `address`, `city`, `postal_code` y `country`.
+- `latitude`, `longitude`, `geocoded_at` y `geocoding_provider` quedan reservados para el siguiente microbloque de geocodificacion.
+- No hay todavia Nominatim, Leaflet, boton "Buscar en el mapa", cambios de CSP ni card publica "Donde estamos".
 
 ### 3D Gaussian Splatting post-TFG
 - 3D Gaussian Splatting queda como dirección comercial definitiva post-TFG de Oxphyre.

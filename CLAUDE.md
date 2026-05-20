@@ -100,6 +100,7 @@ CLAUDE.md            → este archivo
 - `hotspots` conserva columnas legacy como `photo_id`, `position_x`, `position_y`, `yaw_rad` y `pitch_rad`, pero el nuevo flujo de navegacion usa `position_id` como origen logico, `target_position_id` como destino, `panorama_photo_id` para detectar sustituciones de panoramica y `texture_x`/`texture_y` como coordenadas principales sobre la textura. `photo_id` queda nullable legacy.
 - `qr_codes.token` es un token base62 de 12 caracteres para URL permanente `/qr/{token}`. `token` es UNIQUE; `tour_id` NO es UNIQUE para permitir multiples tokens/campanas futuras.
 - `qr_scans` es la fuente de verdad de analitica QR 2A: guarda `qr_code_id`, `ip_hash`, `device_type` y `scanned_at`; `ip_address`, `user_agent` y `country` quedan en `NULL` por privacidad.
+- `businesses` contiene la ubicacion estructurada del negocio: `address` como direccion principal visible, `city`, `postal_code`, `country` y campos reservados para geocodificacion `latitude`, `longitude`, `geocoded_at`, `geocoding_provider`.
 - El contador QR se calcula con `COUNT(*)` sobre `qr_scans`; `qr_codes.total_scans` queda como columna legacy/cache futura y QR 2A no la usa ni la actualiza.
 - `login_attempts` existe para rate limiting de login.
 - `businesses`, `tours`, `positions`, `photos` y `hotspots` tienen soft delete con `deleted_at`.
@@ -107,6 +108,12 @@ CLAUDE.md            → este archivo
 **Nota histórica:** La tabla `photos` nació para N/S/E/O. Después se añadió `direction='360'` para permitir panorámica sin cambiar la estructura general. `positions.active_mode` se añadió para permitir que 4 fotos y panorámica coexistan. La decisión vigente mantiene `360` como panorámica obligatoria y reutiliza N/S/E/O como mapeo interno temporal de Foto detalle 1-4.
 
 **Decisión vigente:** Todos los modelos deben usar prepared statements. En tablas con soft delete, no usar `DELETE FROM`; usar `UPDATE ... SET deleted_at = NOW()` y filtrar `deleted_at IS NULL` en todos los SELECT.
+
+### Ubicacion de negocios y mapa publico
+
+**Estado actual:** Mapa 1A prepara la base de datos y formularios para ubicacion estructurada del negocio. La migracion `docs/sql/2026-05-20_business_location_fields.sql` anade `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider`. Crear/editar negocio ya guarda direccion, ciudad, codigo postal y pais.
+
+**Decision vigente:** La ubicacion pertenece al negocio, no al tour. `address` sigue siendo el campo principal visible. `latitude`, `longitude`, `geocoded_at` y `geocoding_provider` quedan reservados para el siguiente microbloque con Nominatim/OpenStreetMap. No hay todavia Leaflet, cambios CSP ni card publica "Donde estamos".
 
 ## Rutas importantes del servidor
 - Proyecto: `/var/www/oxphyre`

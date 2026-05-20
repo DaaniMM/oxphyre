@@ -3207,3 +3207,23 @@ Tipo: mejora puntual de claridad en Hotspots 1D.
 - No se toco backend, BD, visor publico, endpoints, logica de guardado ni JS ajeno al editor.
 - No se hizo commit ni push.
 
+## 2026-05-20 - Mapa 1A base de ubicacion del negocio
+
+Tipo: preparacion de base de datos, modelo, controller y formularios para SEO local/API externa posterior.
+
+### Que se hizo
+
+- `docs/sql/2026-05-20_business_location_fields.sql`: migracion idempotente para anadir en `businesses` los campos `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider`.
+- `backend/models/BusinessModel.php`: `create()` y `update()` aceptan y guardan `city`, `postal_code` y `country` con prepared statements. `getByUser()` tambien devuelve los campos visibles de ubicacion.
+- `backend/controllers/BusinessController.php`: `store()` y `update()` leen/sanean `city`, `postal_code` y `country`; validan maximos simples sin hacerlos obligatorios.
+- `backend/views/dashboard/business/create.php`: anadida seccion "Ubicacion de tu negocio" con direccion, ciudad, codigo postal y pais.
+- `backend/views/dashboard/negocios/manage.php`: anadida la misma seccion en edicion y se muestra la ubicacion compuesta en la ficha del negocio si existe.
+- `public/css/dashboard.css`: estilos reutilizables para la seccion de ubicacion.
+- `AI_SYNC.md` y `CLAUDE.md`: actualizado el estado vivo y la decision de que la ubicacion pertenece al negocio.
+
+### Que NO se hizo
+
+- No se implemento Nominatim, Leaflet, boton "Buscar en el mapa", card publica "Donde estamos" ni cambios CSP.
+- No se tocaron tour publico, Hotspots, QR, R2, MiDaS, pipeline, landing ni planes.
+- No se hizo commit ni push.
+

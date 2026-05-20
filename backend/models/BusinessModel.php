@@ -27,7 +27,7 @@ class BusinessModel
     public function getByUser(int $userId): array
     {
         $stmt = $this->db->prepare(
-            'SELECT id, name, slug, description, phone, address, plan_id, created_at
+            'SELECT id, name, slug, description, phone, address, city, postal_code, country, plan_id, created_at
              FROM businesses
              WHERE user_id = ? AND deleted_at IS NULL
              ORDER BY created_at DESC'
@@ -48,14 +48,23 @@ class BusinessModel
         return $row !== false ? $row : null;
     }
 
-    public function update(int $id, string $name, ?string $description, ?string $phone, ?string $address): void
+    public function update(
+        int $id,
+        string $name,
+        ?string $description,
+        ?string $phone,
+        ?string $address,
+        ?string $city,
+        ?string $postalCode,
+        ?string $country
+    ): void
     {
         $stmt = $this->db->prepare(
             'UPDATE businesses
-             SET name = ?, description = ?, phone = ?, address = ?, updated_at = NOW()
+             SET name = ?, description = ?, phone = ?, address = ?, city = ?, postal_code = ?, country = ?, updated_at = NOW()
              WHERE id = ? AND deleted_at IS NULL'
         );
-        $stmt->execute([$name, $description, $phone, $address, $id]);
+        $stmt->execute([$name, $description, $phone, $address, $city, $postalCode, $country, $id]);
     }
 
     public function softDelete(int $id): void
@@ -81,14 +90,17 @@ class BusinessModel
         string $slug,
         ?string $description,
         ?string $phone,
-        ?string $address
+        ?string $address,
+        ?string $city,
+        ?string $postalCode,
+        ?string $country
     ): int {
         $stmt = $this->db->prepare(
             'INSERT INTO businesses
-               (user_id, name, slug, description, phone, address, plan_id, is_active, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())'
+               (user_id, name, slug, description, phone, address, city, postal_code, country, plan_id, is_active, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())'
         );
-        $stmt->execute([$userId, $name, $slug, $description, $phone, $address, PLAN_FREE]);
+        $stmt->execute([$userId, $name, $slug, $description, $phone, $address, $city, $postalCode, $country, PLAN_FREE]);
         return (int) $this->db->lastInsertId();
     }
 }

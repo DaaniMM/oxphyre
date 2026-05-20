@@ -159,10 +159,37 @@
                 maxlength="20" placeholder="+34 600 000 000">
             </div>
 
-            <div class="db-form-group" style="margin-bottom:0;">
-              <label class="db-form-label" for="biz-address">Dirección</label>
-              <input class="db-form-input" type="text" id="biz-address" name="address"
-                maxlength="200" placeholder="Calle Mayor 1, Madrid">
+            <div class="business-location-section">
+              <h3 class="business-location-title">Ubicación de tu negocio</h3>
+              <p class="business-location-help">
+                Escribe la dirección de tu local y la mostraremos en tu tour para que tus clientes sepan cómo llegar.
+              </p>
+
+              <div class="db-form-group">
+                <label class="db-form-label" for="biz-address">Dirección</label>
+                <input class="db-form-input" type="text" id="biz-address" name="address"
+                  maxlength="200" placeholder="Ej: Calle Mayor 12">
+              </div>
+
+              <div class="business-location-fields">
+                <div class="db-form-group">
+                  <label class="db-form-label" for="biz-city">Ciudad</label>
+                  <input class="db-form-input" type="text" id="biz-city" name="city"
+                    maxlength="100" placeholder="Ej: Madrid">
+                </div>
+
+                <div class="db-form-group">
+                  <label class="db-form-label" for="biz-postal-code">Código postal</label>
+                  <input class="db-form-input" type="text" id="biz-postal-code" name="postal_code"
+                    maxlength="20" placeholder="Ej: 28013">
+                </div>
+
+                <div class="db-form-group">
+                  <label class="db-form-label" for="biz-country">País</label>
+                  <input class="db-form-input" type="text" id="biz-country" name="country"
+                    maxlength="100" placeholder="Ej: España">
+                </div>
+              </div>
             </div>
           </div>
 
