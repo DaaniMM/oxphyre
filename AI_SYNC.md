@@ -57,7 +57,9 @@ Estado implementado:
 - Soft delete en businesses, tours, positions y photos.
 - QR 1 descargable y QR 2A validados en servidor real: `/qr/{token}` redirige a tour publico, `GET` valido registra escaneo pseudonimizado en `qr_scans`, `HEAD` y bots no cuentan, y el contador simple se calcula con `COUNT(*)`.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
-- Mapa 1A implementado en local: migracion SQL preparada para campos de ubicacion estructurada en `businesses`; crear/editar negocio ya guarda direccion, ciudad, codigo postal y pais. Nominatim/Leaflet/mapa publico quedan pendientes.
+- Mapa 1A validado en servidor: migracion `docs/sql/2026-05-20_business_location_fields.sql` ejecutada. `businesses` tiene `address`, `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider`. Crear/editar negocio guarda ubicacion estructurada.
+- Mapa 1B validado en servidor: boton "Buscar en el mapa" en edicion de negocio llama server-side a Nominatim/OpenStreetMap con los valores actuales del formulario. Guarda lat/lng + direccion coherente + `geocoding_provider='nominatim'` en BD. No acepta lat/lng desde cliente. CSRF validado sin consumir.
+- Mapa 1C validado en servidor: tour publico muestra boton "Donde estamos" solo si el negocio tiene coordenadas. Bottom sheet responsive con backdrop blur, mapa Leaflet/OSM con pin, nombre del negocio, direccion textual y boton "Como llegar" a OSM. Schema.org LocalBusiness JSON-LD en pagina publica del tour. CSP actualizada para Leaflet CDN y tiles OSM. Cubre el requisito de API externa del tribunal TFG.
 
 ---
 
@@ -359,10 +361,11 @@ Lo que **no** hace Fase 1:
 ### Ubicacion de negocios y mapa publico
 - La ubicacion pertenece al negocio, no al tour.
 - `businesses.address` sigue siendo el campo principal visible.
-- Mapa 1A deja preparados `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider` mediante migracion en `docs/sql/2026-05-20_business_location_fields.sql`.
-- Los formularios de crear y editar negocio guardan `address`, `city`, `postal_code` y `country`.
-- `latitude`, `longitude`, `geocoded_at` y `geocoding_provider` quedan reservados para el siguiente microbloque de geocodificacion.
-- No hay todavia Nominatim, Leaflet, boton "Buscar en el mapa", cambios de CSP ni card publica "Donde estamos".
+- Mapa 1A implementado: migracion `docs/sql/2026-05-20_business_location_fields.sql` ejecutada. `businesses` tiene `address`, `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider`. Crear/editar negocio guarda ubicacion estructurada.
+- Mapa 1B implementado y validado: endpoint `POST /dashboard/negocios/{slug}/geocode`. Backend llama server-side a Nominatim. No acepta lat/lng desde cliente. Guarda coordenadas + campos de direccion coherente en BD. Boton "Buscar en el mapa" en el formulario de edicion del negocio. JS en `business-location.js`.
+- Mapa 1C implementado y validado: `TourController::showPublic()` extrae `$businessLocation` y lo anade a `$tourData.location`. Tour publico muestra boton "Donde estamos" solo si hay coordenadas. Bottom sheet responsive con backdrop blur, mapa Leaflet/OSM con pin, nombre del negocio, direccion textual y enlace "Como llegar". Schema.org `LocalBusiness` JSON-LD en tour publico. CSP actualizada para Leaflet CDN y tiles OSM. Gyroscopio bloqueado mientras sheet esta abierto via `body.location-sheet-open`.
+- Leaflet se carga desde CDN jsdelivr (ya en allowlist CSP). No hay copia local de Leaflet.
+- La ubicacion no tiene todavia card publica fuera del tour (Mapa 1D queda pendiente si se decide).
 
 ### 3D Gaussian Splatting post-TFG
 - 3D Gaussian Splatting queda como dirección comercial definitiva post-TFG de Oxphyre.
@@ -425,7 +428,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ### Prioridad alta para TFG
 - Crear o terminar `/precios` con Free, Pro y Business.
-- Integrar una API externa obligatoria para el tribunal: Google Maps o Mapbox.
+- API externa para tribunal: **implementada y validada**. Nominatim/OpenStreetMap (geocodificacion server-side, Mapa 1B) + Leaflet/OSM (mapa publico en visor, Mapa 1C). Cubre el requisito sin Google Maps ni Mapbox (sin API key, sin cuotas, open source).
 - Documentar roles en la memoria: admin, business_owner, viewer.
 - Revisar contraste en dashboard y wizard: inputs, labels y textos secundarios.
 - Preparar 1-2 tours demo visualmente impecables antes de la exposición.
@@ -461,14 +464,15 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
-Última sesión de implementación (2026-05-19):
-- Hotspots 1C validado en servidor real: listado, modal, añadir/editar/eliminar flechas, visor publico y hover "Ir a {nombre}" funcionando correctamente.
-- Helper `asset()` en `config.php`: versiona CSS/JS automaticamente con `filemtime()` sin builds ni versiones manuales. Aplicado a `dashboard.css` (10 vistas), `hotspot-editor.js`, `tour.css` y `tour-viewer.js`.
-- Label de flechas en visor publico: dos lineas — "Ir a" arriba y nombre de destino abajo.
+Ultima sesion de implementacion (2026-05-20):
+- Mapa 1A validado en servidor: campos de ubicacion en `businesses`, formularios de crear/editar negocio.
+- Mapa 1B validado en servidor: geocodificacion Nominatim server-side, boton "Buscar en el mapa" en edicion de negocio, `business-location.js`, endpoint privado con CSRF/ownership.
+- Mapa 1C validado en servidor: mapa Leaflet en tour publico, bottom sheet responsive, Schema.org LocalBusiness JSON-LD, CSP actualizada. Cubre requisito API externa del tribunal.
+- Ajustes visuales Mapa 1C: boton centrado, sheet de 860px / 78vh, mapa 320px desktop, nombre del negocio en el sheet.
 
 Sesiones anteriores clave:
-- Hotspots 1A y 1B validados en servidor real.
-- Hotspots 1B.1: coordenadas UV directas en render publico.
+- Hotspots 1A, 1B, 1B.1, 1C y 1D validados en servidor real.
+- Helper `asset()` con `filemtime()` en `config.php`.
 - Pipeline de imagenes Fase 1.2, R2/CDN Fase 2B, QR 1 y QR 2A validados en servidor real.
 
 ---
@@ -477,24 +481,23 @@ Sesiones anteriores clave:
 
 Siguiente orden recomendado para cerrar antes del TFG:
 
-1. **UX dashboard — bloquear "Ver posición" si falta panorámica `360`**:
-   - En la card/listado de posiciones y dentro de la pantalla de gestión/subida, el botón debe aparecer desactivado/no clickable si la posición no tiene panorámica principal.
-   - Tooltip/mensaje sugerido: "Sube una panorámica principal para activar esta experiencia Oxphyre Room. Las fotos detalle son opcionales."
-2. **Detalles parciales de Oxphyre Room**:
-   - Adaptar UI/visor cuando proceda para usar "Foto detalle 1-4" y permitir mostrar 1-4 detalles disponibles sin exigir las 4 fotos.
-3. **R2/CDN — Fase 2B validada**:
-   - Fase 0 **validada**: bucket `oxphyre-tour-media` creado, DNS Cloudflare activo, `media.oxphyre.com` Active, WebP público servido correctamente.
-   - Fase 1 **validada de forma aislada**: variables R2 en `.env.example`, migración SQL metadata `photos`, `R2StorageService.php` y test CLI real contra R2 completados.
-   - Fase 2A **implementada y validada**: nuevas subidas mantienen WebP local y, si `R2_ENABLED=true`, duplican WebP final en R2 con fallback local obligatorio.
-   - Fase 2B **implementada y validada en servidor real**: visor/dashboard usan `public_url` si existe y fallback local si no. CORS R2 configurado y validado para WebGL/Three.js.
-4. Limpieza física de soft delete: borrar WebP/depth asociados cuando proceda. No implementado todavía. Esperar a validar R2 como fuente del visor antes de borrar físico.
-5. **Hotspots 1D**: implementado y validado parcialmente. Pendiente: confirmar ciclo completo con borrado de panoramica. La deuda P1 de estilos inline de avisos ya esta cerrada en `dashboard.css`.
-   **Hotspots 1E**: pulido UX mobile/labels/limites — siguiente bloque.
-6. Pulido opcional de ruido/granulado si sobra tiempo. No bloqueante.
+**Requisitos tribunal ya cubiertos:**
+- API externa: Nominatim/OpenStreetMap (Mapa 1B) + Leaflet/OSM (Mapa 1C). **Validado.**
+- Roles documentados: pendiente documentar en la memoria (admin, business_owner, viewer).
 
-Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversión automática de iOS/Safari para confirmar el path HEIC del pipeline. HEIC/HEIF está implementado en código y el servidor soporta libheif/libvips; es verificación, no implementación.
+1. **`/precios`**: crear pagina independiente con las 3 cards de planes (Free, Pro, Business). Todos los CTAs de upgrade del dashboard apuntan aqui. Slug correcto para SEO es `/precios` (no `/planes`).
+2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
+   **Hotspots 1E**: pulido UX mobile/labels/limites.
+3. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
+4. Responsive: verificar todas las secciones en movil y tablet.
+5. SEO tecnico final: sitemap, robots, schema, metas, Open Graph.
+6. PageSpeed final.
+7. Limpieza fisica de soft delete: borrar WebP/depth asociados cuando proceda. Esperar a tener R2 como fuente validada (ya lo es en Fase 2B). No es bloqueante para el TFG.
+8. Pulido opcional de ruido/granulado. No bloqueante.
 
-Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo público actual depende de `photos.direction='360'` para la panorámica principal. `N/S/E/O` quedan como mapeo interno temporal de Foto detalle 1-4.
+Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversion automatica de iOS/Safari para confirmar el path HEIC del pipeline.
+
+Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo publico actual depende de `photos.direction='360'` para la panoramica principal. `N/S/E/O` quedan como mapeo interno temporal de Foto detalle 1-4.
 
 ---
 

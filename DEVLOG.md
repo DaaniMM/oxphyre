@@ -3226,3 +3226,62 @@ Tipo: preparacion de base de datos, modelo, controller y formularios para SEO lo
 - No se implemento Nominatim, Leaflet, boton "Buscar en el mapa", card publica "Donde estamos" ni cambios CSP.
 - No se tocaron tour publico, Hotspots, QR, R2, MiDaS, pipeline, landing ni planes.
 
+## 2026-05-20 - Mapa 1B/1C — Geocodificacion Nominatim y mapa publico Leaflet
+
+Tipo: implementacion de API externa (requisito tribunal TFG) + SEO local. Validado en servidor real.
+
+### Que se hizo
+
+#### Mapa 1B — Geocodificacion server-side con Nominatim/OpenStreetMap
+
+- `backend/controllers/BusinessController.php`: metodo `geocode()` nuevo. Endpoint `POST /dashboard/negocios/{slug}/geocode`. Valida sesion, ownership y CSRF (sin consumir — el formulario de edicion tambien lo necesita). Lee valores del formulario desde el body JSON, no desde BD ni desde el cliente. Llama server-side a Nominatim con `curl`, timeout 8s, User-Agent `Oxphyre/1.0 (TFG tour virtual; https://oxphyre.com)`. Valida lat/lng en rango valido y no 0.0/0.0. Guarda `address`, `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider='nominatim'` en BD para mantener coherencia entre coordenadas y direccion mostrada al usuario. No acepta lat/lng desde cliente.
+- `backend/models/BusinessModel.php`: `saveGeocoding()` guarda tambien los campos de direccion ademas de las coordenadas.
+- `backend/routes/web.php`: ruta `POST /dashboard/negocios/([a-z0-9-]+)/geocode` con guard auth.
+- `backend/views/dashboard/negocios/manage.php`: boton "Buscar en el mapa" y parrafo de estado `#business-geocode-status` debajo de los campos de ubicacion.
+- `public/js/business-location.js` (nuevo): JS vanilla con `fetch` POST JSON al endpoint geocode. Lee campos actuales del formulario (no la version guardada en BD). Muestra estados de carga/exito/error sin recargar pagina.
+- `public/css/dashboard.css`: clases `.business-geocode-row`, `.business-geocode-status`, `.business-geocode-status--success` y `.business-geocode-status--error`.
+
+Validado en servidor real con "Calle Preciados 7, Madrid, Espana". BD confirmo `latitude`, `longitude`, `geocoded_at` y `geocoding_provider='nominatim'` guardados correctamente.
+
+#### Mapa 1C — Mapa publico en tour con Leaflet/OpenStreetMap
+
+- `backend/controllers/TourController.php`: `showPublic()` extrae `$businessLocation` con lat, lng, address, city, postalCode y country. Anade `location.hasCoords/lat/lng` a `$tourData`. Solo lat/lng viajan al cliente en el JSON; datos textuales se usan en PHP.
+- `backend/views/tour.php`:
+  - Schema.org `LocalBusiness` JSON-LD en `<head>` si `hasCoords`: `name`, `PostalAddress` y `GeoCoordinates`.
+  - Leaflet CSS desde CDN jsdelivr (`leaflet@1.9.4`), solo si `hasCoords`.
+  - Boton `#tour-location-btn` (top-center, pill glassmorphism, icono pin de mapa + "Donde estamos"). Solo se renderiza si `hasCoords`.
+  - Bottom sheet: `#tour-location-backdrop` (overlay oscuro/blur) + `#tour-location-sheet` con header (titulo "Donde estamos" + boton X), cuerpo con nombre del negocio, `<address>` con datos textuales, contenedor del mapa Leaflet y enlace "Como llegar" a `openstreetmap.org/directions?to={lat},{lng}` en nueva pestana.
+  - Leaflet JS y `tour-location.js` al final del body, condicionalmente.
+- `public/js/tour-location.js` (nuevo): inicializacion lazy de Leaflet (primera apertura: init a los 50ms + `invalidateSize` a los 350ms para esperar la animacion CSS de subida del sheet; aperturas siguientes: solo `invalidateSize`). Apertura/cierre con clase `.is-open`, bloqueo del visor via `body.location-sheet-open`, cierre con X/backdrop/Escape.
+- `public/js/tour-viewer.js`: `handleGyro()` agrega comprobacion `body.location-sheet-open` al mismo patron que ya usaba para `body.room-is-open`.
+- `public/css/tour.css`: boton top-center con `left: 50%; transform: translateX(-50%)`, backdrop (`z-index: 200`, blur + oscuro), bottom sheet (slide-up `cubic-bezier(0.34,1.08,0.64,1)`, ancho `min(860px, calc(100vw - 32px))`, `max-height: 78vh` desktop, 100% movil con border-radius), mapa `320px` desktop / `240px` movil, enlace "Como llegar" en acento ambar, `.tour-location-biz-name` para el nombre.
+- `public/index.php`: CSP actualizada con `https://*.tile.openstreetmap.org` y `https://cdn.jsdelivr.net` en `img-src` para tiles OSM y markers de Leaflet.
+
+Validado visualmente en produccion: boton visible en visor, sheet sube suavemente, backdrop oscurece el visor, mapa Leaflet carga con pin en la ubicacion del negocio, drag/zoom funcionan, "Como llegar" abre OSM en nueva pestana, visor no gira mientras el sheet esta abierto.
+
+#### Aportacion al TFG
+
+Nominatim/OpenStreetMap cubre el **requisito de API externa del tribunal**: llamada HTTP server-side real a un servicio externo, con gestion de errores, validacion de respuesta y persistencia en BD. Leaflet + OSM en el visor publico es la segunda capa visible para el tribunal. Se eligio OpenStreetMap/Nominatim/Leaflet sobre Google Maps/Mapbox: gratuito, sin API key, sin cuotas en uso razonable con User-Agent correcto, codigo abierto, y sin dependencia de servicios de pago.
+
+### Archivos tocados
+
+- `backend/controllers/TourController.php`
+- `backend/controllers/BusinessController.php`
+- `backend/models/BusinessModel.php`
+- `backend/views/tour.php`
+- `backend/views/dashboard/negocios/manage.php`
+- `backend/routes/web.php`
+- `public/js/tour-location.js` (nuevo)
+- `public/js/tour-viewer.js`
+- `public/js/business-location.js` (nuevo)
+- `public/css/tour.css`
+- `public/css/dashboard.css`
+- `public/index.php`
+
+### Que NO se hizo
+
+- No se implemento Mapa 1D ni card publica "Donde estamos" en paginas de negocio fuera del tour.
+- No se uso Google Maps ni Mapbox.
+- No se tocaron Hotspots, QR, R2, MiDaS, pipeline, landing ni planes.
+- No se hizo commit ni push.
+
