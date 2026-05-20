@@ -217,6 +217,18 @@
                     maxlength="100" placeholder="Ej: España" value="<?= htmlspecialchars($business['country'] ?? '') ?>">
                 </div>
               </div>
+
+              <div class="business-geocode-row">
+                <button type="button"
+                        class="db-btn-secondary"
+                        id="business-geocode-btn"
+                        data-biz-slug="<?= htmlspecialchars($business['slug']) ?>"
+                        data-csrf-token="<?= $csrfToken ?>">
+                  <i data-lucide="map-pin" width="14" height="14" aria-hidden="true"></i>
+                  Buscar en el mapa
+                </button>
+                <p id="business-geocode-status" class="business-geocode-status" hidden></p>
+              </div>
             </div>
           </div>
 
@@ -433,6 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<script src="<?= asset('/js/business-location.js') ?>"></script>
 
 </body>
 </html>

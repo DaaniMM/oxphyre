@@ -282,7 +282,115 @@ class BusinessController extends BaseController
         require_once VIEWS_PATH . '/dashboard/business/success.php';
     }
 
+    // ── Geocodificación con Nominatim/OpenStreetMap ───────────────────────────
+
+    public function geocode(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        global $routeSlug;
+        $slug = preg_replace('/[^a-z0-9-]/', '', $routeSlug ?? '');
+
+        $input = $this->parseJsonBody();
+        $token = (string) ($input['csrf_token'] ?? '');
+
+        // Valida CSRF sin consumirlo: el form de edición también lo necesita.
+        if ($token === '' || !hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->geocodeJson(false, 'Token de seguridad inválido.');
+        }
+
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        $model    = new BusinessModel();
+        $business = $model->getBySlug($slug, $userId);
+
+        if (!$business) {
+            $this->geocodeJson(false, 'Negocio no encontrado.');
+        }
+
+        // Usar los valores enviados desde el formulario, no los de BD,
+        // para geocodificar lo que el usuario ve aunque no haya guardado aún.
+        $address    = mb_substr(strip_tags(trim((string) ($input['address']     ?? ''))), 0, 200);
+        $city       = mb_substr(strip_tags(trim((string) ($input['city']        ?? ''))), 0, 100);
+        $postalCode = mb_substr(strip_tags(trim((string) ($input['postal_code'] ?? ''))), 0, 20);
+        $country    = mb_substr(strip_tags(trim((string) ($input['country']     ?? ''))), 0, 100);
+
+        if ($address === '' && $city === '') {
+            $this->geocodeJson(false, 'Añade al menos la dirección o la ciudad antes de buscar en el mapa.');
+        }
+
+        $parts = array_values(array_filter([$address, $postalCode, $city, $country], fn($v) => $v !== ''));
+
+        $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
+            'q'              => implode(', ', $parts),
+            'format'         => 'json',
+            'limit'          => 1,
+            'addressdetails' => 0,
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 8,
+            // User-Agent obligatorio por los términos de uso de Nominatim.
+            CURLOPT_USERAGENT      => 'Oxphyre/1.0 (TFG tour virtual; https://oxphyre.com)',
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $raw      = curl_exec($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
+        curl_close($ch);
+
+        if ($raw === false || $curlErr !== '' || $httpCode !== 200) {
+            $this->geocodeJson(false, 'No hemos podido conectar con el servicio de mapas. Inténtalo de nuevo en unos segundos.');
+        }
+
+        $results = json_decode((string) $raw, true);
+
+        if (!is_array($results) || empty($results[0])) {
+            $this->geocodeJson(false, 'No hemos encontrado esa dirección. Prueba a escribirla de otra forma o añade la ciudad al final.');
+        }
+
+        $lat = (float) ($results[0]['lat'] ?? 0);
+        $lng = (float) ($results[0]['lon'] ?? 0);
+
+        if (!is_finite($lat) || !is_finite($lng)
+            || ($lat === 0.0 && $lng === 0.0)
+            || $lat < -90 || $lat > 90
+            || $lng < -180 || $lng > 180) {
+            $this->geocodeJson(false, 'No hemos encontrado esa dirección. Prueba a escribirla de otra forma o añade la ciudad al final.');
+        }
+
+        $model->saveGeocoding(
+            (int) $business['id'],
+            $address    !== '' ? $address    : null,
+            $city       !== '' ? $city       : null,
+            $postalCode !== '' ? $postalCode : null,
+            $country    !== '' ? $country    : null,
+            $lat,
+            $lng,
+            'nominatim'
+        );
+
+        $this->geocodeJson(true, 'Ubicación encontrada. Ya podremos mostrarla en tu tour.');
+    }
+
     // ── Helpers privados ──────────────────────────────────────────────────────
+
+    private function parseJsonBody(): array
+    {
+        $raw  = file_get_contents('php://input');
+        $json = is_string($raw) && $raw !== '' ? json_decode($raw, true) : null;
+        return is_array($json) ? array_merge($_POST, $json) : $_POST;
+    }
+
+    private function geocodeJson(bool $success, string $message): never
+    {
+        echo json_encode(['success' => $success, 'message' => $message], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+        exit();
+    }
 
     private function go(string $url): never
     {

@@ -132,6 +132,12 @@ if (isset($routes[$method][$uri])) {
     require_once BACKEND_PATH . '/controllers/BusinessController.php';
     (new BusinessController())->delete();
 
+} elseif ($method === 'POST' && preg_match('#^/dashboard/negocios/([a-z0-9-]+)/geocode$#', $uri, $m)) {
+    AuthMiddleware::check();
+    $routeSlug = $m[1];
+    require_once BACKEND_PATH . '/controllers/BusinessController.php';
+    (new BusinessController())->geocode();
+
 } elseif ($method === 'POST' && preg_match('#^/dashboard/tours/([a-z0-9-]+)/delete$#', $uri, $m)) {
     AuthMiddleware::check();
     $routeSlug = $m[1];

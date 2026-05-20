@@ -67,6 +67,26 @@ class BusinessModel
         $stmt->execute([$name, $description, $phone, $address, $city, $postalCode, $country, $id]);
     }
 
+    public function saveGeocoding(
+        int $id,
+        ?string $address,
+        ?string $city,
+        ?string $postalCode,
+        ?string $country,
+        float $lat,
+        float $lng,
+        string $provider
+    ): void {
+        $stmt = $this->db->prepare(
+            'UPDATE businesses
+             SET address = ?, city = ?, postal_code = ?, country = ?,
+                 latitude = ?, longitude = ?, geocoded_at = NOW(), geocoding_provider = ?,
+                 updated_at = NOW()
+             WHERE id = ? AND deleted_at IS NULL'
+        );
+        $stmt->execute([$address, $city, $postalCode, $country, $lat, $lng, $provider, $id]);
+    }
+
     public function softDelete(int $id): void
     {
         $stmt = $this->db->prepare('UPDATE businesses SET deleted_at = NOW() WHERE id = ?');
