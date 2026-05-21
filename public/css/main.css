@@ -1364,9 +1364,9 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 
 .pricing-details-cta-text {
   color: var(--text-2);
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1.6;
-  margin-bottom: 16px;
+  margin: 16px 0;
 }
 
 .pricing-details-cta-link {
