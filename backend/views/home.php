@@ -9,19 +9,21 @@
   <meta name="description" content="Crea tours virtuales 3D de tu negocio en minutos. Sube fotos, construye el tour con nuestro editor y compártelo con un QR. Sin hardware especial. Gratis para empezar.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#FEB354">
 
   <!-- Open Graph -->
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="https://oxphyre.com/">
   <meta property="og:title"       content="Oxphyre | Tours Virtuales 3D para Negocios Locales">
   <meta property="og:description" content="Convierte tu local en una experiencia 360° que tus clientes pueden visitar desde cualquier lugar. Sin cámaras especiales, sin técnicos.">
-  <meta property="og:image"       content="https://oxphyre.com/assets/og-image.jpg">
+  <meta property="og:image"       content="https://oxphyre.com/assets/og-image.png">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Oxphyre | Tours Virtuales 3D">
   <meta name="twitter:description" content="Tours virtuales 3D para negocios locales. Sin hardware especial. Gratis para empezar.">
-  <meta name="twitter:image"       content="https://oxphyre.com/assets/og-image.jpg">
+  <meta name="twitter:image"       content="https://oxphyre.com/assets/og-image.png">
 
   <!-- Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

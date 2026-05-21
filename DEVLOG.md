@@ -3577,3 +3577,41 @@ Tipo: microfix de flujo publico de planes.
 - No se hizo commit ni push.
 
 
+## 2026-05-21 - Microfixes P0 responsive/SEO
+
+Tipo: correcciones de bloqueo detectadas en auditoria previa al despliegue de /precios.
+
+### Que se hizo
+
+- `backend/views/auth/login.php`: corregido enlace roto "¿Olvidaste tu contraseña?" que apuntaba a `/login/recuperar` (404) y ahora apunta a `/recover` (ruta registrada en el router).
+- `public/favicon.svg`: creado favicon SVG minimal con el simbolo ◉ de Oxphyre (anillo + punto central en ambar #FEB354 sobre fondo negro). Soporte nativo en todos los navegadores modernos. Evita el GET 404 de /favicon.ico en cada visita.
+- `public/assets/og-image.svg`: creada imagen OG 1200x630 con fondo negro, logotipo ◉, wordmark "Oxphyre", tagline "Tours virtuales 3D para negocios" y URL oxphyre.com. Resuelve el 404 de og:image/twitter:image que rompia todos los previews sociales.
+- `backend/views/home.php` y `backend/views/precios.php`: og:image y twitter:image actualizados de `.jpg` (inexistente) a `.svg`; añadidos `<link rel="icon">` y `<meta name="theme-color" content="#FEB354">`.
+- `backend/views/auth/login.php`, `register.php`, `recover.php`, `reset.php`, `verify.php`: añadidos `<link rel="icon">` y `<meta name="theme-color">` en cada head.
+
+### Nota sobre og:image SVG
+
+SVG funciona como OG image en navegadores, Telegram y plataformas modernas. Facebook e Instagram no renderan SVG en previews sociales. La version PNG se genero en el microbloque siguiente.
+
+### Que NO se toco
+
+- Logica de planes, dashboard, tours, watermark, QR, R2, MiDaS, pipeline.
+- No se hizo commit ni push.
+
+## 2026-05-21 - OG image PNG 1200x630
+
+Tipo: asset grafico de marca para previews sociales.
+
+### Que se hizo
+
+- `public/assets/og-image.png`: generado con Python Pillow 12 (script temporal eliminado tras ejecucion). Diseño: fondo negro, glow ambar gaussiano, logo ◉ (anillo + punto), wordmark "Oxphyre" 88px bold, tagline "Tours virtuales 3D para negocios" 30px, separador y "oxphyre.com" en ambar. Fuente: Arial Bold/Regular de Windows; fallback a default. Tamaño: ~68KB a 1200x630.
+- `backend/views/home.php`: og:image y twitter:image actualizados de `.svg` a `.png`.
+- `backend/views/precios.php`: og:image actualizado de `.svg` a `.png`; añadido `twitter:image` que faltaba.
+- `public/assets/og-image.svg`: se mantiene como fuente de referencia.
+
+### Que NO se toco
+
+- favicon.svg se mantiene (SVG es el formato correcto para favicons modernos).
+- Layout, textos, logica de planes, dashboard, tours, QR, R2, MiDaS, pipeline.
+- No se hizo commit ni push.
+

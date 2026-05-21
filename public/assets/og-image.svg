@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Fondo negro -->
+  <rect width="1200" height="630" fill="#000000"/>
+
+  <!-- Glow radial central -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%"   stop-color="#FEB354" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Grain overlay ligero -->
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feBlend in="SourceGraphic" mode="overlay" result="blend"/>
+      <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Anillo exterior del logo -->
+  <circle cx="600" cy="200" r="52" fill="none" stroke="#FEB354" stroke-width="3.5" stroke-opacity="0.9"/>
+  <!-- Punto central del logo -->
+  <circle cx="600" cy="200" r="19" fill="#FEB354"/>
+
+  <!-- Wordmark "Oxphyre" -->
+  <text
+    x="600" y="320"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="88"
+    font-weight="700"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    letter-spacing="-3">Oxphyre</text>
+
+  <!-- Tagline -->
+  <text
+    x="600" y="392"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="30"
+    font-weight="400"
+    fill="rgba(255,255,255,0.55)"
+    text-anchor="middle"
+    letter-spacing="0.3">Tours virtuales 3D para negocios</text>
+
+  <!-- Separador decorativo -->
+  <line x1="520" y1="440" x2="680" y2="440" stroke="#FEB354" stroke-width="1" stroke-opacity="0.4"/>
+
+  <!-- URL -->
+  <text
+    x="600" y="490"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="22"
+    font-weight="500"
+    fill="#FEB354"
+    text-anchor="middle"
+    letter-spacing="1">oxphyre.com</text>
+</svg>

@@ -12,6 +12,8 @@ $selectedPlanLabel = $selectedPlanLabel ?? 'Free';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crear cuenta — Oxphyre</title>
   <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#FEB354">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

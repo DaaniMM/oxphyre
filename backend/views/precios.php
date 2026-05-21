@@ -8,16 +8,19 @@
   <meta name="description" content="Empieza gratis con Oxphyre. Planes Free, Pro y Business para crear y compartir tours virtuales 3D de tu negocio. Sin tarjeta de crédito. Sin comisiones ocultas.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/precios">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#FEB354">
 
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="https://oxphyre.com/precios">
   <meta property="og:title"       content="Precios — Oxphyre | Tours Virtuales 3D">
   <meta property="og:description" content="Elige el plan que mejor se adapta a tu negocio. Free para empezar, Pro para crecer, Business para escalar.">
-  <meta property="og:image"       content="https://oxphyre.com/assets/og-image.jpg">
+  <meta property="og:image"       content="https://oxphyre.com/assets/og-image.png">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Precios — Oxphyre">
   <meta name="twitter:description" content="Planes Free, Pro y Business para tours virtuales 3D. Sin tarjeta de crédito.">
+  <meta name="twitter:image"       content="https://oxphyre.com/assets/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
