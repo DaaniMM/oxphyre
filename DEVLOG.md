@@ -3687,3 +3687,22 @@ Tipo: SEO interno publico.
 - No se toco `backend/views/tour-virtual-para-negocios.php`, sitemap, rutas, controllers, dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Paginas publicas /sobre-nosotros y /soporte
+
+Tipo: arquitectura publica / confianza.
+
+### Que se hizo
+
+- `backend/routes/web.php`: anadidas rutas publicas GET `/sobre-nosotros` y `/soporte`.
+- `backend/controllers/HomeController.php`: anadidos metodos `showAbout()` y `showSupport()`.
+- `backend/views/sobre-nosotros.php`: creada pagina publica ligera sobre que es Oxphyre, problema que resuelve, enfoque para negocios locales/PYMES, transparencia como TFG DAW con vocacion comercial y CTAs a `/tour-virtual-para-negocios` y `/precios`.
+- `backend/views/soporte.php`: creado centro de ayuda basico con cuenta, negocio, fotos, zonas, flechas, QR, ubicacion, planes, recuperacion de contrasena y contacto `hola@oxphyre.com`.
+- `backend/views/home.php` y `backend/views/precios.php`: se mantienen enlaces a `/sobre-nosotros` y `/soporte` y se retiran enlaces de footer a `/blog` y `/novedades` porque esas paginas todavia no existen.
+- `public/sitemap.xml`: anadidas URLs `/sobre-nosotros` y `/soporte` con `lastmod 2026-05-21`, `changefreq monthly` y `priority 0.5`.
+
+### Que NO se hizo
+
+- No se cargan Three.js ni `main.js` en las nuevas paginas publicas.
+- No se tocaron dashboard, BD, auth logica, tours, QR, R2, watermark, limites, mapas ni pipeline.
+- No se hizo commit ni push.
+

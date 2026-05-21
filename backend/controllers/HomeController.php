@@ -33,6 +33,16 @@ class HomeController
         require_once VIEWS_PATH . '/tour-virtual-para-negocios.php';
     }
 
+    public function showAbout(): void
+    {
+        require_once VIEWS_PATH . '/sobre-nosotros.php';
+    }
+
+    public function showSupport(): void
+    {
+        require_once VIEWS_PATH . '/soporte.php';
+    }
+
     public function showPrivacy(): void
     {
         require_once VIEWS_PATH . '/legal/privacidad.php';

@@ -626,7 +626,6 @@
               <li><a href="/#caracteristicas" data-i18n="footer.features">Características</a></li>
               <li><a href="/precios"           data-i18n="footer.pricing">Precios</a></li>
               <li><a href="/#demo"             data-i18n="footer.demo">Demo</a></li>
-              <li><a href="/novedades"         data-i18n="footer.changelog">Novedades</a></li>
             </ul>
           </div>
 
@@ -643,7 +642,6 @@
             <p class="footer-col-title" data-i18n="footer.contact">Contacto</p>
             <ul>
               <li><a href="/sobre-nosotros" data-i18n="footer.about">Sobre nosotros</a></li>
-              <li><a href="/blog"           data-i18n="footer.blog">Blog</a></li>
               <li><a href="/soporte"        data-i18n="footer.support">Soporte</a></li>
             </ul>
           </div>
