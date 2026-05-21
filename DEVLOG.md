@@ -3409,4 +3409,19 @@ Tipo: cierre documental de bloque validado en produccion.
 - No se tocaron dashboard, tour publico, BD, Hotspots, QR, R2 ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Sitemap XML publico minimo
+
+Tipo: SEO tecnico publico.
+
+### Que se hizo
+
+- `public/sitemap.xml`: creado sitemap estatico minimo con las URLs publicas principales `https://oxphyre.com/` y `https://oxphyre.com/precios`.
+- Se uso formato sitemap.org con `loc`, `lastmod`, `changefreq` y `priority`.
+
+### Que NO se hizo
+
+- No se incluyeron dashboard, login, registro, rutas privadas ni tours demo.
+- No se toco `robots.txt`, rutas PHP ni codigo funcional.
+- No se hizo commit ni push.
+
 
