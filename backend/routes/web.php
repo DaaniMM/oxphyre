@@ -53,6 +53,7 @@ $routes = [
         '/dashboard/posicion/store'    => ['PositionController', 'store',       'auth'],
         '/dashboard/posicion/upload'    => ['PositionController', 'upload',        'auth'],
         '/dashboard/posicion/set-mode'  => ['PositionController', 'setActiveMode', 'auth'],
+        '/dashboard/posicion/delete'   => ['PositionController', 'delete',     'auth'],
         '/dashboard/posicion/photo/delete' => ['PositionController', 'deletePhoto', 'auth'],
         '/dashboard/hotspots/create' => ['HotspotController', 'create', 'auth'],
         '/dashboard/hotspots/move'   => ['HotspotController', 'move',   'auth'],

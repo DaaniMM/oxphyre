@@ -306,9 +306,10 @@
                 ?>
                 <div class="db-pos-card-top">
                   <span class="db-pos-card-order">#<?= (int) $pos['order_index'] ?></span>
-                  <button type="button" class="db-pos-card-delete"
-                    title="Próximamente"
-                    aria-label="Eliminar posición próximamente">
+                  <button type="button" class="db-pos-card-delete btn-delete-position"
+                    data-position-id="<?= (int) $pos['id'] ?>"
+                    data-position-name="<?= htmlspecialchars($pos['name']) ?>"
+                    aria-label="Eliminar posición <?= htmlspecialchars($pos['name']) ?>">
                     <i data-lucide="trash-2" width="14" height="14" aria-hidden="true"></i>
                   </button>
                 </div>
@@ -372,6 +373,30 @@
             <div class="db-modal-actions">
               <button type="submit" class="db-btn-danger">Eliminar tour</button>
               <button type="button" class="db-btn-ghost" id="btn-cancel-delete-modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── Modal: eliminar posición ── -->
+      <div class="db-modal-overlay" id="modal-delete-position" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="delete-position-title">
+        <div class="db-modal">
+          <button class="db-modal-close" id="btn-close-delete-position-modal" aria-label="Cerrar">
+            <i data-lucide="x" width="18" height="18" aria-hidden="true"></i>
+          </button>
+          <div class="db-modal-icon db-modal-icon--danger" aria-hidden="true">
+            <i data-lucide="trash-2" width="28" height="28"></i>
+          </div>
+          <h3 class="db-modal-title" id="delete-position-title">¿Eliminar esta posición?</h3>
+          <p class="db-modal-body" id="delete-position-body">La posición dejará de aparecer en este tour.</p>
+          <form method="POST" action="/dashboard/posicion/delete">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <input type="hidden" name="biz_slug"   value="<?= htmlspecialchars($business['slug']) ?>">
+            <input type="hidden" name="tour_slug"  value="<?= htmlspecialchars($tour['slug']) ?>">
+            <input type="hidden" name="position_id" id="delete-position-id" value="">
+            <div class="db-modal-actions">
+              <button type="submit" class="db-btn-danger">Eliminar posición</button>
+              <button type="button" class="db-btn-ghost" id="btn-cancel-delete-position-modal">Cancelar</button>
             </div>
           </form>
         </div>
@@ -448,6 +473,36 @@ document.addEventListener('DOMContentLoaded', () => {
   btnCancel2?.addEventListener('click', closeDeleteModal);
   modalDelete?.addEventListener('click', e => { if (e.target === modalDelete) closeDeleteModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalDelete?.classList.contains('is-visible')) closeDeleteModal(); });
+
+  // ── Modal: eliminar posición ───────────────────────────────────────────────
+  const modalDeletePosition = document.getElementById('modal-delete-position');
+  const deletePositionId    = document.getElementById('delete-position-id');
+  const deletePositionBody  = document.getElementById('delete-position-body');
+  const btnClosePosition    = document.getElementById('btn-close-delete-position-modal');
+  const btnCancelPosition   = document.getElementById('btn-cancel-delete-position-modal');
+
+  const openDeletePositionModal = btn => {
+    if (!modalDeletePosition || !deletePositionId || !deletePositionBody) return;
+    deletePositionId.value = btn.dataset.positionId || '';
+    deletePositionBody.textContent = `La posición "${btn.dataset.positionName || 'seleccionada'}" dejará de aparecer en este tour.`;
+    modalDeletePosition.classList.add('is-visible');
+    modalDeletePosition.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeDeletePositionModal = () => {
+    if (!modalDeletePosition) return;
+    modalDeletePosition.classList.remove('is-visible');
+    modalDeletePosition.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  document.querySelectorAll('.btn-delete-position').forEach(btn => {
+    btn.addEventListener('click', () => openDeletePositionModal(btn));
+  });
+  btnClosePosition?.addEventListener('click', closeDeletePositionModal);
+  btnCancelPosition?.addEventListener('click', closeDeletePositionModal);
+  modalDeletePosition?.addEventListener('click', e => { if (e.target === modalDeletePosition) closeDeletePositionModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalDeletePosition?.classList.contains('is-visible')) closeDeletePositionModal(); });
 });
 </script>
 

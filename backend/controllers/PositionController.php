@@ -442,6 +442,54 @@ class PositionController extends BaseController
         exit();
     }
 
+    // ── Eliminar posición ─────────────────────────────────────────────────────
+
+    public function delete(): void
+    {
+        $token = $_POST['csrf_token'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+            $this->flash('error', 'Token de seguridad inválido.');
+            $this->go('/dashboard/negocios');
+        }
+        unset($_SESSION['csrf_token']);
+
+        $bizSlug  = preg_replace('/[^a-z0-9-]/', '', $_POST['biz_slug']   ?? '');
+        $tourSlug = preg_replace('/[^a-z0-9-]/', '', $_POST['tour_slug']  ?? '');
+        $posId    = (int) ($_POST['position_id'] ?? 0);
+        $userId   = (int) ($_SESSION['user_id']  ?? 0);
+
+        if ($bizSlug === '' || $tourSlug === '' || $posId <= 0) {
+            $this->flash('error', 'Solicitud de eliminación inválida.');
+            $this->go('/dashboard/negocios');
+        }
+
+        require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
+        require_once BACKEND_PATH . '/models/PositionModel.php';
+
+        $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
+        if (!$business) {
+            $this->go('/dashboard/negocios');
+        }
+
+        $tour = (new TourModel())->getBySlugAndBusiness($tourSlug, (int) $business['id']);
+        if (!$tour) {
+            $this->go("/dashboard/negocios/{$bizSlug}");
+        }
+
+        $posModel = new PositionModel();
+        $position = $posModel->getByIdAndTour($posId, (int) $tour['id']);
+        if (!$position) {
+            $this->flash('error', 'La posición ya no existe o ya fue eliminada.');
+            $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+        }
+
+        $posModel->softDelete((int) $position['id']);
+
+        $this->flash('success', 'Posición eliminada correctamente.');
+        $this->go("/dashboard/negocios/{$bizSlug}/tours/{$tourSlug}");
+    }
+
     // ── Eliminar foto individual ──────────────────────────────────────────────
 
     public function deletePhoto(): void

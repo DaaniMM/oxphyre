@@ -3522,4 +3522,26 @@ Tipo: ajuste backend acotado para alinear limites reales con `/precios`.
 - No se tocaron `plan_id`, watermark, embed, QR, analiticas, dashboard visual grande, BD, R2, MiDaS, mapas ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Correccion boton eliminar posicion
+
+Tipo: bugfix acotado en gestion de posiciones.
+
+### Auditoria
+
+- `backend/views/dashboard/tours/manage.php`: el boton de papelera de cada posicion era solo visual; tenia `title="Proximamente"` y no incluia `form`, `action`, `data-position-id` ni listener JS.
+- `backend/routes/web.php`: no existia ruta POST para eliminar una posicion completa.
+- `backend/controllers/PositionController.php`: no existia metodo `delete()` para posicion, aunque `PositionModel::softDelete()` ya estaba disponible y las consultas activas filtran `deleted_at IS NULL`.
+
+### Que se hizo
+
+- Se anadio ruta POST `/dashboard/posicion/delete` protegida por `auth`.
+- Se anadio `PositionController::delete()` con validacion CSRF, comprobacion de negocio/tour/posicion del usuario y soft delete mediante `PositionModel::softDelete()`.
+- Se cambio la papelera de la card de posicion para abrir un modal de confirmacion real.
+- El modal envia `biz_slug`, `tour_slug`, `position_id` y `csrf_token`; al confirmar, la posicion queda eliminada logicamente y desaparece del listado activo.
+
+### Que NO se hizo
+
+- No se tocaron limites de planes, `plan_id`, watermark, precios, sitemap, QR, R2, MiDaS, mapa ni pipeline.
+- No se hizo commit ni push.
+
 
