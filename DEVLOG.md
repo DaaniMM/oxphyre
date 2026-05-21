@@ -3347,4 +3347,20 @@ Mover cta precios de section 3 a section 6.
 - No se tocaron `.pricing-card`, `.pricing-grid` ni `.plan-*`.
 - No se toco `/precios`, `main.js`, rutas, dashboard, BD, Hotspots, QR, R2, mapa publico ni pipeline.
 
+## 2026-05-21 - Cache-busting en assets locales de landing y precios
+
+Tipo: ajuste tecnico acotado.
+
+### Que se hizo
+
+- `backend/views/home.php`: se aplico `asset()` a `/css/main.css`, `/js/i18n.js` y `/js/main.js`.
+- `backend/views/precios.php`: se aplico `asset()` a `/css/main.css` y `/js/i18n.js`.
+
+### Que NO se hizo
+
+- No se aplico `asset()` a URLs externas/CDN.
+- No se cambiaron textos, layout ni logica.
+- No se tocaron dashboard, tour publico, BD, Hotspots, QR, R2 ni pipeline.
+- No se hizo commit ni push.
+
 

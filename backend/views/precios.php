@@ -24,7 +24,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="<?= asset('/css/main.css') ?>">
 
   <script type="application/ld+json">
   {
@@ -658,7 +658,7 @@
 
 
   <!-- Scripts: Lucide + i18n + inline JS (sin Three.js, sin main.js) -->
-  <script src="/js/i18n.js" defer></script>
+  <script src="<?= asset('/js/i18n.js') ?>" defer></script>
 
   <script>
   (function () {

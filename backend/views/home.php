@@ -34,7 +34,7 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="<?= asset('/css/main.css') ?>">
 
   <!-- Schema.org: SoftwareApplication -->
   <script type="application/ld+json">
@@ -711,8 +711,8 @@
 
   <!-- Scripts: Three.js primero (necesario antes que main.js) -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js" defer></script>
-  <script src="/js/i18n.js" defer></script>
-  <script src="/js/main.js" defer></script>
+  <script src="<?= asset('/js/i18n.js') ?>" defer></script>
+  <script src="<?= asset('/js/main.js') ?>" defer></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
