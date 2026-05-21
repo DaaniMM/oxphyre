@@ -3758,3 +3758,23 @@ Tipo: fix backend/soft delete acotado.
 - No se tocaron tours, positions, photos, QR, R2, watermark, planes, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Cierre cuentas demo y slug soft delete
+
+Tipo: validacion funcional / cierre de bloque.
+
+### Que se valido
+
+- Cuentas demo creadas y verificadas sin documentar contrasenas:
+  - `demo_free@oxphyre.com` con rol `business_free`.
+  - `demo_pro@oxphyre.com` con rol `business_pro`.
+  - `demo_business@oxphyre.com` con rol `business_business`.
+- Login correcto en las tres cuentas.
+- Creacion de negocio validada por plan: Free crea con `plan_id=1`, Pro con `plan_id=2` y Business con `plan_id=3`.
+- Se reprodujo el bug por slug ocupado de negocio soft deleted y se verifico la correccion: `negocioofree` paso a `negocioofree-deleted-2`, y un nuevo negocio pudo reutilizar `negocioofree` sin error 500.
+
+### Que NO se hizo
+
+- No se documentaron contrasenas.
+- No se toco codigo funcional en este cierre.
+- No se hizo commit ni push.
+
