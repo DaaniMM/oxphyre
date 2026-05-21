@@ -200,6 +200,12 @@
       line-height: 1.12;
       color: var(--text-1);
     }
+    .seo-page #como-funciona {
+      min-height: 0;
+      display: block;
+      padding: 0;
+      overflow: visible;
+    }
     .seo-section h3 {
       margin-top: 22px;
       margin-bottom: 8px;
