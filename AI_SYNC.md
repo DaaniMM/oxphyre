@@ -32,6 +32,7 @@ Stack activo:
 
 Estado implementado:
 - Landing completa y desplegada.
+- `/precios` implementada y validada en produccion: ruta publica `GET /precios`, pagina autocontenida con cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ de planes y CTA final. No carga `main.js` ni Three.js; usa `main.css` e `i18n.js` versionados con `asset()`.
 - Auth completo: registro, verificación email, login, logout y recuperación de contraseña.
 - Dashboard base con navegación, métricas y layout.
 - Wizard de creación de negocio.
@@ -352,14 +353,16 @@ Lo que **no** hace Fase 1:
 - Nunca depender de procesado en directo en la exposición; los tours pregenerados son el plan A.
 
 ### Planes SaaS
-- Free, Pro y Business definidos en CLAUDE.md y Planes_Oxphyre.md.
-- **FREE (decisión vigente 2026-05-20):** 1 negocio, 1 tour, hasta 3 posiciones por tour. QR básico con branding Oxphyre incluido. Flechas de navegación básicas incluidas. Mapa/ubicación del negocio incluido. Sin embed/iframe. Sin analíticas. Marca de agua visible y agresiva: overlay semitransparente en el visor + badge "Creado con Oxphyre" clicable hacia /precios.
-- **PRO:** hasta 5 negocios, tours ilimitados, hasta 20 posiciones por tour. Sin marca de agua. QR profesional. Embed/iframe. Analíticas básicas. Hotspots informativos (pines con texto/precio/CTA). Más personalización. Soporte email.
-- **BUSINESS:** negocios y posiciones ilimitados, marca blanca, dominio personalizado, múltiples usuarios, API, analíticas avanzadas, soporte prioritario, features avanzadas como roadmap.
-- Agente IA completo queda como roadmap/post-TFG salvo decisión contraria.
-- QR disponible en todos los planes: básico (Free, con branding) y profesional (Pro/Business).
-- Embed/iframe: solo Pro y Business. Free solo tiene enlace público.
-- La diferencia Free→Pro es cantidad (3 vs 20 posiciones) + distribución (QR básico vs profesional, sin embed, watermark visible) + features (analíticas, hotspots informativos, personalización).
+- Free, Pro y Business definidos en CLAUDE.md y Planes_Oxphyre.md. `/precios` y la landing `#precios` ya reflejan esta decision y estan validadas visualmente en produccion.
+- **FREE (decision vigente 2026-05-21):** 0 EUR. 1 negocio, 1 tour, hasta 3 posiciones por tour. Enlace publico. QR basico con branding Oxphyre incluido. Flechas de navegacion basicas incluidas. Mapa/ubicacion del negocio incluido. Marca de agua visible/agresiva: overlay semitransparente + badge "Creado con Oxphyre" clicable hacia `/precios`. Sin embed/iframe. Sin analiticas.
+- **PRO:** 19 EUR/mes, 182 EUR/ano. Hasta 5 negocios, tours ilimitados, hasta 20 posiciones por tour. Sin marca de agua. QR profesional. Embed/iframe. Analiticas basicas.
+- **BUSINESS:** 49 EUR/mes, 470 EUR/ano. Negocios y posiciones ilimitados. Soporte prioritario. Dominio personalizado, marca blanca, API y analiticas avanzadas quedan marcadas como proximamente/roadmap, no como disponible inmediato.
+- Agente IA completo queda como roadmap/post-TFG salvo decision contraria.
+- QR disponible en todos los planes: basico (Free, con branding) y profesional (Pro/Business).
+- Embed/iframe: solo Pro y Business. Free solo tiene enlace publico.
+- Hotspots comerciales Pro/Business (pines con texto, precio, CTA, reserva o formularios) quedan como roadmap/proximamente, no como feature disponible inmediata.
+- MiDaS no se vende como promesa comercial principal; queda como tecnologia interna/futura del producto.
+- La diferencia Free->Pro es cantidad (3 vs 20 posiciones) + distribucion (QR basico vs profesional, sin embed, watermark visible) + features comerciales disponibles como embed y analiticas basicas.
 
 ### Ubicacion de negocios y mapa publico
 - La ubicacion pertenece al negocio, no al tour.
@@ -403,7 +406,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Cuándo implementar modo claro: está pendiente hasta cerrar bien modo oscuro y funcionalidad principal.
 - Si n8n entra en el TFG o queda documentado como integración futura.
 - Cómo presentar 3D Gaussian Splatting en la memoria/exposición sin confundirlo con el core obligatorio del TFG.
-- Existe una propuesta consolidada en `Planes_Oxphyre.md` para redefinir Free/Pro/Business: Free como prueba limitada con 3 posiciones, Pro como plan comercial profesional y Business como premium/Gaussian. Todavía no es decisión definitiva; no aplicar a código ni documentación principal hasta validar el visor Free y confirmar la estrategia comercial.
+- `Planes_Oxphyre.md` ya no es propuesta pendiente: queda como definicion vigente de planes tras validar `/precios` y la landing `#precios` en produccion.
 - `Oxphyre_Room_Free_Flow.md` debe leerse con la decisión UX vigente: Oxphyre Room = experiencia completa de posición, panorámica obligatoria y fotos detalle 1-4 opcionales. Hotspots sobre panorámica siguen pendientes.
 
 ---
@@ -430,7 +433,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Problemas pendientes
 
 ### Prioridad alta para TFG
-- Crear o terminar `/precios` con Free, Pro y Business.
+- `/precios` cerrado: implementado y validado en produccion con Free, Pro y Business.
 - API externa para tribunal: **implementada y validada**. Nominatim/OpenStreetMap (geocodificacion server-side, Mapa 1B) + Leaflet/OSM (mapa publico en visor, Mapa 1C). Cubre el requisito sin Google Maps ni Mapbox (sin API key, sin cuotas, open source).
 - Documentar roles en la memoria: admin, business_owner, viewer.
 - Revisar contraste en dashboard y wizard: inputs, labels y textos secundarios.
@@ -467,7 +470,12 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
-Ultima sesion de implementacion (2026-05-20):
+Ultima sesion de implementacion/documentacion (2026-05-21):
+- `/precios` cerrada y validada en produccion: ruta publica, cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ, CTA final.
+- Landing `#precios` validada: cards correctas, CTA inferior hacia `/precios`, assets locales con `asset()`.
+- Planes sincronizados: Free/Pro/Business con limites y precios vigentes; Business y hotspots comerciales marcados como roadmap/proximamente cuando no estan disponibles.
+
+Sesion anterior clave (2026-05-20):
 - Mapa 1A validado en servidor: campos de ubicacion en `businesses`, formularios de crear/editar negocio.
 - Mapa 1B validado en servidor: geocodificacion Nominatim server-side, boton "Buscar en el mapa" en edicion de negocio, `business-location.js`, endpoint privado con CSRF/ownership.
 - Mapa 1C validado en servidor: mapa Leaflet en tour publico, bottom sheet responsive, Schema.org LocalBusiness JSON-LD, CSP actualizada. Cubre requisito API externa del tribunal.
@@ -488,7 +496,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
 - API externa: Nominatim/OpenStreetMap (Mapa 1B) + Leaflet/OSM (Mapa 1C). **Validado.**
 - Roles documentados: pendiente documentar en la memoria (admin, business_owner, viewer).
 
-1. **`/precios`**: crear pagina independiente con las 3 cards de planes (Free, Pro, Business). Todos los CTAs de upgrade del dashboard apuntan aqui. Slug correcto para SEO es `/precios` (no `/planes`).
+1. **SEO tecnico publico:** revisar/crear `robots.txt`, `sitemap.xml` y preparar alta/verificacion en Google Search Console.
 2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
    **Hotspots 1E**: pulido UX mobile/labels/limites.
 3. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.

@@ -140,7 +140,7 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 
 ## Estado implementado resumido
 
-**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real, Hotspots 1A BD/modelo validado en servidor real, Hotspots 1B render público validado visualmente en servidor real, Hotspots 1C editor dashboard validado en servidor real (listado de zonas con estados "Sin flecha"/"Enlazada", modal para colocar/editar/eliminar flechas, visor público muestra flecha en el punto colocado con hover "Ir a {posición}"), Hotspots 1D automatización `needs_review` y avisos de revisión en dashboard validados en servidor real, helper `asset()` con `filemtime()` en `backend/config/config.php` para cache-busting automático de CSS/JS sin versiones manuales, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions`, `photos` y `hotspots`, **Mapa 1A/1B/1C validados en servidor real**: geocodificación server-side Nominatim, botón "Dónde estamos" en tour público con mapa Leaflet/OpenStreetMap, Schema.org LocalBusiness JSON-LD — cubre el requisito de API externa del tribunal TFG.
+**Estado actual:** Según `DEVLOG.md` y `AI_SYNC.md`, están implementados: landing completa y desplegada, pagina publica `/precios` validada en produccion (cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ de planes y CTA final), auth completo, dashboard base, wizard de negocio, gestión de negocios/tours/posiciones, subida de fotos por posición, pipeline WebP/libvips en `ImageProcessingService`, procesado MiDaS mediante Flask, visor público Three.js con panorámica principal + Oxphyre Room, QR 1 descargable y QR 2A con tracking pseudonimizado validados en servidor real, Hotspots 1A BD/modelo validado en servidor real, Hotspots 1B render público validado visualmente en servidor real, Hotspots 1C editor dashboard validado en servidor real (listado de zonas con estados "Sin flecha"/"Enlazada", modal para colocar/editar/eliminar flechas, visor público muestra flecha en el punto colocado con hover "Ir a {posición}"), Hotspots 1D automatización `needs_review` y avisos de revisión en dashboard validados en servidor real, helper `asset()` con `filemtime()` en `backend/config/config.php` para cache-busting automático de CSS/JS sin versiones manuales, mensajes friendly de calidad y soft delete en `businesses`, `tours`, `positions`, `photos` y `hotspots`, **Mapa 1A/1B/1C validados en servidor real**: geocodificación server-side Nominatim, botón "Dónde estamos" en tour público con mapa Leaflet/OpenStreetMap, Schema.org LocalBusiness JSON-LD — cubre el requisito de API externa del tribunal TFG.
 
 **Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
 
@@ -255,11 +255,11 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 - No migrar fotos antiguas, no subir depth maps/originales, no purgar cache Cloudflare y no reutilizar keys.
 - Siguiente bloque recomendado: bloquear/desactivar "Ver posición" si falta panorámica `360`.
 
-## Propuesta provisional de tiers
+## Definicion vigente de tiers
 
-**Estado actual:** Existe `Planes_Oxphyre.md` como propuesta candidata/provisional para redefinir Free/Pro/Business, creada el 12/05/2026. Se debe consultar durante las pruebas actuales del visor Free.
+**Estado actual:** `Planes_Oxphyre.md` ya no es una propuesta pendiente. Tras validar `/precios` y la seccion `#precios` de la landing en produccion, Free, Pro y Business quedan como definicion comercial vigente.
 
-**Decisión vigente:** Esta propuesta no sustituye todavía la definición oficial de planes y no debe aplicarse a código como decisión definitiva hasta validar visual y comercialmente Free. Si se valida, se sincronizarán `CLAUDE.md`, `AI_SYNC.md`, landing, `/precios` y los límites reales de la app.
+**Decision vigente:** La pagina publica `/precios`, la landing y la documentacion deben mantener la misma segmentacion: Free como prueba real limitada, Pro como plan comercial principal y Business como plan premium con varias capacidades marcadas como proximamente/roadmap.
 
 ## Planes SaaS — Definición técnica y comercial
 
@@ -282,38 +282,22 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 - Sin analíticas
 - **Nota histórica:** La estrategia anterior contemplaba 5 posiciones y "1 posición con MiDaS como crédito de prueba". Decisión vigente (2026-05-20): 3 posiciones, sin crédito MiDaS diferenciado. La watermark más visible es el principal mecanismo de incentivo a upgrade.
 
-### PRO (19€/mes — 182€/año)
-- MiDaS activado en todas las posiciones (profundidad 3D real)
-- Hasta 5 negocios, 20 posiciones por tour, tours ilimitados
-- Minimapa automático generado desde el canvas
+### PRO (19 EUR/mes - 182 EUR/ano)
+- Hasta 5 negocios, tours ilimitados, hasta 20 posiciones por tour
 - Sin marca de agua
+- QR profesional
 - Embed/iframe para incrustar el tour en la web propia del negocio
-- QR descargable
-- Hotspots informativos: el dueño añade pines sobre el espacio con texto, descripción o precio
-- Tour guiado automático: el dueño define el orden de posiciones y un mensaje por posición; la cámara va sola y muestra los mensajes al visitante
-- Compartir en redes sociales: botón para compartir directamente en WhatsApp, Instagram y Google Maps
-- Foto de portada personalizable: imagen Open Graph propia al compartir el enlace
-- Idioma del tour elegido por el dueño (español o inglés), sin traducción automática
-- Chatbot básico precargado: el dueño configura hasta 60 preguntas frecuentes y respuestas (horario, precios, ubicación, reservas...); basado en palabras clave, sin IA, se ejecuta en el navegador del visitante
-- Analíticas básicas: visitas totales, escaneos QR, dispositivo (móvil/desktop/tablet), visitas por día
-- Analíticas Business visibles pero bloqueadas con candado + CTA de upgrade
-- URL bajo oxphyre.com/negocio (sin dominio propio)
-- Soporte por email, respuesta en 48h, acceso a documentación y tutoriales
+- Analiticas basicas
+- Soporte por email
+- Hotspots comerciales/informativos quedan como roadmap/proximamente, no como disponible inmediato
+- MiDaS queda como tecnologia interna/futura; no se vende como promesa comercial principal del plan
 
-### BUSINESS (49€/mes — 470€/año)
-- Todo lo incluido en Pro, más:
+### BUSINESS (49 EUR/mes - 470 EUR/ano)
 - Negocios ilimitados, posiciones ilimitadas por tour
-- Dominio personalizado (tour.tunegocio.com) — marca blanca total, sin rastro de Oxphyre en URL ni visor
-- Tours privados con contraseña — acceso restringido a compradores o clientes cualificados
-- Historial de versiones del tour — posibilidad de restaurar versiones anteriores
-- Integración con Google My Business — publicar el tour directamente en la ficha de Google del negocio
-- Traducción automática IA de todos los textos del tour (hotspots, tour guiado, descripciones)
-- Hotspots enriquecidos: además de texto, permiten vídeo embebido, botón de reserva directa y formulario de contacto
-- Múltiples usuarios con acceso al dashboard (dueño + empleados con roles diferenciados)
-- API access para integrar el tour en sistemas propios del negocio
-- Agente IA completo (OpenClaw/Make/n8n): responde con lenguaje natural, recoge leads, detecta intención del visitante, crea perfil del visitante, notifica al dueño por WhatsApp/email/Telegram, conecta con calendario para reservas directas — IMPLEMENTACIÓN PREVISTA EN ROADMAP, marcado como "próximamente" en la UI hasta su despliegue
-- Analíticas avanzadas completas: mapa de calor de posiciones más visitadas, tiempo medio por posición, país y ciudad del visitante, fuente de tráfico (QR/embed/enlace directo), tasa de rebote por posición, comparativa entre tours, exportación CSV, alertas de pico de visitas
-- Soporte prioritario por email + chat, respuesta en 24h, onboarding personalizado (llamada de configuración inicial incluida)
+- Soporte prioritario + onboarding
+- Dominio personalizado, marca blanca, API access, multiples usuarios y analiticas avanzadas quedan marcadas como proximamente/roadmap hasta implementacion real
+- Hotspots enriquecidos, formularios, reservas, agente IA y automatizaciones quedan como roadmap/proximamente
+- Business no debe presentarse como si todas sus features avanzadas estuvieran disponibles hoy; la UI debe marcarlas como "Proximamente" o equivalente.
 
 ## Contexto TFG
 - Estudiante DAW (Desarrollo de Aplicaciones Web), 2º año
@@ -779,9 +763,9 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`, `hotspots`.
 **Estado actual:** Esta lista se organiza por prioridad para el TFG, prioridad media, deuda técnica y roadmap/futuro. No se borran pendientes antiguos útiles; se reclasifican para que una IA no confunda tareas críticas de entrega con mejoras post-TFG.
 
 #### Prioridad alta para TFG
-- `/precios`: crear página independiente con las 3 cards de planes (Free, Pro, Business), mismo diseño que la sección de precios de la landing pero como página propia. Slug correcto para SEO es `/precios` (no `/planes`). Todos los CTAs de upgrade del dashboard apuntan aquí.
-- Verificar que el enlace "Ver planes Pro/Business →" del wizard paso 2 y los CTAs de upgrade del dashboard apuntan a `/precios`.
-- API externa obligatoria (requisito tribunal): integrar Google Maps o Mapbox para mostrar ubicación del negocio en el dashboard/tour. Sin esto el proyecto no cumple los requisitos mínimos.
+- SEO tecnico publico: revisar/crear `robots.txt`, `sitemap.xml` y preparar alta/verificacion en Google Search Console.
+- `/precios`: implementada y validada en produccion. Mantener coherencia con landing `#precios` y planes vigentes; no volver a marcarla como pendiente salvo regresion real.
+- API externa obligatoria (requisito tribunal): cubierta por Nominatim/OpenStreetMap server-side (Mapa 1B) + Leaflet/OSM publico (Mapa 1C), validado en servidor real.
 - Roles documentados (requisito tribunal): documentar explícitamente en la memoria qué puede hacer cada rol (`admin`, `business_owner`, `viewer`) tanto en frontend como en backend. Los roles ya existen en BD pero no están documentados.
 - Preparar 1-2 tours demo visualmente impecables antes de la exposición.
 - Video demo real: grabar y sustituir placeholder de S4.
@@ -820,4 +804,4 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`, `hotspots`.
 
 **Nota histórica:** La lista original mezclaba tareas críticas, deuda técnica y mejoras futuras. Se conserva todo el contenido útil, pero queda separado para priorizar mejor la entrega del TFG.
 
-**Decisión vigente:** Para el TFG, priorizar requisitos visibles del tribunal y estabilidad: `/precios`, API externa, roles, demo, responsive, SEO/PageSpeed y seguridad. No ampliar alcance grande si pone en riesgo la entrega.
+**Decision vigente:** Para el TFG, priorizar requisitos visibles del tribunal y estabilidad: robots/sitemap/Search Console, roles, demo, responsive, SEO/PageSpeed y seguridad. `/precios` y API externa ya estan cerrados y validados; no ampliar alcance grande si pone en riesgo la entrega.

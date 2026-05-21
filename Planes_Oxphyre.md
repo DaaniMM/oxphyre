@@ -93,13 +93,12 @@ Ser el plan principal para negocios que quieren usar Oxphyre de verdad para capt
 - Todo lo incluido en Free, más:
 - QR profesional (no básico Free, sino QR para uso profesional con analíticas asociadas).
 - Embed/iframe para insertar el tour en la web del negocio (solo disponible desde Pro).
-- Hotspots completos:
-  - navegación;
+- Hotspots comerciales completos quedan como roadmap/proximamente:
   - texto;
-  - descripción;
+  - descripcion;
   - precios;
-  - información de productos/servicios;
-  - CTA básico como “Reservar”, “Llamar” o “Contactar”.
+  - informacion de productos/servicios;
+  - CTA basico como "Reservar", "Llamar" o "Contactar".
 - Analíticas básicas:
   - visitas;
   - escaneos QR;
@@ -117,7 +116,7 @@ Ser el plan principal para negocios que quieren usar Oxphyre de verdad para capt
 - Más posiciones permiten cubrir negocios grandes o con varias zonas.
 - La experiencia final debe sentirse más profesional porque combina:
   - más posiciones;
-  - hotspots completos;
+  - hotspots comerciales completos cuando salgan del roadmap;
   - QR;
   - embed;
   - analíticas;
@@ -139,14 +138,14 @@ Plan premium para negocios con necesidades avanzadas, marca blanca, mayor person
 - Todo lo incluido en Pro, más:
 - Negocios ilimitados.
 - Posiciones ilimitadas.
-- Dominio personalizado.
-- Marca blanca.
-- Tours privados con contraseña.
-- Historial de versiones.
-- Múltiples usuarios/roles.
-- API access.
-- Analíticas avanzadas.
-- Exportación CSV.
+- Dominio personalizado (proximamente/roadmap).
+- Marca blanca (proximamente/roadmap).
+- Tours privados con contrasena (roadmap).
+- Historial de versiones (roadmap).
+- Multiples usuarios/roles (roadmap).
+- API access (proximamente/roadmap).
+- Analiticas avanzadas (proximamente/roadmap).
+- Exportacion CSV (roadmap).
 - Soporte prioritario.
 - Onboarding personalizado.
 - Integraciones futuras.
@@ -202,7 +201,7 @@ Comunicar Business:
 
 ## Decisiones cerradas (2026-05-20) — pre /precios
 
-Las siguientes decisiones quedan cerradas para implementar `/precios` sin contradicciones:
+Las siguientes decisiones guiaron la implementacion de `/precios` y quedan como definicion vigente:
 
 | Decisión | Valor |
 |---|---|
@@ -220,3 +219,13 @@ Las siguientes decisiones quedan cerradas para implementar `/precios` sin contra
 - Watermark Free era solo “visible” → actualizada a overlay semitransparente más agresivo.
 - Mapa/ubicación no aparecía en ningún plan → añadido a Free (ya implementado).
 - “1 posición con MiDaS como crédito” en `CLAUDE.md` → estrategia histórica eliminada.
+
+## Cierre validado en produccion (2026-05-21)
+
+`/precios` y la seccion `#precios` de la landing ya estan implementadas y validadas visualmente en produccion.
+
+- Free, Pro y Business se muestran como definicion comercial vigente.
+- Pro queda destacado como plan recomendado.
+- Business contiene varias capacidades avanzadas marcadas como proximamente/roadmap, no como disponibles de forma inmediata.
+- Hotspots comerciales Pro/Business quedan como roadmap/proximamente; las flechas basicas de navegacion son la capacidad disponible actual.
+- MiDaS no se vende como promesa comercial principal; queda como tecnologia interna/futura del producto.

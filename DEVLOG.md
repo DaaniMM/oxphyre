@@ -3363,4 +3363,50 @@ Tipo: ajuste tecnico acotado.
 - No se tocaron dashboard, tour publico, BD, Hotspots, QR, R2 ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Cierre de /precios y coherencia de planes
+
+Tipo: cierre documental de bloque validado en produccion.
+
+### Que se implemento
+
+- `/precios`: ruta publica `GET /precios` funcionando como pagina publica autocontenida.
+- `backend/views/precios.php`: pagina con cards Free/Pro/Business, Pro destacado como plan recomendado, toggle mensual/anual, tabla comparativa completa, FAQ de planes y CTA final.
+- `backend/views/home.php`: seccion `#precios` coherente con `/precios`, cards correctas y CTA inferior hacia `/precios` con el texto "Quieres ver limites, funciones y diferencias plan por plan?".
+- `backend/views/home.php` y `backend/views/precios.php`: assets locales publicos versionados con `asset()` para evitar cache vieja tras despliegues.
+
+### Validado en produccion
+
+- `/precios` carga correctamente y muestra Free, Pro y Business.
+- Toggle mensual/anual funcional.
+- Tabla comparativa y FAQ visibles.
+- CTA final visible.
+- La pagina `/precios` no carga `main.js` ni Three.js: usa `main.css`, `i18n.js` e inline JS minimo propio.
+- Landing `#precios` mantiene las cards visualmente bien; el CTA inferior redirige correctamente a `/precios`.
+
+### Decision de planes vigente
+
+- Free: 0 EUR, 1 negocio, 1 tour, 3 posiciones, enlace publico, QR basico con branding, flechas basicas, mapa de ubicacion, watermark visible, sin embed y sin analiticas.
+- Pro: 19 EUR/mes, 182 EUR/ano, hasta 5 negocios, tours ilimitados, 20 posiciones por tour, sin watermark, QR profesional, analiticas basicas y embed.
+- Business: 49 EUR/mes, 470 EUR/ano, negocios/posiciones ilimitadas, soporte prioritario y features avanzadas como dominio personalizado, marca blanca, API y analiticas avanzadas marcadas como proximamente/roadmap.
+- Hotspots comerciales Pro/Business quedan como roadmap/proximamente, no como disponible inmediato.
+- MiDaS queda como tecnologia interna/futura y no se vende como promesa comercial principal.
+
+### Archivos principales tocados en el bloque
+
+- `backend/routes/web.php`
+- `backend/controllers/HomeController.php`
+- `backend/views/precios.php`
+- `backend/views/home.php`
+- `public/css/main.css`
+- `public/js/i18n.js`
+- `DEVLOG.md`
+- `AI_SYNC.md`
+- `CLAUDE.md`
+- `Planes_Oxphyre.md`
+
+### Que NO se hizo
+
+- No se tocaron dashboard, tour publico, BD, Hotspots, QR, R2 ni pipeline.
+- No se hizo commit ni push.
+
 
