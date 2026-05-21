@@ -220,7 +220,7 @@
               </li>
               <li class="plan-feature-item included">
                 <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>
-                Hasta 5 posiciones por tour
+                Hasta 3 posiciones por tour
               </li>
               <li class="plan-feature-item included">
                 <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>

@@ -33,6 +33,7 @@ Stack activo:
 Estado implementado:
 - Landing completa y desplegada.
 - `/precios` implementada y validada en produccion: ruta publica `GET /precios`, pagina autocontenida con cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ de planes y CTA final. No carga `main.js` ni Three.js; usa `main.css` e `i18n.js` versionados con `asset()`.
+- Enforcement minimo de limites publicado en `/precios` aplicado en backend: Free = 1 negocio, 1 tour por negocio y 3 posiciones por tour; Pro = 5 negocios, tours ilimitados y 20 posiciones por tour; Business = ilimitado. Falta todavia centralizar estos limites en un helper unico.
 - Auth completo: registro, verificación email, login, logout y recuperación de contraseña.
 - Dashboard base con navegación, métricas y layout.
 - Wizard de creación de negocio.
@@ -474,6 +475,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Ultima sesion de implementacion/documentacion (2026-05-21):
+- Enforcement minimo de planes aplicado: Free 1 negocio/1 tour/3 posiciones, Pro 5 negocios/tours ilimitados/20 posiciones, Business ilimitado. No se centralizo helper de planes todavia.
 - Watermark Free real implementado y validado en produccion: una sola marca central diagonal "OXPHYRE" + badge "Creado con Oxphyre" hacia `/precios`; no bloquea drag ni hotspots y se mantiene al navegar. Queda pendiente crear cuentas demo Free/Pro/Business; ahora solo hay cuenta Free de pruebas.
 - SEO tecnico inicial cerrado: sitemap minimo creado y desplegado, `curl` validado con HTTP/2 200, robots.txt gestionado por Cloudflare sin cambios, sitemap enviado en Search Console y pendiente de procesamiento por Google.
 - `/precios` cerrada y validada en produccion: ruta publica, cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ, CTA final.

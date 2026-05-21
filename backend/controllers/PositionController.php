@@ -14,7 +14,7 @@ class PositionController extends BaseController
 
     // Máximo de posiciones por tour según plan (-1 = ilimitado)
     private static array $positionLimits = [
-        'business_free'     => 5,
+        'business_free'     => 3,
         'business_pro'      => 20,
         'business_business' => -1,
         'admin'             => -1,
@@ -102,7 +102,7 @@ class PositionController extends BaseController
         // Aplicar límite de posiciones según plan
         $posModel   = new PositionModel();
         $count      = $posModel->countByTour((int) $tour['id']);
-        $limit      = self::$positionLimits[$userRole] ?? 5;
+        $limit      = self::$positionLimits[$userRole] ?? 3;
 
         if ($limit !== -1 && $count >= $limit) {
             $this->flash('error', "Has alcanzado el límite de {$limit} posiciones por tour en tu plan.");

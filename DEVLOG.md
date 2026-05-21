@@ -3505,4 +3505,21 @@ Tipo: microajuste tras prueba visual.
 - No se tocaron PHP, JS, dashboard, BD, R2, MiDaS, QR, mapa ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Enforcement minimo de limites publicados
+
+Tipo: ajuste backend acotado para alinear limites reales con `/precios`.
+
+### Que se hizo
+
+- `backend/controllers/PositionController.php`: Free pasa de 5 a 3 posiciones por tour. Pro se mantiene en 20 y Business/admin ilimitado.
+- `backend/controllers/TourController.php`: se elimina el limite antiguo de 20 tours para Pro. Free queda limitado a 1 tour por negocio tambien en `store()` para evitar saltarlo con POST directo.
+- `backend/controllers/BusinessController.php`: `showCreate()` y `store()` usan el limite del plan: Free 1 negocio, Pro 5 negocios, Business/admin ilimitado.
+- `backend/views/dashboard/business/create.php`: el copy del plan Free cambia de "Hasta 5 posiciones por tour" a "Hasta 3 posiciones por tour".
+
+### Que NO se hizo
+
+- No se creo helper central de planes.
+- No se tocaron `plan_id`, watermark, embed, QR, analiticas, dashboard visual grande, BD, R2, MiDaS, mapas ni pipeline.
+- No se hizo commit ni push.
+
 

@@ -55,7 +55,6 @@ class TourController extends BaseController
 
         require_once BACKEND_PATH . '/models/BusinessModel.php';
         require_once BACKEND_PATH . '/models/TourModel.php';
-        require_once BACKEND_PATH . '/models/DashboardModel.php';
 
         $userId   = (int) ($_SESSION['user_id'] ?? 0);
         $userRole = $_SESSION['user_role'] ?? 'business_free';
@@ -68,15 +67,9 @@ class TourController extends BaseController
 
         // Verificar límite de tours según plan
         if ($userRole === 'business_free') {
-            $total = (new DashboardModel())->countTours($userId);
-            if ($total >= 1) {
-                $this->flash('error', 'El plan Free solo permite 1 tour. Mejora a Pro para crear más.');
-                $this->go("/dashboard/negocios/{$bizSlug}");
-            }
-        } elseif ($userRole === 'business_pro') {
             $inBiz = (new TourModel())->countByBusiness((int) $business['id']);
-            if ($inBiz >= 20) {
-                $this->flash('error', 'Has alcanzado el límite de 20 tours por negocio en el plan Pro.');
+            if ($inBiz >= 1) {
+                $this->flash('error', 'El plan Free solo permite 1 tour por negocio. Mejora a Pro para crear tours ilimitados.');
                 $this->go("/dashboard/negocios/{$bizSlug}");
             }
         }
@@ -108,10 +101,19 @@ class TourController extends BaseController
         $userId  = (int) ($_SESSION['user_id'] ?? 0);
 
         require_once BACKEND_PATH . '/models/BusinessModel.php';
+        require_once BACKEND_PATH . '/models/TourModel.php';
         $business = (new BusinessModel())->getBySlug($bizSlug, $userId);
 
         if (!$business) {
             $this->go('/dashboard/negocios');
+        }
+
+        $userRole  = $_SESSION['user_role'] ?? 'business_free';
+        $tourModel = new TourModel();
+
+        if ($userRole === 'business_free' && $tourModel->countByBusiness((int) $business['id']) >= 1) {
+            $this->flash('error', 'El plan Free solo permite 1 tour por negocio. Mejora a Pro para crear tours ilimitados.');
+            $this->go("/dashboard/negocios/{$bizSlug}");
         }
 
         $title       = strip_tags(trim($_POST['title']       ?? ''));
@@ -135,9 +137,6 @@ class TourController extends BaseController
         // Usar slug del input si tiene al menos 2 chars, si no generar desde título
         $baseSlug = mb_strlen($slugInput) >= 2 ? $slugInput : $this->slugify($title);
         if ($baseSlug === '') $baseSlug = 'tour';
-
-        require_once BACKEND_PATH . '/models/TourModel.php';
-        $tourModel = new TourModel();
 
         $slug = $baseSlug;
         $i    = 2;

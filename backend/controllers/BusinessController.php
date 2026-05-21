@@ -173,9 +173,10 @@ class BusinessController extends BaseController
         require_once BACKEND_PATH . '/models/BusinessModel.php';
         $userId   = (int) ($_SESSION['user_id']   ?? 0);
         $userRole = $_SESSION['user_role'] ?? 'business_free';
+        $businessLimit = self::$businessLimits[$userRole] ?? 1;
 
-        if ($userRole === 'business_free' && (new BusinessModel())->countByUser($userId) >= 1) {
-            $this->flash('error', 'El plan Free solo permite 1 negocio. Actualiza a Pro para crear más.');
+        if ($businessLimit !== -1 && (new BusinessModel())->countByUser($userId) >= $businessLimit) {
+            $this->flash('error', "Has alcanzado el límite de {$businessLimit} negocio" . ($businessLimit === 1 ? '' : 's') . " de tu plan. Revisa Pro o Business para ampliar capacidad.");
             $this->go('/dashboard');
         }
 
@@ -238,8 +239,9 @@ class BusinessController extends BaseController
         require_once BACKEND_PATH . '/models/BusinessModel.php';
         $model = new BusinessModel();
 
-        if ($userRole === 'business_free' && $model->countByUser($userId) >= 1) {
-            $this->flash('error', 'El plan Free solo permite 1 negocio.');
+        $businessLimit = self::$businessLimits[$userRole] ?? 1;
+        if ($businessLimit !== -1 && $model->countByUser($userId) >= $businessLimit) {
+            $this->flash('error', "Has alcanzado el límite de {$businessLimit} negocio" . ($businessLimit === 1 ? '' : 's') . " de tu plan.");
             $this->go('/dashboard');
         }
 
