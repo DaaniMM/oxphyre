@@ -25,6 +25,7 @@ $routes = [
     'GET' => [
         '/'          => ['HomeController',      'index'],
         '/precios'   => ['HomeController',      'showPricing'],
+        '/tour-virtual-para-negocios' => ['HomeController', 'showVirtualTourForBusinesses'],
         '/privacidad' => ['HomeController',      'showPrivacy'],
         '/terminos'   => ['HomeController',      'showTerms'],
         '/cookies'    => ['HomeController',      'showCookies'],

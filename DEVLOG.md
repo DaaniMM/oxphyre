@@ -3634,3 +3634,26 @@ Tipo: implementacion legal/publica acotada.
 - No se tocaron dashboard, BD, auth logica, tours, QR, R2, watermark, limites, mapas ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Pagina SEO publica /tour-virtual-para-negocios
+
+Tipo: SEO publico / pagina pilar.
+
+### Que se hizo
+
+- `backend/routes/web.php`: anadida ruta publica GET `/tour-virtual-para-negocios`.
+- `backend/controllers/HomeController.php`: anadido metodo `showVirtualTourForBusinesses()`.
+- `backend/views/tour-virtual-para-negocios.php`: creada pagina pilar SEO ligera para la intencion "crear tour virtual para mi negocio" / "tour virtual para negocios". Usa `main.css` con `asset()`, favicon, theme-color, canonical propio, index/follow, OG image PNG, Schema.org `SoftwareApplication`, `FAQPage` y `BreadcrumbList`.
+- La vista no carga Three.js ni `main.js`; solo HTML/CSS y fuentes, siguiendo el patron de pagina publica ligera.
+- Contenido orientado a posicionamiento self-service: crear visita virtual con movil, sin agencia, sin fotografo y sin camara 360. Incluye hero, explicacion, diferencia frente a agencia, funcionamiento por zonas/flechas, usos por tipo de negocio, plan Free, FAQ y CTA final.
+- `public/sitemap.xml`: anadida URL `https://oxphyre.com/tour-virtual-para-negocios` con `lastmod 2026-05-21`, `changefreq monthly` y `priority 0.9`.
+
+### Decisiones
+
+- No se enlazo `/soporte` ni `/tour-virtual-para-restaurantes` porque no existen como rutas publicas.
+- No se prometieron funciones no disponibles como marca blanca, dominio personalizado, API o analiticas avanzadas.
+
+### Que NO se hizo
+
+- No se tocaron dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
+- No se hizo commit ni push.
+

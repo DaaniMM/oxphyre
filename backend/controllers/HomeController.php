@@ -28,6 +28,11 @@ class HomeController
         require_once VIEWS_PATH . '/precios.php';
     }
 
+    public function showVirtualTourForBusinesses(): void
+    {
+        require_once VIEWS_PATH . '/tour-virtual-para-negocios.php';
+    }
+
     public function showPrivacy(): void
     {
         require_once VIEWS_PATH . '/legal/privacidad.php';
