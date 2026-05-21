@@ -297,7 +297,7 @@
       <span class="lang-divider">/</span>
       <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
       <a href="/login"    class="btn-ghost"   data-i18n="nav.login">Iniciar sesión</a>
-      <a href="/registro" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
+      <a href="/registro?plan=free" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
     </div>
 
     <button id="menu-toggle" aria-label="Abrir menú" aria-expanded="false" style="margin-left:auto;">
@@ -317,7 +317,7 @@
     <a href="/precios" data-i18n="nav.pricing">Precios</a>
     <a href="/#faq"              data-i18n="nav.faq">FAQ</a>
     <a href="/login"             data-i18n="nav.login">Iniciar sesión</a>
-    <a href="/registro" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
+    <a href="/registro?plan=free" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
     <div class="mobile-menu-footer">
       <button class="lang-btn active" data-lang="es">ES</button>
       <span class="lang-divider">/</span>
@@ -365,7 +365,7 @@
             <li data-i18n="pricing.free_f5">Mapa de ubicación del negocio</li>
             <li data-i18n="pricing.free_f6">Marca de agua Oxphyre en el visor</li>
           </ul>
-          <a href="/registro" class="plan-cta" data-i18n="pricing.cta_free">Empezar gratis</a>
+          <a href="/registro?plan=free" class="plan-cta" data-i18n="pricing.cta_free">Empezar gratis</a>
           <p class="plan-micro-note" data-i18n="pricing.free_note">Sin tarjeta. Sin compromiso.</p>
         </article>
 
@@ -386,7 +386,7 @@
             <li data-i18n="pricing.pro_f4">Embed/iframe en tu web</li>
             <li data-i18n="pricing.pro_f5">Analíticas básicas · QR profesional</li>
           </ul>
-          <a href="/registro" class="plan-cta featured-cta" data-i18n="pricing.cta_pro">Empezar con Pro</a>
+          <a href="/registro?plan=pro" class="plan-cta featured-cta" data-i18n="pricing.cta_pro">Empezar con Pro</a>
           <p class="plan-micro-note" data-i18n="pricing.pro_note">Actualiza o cancela en cualquier momento.</p>
         </article>
 
@@ -406,7 +406,7 @@
             <li data-i18n="pricing.biz_f4">Soporte prioritario + onboarding</li>
             <li class="soon-feature" data-i18n="pricing.biz_f5">API access (próximamente)</li>
           </ul>
-          <a href="mailto:hola@oxphyre.com" class="plan-cta" data-i18n="pricing.cta_biz_contact">Contactar</a>
+          <a href="/registro?plan=business" class="plan-cta" data-i18n="pricing.cta_biz">Empezar con Business</a>
           <p class="plan-micro-note" data-i18n="pricing.biz_note">Acceso completo. Sin límites.</p>
         </article>
 
@@ -587,7 +587,7 @@
     <section class="pricing-cta-section" aria-labelledby="pricing-cta-h2">
       <p id="pricing-cta-h2">Tu negocio merece ser descubierto.</p>
       <p class="cta-sub">Empieza gratis hoy. Sin tarjeta de crédito.</p>
-      <a href="/registro" class="cta-btn">Crear mi tour gratis →</a>
+      <a href="/registro?plan=free" class="cta-btn">Crear mi tour gratis →</a>
     </section>
 
 

@@ -2,6 +2,8 @@
 $flash     = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 $csrfToken = $_SESSION['csrf_token'] ?? '';
+$selectedPlan      = $selectedPlan      ?? 'free';
+$selectedPlanLabel = $selectedPlanLabel ?? 'Free';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -60,6 +62,8 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
       <h1 class="form-h1" data-i18n="auth.register_h1">Crea tu cuenta</h1>
       <p class="form-sub" data-i18n="auth.register_form_sub">Empieza gratis. Sin tarjeta de crédito.</p>
 
+      <p class="form-sub">Plan seleccionado: <strong><?= htmlspecialchars($selectedPlanLabel) ?></strong></p>
+
       <?php if ($flash): ?>
         <div class="flash flash-<?= htmlspecialchars($flash['type']) ?>" role="alert">
           <?= htmlspecialchars($flash['message']) ?>
@@ -93,6 +97,7 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
       <!-- Formulario -->
       <form action="/registro" method="POST" novalidate id="register-form">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+        <input type="hidden" name="plan" value="<?= htmlspecialchars($selectedPlan) ?>">
 
         <div class="fields-group">
           <div class="field">

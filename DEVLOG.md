@@ -3558,4 +3558,22 @@ Tipo: microfix backend acotado.
 - No se tocaron enforcement de limites, watermark, `TourController`, `tour.php`, CSS, BD, Stripe, sesiones ni rutas.
 - No se hizo commit ni push.
 
+## 2026-05-21 - CTAs de precios con plan seleccionado en registro
+
+Tipo: microfix de flujo publico de planes.
+
+### Que se hizo
+
+- `backend/views/precios.php` y `backend/views/home.php`: los CTAs de Free, Pro y Business apuntan a `/registro?plan=free`, `/registro?plan=pro` y `/registro?plan=business`; los CTAs genericos de empezar gratis apuntan a Free.
+- `backend/controllers/AuthController.php`: `showRegister()` valida el plan de query string con fallback Free y lo pasa a la vista; `register()` lee el plan del POST y lo mapea a `business_free`, `business_pro` o `business_business`.
+- `backend/views/auth/register.php`: muestra el plan seleccionado e incluye `plan` como hidden input.
+- `backend/models/UserModel.php`: `create()` acepta rol con fallback seguro a `business_free`.
+- Business queda habilitado como cuenta demo/pre-lanzamiento; en producto real Pro/Business deberian pasar por checkout antes de activar el rol.
+
+### Que NO se hizo
+
+- No se cambio el guard guest de `/registro`.
+- No se tocaron pagos/Stripe, dashboard, watermark, limites, tours, QR, R2 ni pipeline.
+- No se hizo commit ni push.
+
 

@@ -7,6 +7,18 @@ class AuthController extends BaseController
     private UserModel $userModel;
     private LoginAttemptModel $attemptModel;
 
+    private static array $planLabels = [
+        'free'     => 'Free',
+        'pro'      => 'Pro',
+        'business' => 'Business',
+    ];
+
+    private static array $planRoles = [
+        'free'     => 'business_free',
+        'pro'      => 'business_pro',
+        'business' => 'business_business',
+    ];
+
     public function __construct()
     {
         require_once BACKEND_PATH . '/models/UserModel.php';
@@ -25,6 +37,9 @@ class AuthController extends BaseController
 
     public function showRegister(): void
     {
+        $selectedPlan      = $this->normalizeSelectedPlan($_GET['plan'] ?? '');
+        $selectedPlanLabel = self::$planLabels[$selectedPlan];
+
         $this->ensureCsrfToken();
         require_once VIEWS_PATH . '/auth/register.php';
     }
@@ -104,35 +119,41 @@ class AuthController extends BaseController
 
     public function register(): void
     {
-        $this->validateCsrf('/registro');
+        $selectedPlan = $this->normalizeSelectedPlan($_POST['plan'] ?? '');
+        $registerPath = '/registro?plan=' . urlencode($selectedPlan);
+
+        $this->validateCsrf($registerPath);
 
         $name            = strip_tags(trim($_POST['name']             ?? ''));
         $email           = strtolower(trim($_POST['email']            ?? ''));
         $password        = $_POST['password']                         ?? '';
         $confirmPassword = $_POST['confirm_password']                 ?? '';
         $ip              = $this->getClientIp();
+        $role            = self::$planRoles[$selectedPlan] ?? self::$planRoles['free'];
 
         // Rate limiting: 3 registros por IP en 1 hora
         if ($this->attemptModel->countRecentByIp($ip, 60) >= 3) {
             $this->flash('error', 'Has alcanzado el límite de registros. Inténtalo más tarde.');
-            $this->redirect('/registro');
+            $this->redirect($registerPath);
         }
 
         $errors = $this->validateRegister($name, $email, $password, $confirmPassword);
         if (!empty($errors)) {
             $this->flash('error', implode(' ', $errors));
-            $this->redirect('/registro');
+            $this->redirect($registerPath);
         }
 
         if ($this->userModel->emailExists($email)) {
             $this->flash('error', 'Ese email ya está en uso. ¿Quieres iniciar sesión?');
-            $this->redirect('/registro');
+            $this->redirect($registerPath);
         }
 
         $hashedPassword    = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
         $verificationToken = bin2hex(random_bytes(32));
 
-        $this->userModel->create($name, $email, $hashedPassword, $verificationToken);
+        // Seleccion publica de plan para demo/pre-lanzamiento.
+        // En producto real, Pro y Business deberian pasar por checkout antes de activar el rol.
+        $this->userModel->create($name, $email, $hashedPassword, $verificationToken, $role);
         $this->attemptModel->record('', $ip);
 
         // Enviar email de verificación (fallo silencioso: cuenta creada igualmente)
@@ -229,6 +250,16 @@ class AuthController extends BaseController
     {
         require_once BACKEND_PATH . '/services/EmailService.php';
         return new EmailService();
+    }
+
+    private function normalizeSelectedPlan(mixed $plan): string
+    {
+        if (!is_string($plan)) {
+            return 'free';
+        }
+
+        $plan = strtolower(trim($plan));
+        return array_key_exists($plan, self::$planLabels) ? $plan : 'free';
     }
 
     private function validateCsrf(string $fallback): void

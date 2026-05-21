@@ -28,13 +28,15 @@ class UserModel
         return $stmt->fetchColumn() !== false;
     }
 
-    public function create(string $name, string $email, string $hashedPassword, string $verificationToken): int
+    public function create(string $name, string $email, string $hashedPassword, string $verificationToken, string $role = 'business_free'): int
     {
+        $safeRole = in_array($role, ['business_free', 'business_pro', 'business_business'], true) ? $role : 'business_free';
+
         $stmt = $this->db->prepare(
             'INSERT INTO users (name, email, password, role, email_verified, verification_token, created_at, updated_at)
-             VALUES (?, ?, ?, "business_free", 0, ?, NOW(), NOW())'
+             VALUES (?, ?, ?, ?, 0, ?, NOW(), NOW())'
         );
-        $stmt->execute([$name, $email, $hashedPassword, $verificationToken]);
+        $stmt->execute([$name, $email, $hashedPassword, $safeRole, $verificationToken]);
         return (int) $this->db->lastInsertId();
     }
 
