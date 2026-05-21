@@ -3491,6 +3491,15 @@ Tipo: microajuste tras prueba visual.
 - `public/css/tour.css`: se elimino la segunda capa `.tour-watermark::after` para dejar una sola marca central grande "OXPHYRE" en diagonal.
 - Se mantuvo intacto el badge clicable "Creado con Oxphyre" hacia `/precios`.
 
+### Validacion final en produccion
+
+- Free muestra una sola marca central diagonal "OXPHYRE".
+- El badge "Creado con Oxphyre" queda visible y clicable hacia `/precios`.
+- La marca de agua no bloquea el drag del visor.
+- Hotspots/flechas siguen funcionando y, al navegar por hotspot, la watermark se mantiene.
+- La marca molesta lo justo para diferenciar Free sin destruir la experiencia.
+- Pendiente para validaciones futuras: crear cuentas demo Free/Pro/Business. Actualmente solo hay cuenta Free de pruebas.
+
 ### Que NO se hizo
 
 - No se tocaron PHP, JS, dashboard, BD, R2, MiDaS, QR, mapa ni pipeline.
