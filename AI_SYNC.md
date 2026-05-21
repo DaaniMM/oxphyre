@@ -61,6 +61,7 @@ Estado implementado:
 - Mapa 1A validado en servidor: migracion `docs/sql/2026-05-20_business_location_fields.sql` ejecutada. `businesses` tiene `address`, `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider`. Crear/editar negocio guarda ubicacion estructurada.
 - Mapa 1B validado en servidor: boton "Buscar en el mapa" en edicion de negocio llama server-side a Nominatim/OpenStreetMap con los valores actuales del formulario. Guarda lat/lng + direccion coherente + `geocoding_provider='nominatim'` en BD. No acepta lat/lng desde cliente. CSRF validado sin consumir.
 - Mapa 1C validado en servidor: tour publico muestra boton "Donde estamos" solo si el negocio tiene coordenadas. Bottom sheet responsive con backdrop blur, mapa Leaflet/OSM con pin, nombre del negocio, direccion textual y boton "Como llegar" a OSM. Schema.org LocalBusiness JSON-LD en pagina publica del tour. CSP actualizada para Leaflet CDN y tiles OSM. Cubre el requisito de API externa del tribunal TFG.
+- Watermark Free real implementado en visor publico: `TourController::showPublic()` activa marca de agua solo con `plan_id === PLAN_FREE`; Free muestra overlay diagonal semitransparente "OXPHYRE" sobre el canvas y badge clicable "Creado con Oxphyre" hacia `/precios`. Pro/Business no renderizan overlay ni badge.
 - SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home y `/precios`. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
 
 ---
@@ -473,6 +474,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Ultima sesion de implementacion/documentacion (2026-05-21):
+- Watermark Free real implementado en visor publico: overlay diagonal semitransparente + badge "Creado con Oxphyre" hacia `/precios`; Pro/Business quedan sin watermark.
 - SEO tecnico inicial cerrado: sitemap minimo creado y desplegado, `curl` validado con HTTP/2 200, robots.txt gestionado por Cloudflare sin cambios, sitemap enviado en Search Console y pendiente de procesamiento por Google.
 - `/precios` cerrada y validada en produccion: ruta publica, cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ, CTA final.
 - Landing `#precios` validada: cards correctas, CTA inferior hacia `/precios`, assets locales con `asset()`.

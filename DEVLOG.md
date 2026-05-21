@@ -3457,4 +3457,29 @@ Tipo: cierre documental de microbloque SEO tecnico.
 - No se tocaron rutas PHP, codigo funcional, `robots.txt`, Cloudflare ni configuracion externa.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Watermark Free real en visor publico
+
+Tipo: implementacion acotada de diferenciacion Free/Pro/Business en tour publico.
+
+### Auditoria
+
+- `TourController::showPublic()` ya cargaba el negocio publico con `BusinessModel::getBySlugPublic()`, que devuelve `plan_id`.
+- `showPublic()` ya calculaba `features.watermark` y lo enviaba dentro de `TOUR_DATA`, pero tambien renderizaba la marca desde PHP con `$hasWatermark`.
+- `backend/views/tour.php` tenia un watermark discreto "Powered by Oxphyre" en esquina inferior izquierda.
+- `public/css/tour.css` solo estilaba esa etiqueta pequena; no existia overlay real sobre el visor.
+- `public/js/tour-viewer.js` no gestionaba watermark y no era necesario tocarlo.
+- `backend/config/config.php` define `PLAN_FREE=1`, `PLAN_PRO=2` y `PLAN_BUSINESS=3`.
+
+### Que se hizo
+
+- `backend/controllers/TourController.php`: la marca de agua ahora se activa solo con plan Free estricto (`plan_id === PLAN_FREE`). Tambien se anade `plan.id` y `plan.isFree` a `TOUR_DATA` para que el cliente tenga trazabilidad del plan sin depender solo de `features.watermark`.
+- `backend/views/tour.php`: el watermark Free pasa a ser overlay decorativo `aria-hidden="true"` + badge clicable "Creado con Oxphyre" hacia `/precios` con `aria-label`.
+- `public/css/tour.css`: overlay diagonal grande "OXPHYRE" semitransparente sobre el canvas, sin bloquear drag/clicks (`pointer-events: none`), y badge visible con `pointer-events: auto`. Se ajusto responsive movil para que sea visible sin ocupar demasiado.
+
+### Que NO se hizo
+
+- No se tocaron imagenes, R2, MiDaS, pipeline, geocoding, mapa, BD, dashboard ni planes/precios funcionales.
+- No se modifico `public/js/tour-viewer.js`.
+- No se hizo commit ni push.
+
 

@@ -51,10 +51,13 @@ echo json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON
 </div>
 
 <?php if ($hasWatermark): ?>
-<!-- Marca de agua: solo visible en plan Free -->
-<div class="tour-watermark">
-  Powered by <a href="https://oxphyre.com" target="_blank" rel="noopener noreferrer">Oxphyre</a>
-</div>
+<!-- Marca de agua Free: el overlay es decorativo y el badge lleva a la comparativa de planes -->
+<div class="tour-watermark" aria-hidden="true"></div>
+<a class="tour-watermark-badge"
+   href="/precios"
+   aria-label="Ver planes de Oxphyre: tour creado con Oxphyre">
+  Creado con Oxphyre
+</a>
 <?php endif; ?>
 
 <?php if (count($tourPositions) > 1): ?>

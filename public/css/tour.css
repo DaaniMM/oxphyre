@@ -34,22 +34,72 @@ html, body {
 
 .tour-watermark {
   position: fixed;
-  bottom: 1rem;
-  left: 1rem;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  z-index: 100;
+  inset: 0;
+  z-index: 90;
+  overflow: hidden;
   pointer-events: none;
 }
 
-.tour-watermark a {
-  color: rgba(254, 179, 84, 0.7);
-  text-decoration: none;
-  pointer-events: auto;
+.tour-watermark::before,
+.tour-watermark::after {
+  content: 'OXPHYRE';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: rgba(255, 255, 255, 0.11);
+  font: 900 clamp(4.5rem, 15vw, 13rem) 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 34px rgba(0, 0, 0, 0.42);
+  white-space: nowrap;
 }
 
-.tour-watermark a:hover {
-  color: rgba(254, 179, 84, 1);
+.tour-watermark::before {
+  transform: translate(-50%, -50%) rotate(-18deg);
+}
+
+.tour-watermark::after {
+  top: 26%;
+  color: rgba(254, 179, 84, 0.075);
+  font-size: clamp(2.8rem, 9vw, 8rem);
+  transform: translate(-50%, -50%) rotate(-18deg);
+}
+
+.tour-watermark-badge {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 106;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(220px, calc(100vw - 2rem));
+  min-height: 40px;
+  padding: 0.62rem 0.9rem;
+  border: 1px solid rgba(254, 179, 84, 0.52);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: rgba(255, 255, 255, 0.92);
+  font: 700 0.78rem 'Inter', system-ui, sans-serif;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36), 0 0 22px rgba(254, 179, 84, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-decoration: none;
+  pointer-events: auto;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.tour-watermark-badge:hover {
+  border-color: rgba(254, 179, 84, 0.78);
+  background: rgba(254, 179, 84, 0.18);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.tour-watermark-badge:focus-visible {
+  outline: 2px solid rgba(254, 179, 84, 0.78);
+  outline-offset: 4px;
 }
 
 /* ── Barra de navegación entre posiciones ──────────────────────────────────── */
@@ -390,10 +440,17 @@ html, body {
   box-shadow: 0 0 18px rgba(254, 179, 84, 0.22);
 }
 
-body.room-is-open .tour-watermark,
 body.room-is-open .tour-positions-bar,
 body.room-is-open #tour-gyro-btn {
   display: none;
+}
+
+body.room-is-open .tour-watermark {
+  z-index: 320;
+}
+
+body.room-is-open .tour-watermark-badge {
+  z-index: 340;
 }
 
 /* Solo visible en dispositivos táctiles (sin ratón preciso) */
@@ -407,6 +464,20 @@ body.room-is-open #tour-gyro-btn {
   .tour-positions-bar { bottom: 1.25rem; }
   #tour-gyro-btn      { bottom: 1.25rem; right: 1rem; }
   .tour-details-btn   { bottom: 4.5rem; }
+  .tour-watermark::before {
+    font-size: clamp(3.8rem, 20vw, 7rem);
+    opacity: 0.9;
+  }
+  .tour-watermark::after {
+    top: 30%;
+    font-size: clamp(2.1rem, 13vw, 4.5rem);
+  }
+  .tour-watermark-badge {
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
+    min-height: 36px;
+    padding: 0.52rem 0.78rem;
+    font-size: 0.72rem;
+  }
   .room-hud {
     align-items: stretch;
     flex-direction: column;

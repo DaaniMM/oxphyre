@@ -348,8 +348,9 @@ class TourController extends BaseController
 
         // Determinar features disponibles según plan del negocio
         $planId       = (int) $business['plan_id'];
+        $isFreePlan   = $planId === PLAN_FREE;
         $hasMiDaS     = $planId >= PLAN_PRO;
-        $hasWatermark = $planId <= PLAN_FREE;
+        $hasWatermark = $isFreePlan;
         $hasMinimapa  = $planId >= PLAN_PRO;
 
         // Cargar posiciones con sus fotos organizadas por dirección
@@ -416,6 +417,10 @@ class TourController extends BaseController
                 'midas'     => $hasMiDaS,
                 'watermark' => $hasWatermark,
                 'minimap'   => $hasMinimapa,
+            ],
+            'plan'      => [
+                'id'     => $planId,
+                'isFree' => $isFreePlan,
             ],
             'location'  => [
                 'hasCoords' => $businessLocation['hasCoords'],
