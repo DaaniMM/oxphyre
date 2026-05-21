@@ -89,8 +89,22 @@ class BusinessModel
 
     public function softDelete(int $id): void
     {
-        $stmt = $this->db->prepare('UPDATE businesses SET deleted_at = NOW() WHERE id = ?');
+        $stmt = $this->db->prepare(
+            "UPDATE businesses
+             SET slug = CONCAT(slug, '-deleted-', id), deleted_at = NOW(), updated_at = NOW()
+             WHERE id = ? AND deleted_at IS NULL"
+        );
         $stmt->execute([$id]);
+    }
+
+    public function releaseDeletedSlug(string $slug): void
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE businesses
+             SET slug = CONCAT(slug, '-deleted-', id), updated_at = NOW()
+             WHERE slug = ? AND deleted_at IS NOT NULL AND slug NOT LIKE '%-deleted-%'"
+        );
+        $stmt->execute([$slug]);
     }
 
     // Acceso público: busca negocio por slug sin filtrar por user_id

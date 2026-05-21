@@ -257,6 +257,9 @@ class BusinessController extends BaseController
             $this->go('/dashboard/negocios/nuevo');
         }
 
+        // Libera slugs heredados de negocios ya borrados antes del INSERT.
+        $model->releaseDeletedSlug($slug);
+
         $planId = self::$businessPlanIds[$userRole] ?? PLAN_FREE;
 
         $businessId = $model->create(

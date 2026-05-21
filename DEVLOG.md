@@ -3742,3 +3742,19 @@ Tipo: fix UI/dashboard acotado.
 - No se tocaron `BusinessController::store()`, `BusinessModel::create()`, `plan_id`, enforcement de limites, BD, tours, QR, R2, watermark, mapas ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Liberacion de slug al borrar negocios
+
+Tipo: fix backend/soft delete acotado.
+
+### Que se hizo
+
+- `backend/models/BusinessModel.php`: `softDelete()` ahora marca `deleted_at`, actualiza `updated_at` y renombra el slug a `slug-original-deleted-ID` en la misma operacion para liberar el indice unico.
+- `backend/models/BusinessModel.php`: anadido `releaseDeletedSlug()` para liberar slugs exactos que ya estuvieran ocupados por negocios soft deleted antiguos.
+- `backend/controllers/BusinessController.php`: antes de crear un negocio, si no existe duplicado activo, se libera cualquier slug soft deleted heredado con el mismo valor para evitar error 500 por el UNIQUE.
+
+### Que NO se hizo
+
+- No se cambio la URL de negocios activos ni la generacion del slug nuevo.
+- No se tocaron tours, positions, photos, QR, R2, watermark, planes, limites ni pipeline.
+- No se hizo commit ni push.
+
