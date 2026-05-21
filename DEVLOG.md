@@ -3482,4 +3482,18 @@ Tipo: implementacion acotada de diferenciacion Free/Pro/Business en tour publico
 - No se modifico `public/js/tour-viewer.js`.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Ajuste visual Watermark Free
+
+Tipo: microajuste tras prueba visual.
+
+### Que se hizo
+
+- `public/css/tour.css`: se elimino la segunda capa `.tour-watermark::after` para dejar una sola marca central grande "OXPHYRE" en diagonal.
+- Se mantuvo intacto el badge clicable "Creado con Oxphyre" hacia `/precios`.
+
+### Que NO se hizo
+
+- No se tocaron PHP, JS, dashboard, BD, R2, MiDaS, QR, mapa ni pipeline.
+- No se hizo commit ni push.
+
 

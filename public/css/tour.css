@@ -40,8 +40,7 @@ html, body {
   pointer-events: none;
 }
 
-.tour-watermark::before,
-.tour-watermark::after {
+.tour-watermark::before {
   content: 'OXPHYRE';
   position: absolute;
   left: 50%;
@@ -56,13 +55,6 @@ html, body {
 }
 
 .tour-watermark::before {
-  transform: translate(-50%, -50%) rotate(-18deg);
-}
-
-.tour-watermark::after {
-  top: 26%;
-  color: rgba(254, 179, 84, 0.075);
-  font-size: clamp(2.8rem, 9vw, 8rem);
   transform: translate(-50%, -50%) rotate(-18deg);
 }
 
@@ -467,10 +459,6 @@ body.room-is-open .tour-watermark-badge {
   .tour-watermark::before {
     font-size: clamp(3.8rem, 20vw, 7rem);
     opacity: 0.9;
-  }
-  .tour-watermark::after {
-    top: 30%;
-    font-size: clamp(2.1rem, 13vw, 4.5rem);
   }
   .tour-watermark-badge {
     bottom: max(0.8rem, env(safe-area-inset-bottom));
