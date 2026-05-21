@@ -3706,3 +3706,22 @@ Tipo: arquitectura publica / confianza.
 - No se tocaron dashboard, BD, auth logica, tours, QR, R2, watermark, limites, mapas ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Cierre provisional del bloque publico/SEO
+
+Tipo: documentacion / estado MVP.
+
+### Que se documento
+
+- Se deja cerrado provisionalmente el bloque publico reciente: `/tour-virtual-para-negocios`, enlaces internos desde home y `/precios`, `/sobre-nosotros`, `/soporte` y sitemap actualizado.
+- Validacion MVP aceptada para TFG. Estas paginas sirven para avanzar y evitar bloqueos por pulido prematuro.
+- Queda pendiente una revision final de copy, microcopy, SEO fino, legal y UX antes de entrega final o lanzamiento comercial.
+- `/blog` y `/novedades` no existen todavia y se retiraron del footer para evitar 404.
+
+### Decision
+
+- No retocar estas paginas sin motivo claro. Cualquier mejora futura debe plantearse como revision especifica, no como reapertura del bloque.
+
+### Que NO se hizo
+
+- No se toco codigo funcional.
+

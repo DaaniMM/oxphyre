@@ -34,6 +34,9 @@ Estado implementado:
 - Landing completa y desplegada.
 - `/precios` implementada y validada en produccion: ruta publica `GET /precios`, pagina autocontenida con cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ de planes y CTA final. No carga `main.js` ni Three.js; usa `main.css` e `i18n.js` versionados con `asset()`.
 - `/tour-virtual-para-negocios` implementada como pagina pilar SEO publica para posicionamiento self-service: crear visita virtual con movil, sin agencia, sin fotografo y sin camara 360. No carga Three.js ni `main.js`; usa `main.css` con `asset()`, metas completas, OG image PNG, canonical, `SoftwareApplication`, `FAQPage`, `BreadcrumbList` y sitemap actualizado.
+- `/sobre-nosotros` y `/soporte` implementadas como paginas publicas ligeras, indexables y en estado MVP validado. Sirven para confianza, arquitectura publica y evitar enlaces de footer muertos; no cargan Three.js ni `main.js`.
+- Footer publico actualizado: `/blog` y `/novedades` se retiraron porque esas paginas no existen todavia. No reanadir esos enlaces hasta crear rutas/contenido reales.
+- Bloque publico/SEO reciente aprobado provisionalmente para avanzar en MVP/TFG. Pendiente revision final de copy, microcopy, SEO fino, legal y UX antes de entrega/lanzamiento comercial; no retocar estas paginas sin motivo salvo tarea especifica de revision futura.
 - Enforcement minimo de limites publicado en `/precios` aplicado en backend: Free = 1 negocio, 1 tour por negocio y 3 posiciones por tour; Pro = 5 negocios, tours ilimitados y 20 posiciones por tour; Business = ilimitado. Falta todavia centralizar estos limites en un helper unico.
 - Auth completo: registro, verificación email, login, logout y recuperación de contraseña.
 - Dashboard base con navegación, métricas y layout.
@@ -64,7 +67,7 @@ Estado implementado:
 - Mapa 1B validado en servidor: boton "Buscar en el mapa" en edicion de negocio llama server-side a Nominatim/OpenStreetMap con los valores actuales del formulario. Guarda lat/lng + direccion coherente + `geocoding_provider='nominatim'` en BD. No acepta lat/lng desde cliente. CSRF validado sin consumir.
 - Mapa 1C validado en servidor: tour publico muestra boton "Donde estamos" solo si el negocio tiene coordenadas. Bottom sheet responsive con backdrop blur, mapa Leaflet/OSM con pin, nombre del negocio, direccion textual y boton "Como llegar" a OSM. Schema.org LocalBusiness JSON-LD en pagina publica del tour. CSP actualizada para Leaflet CDN y tiles OSM. Cubre el requisito de API externa del tribunal TFG.
 - Watermark Free real implementado y validado visualmente en produccion: `TourController::showPublic()` activa marca de agua solo con `plan_id === PLAN_FREE`; Free muestra una sola marca central diagonal semitransparente "OXPHYRE" sobre el canvas y badge clicable "Creado con Oxphyre" hacia `/precios`. No bloquea drag ni hotspots/flechas y se mantiene al navegar por hotspot. Pro/Business no renderizan overlay ni badge. Pendiente crear cuentas demo Free/Pro/Business para validaciones futuras; ahora solo hay cuenta Free de pruebas.
-- SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home y `/precios`. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
+- SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home, `/precios`, `/tour-virtual-para-negocios`, `/sobre-nosotros` y `/soporte`. `/tour-virtual-para-negocios` es la primera pagina pilar SEO y fue enviada a indexacion. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
 
 ---
 
@@ -439,7 +442,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ### Prioridad alta para TFG
 - `/precios` cerrado: implementado y validado en produccion con Free, Pro y Business.
 - API externa para tribunal: **implementada y validada**. Nominatim/OpenStreetMap (geocodificacion server-side, Mapa 1B) + Leaflet/OSM (mapa publico en visor, Mapa 1C). Cubre el requisito sin Google Maps ni Mapbox (sin API key, sin cuotas, open source).
-- SEO tecnico inicial: **implementado y validado tecnicamente**. Sitemap minimo enviado en Search Console; pendiente que Google lo procese/reintente.
+- SEO tecnico inicial: **implementado y validado tecnicamente**. Sitemap actualizado con paginas publicas principales y `/tour-virtual-para-negocios` enviada a indexacion; pendiente que Google procese/reintente y revision final de copy/SEO/UX antes de entrega/lanzamiento.
 - Documentar roles en la memoria: admin, business_owner, viewer.
 - Revisar contraste en dashboard y wizard: inputs, labels y textos secundarios.
 - Preparar 1-2 tours demo visualmente impecables antes de la exposición.
@@ -476,7 +479,10 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Ultima sesion de implementacion/documentacion (2026-05-21):
-- Pagina SEO publica `/tour-virtual-para-negocios` creada y anadida a sitemap con prioridad 0.9. Enfoque: herramienta self-service para que el dueno cree su visita virtual con movil. Sin enlaces a `/soporte` ni `/tour-virtual-para-restaurantes` porque no existen como rutas publicas.
+- Cierre provisional del bloque publico/SEO: `/tour-virtual-para-negocios`, enlaces internos desde home y `/precios`, `/sobre-nosotros`, `/soporte` y sitemap actualizado quedan aprobados para MVP/TFG y sirven para avanzar.
+- `/tour-virtual-para-negocios` es la primera pagina pilar SEO, creada y enviada a indexacion. Enfoque: herramienta self-service para que el dueno cree su visita virtual con movil.
+- `/sobre-nosotros` y `/soporte` existen como paginas publicas ligeras en estado MVP validado. `/blog` y `/novedades` se retiraron del footer porque no existen todavia.
+- Estas paginas no se consideran definitivas a nivel copy/legal/SEO/UX. Pendiente revision final mas calmada antes de entrega/lanzamiento comercial; no retocarlas sin motivo salvo tarea especifica de revision.
 - Enforcement minimo de planes aplicado: Free 1 negocio/1 tour/3 posiciones, Pro 5 negocios/tours ilimitados/20 posiciones, Business ilimitado. No se centralizo helper de planes todavia.
 - Watermark Free real implementado y validado en produccion: una sola marca central diagonal "OXPHYRE" + badge "Creado con Oxphyre" hacia `/precios`; no bloquea drag ni hotspots y se mantiene al navegar. Queda pendiente crear cuentas demo Free/Pro/Business; ahora solo hay cuenta Free de pruebas.
 - SEO tecnico inicial cerrado: sitemap minimo creado y desplegado, `curl` validado con HTTP/2 200, robots.txt gestionado por Cloudflare sin cambios, sitemap enviado en Search Console y pendiente de procesamiento por Google.
@@ -528,6 +534,7 @@ Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo pu
 - No reabrir decisiones cerradas salvo problema claro.
 - No cambiar stack ni arquitectura sin justificarlo.
 - No hacer refactors grandes sin confirmación.
+- No reabrir ni retocar el bloque publico/SEO reciente (`/tour-virtual-para-negocios`, `/sobre-nosotros`, `/soporte`, enlaces internos y sitemap) sin una tarea especifica de revision. Esta validado como MVP para avanzar, aunque queda pendiente pulido final de copy/SEO/UX.
 - No proponer frameworks nuevos.
 - No proponer cámaras 360° profesionales como requisito para clientes.
 - No implementar ideas en debate como si fueran decisiones tomadas.
