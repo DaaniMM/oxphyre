@@ -365,10 +365,6 @@
 
     </div>
 
-    <div class="pricing-details-cta animate-on-scroll">
-      <p class="pricing-details-cta-text" data-i18n="pricing.details_cta_text">¿Quieres comparar todos los detalles?</p>
-      <a href="/precios" class="pricing-details-cta-link" data-i18n="pricing.details_cta_link">Ver comparativa completa</a>
-    </div>
   </section>
 
 
@@ -454,7 +450,6 @@
           Nuestra IA convierte cada imagen en un espacio con profundidad 3D real. Sin cámaras 360°, sin equipos especiales, sin coste extra.
         </p>
       </article>
-
     </div>
   </section>
 
@@ -537,6 +532,11 @@
         <p class="plan-micro-note" data-i18n="pricing.biz_note">Acceso completo. Sin límites.</p>
       </article>
 
+    </div>
+
+    <div class="pricing-details-cta animate-on-scroll">
+      <p class="pricing-details-cta-text" data-i18n="pricing.details_cta_text">¿Quieres ver límites, funciones y diferencias plan por plan?</p>
+      <a href="/precios" class="pricing-details-cta-link" data-i18n="pricing.details_cta_link">Ver comparativa completa</a>
     </div>
   </section>
 

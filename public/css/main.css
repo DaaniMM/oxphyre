@@ -1350,18 +1350,23 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 }
 
 .pricing-details-cta {
-  max-width: 420px;
-  margin: 42px auto 0;
+  width: min(100%, 680px);
+  margin: clamp(34px, 5vw, 56px) auto 0;
+  padding: 22px 26px;
   text-align: center;
   position: relative;
   z-index: 1;
+  border: 1px solid rgba(254, 179, 84, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(254, 179, 84, 0.08), rgba(254, 179, 84, 0.03));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
 .pricing-details-cta-text {
   color: var(--text-2);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .pricing-details-cta-link {
@@ -1689,4 +1694,5 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   #nav { padding: 0 16px; }
   .hero-pills { flex-direction: column; gap: 8px; }
   .pricing-grid { max-width: 100%; }
+  .pricing-details-cta { padding: 20px 18px; }
 }

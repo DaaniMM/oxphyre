@@ -3331,3 +3331,20 @@ Tipo: ajuste visual acotado.
 - No se tocaron rutas, dashboard, BD, Hotspots, QR, R2, mapa publico ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Reubicacion CTA comparativa en landing
+
+Tipo: ajuste visual acotado en seccion de precios.
+Mover cta precios de section 3 a section 6.
+
+### Que se hizo
+
+- `backend/views/home.php`: se movio el bloque `.pricing-details-cta` desde el cierre de `#como-funciona` hasta el cierre natural de `#precios`, justo debajo de las cards de planes.
+- `backend/views/home.php` y `public/js/i18n.js`: se actualizo el texto ES/EN del CTA para orientar a comparar limites, funciones y diferencias plan por plan.
+- `public/css/main.css`: se ajustaron solo clases `.pricing-details-cta*` para dar al CTA aire, contenedor propio y coherencia visual bajo las cards.
+
+### Que NO se hizo
+
+- No se tocaron `.pricing-card`, `.pricing-grid` ni `.plan-*`.
+- No se toco `/precios`, `main.js`, rutas, dashboard, BD, Hotspots, QR, R2, mapa publico ni pipeline.
+
+
