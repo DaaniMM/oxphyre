@@ -3615,3 +3615,22 @@ Tipo: asset grafico de marca para previews sociales.
 - Layout, textos, logica de planes, dashboard, tours, QR, R2, MiDaS, pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Paginas legales publicas MVP
+
+Tipo: implementacion legal/publica acotada.
+
+### Que se hizo
+
+- `backend/routes/web.php`: anadidas rutas publicas GET `/privacidad`, `/terminos` y `/cookies`.
+- `backend/controllers/HomeController.php`: anadidos `showPrivacy()`, `showTerms()` y `showCookies()`.
+- `backend/views/legal/privacidad.php`: creada politica de privacidad inicial con datos recogidos, finalidades, conservacion, derechos, servicios externos, contacto y nota de pre-lanzamiento.
+- `backend/views/legal/terminos.php`: creados terminos de uso iniciales con cuenta, contenido subido, planes Free/Pro/Business, limites, uso aceptable, disponibilidad, propiedad intelectual, cambios y contacto.
+- `backend/views/legal/cookies.php`: creada politica de cookies inicial con cookies tecnicas, sesion/login, preferencias, analiticas y gestion desde navegador.
+- Las tres paginas reutilizan `main.css` con `asset()`, favicon, `theme-color`, canonical propio e index/follow. No cargan Three.js ni `main.js`.
+
+### Que NO se hizo
+
+- No se prometio cumplimiento legal perfecto; se deja nota de version inicial y revision legal futura.
+- No se tocaron dashboard, BD, auth logica, tours, QR, R2, watermark, limites, mapas ni pipeline.
+- No se hizo commit ni push.
+

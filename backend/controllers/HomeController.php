@@ -27,4 +27,19 @@ class HomeController
     {
         require_once VIEWS_PATH . '/precios.php';
     }
+
+    public function showPrivacy(): void
+    {
+        require_once VIEWS_PATH . '/legal/privacidad.php';
+    }
+
+    public function showTerms(): void
+    {
+        require_once VIEWS_PATH . '/legal/terminos.php';
+    }
+
+    public function showCookies(): void
+    {
+        require_once VIEWS_PATH . '/legal/cookies.php';
+    }
 }
