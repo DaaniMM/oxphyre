@@ -49,7 +49,7 @@
       },
       {
         "@type": "FAQPage",
-        "@id": "https://oxphyre.com/tour-virtual-para-negocios#faq",
+        "@id": "https://oxphyre.com/tour-virtual-para-negocios#seo-faq",
         "mainEntity": [
           {
             "@type": "Question",
@@ -115,12 +115,14 @@
     .seo-page {
       min-height: 100vh;
       padding-top: var(--nav-h);
+      overflow-x: hidden;
       background:
         radial-gradient(circle at 48% 0%, rgba(254, 179, 84, 0.18), transparent 36%),
         linear-gradient(180deg, #050505 0%, #000 34%, #050505 100%);
     }
     .seo-section,
     .seo-hero {
+      width: 100%;
       max-width: 960px;
       margin: 0 auto;
       padding-left: 24px;
@@ -173,7 +175,7 @@
     }
     .seo-primary {
       background: var(--accent);
-      color: #000;
+      color: #000 !important;
       box-shadow: 0 0 24px rgba(254, 179, 84, 0.18);
     }
     .seo-secondary {
@@ -186,6 +188,9 @@
       transform: translateY(-2px);
       border-color: rgba(254, 179, 84, 0.4);
       box-shadow: 0 0 28px rgba(254, 179, 84, 0.22);
+    }
+    .seo-primary:hover {
+      color: #000;
     }
     .seo-section {
       padding-top: 58px;
@@ -200,12 +205,6 @@
       line-height: 1.12;
       color: var(--text-1);
     }
-    .seo-page #como-funciona {
-      min-height: 0;
-      display: block;
-      padding: 0;
-      overflow: visible;
-    }
     .seo-section h3 {
       margin-top: 22px;
       margin-bottom: 8px;
@@ -219,7 +218,8 @@
       color: var(--text-2);
       line-height: 1.78;
     }
-    .seo-section a {
+    .seo-section p a,
+    .seo-section li a {
       color: var(--accent);
     }
     .seo-grid {
@@ -290,14 +290,23 @@
         padding-top: 72px;
         padding-bottom: 38px;
       }
+      .seo-h1 {
+        font-size: clamp(2rem, 9vw, 2.4rem);
+        line-height: 1.05;
+        overflow-wrap: break-word;
+      }
+      .seo-section h2 {
+        overflow-wrap: break-word;
+      }
       .nav-actions {
         display: flex;
         margin-left: auto;
       }
       .nav-actions .btn-primary {
         display: inline-flex;
-        padding: 8px 14px;
-        font-size: 13px;
+        padding: 8px 10px;
+        font-size: 12px;
+        white-space: nowrap;
       }
       .seo-grid {
         grid-template-columns: 1fr;
@@ -357,8 +366,8 @@
       <p>No hace falta coordinar una sesión externa ni esperar entregas. Puedes preparar el local, hacer fotos cuando esté ordenado y subirlas a tu ritmo. La herramienta está pensada para que el resultado sea claro y compartible sin convertir el proceso en una producción complicada.</p>
     </section>
 
-    <section class="seo-section" aria-labelledby="como-funciona">
-      <h2 id="como-funciona">Cómo funciona Oxphyre</h2>
+    <section class="seo-section" aria-labelledby="seo-como-funciona">
+      <h2 id="seo-como-funciona">Cómo funciona Oxphyre</h2>
       <p>Oxphyre estructura el tour por zonas para que el recorrido tenga sentido. El objetivo no es prometer magia automática, sino darte una forma práctica de construir una visita navegable con fotos reales de tu negocio.</p>
       <div class="seo-steps">
         <div class="seo-step"><p><strong>Haces o subes fotos del local.</strong> Puedes empezar con imágenes tomadas desde el móvil, cuidando luz, orden y encuadre.</p></div>
@@ -414,8 +423,8 @@
       </div>
     </section>
 
-    <section class="seo-section" id="faq" aria-labelledby="faq-title">
-      <h2 id="faq-title">Preguntas frecuentes</h2>
+    <section class="seo-section" id="seo-faq" aria-labelledby="seo-faq-title">
+      <h2 id="seo-faq-title">Preguntas frecuentes</h2>
       <div class="seo-faq">
         <article>
           <h3>¿Puedo crear la visita virtual de mi negocio solo con el móvil?</h3>
@@ -440,8 +449,8 @@
       </div>
     </section>
 
-    <section class="seo-section seo-final" aria-labelledby="cta-final">
-      <h2 id="cta-final">Empieza enseñando tu negocio como realmente se vive</h2>
+    <section class="seo-section seo-final" aria-labelledby="seo-cta-final">
+      <h2 id="seo-cta-final">Empieza enseñando tu negocio como realmente se vive</h2>
       <p>Tu local ya comunica algo cuando una persona entra. Oxphyre te ayuda a llevar esa primera impresión a internet, con una visita virtual sencilla de crear y fácil de compartir.</p>
       <div class="seo-final-actions">
         <a class="seo-primary" href="/registro?plan=free">Crear mi tour gratis →</a>

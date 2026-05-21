@@ -3657,3 +3657,18 @@ Tipo: SEO publico / pagina pilar.
 - No se tocaron dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Correccion visual /tour-virtual-para-negocios
+
+Tipo: microfix visual SEO publico.
+
+### Que se hizo
+
+- `backend/views/tour-virtual-para-negocios.php`: se corrigieron colisiones de IDs con `main.css` heredado de la landing (`#como-funciona`, `#faq`, `#cta-final`) que provocaban paddings/min-height y estructura visual incorrecta.
+- Se ajusto la especificidad de los CTAs `.seo-primary` y `.seo-secondary` dentro de `.seo-section` para que el texto no herede el color ambar de enlaces normales.
+- Se anadieron ajustes responsive locales para evitar overflow horizontal en movil y mantener CTAs visibles.
+
+### Que NO se hizo
+
+- No se tocaron metas, Schema.org, sitemap, rutas, dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
+- No se hizo commit ni push.
+
