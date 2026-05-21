@@ -61,6 +61,7 @@ Estado implementado:
 - Mapa 1A validado en servidor: migracion `docs/sql/2026-05-20_business_location_fields.sql` ejecutada. `businesses` tiene `address`, `city`, `postal_code`, `country`, `latitude`, `longitude`, `geocoded_at` y `geocoding_provider`. Crear/editar negocio guarda ubicacion estructurada.
 - Mapa 1B validado en servidor: boton "Buscar en el mapa" en edicion de negocio llama server-side a Nominatim/OpenStreetMap con los valores actuales del formulario. Guarda lat/lng + direccion coherente + `geocoding_provider='nominatim'` en BD. No acepta lat/lng desde cliente. CSRF validado sin consumir.
 - Mapa 1C validado en servidor: tour publico muestra boton "Donde estamos" solo si el negocio tiene coordenadas. Bottom sheet responsive con backdrop blur, mapa Leaflet/OSM con pin, nombre del negocio, direccion textual y boton "Como llegar" a OSM. Schema.org LocalBusiness JSON-LD en pagina publica del tour. CSP actualizada para Leaflet CDN y tiles OSM. Cubre el requisito de API externa del tribunal TFG.
+- SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home y `/precios`. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
 
 ---
 
@@ -435,12 +436,13 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ### Prioridad alta para TFG
 - `/precios` cerrado: implementado y validado en produccion con Free, Pro y Business.
 - API externa para tribunal: **implementada y validada**. Nominatim/OpenStreetMap (geocodificacion server-side, Mapa 1B) + Leaflet/OSM (mapa publico en visor, Mapa 1C). Cubre el requisito sin Google Maps ni Mapbox (sin API key, sin cuotas, open source).
+- SEO tecnico inicial: **implementado y validado tecnicamente**. Sitemap minimo enviado en Search Console; pendiente que Google lo procese/reintente.
 - Documentar roles en la memoria: admin, business_owner, viewer.
 - Revisar contraste en dashboard y wizard: inputs, labels y textos secundarios.
 - Preparar 1-2 tours demo visualmente impecables antes de la exposición.
 - Grabar o sustituir el placeholder del video demo en la landing.
 - Revisar responsive en móvil/tablet.
-- Revisar SEO técnico final: sitemap, robots, schema, metas, Open Graph.
+- Revisar SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
 - Revisar PageSpeed final.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
 
@@ -471,6 +473,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Ultima sesion de implementacion/documentacion (2026-05-21):
+- SEO tecnico inicial cerrado: sitemap minimo creado y desplegado, `curl` validado con HTTP/2 200, robots.txt gestionado por Cloudflare sin cambios, sitemap enviado en Search Console y pendiente de procesamiento por Google.
 - `/precios` cerrada y validada en produccion: ruta publica, cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ, CTA final.
 - Landing `#precios` validada: cards correctas, CTA inferior hacia `/precios`, assets locales con `asset()`.
 - Planes sincronizados: Free/Pro/Business con limites y precios vigentes; Business y hotspots comerciales marcados como roadmap/proximamente cuando no estan disponibles.
@@ -496,12 +499,12 @@ Siguiente orden recomendado para cerrar antes del TFG:
 - API externa: Nominatim/OpenStreetMap (Mapa 1B) + Leaflet/OSM (Mapa 1C). **Validado.**
 - Roles documentados: pendiente documentar en la memoria (admin, business_owner, viewer).
 
-1. **SEO tecnico publico:** revisar/crear `robots.txt`, `sitemap.xml` y preparar alta/verificacion en Google Search Console.
+1. **Roles documentados en memoria:** documentar `admin`, `business_owner` y `viewer`, diferenciando permisos reales en frontend/backend y estado actual de uso.
 2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
    **Hotspots 1E**: pulido UX mobile/labels/limites.
 3. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
 4. Responsive: verificar todas las secciones en movil y tablet.
-5. SEO tecnico final: sitemap, robots, schema, metas, Open Graph.
+5. SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
 6. PageSpeed final.
 7. Limpieza fisica de soft delete: borrar WebP/depth asociados cuando proceda. Esperar a tener R2 como fuente validada (ya lo es en Fase 2B). No es bloqueante para el TFG.
 8. Pulido opcional de ruido/granulado. No bloqueante.

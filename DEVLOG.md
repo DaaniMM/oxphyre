@@ -3424,4 +3424,37 @@ Tipo: SEO tecnico publico.
 - No se toco `robots.txt`, rutas PHP ni codigo funcional.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Cierre SEO tecnico inicial: sitemap, robots y Search Console
+
+Tipo: cierre documental de microbloque SEO tecnico.
+
+### Que se valido
+
+- `public/sitemap.xml` creado, desplegado y accesible en `https://oxphyre.com/sitemap.xml`.
+- `https://oxphyre.com/sitemap.xml` responde HTTP/2 200 con `content-type: text/xml`.
+- El sitemap contiene solo las URLs publicas principales:
+  - `https://oxphyre.com/`
+  - `https://oxphyre.com/precios`
+- En navegador el XML se muestra correctamente; el aviso "This XML file does not appear to have any style information..." es normal.
+
+### Search Console
+
+- La home `https://oxphyre.com/` aparece como indexada.
+- HTTPS valido.
+- FAQ detectada como elemento valido.
+- `sitemap.xml` enviado manualmente en Google Search Console.
+- Estado inicial del sitemap: "No se ha podido obtener". Como `curl` confirma HTTP 200 y XML valido, se considera pendiente de procesamiento/reintento por Google.
+
+### Robots.txt
+
+- `https://oxphyre.com/robots.txt` existe y esta gestionado por Cloudflare AI Crawl Control / Managed robots.txt.
+- Permite rastreo general con `User-agent: *` y `Allow: /`.
+- Bloquea bots de IA/entrenamiento como GPTBot, ClaudeBot, Google-Extended y similares.
+- Decision: no tocar Cloudflare ni `robots.txt`; no se anadio `Sitemap:` porque Cloudflare Managed robots.txt no ofrece edicion directa simple desde la pantalla revisada. El sitemap ya fue enviado manualmente en Search Console.
+
+### Que NO se hizo
+
+- No se tocaron rutas PHP, codigo funcional, `robots.txt`, Cloudflare ni configuracion externa.
+- No se hizo commit ni push.
+
 
