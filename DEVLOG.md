@@ -3251,6 +3251,7 @@ Antes de implementar `/precios` se cerraron las contradicciones entre `Planes_Ox
 ### Que NO se hizo
 
 - No se toco codigo funcional.
+
 - No se implemento `/precios`.
 - No se modifico ningun controller, modelo, vista ni JS.
 - No se hizo commit ni push.
@@ -3724,4 +3725,20 @@ Tipo: documentacion / estado MVP.
 ### Que NO se hizo
 
 - No se toco codigo funcional.
+
+## 2026-05-21 - Wizard crear negocio: copy dinamico de plan
+
+Tipo: fix UI/dashboard acotado.
+
+### Que se hizo
+
+- `backend/views/dashboard/business/create.php`: el paso "Tu plan" deja de estar hardcodeado como Free y ahora muestra contenido segun el rol de sesion (`business_free`, `business_pro`, `business_business` o `admin`).
+- Se actualizo el copy a los planes vigentes: Free con 1 negocio, 1 tour activo, hasta 3 posiciones, QR basico, mapa/ubicacion, marca de agua y sin embed; Pro con 5 negocios, tours ilimitados, 20 posiciones, sin marca de agua, QR profesional, embed y mapa; Business/Admin con limites ilimitados y soporte prioritario/onboarding.
+- Se elimino la mencion a MiDaS como credito incluido en Free y el texto antiguo "sin minimapa".
+- El enlace inferior ahora dice "Ver otros planes" para que sea coherente en Free, Pro y Business.
+
+### Que NO se hizo
+
+- No se tocaron `BusinessController::store()`, `BusinessModel::create()`, `plan_id`, enforcement de limites, BD, tours, QR, R2, watermark, mapas ni pipeline.
+- No se hizo commit ni push.
 

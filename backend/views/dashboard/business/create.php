@@ -1,3 +1,64 @@
+<?php
+$currentPlanRole = $userRole ?? ($_SESSION['user_role'] ?? 'business_free');
+
+// El negocio aún no existe en BD: este bloque solo muestra el plan de la sesión actual.
+$wizardPlanContent = [
+    'business_free' => [
+        'name' => 'Free',
+        'heading' => 'Empezando con',
+        'features' => [
+            ['included' => true,  'text' => '1 negocio'],
+            ['included' => true,  'text' => '1 tour activo'],
+            ['included' => true,  'text' => 'Hasta 3 posiciones por tour'],
+            ['included' => true,  'text' => 'QR básico con branding Oxphyre'],
+            ['included' => true,  'text' => 'Mapa/ubicación incluido'],
+            ['included' => false, 'text' => 'Sin eliminación de marca de agua'],
+            ['included' => false, 'text' => 'Sin embed/iframe'],
+        ],
+    ],
+    'business_pro' => [
+        'name' => 'Pro',
+        'heading' => 'Creando con',
+        'features' => [
+            ['included' => true, 'text' => 'Hasta 5 negocios'],
+            ['included' => true, 'text' => 'Tours ilimitados'],
+            ['included' => true, 'text' => 'Hasta 20 posiciones por tour'],
+            ['included' => true, 'text' => 'Sin marca de agua'],
+            ['included' => true, 'text' => 'QR profesional / mejor presentación'],
+            ['included' => true, 'text' => 'Embed/iframe incluido'],
+            ['included' => true, 'text' => 'Mapa/ubicación incluido'],
+        ],
+    ],
+    'business_business' => [
+        'name' => 'Business',
+        'heading' => 'Creando con',
+        'features' => [
+            ['included' => true, 'text' => 'Negocios ilimitados'],
+            ['included' => true, 'text' => 'Tours ilimitados'],
+            ['included' => true, 'text' => 'Posiciones ilimitadas'],
+            ['included' => true, 'text' => 'Sin marca de agua'],
+            ['included' => true, 'text' => 'Soporte prioritario/onboarding'],
+            ['included' => true, 'text' => 'Mapa/ubicación incluido'],
+            ['included' => true, 'text' => 'Roadmap/próximamente: marca blanca, dominio personalizado, API y analíticas avanzadas'],
+        ],
+    ],
+    'admin' => [
+        'name' => 'Business/Admin',
+        'heading' => 'Creando con',
+        'features' => [
+            ['included' => true, 'text' => 'Negocios ilimitados'],
+            ['included' => true, 'text' => 'Tours ilimitados'],
+            ['included' => true, 'text' => 'Posiciones ilimitadas'],
+            ['included' => true, 'text' => 'Sin marca de agua'],
+            ['included' => true, 'text' => 'Soporte prioritario/onboarding'],
+            ['included' => true, 'text' => 'Mapa/ubicación incluido'],
+        ],
+    ],
+];
+
+$wizardPlan = $wizardPlanContent[$currentPlanRole] ?? $wizardPlanContent['business_free'];
+$wizardPlanName = $wizardPlan['name'];
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -210,38 +271,16 @@
           <div class="wizard-card">
             <p style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.25em;color:var(--ox-text-dim);margin-bottom:1rem;">Plan actual</p>
             <h3 style="font-family:'Instrument Serif',serif;font-size:1.4rem;font-weight:400;color:var(--ox-text);margin-bottom:1.25rem;">
-              Empezando con <em style="font-style:italic;color:var(--ox-amber);">Free.</em>
+              <?= htmlspecialchars($wizardPlan['heading']) ?> <em style="font-style:italic;color:var(--ox-amber);"><?= htmlspecialchars($wizardPlanName) ?>.</em>
             </h3>
 
-            <ul class="plan-features-list" aria-label="Características del plan Free">
-              <li class="plan-feature-item included">
-                <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>
-                1 negocio, 1 tour activo
-              </li>
-              <li class="plan-feature-item included">
-                <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>
-                Hasta 3 posiciones por tour
-              </li>
-              <li class="plan-feature-item included">
-                <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>
-                1 posición con profundidad IA real (MiDaS) incluida
-              </li>
-              <li class="plan-feature-item included">
-                <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>
-                Esfera Three.js navegable en el resto de posiciones
-              </li>
-              <li class="plan-feature-item included">
-                <i data-lucide="check" width="16" height="16" class="plan-feature-icon yes" aria-hidden="true"></i>
-                QR descargable · URL pública oxphyre.com/tu-negocio
-              </li>
-              <li class="plan-feature-item">
-                <i data-lucide="x" width="16" height="16" class="plan-feature-icon no" aria-hidden="true"></i>
-                Sin embed / sin minimapa
-              </li>
-              <li class="plan-feature-item">
-                <i data-lucide="x" width="16" height="16" class="plan-feature-icon no" aria-hidden="true"></i>
-                Marca de agua Oxphyre visible en el visor
-              </li>
+            <ul class="plan-features-list" aria-label="Características del plan <?= htmlspecialchars($wizardPlanName) ?>">
+              <?php foreach ($wizardPlan['features'] as $feature): ?>
+                <li class="plan-feature-item<?= $feature['included'] ? ' included' : '' ?>">
+                  <i data-lucide="<?= $feature['included'] ? 'check' : 'x' ?>" width="16" height="16" class="plan-feature-icon <?= $feature['included'] ? 'yes' : 'no' ?>" aria-hidden="true"></i>
+                  <?= htmlspecialchars($feature['text']) ?>
+                </li>
+              <?php endforeach; ?>
             </ul>
           </div>
 
@@ -252,10 +291,10 @@
             </button>
             <button type="submit" class="wizard-btn-submit">
               <i data-lucide="check" width="16" height="16" aria-hidden="true"></i>
-              Continuar con Free
+              Continuar con <?= htmlspecialchars($wizardPlanName) ?>
             </button>
             <a href="/precios" style="font-size:0.8125rem;color:var(--ox-text-muted);margin-left:0.5rem;align-self:center;">
-              Ver planes Pro / Business →
+              Ver otros planes &rarr;
             </a>
           </div>
         </div>
