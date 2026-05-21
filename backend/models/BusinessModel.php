@@ -113,14 +113,17 @@ class BusinessModel
         ?string $address,
         ?string $city,
         ?string $postalCode,
-        ?string $country
+        ?string $country,
+        ?int $planId = null
     ): int {
+        $safePlanId = in_array($planId, [PLAN_FREE, PLAN_PRO, PLAN_BUSINESS], true) ? $planId : PLAN_FREE;
+
         $stmt = $this->db->prepare(
             'INSERT INTO businesses
                (user_id, name, slug, description, phone, address, city, postal_code, country, plan_id, is_active, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())'
         );
-        $stmt->execute([$userId, $name, $slug, $description, $phone, $address, $city, $postalCode, $country, PLAN_FREE]);
+        $stmt->execute([$userId, $name, $slug, $description, $phone, $address, $city, $postalCode, $country, $safePlanId]);
         return (int) $this->db->lastInsertId();
     }
 }

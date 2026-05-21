@@ -3544,4 +3544,18 @@ Tipo: bugfix acotado en gestion de posiciones.
 - No se tocaron limites de planes, `plan_id`, watermark, precios, sitemap, QR, R2, MiDaS, mapa ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Plan inicial del negocio segun rol
+
+Tipo: microfix backend acotado.
+
+### Que se hizo
+
+- `backend/controllers/BusinessController.php`: `store()` calcula `plan_id` desde `$_SESSION['user_role']` al crear negocio: `business_free` -> Free, `business_pro` -> Pro, `business_business` -> Business, `admin` -> Business.
+- `backend/models/BusinessModel.php`: `create()` acepta el `plan_id` recibido y mantiene fallback seguro a `PLAN_FREE` si llega un valor vacio o no permitido.
+
+### Que NO se hizo
+
+- No se tocaron enforcement de limites, watermark, `TourController`, `tour.php`, CSS, BD, Stripe, sesiones ni rutas.
+- No se hizo commit ni push.
+
 

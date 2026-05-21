@@ -18,6 +18,13 @@ class BusinessController extends BaseController
         'admin'             => -1,
     ];
 
+    private static array $businessPlanIds = [
+        'business_free'     => PLAN_FREE,
+        'business_pro'      => PLAN_PRO,
+        'business_business' => PLAN_BUSINESS,
+        'admin'             => PLAN_BUSINESS,
+    ];
+
     public function showList(): void
     {
         $this->ensureCsrfToken();
@@ -250,6 +257,8 @@ class BusinessController extends BaseController
             $this->go('/dashboard/negocios/nuevo');
         }
 
+        $planId = self::$businessPlanIds[$userRole] ?? PLAN_FREE;
+
         $businessId = $model->create(
             $userId, $name, $slug,
             $description !== '' ? $description : null,
@@ -257,7 +266,8 @@ class BusinessController extends BaseController
             $address     !== '' ? $address     : null,
             $city        !== '' ? $city        : null,
             $postalCode  !== '' ? $postalCode  : null,
-            $country     !== '' ? $country     : null
+            $country     !== '' ? $country     : null,
+            $planId
         );
 
         $_SESSION['created_business'] = ['id' => $businessId, 'name' => $name, 'slug' => $slug];
