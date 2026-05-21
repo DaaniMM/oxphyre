@@ -146,6 +146,21 @@
       margin-bottom: 28px;
       text-align: center;
     }
+    .pricing-seo-note {
+      max-width: 640px;
+      margin: 0 auto 28px;
+      color: var(--text-3);
+      font-size: 14px;
+      line-height: 1.7;
+      text-align: center;
+    }
+    .pricing-seo-note a {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .pricing-seo-note a:hover {
+      color: var(--text-1);
+    }
     .compare-wrap {
       overflow-x: auto;
       border-radius: 12px;
@@ -420,6 +435,7 @@
     <!-- ── TABLA COMPARATIVA ─────────────────────────────────────────── -->
     <section class="pricing-compare" aria-labelledby="compare-h2">
       <h2 id="compare-h2">¿Qué incluye cada plan?</h2>
+      <p class="pricing-seo-note">Antes de elegir plan, puedes ver <a href="/tour-virtual-para-negocios">cómo funciona un tour virtual para negocios</a> y qué verá tu cliente al abrirlo.</p>
       <div class="compare-wrap">
         <table class="compare-table">
           <thead>

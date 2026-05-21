@@ -335,6 +335,9 @@
       <p class="step-hook animate-on-scroll" data-i18n="steps.hook">
         Sin cursos. Sin técnicos. Sin complicaciones.
       </p>
+      <p class="section-context-link animate-on-scroll">
+        Si estás empezando, aprende <a href="/tour-virtual-para-negocios">cómo crear un tour virtual para tu negocio</a>.
+      </p>
     </div>
 
     <div class="steps-grid" style="position:relative;">

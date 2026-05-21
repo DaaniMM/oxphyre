@@ -896,6 +896,24 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   opacity: 0.85;
 }
 
+.section-context-link {
+  max-width: 560px;
+  margin: -28px auto 44px;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.section-context-link a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.section-context-link a:hover {
+  color: var(--text-1);
+}
+
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

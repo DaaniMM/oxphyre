@@ -3672,3 +3672,18 @@ Tipo: microfix visual SEO publico.
 - No se tocaron metas, Schema.org, sitemap, rutas, dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-21 - Enlazado interno a /tour-virtual-para-negocios
+
+Tipo: SEO interno publico.
+
+### Que se hizo
+
+- `backend/views/home.php`: anadido enlace natural en la seccion "Como lo creas" hacia `/tour-virtual-para-negocios` con anchor "como crear un tour virtual para tu negocio".
+- `public/css/main.css`: anadida clase acotada `.section-context-link` para que el enlace no altere el layout grande de la landing.
+- `backend/views/precios.php`: anadida nota breve antes de la tabla comparativa con anchor "como funciona un tour virtual para negocios".
+
+### Que NO se hizo
+
+- No se toco `backend/views/tour-virtual-para-negocios.php`, sitemap, rutas, controllers, dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
+- No se hizo commit ni push.
+
