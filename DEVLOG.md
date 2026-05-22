@@ -3658,6 +3658,26 @@ Tipo: SEO publico / pagina pilar.
 - No se tocaron dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-22 - SEO_MATRIX.md como matriz viva SEO
+
+Tipo: documentacion SEO / seguimiento tactico.
+
+### Que se hizo
+
+- `SEO_MATRIX.md`: creado documento versionado como equivalente interno al Excel SEO de clase, con arquitectura SEO actual, decisiones del silo, matriz por URL, seguimiento Search Console, baremos de revision y proximas acciones.
+- Se registro que el bloque SEO publico/silos ya esta desplegado y que el sitemap fue actualizado.
+- Se documento la solicitud manual de indexacion en Search Console para `/blog`, los 3 posts, `/tour-virtual-para-restaurantes` y `/tour-virtual-para-negocios`.
+- Se dejo claro que impresiones, clics, CTR, posicion media y consultas reales quedan pendientes de Search Console.
+
+### Decision
+
+- `SEO_MATRIX.md` queda como matriz viva de seguimiento tactico SEO para evitar canibalizacion, revisar intencion por URL y decidir futuras acciones con datos reales.
+
+### Que NO se hizo
+
+- No se tocaron codigo funcional, rutas, vistas, sitemap, CSS, dashboard, BD, auth, tours, QR, planes ni pipeline.
+- No se hizo commit ni push.
+
 ## 2026-05-22 - Microoptimizacion SEO de contenido del silo publico
 
 Tipo: SEO publico / copy fino.
