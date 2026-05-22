@@ -449,6 +449,33 @@
       </div>
     </section>
 
+    <section class="seo-section" aria-labelledby="recursos-relacionados">
+      <h2 id="recursos-relacionados">Recursos relacionados</h2>
+      <p>Si quieres profundizar sin perder de vista esta guía principal, puedes revisar recursos específicos para preparar fotos, crear un recorrido con móvil, compartirlo con QR o aplicarlo a restauración.</p>
+      <div class="seo-grid">
+        <article class="seo-card">
+          <h3>Restaurantes</h3>
+          <p>Aplicación sectorial para comedor, barra, terraza y reservas.</p>
+          <a href="/tour-virtual-para-restaurantes">Ver tour virtual para restaurantes</a>
+        </article>
+        <article class="seo-card">
+          <h3>Fotos</h3>
+          <p>Checklist para preparar el local antes de subir imágenes.</p>
+          <a href="/blog/como-hacer-fotos-para-tour-virtual">Cómo hacer fotos para tour virtual</a>
+        </article>
+        <article class="seo-card">
+          <h3>Móvil</h3>
+          <p>Qué puedes conseguir sin cámara 360 y qué límites conviene explicar.</p>
+          <a href="/blog/tour-virtual-con-movil-sin-camara-360">Tour virtual con móvil</a>
+        </article>
+        <article class="seo-card">
+          <h3>QR</h3>
+          <p>Ideas para enseñar el local desde escaparate, mesas o tarjetas.</p>
+          <a href="/blog/como-usar-qr-para-ensenar-tu-local">Usar QR para enseñar tu local</a>
+        </article>
+      </div>
+    </section>
+
     <section class="seo-section seo-final" aria-labelledby="seo-cta-final">
       <h2 id="seo-cta-final">Empieza enseñando tu negocio como realmente se vive</h2>
       <p>Tu local ya comunica algo cuando una persona entra. Oxphyre te ayuda a llevar esa primera impresión a internet, con una visita virtual sencilla de crear y fácil de compartir.</p>
@@ -470,6 +497,7 @@
           <p class="footer-col-title">Producto</p>
           <ul>
             <li><a href="/tour-virtual-para-negocios">Tour virtual para negocios</a></li>
+            <li><a href="/blog">Blog</a></li>
             <li><a href="/precios">Precios</a></li>
             <li><a href="/#demo">Demo</a></li>
           </ul>

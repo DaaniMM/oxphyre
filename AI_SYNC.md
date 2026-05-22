@@ -33,9 +33,10 @@ Stack activo:
 Estado implementado:
 - Landing completa y desplegada.
 - `/precios` implementada y validada en produccion: ruta publica `GET /precios`, pagina autocontenida con cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ de planes y CTA final. No carga `main.js` ni Three.js; usa `main.css` e `i18n.js` versionados con `asset()`.
-- `/tour-virtual-para-negocios` implementada como pagina pilar SEO publica para posicionamiento self-service: crear visita virtual con movil, sin agencia, sin fotografo y sin camara 360. No carga Three.js ni `main.js`; usa `main.css` con `asset()`, metas completas, OG image PNG, canonical, `SoftwareApplication`, `FAQPage`, `BreadcrumbList` y sitemap actualizado.
+- `/tour-virtual-para-negocios` implementada como pagina pilar SEO publica para posicionamiento self-service: crear visita virtual con movil, sin agencia, sin fotografo y sin camara 360. No carga Three.js ni `main.js`; usa `main.css` con `asset()`, metas completas, OG image PNG, canonical, `SoftwareApplication`, `FAQPage`, `BreadcrumbList` y sitemap actualizado. Sigue siendo pilar core y no debe moverse a `/blog`.
+- Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual: `/blog` como hub de recursos, 3 posts informativos de apoyo (`/blog/como-hacer-fotos-para-tour-virtual`, `/blog/tour-virtual-con-movil-sin-camara-360`, `/blog/como-usar-qr-para-ensenar-tu-local`) y `/tour-virtual-para-restaurantes` como primera pagina sectorial hija/comercial del silo de `/tour-virtual-para-negocios`.
 - `/sobre-nosotros` y `/soporte` implementadas como paginas publicas ligeras, indexables y en estado MVP validado. Sirven para confianza, arquitectura publica y evitar enlaces de footer muertos; no cargan Three.js ni `main.js`.
-- Footer publico actualizado: `/blog` y `/novedades` se retiraron porque esas paginas no existen todavia. No reanadir esos enlaces hasta crear rutas/contenido reales.
+- Footer publico actualizado: `/blog` vuelve a estar enlazado porque ya existe contenido real. `/novedades` no existe y no debe enlazarse.
 - Bloque publico/SEO reciente aprobado provisionalmente para avanzar en MVP/TFG. Pendiente revision final de copy, microcopy, SEO fino, legal y UX antes de entrega/lanzamiento comercial; no retocar estas paginas sin motivo salvo tarea especifica de revision futura.
 - Enforcement minimo de limites publicado en `/precios` aplicado en backend: Free = 1 negocio, 1 tour por negocio y 3 posiciones por tour; Pro = 5 negocios, tours ilimitados y 20 posiciones por tour; Business = ilimitado. Falta todavia centralizar estos limites en un helper unico.
 - Auth completo: registro, verificación email, login, logout y recuperación de contraseña.
@@ -69,7 +70,7 @@ Estado implementado:
 - Watermark Free real implementado y validado visualmente en produccion: `TourController::showPublic()` activa marca de agua solo con `plan_id === PLAN_FREE`; Free muestra una sola marca central diagonal semitransparente "OXPHYRE" sobre el canvas y badge clicable "Creado con Oxphyre" hacia `/precios`. No bloquea drag ni hotspots/flechas y se mantiene al navegar por hotspot. Pro/Business no renderizan overlay ni badge.
 - Cuentas demo Free/Pro/Business creadas y verificadas sin documentar contrasenas: `demo_free@oxphyre.com` (`business_free`), `demo_pro@oxphyre.com` (`business_pro`) y `demo_business@oxphyre.com` (`business_business`). Login validado en las tres. Creacion de negocio verificada con `plan_id=1`, `plan_id=2` y `plan_id=3` respectivamente.
 - Slug soft delete de negocios corregido y validado: al borrar un negocio, su slug activo se libera renombrando el registro soft deleted con sufijo interno `-deleted-{id}`. Caso validado: `negocioofree` paso a `negocioofree-deleted-2` y un nuevo negocio pudo reutilizar `negocioofree` sin error 500.
-- SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home, `/precios`, `/tour-virtual-para-negocios`, `/sobre-nosotros` y `/soporte`. `/tour-virtual-para-negocios` es la primera pagina pilar SEO y fue enviada a indexacion. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
+- SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home, `/precios`, `/tour-virtual-para-negocios`, `/blog`, 3 posts, `/tour-virtual-para-restaurantes`, `/sobre-nosotros` y `/soporte`. `/tour-virtual-para-negocios` es la primera pagina pilar SEO y fue enviada a indexacion. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
 
 ---
 
@@ -80,6 +81,13 @@ Estado implementado:
 - No usar Laravel, Symfony, React, Vue, Angular, Bootstrap ni frameworks no autorizados.
 - Mantener controllers delgados: coordinan; la lógica va en modelos o servicios.
 - Todos los modelos deben usar prepared statements.
+
+### Arquitectura SEO publica
+- `/tour-virtual-para-negocios` es la pagina pilar core para "crear tour virtual para mi negocio" y "tour virtual para negocios".
+- `/tour-virtual-para-restaurantes` es la primera pagina sectorial hija del silo principal y ataca intencion comercial de restaurantes.
+- `/blog` es hub de recursos; sus 3 posts actuales son informativos/de apoyo y no deben canibalizar la pilar.
+- No crear mas posts ni mas sectoriales sin estrategia, validacion posterior o un prompt especifico de expansion SEO.
+- No prometer Matterport, digital twin, escaneo 3D, Gaussian, tour 360 profesional completo ni features roadmap como disponibles.
 
 ### Seguridad
 - Prepared statements en el 100% de queries.
@@ -480,10 +488,18 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
-Ultima sesion de implementacion/documentacion (2026-05-21):
+Ultima sesion de implementacion/documentacion (2026-05-22):
+- Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual: `/blog` como hub de recursos, 3 posts informativos y `/tour-virtual-para-restaurantes` como primera pagina sectorial hija/comercial.
+- `/tour-virtual-para-negocios` se mantiene como pilar core del silo y se le anadio bloque de recursos relacionados hacia restaurantes, fotos, movil y QR.
+- Footer publico vuelve a enlazar `/blog` porque ya existe contenido real; `/novedades` sigue sin existir y no debe enlazarse.
+- Sitemap actualizado con `/blog`, los 3 posts y `/tour-virtual-para-restaurantes`.
+- Las paginas nuevas no cargan Three.js ni `main.js`; usan `main.css` con `asset()` y Schema.org cuando aporta valor.
+- No ampliar el silo con mas posts/sectoriales sin estrategia o validacion posterior.
+
+Sesion anterior de implementacion/documentacion (2026-05-21):
 - Cierre provisional del bloque publico/SEO: `/tour-virtual-para-negocios`, enlaces internos desde home y `/precios`, `/sobre-nosotros`, `/soporte` y sitemap actualizado quedan aprobados para MVP/TFG y sirven para avanzar.
 - `/tour-virtual-para-negocios` es la primera pagina pilar SEO, creada y enviada a indexacion. Enfoque: herramienta self-service para que el dueno cree su visita virtual con movil.
-- `/sobre-nosotros` y `/soporte` existen como paginas publicas ligeras en estado MVP validado. `/blog` y `/novedades` se retiraron del footer porque no existen todavia.
+- En la sesion anterior, `/sobre-nosotros` y `/soporte` quedaron como paginas publicas ligeras en estado MVP validado, y `/blog` se habia retirado del footer porque aun no existia. Ese estado cambio el 2026-05-22: `/blog` ya existe y vuelve a estar enlazado; `/novedades` sigue sin existir.
 - Estas paginas no se consideran definitivas a nivel copy/legal/SEO/UX. Pendiente revision final mas calmada antes de entrega/lanzamiento comercial; no retocarlas sin motivo salvo tarea especifica de revision.
 - Enforcement minimo de planes aplicado: Free 1 negocio/1 tour/3 posiciones, Pro 5 negocios/tours ilimitados/20 posiciones, Business ilimitado. No se centralizo helper de planes todavia.
 - Watermark Free real implementado y validado en produccion: una sola marca central diagonal "OXPHYRE" + badge "Creado con Oxphyre" hacia `/precios`; no bloquea drag ni hotspots y se mantiene al navegar. Cuentas demo Free/Pro/Business creadas y verificadas sin documentar contrasenas.
@@ -536,7 +552,7 @@ Mantener `positions.active_mode` como campo heredado/compatibilidad; el flujo pu
 - No reabrir decisiones cerradas salvo problema claro.
 - No cambiar stack ni arquitectura sin justificarlo.
 - No hacer refactors grandes sin confirmación.
-- No reabrir ni retocar el bloque publico/SEO reciente (`/tour-virtual-para-negocios`, `/sobre-nosotros`, `/soporte`, enlaces internos y sitemap) sin una tarea especifica de revision. Esta validado como MVP para avanzar, aunque queda pendiente pulido final de copy/SEO/UX.
+- No reabrir ni retocar el bloque publico/SEO reciente (`/tour-virtual-para-negocios`, `/tour-virtual-para-restaurantes`, `/blog`, posts, `/sobre-nosotros`, `/soporte`, enlaces internos y sitemap) sin una tarea especifica de revision. Esta validado como MVP para avanzar, aunque queda pendiente pulido final de copy/SEO/UX.
 - No proponer frameworks nuevos.
 - No proponer cámaras 360° profesionales como requisito para clientes.
 - No implementar ideas en debate como si fueran decisiones tomadas.

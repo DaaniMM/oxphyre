@@ -33,6 +33,31 @@ class HomeController
         require_once VIEWS_PATH . '/tour-virtual-para-negocios.php';
     }
 
+    public function showVirtualTourForRestaurants(): void
+    {
+        require_once VIEWS_PATH . '/tour-virtual-para-restaurantes.php';
+    }
+
+    public function showBlog(): void
+    {
+        require_once VIEWS_PATH . '/blog/index.php';
+    }
+
+    public function showBlogPhotosGuide(): void
+    {
+        require_once VIEWS_PATH . '/blog/como-hacer-fotos-para-tour-virtual.php';
+    }
+
+    public function showBlogMobileTour(): void
+    {
+        require_once VIEWS_PATH . '/blog/tour-virtual-con-movil-sin-camara-360.php';
+    }
+
+    public function showBlogQrGuide(): void
+    {
+        require_once VIEWS_PATH . '/blog/como-usar-qr-para-ensenar-tu-local.php';
+    }
+
     public function showAbout(): void
     {
         require_once VIEWS_PATH . '/sobre-nosotros.php';

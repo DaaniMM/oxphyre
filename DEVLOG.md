@@ -3658,6 +3658,55 @@ Tipo: SEO publico / pagina pilar.
 - No se tocaron dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-22 - Microfix FAQ sectorial y matiz SEO MVP
+
+Tipo: microfix preventivo / documentacion.
+
+### Que se hizo
+
+- `backend/views/tour-virtual-para-restaurantes.php`: se cambio el ancla de FAQ de `id="faq"` a `id="restaurant-faq"` y se actualizo el `@id` del Schema.org `FAQPage` para evitar colisiones con estilos globales asociados a `#faq`.
+- `AI_SYNC.md`: se sustituyo la formulacion de cierre definitivo por "Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual".
+
+### Decision
+
+- El bloque SEO queda documentado como arquitectura implementada, no como cierre definitivo. Falta revisar contenido de posts, keywords, visual en produccion y auditoria SEO externa.
+
+### Que NO se hizo
+
+- No se tocaron posts, rutas, sitemap, CSS, footer, enlaces internos, dashboard, BD, auth, tours, QR, R2, watermark, planes, limites, mapas ni pipeline.
+- No se hizo commit ni push.
+
+## 2026-05-22 - Bloque SEO MVP: blog y primera sectorial
+
+Tipo: SEO publico / arquitectura silo.
+
+### Que se hizo
+
+- `backend/routes/web.php`: anadidas rutas publicas para `/blog`, 3 posts informativos y `/tour-virtual-para-restaurantes`.
+- `backend/controllers/HomeController.php`: anadidos metodos publicos para cargar las nuevas vistas estaticas.
+- `backend/views/blog/index.php`: creado hub de recursos con card destacada hacia `/tour-virtual-para-negocios`, grid de posts, card sectorial hacia restaurantes, FAQ y CTA.
+- `backend/views/blog/como-hacer-fotos-para-tour-virtual.php`: creada guia checklist de fotos con tabla "Mejor / Evitar", errores comunes, FAQ y CTA.
+- `backend/views/blog/tour-virtual-con-movil-sin-camara-360.php`: creado post comparativo honesto sobre movil, agencia/camara 360/Oxphyre, limites y ejemplos por negocio.
+- `backend/views/blog/como-usar-qr-para-ensenar-tu-local.php`: creado post de ideas comerciales para QR en escaparate, mesa, tarjeta, redes y carteleria.
+- `backend/views/tour-virtual-para-restaurantes.php`: creada primera pagina sectorial hija del silo principal, orientada a restaurantes, bares y cafeterias.
+- `backend/views/tour-virtual-para-negocios.php`: anadido bloque de recursos relacionados hacia la sectorial y los 3 posts, manteniendo la URL como pilar core.
+- `backend/views/home.php`, `backend/views/precios.php`, `backend/views/soporte.php` y footer de la pilar: reanadido enlace a `/blog` donde ya existe contenido real. En `/soporte` se anadieron enlaces naturales a la guia de fotos y QR.
+- `public/css/main.css`: anadido bloque de estilos acotado `.mvp-*` para las nuevas paginas publicas, sin cargar Three.js ni `main.js`.
+- `public/sitemap.xml`: anadidas `/blog`, los 3 posts y `/tour-virtual-para-restaurantes` con prioridades del bloque SEO.
+
+### Decisiones
+
+- `/tour-virtual-para-negocios` sigue siendo la pagina pilar core y no se movio a `/blog`.
+- `/tour-virtual-para-restaurantes` queda como primera pagina sectorial comercial hija del silo.
+- Los posts quedan como recursos informativos de apoyo, no como paginas comerciales que compitan con la pilar.
+- No se promete Matterport, digital twin, escaneo 3D, Gaussian ni produccion 360 profesional como disponible.
+
+### Que NO se hizo
+
+- No se monto CMS, BD, paginacion funcional ni dependencias nuevas.
+- No se tocaron dashboard, auth, tours, QR backend, R2, watermark, planes, limites, mapas, pipeline ni paginas legales.
+- No se hizo commit ni push.
+
 ## 2026-05-21 - Correccion visual /tour-virtual-para-negocios
 
 Tipo: microfix visual SEO publico.

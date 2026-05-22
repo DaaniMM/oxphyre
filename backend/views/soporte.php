@@ -249,6 +249,7 @@
       <section class="support-section">
         <h2>Crear una visita virtual</h2>
         <p>Oxphyre organiza el recorrido por posiciones o zonas. Cada zona representa una parte del local: entrada, barra, comedor, sala, recepción, escaparate o cualquier punto que ayude al cliente a entender el espacio.</p>
+        <p>Si estás preparando tu primer recorrido, revisa la guía de <a href="/blog/como-hacer-fotos-para-tour-virtual">cómo hacer fotos para tour virtual</a> antes de subir imágenes.</p>
         <ul class="support-list">
           <li><strong>Subir fotos:</strong> añade imágenes claras del local, preferiblemente horizontales, luminosas y sin elementos sensibles a la vista.</li>
           <li><strong>Crear posiciones o zonas:</strong> separa el recorrido en puntos concretos para que la visita tenga orden.</li>
@@ -259,6 +260,7 @@
 
       <section class="support-section">
         <h2>Compartir el tour</h2>
+        <p>Para llevar la visita al escaparate, mesas o tarjetas, puedes apoyarte en la guía de <a href="/blog/como-usar-qr-para-ensenar-tu-local">cómo usar QR para enseñar tu local</a>.</p>
         <div class="support-grid">
           <article class="support-card">
             <h3>Enlace público</h3>
@@ -310,6 +312,7 @@
           <p class="footer-col-title">Producto</p>
           <ul>
             <li><a href="/tour-virtual-para-negocios">Tour para negocios</a></li>
+            <li><a href="/blog">Blog</a></li>
             <li><a href="/precios">Precios</a></li>
             <li><a href="/#demo">Demo</a></li>
           </ul>

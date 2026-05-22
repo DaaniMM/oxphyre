@@ -624,6 +624,7 @@
             <p class="footer-col-title" data-i18n="footer.product">Producto</p>
             <ul>
               <li><a href="/#caracteristicas" data-i18n="footer.features">Características</a></li>
+              <li><a href="/blog">Blog</a></li>
               <li><a href="/precios"           data-i18n="footer.pricing">Precios</a></li>
               <li><a href="/#demo"             data-i18n="footer.demo">Demo</a></li>
             </ul>
