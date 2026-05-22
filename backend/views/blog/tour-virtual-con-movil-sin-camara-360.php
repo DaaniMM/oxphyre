@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tour virtual con móvil sin cámara 360 | Oxphyre</title>
-  <meta name="description" content="Comparativa honesta para crear un tour virtual con móvil sin cámara 360: qué puedes conseguir, qué no debes prometer y cuándo encaja Oxphyre.">
+  <meta name="description" content="Crea una visita virtual con fotos y panorámicas del móvil. Organiza tu local por zonas, conecta con flechas y comparte el tour sin cámara 360.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/blog/tour-virtual-con-movil-sin-camara-360">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -12,11 +12,11 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://oxphyre.com/blog/tour-virtual-con-movil-sin-camara-360">
   <meta property="og:title" content="Tour virtual con móvil: cómo enseñar tu negocio sin cámara 360">
-  <meta property="og:description" content="Qué puedes conseguir con móvil, qué límites debes explicar y cómo compararlo con una agencia o cámara 360.">
+  <meta property="og:description" content="Organiza tu local por zonas, conecta con flechas y comparte una visita virtual hecha con fotos del móvil.">
   <meta property="og:image" content="https://oxphyre.com/assets/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Tour virtual con móvil sin cámara 360">
-  <meta name="twitter:description" content="Comparativa para negocios locales que quieren enseñar su espacio con móvil.">
+  <meta name="twitter:description" content="Crea una visita virtual con fotos y panorámicas del móvil, sin cámara 360.">
   <meta name="twitter:image" content="https://oxphyre.com/assets/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,7 +30,7 @@
         "@type": "BlogPosting",
         "@id": "https://oxphyre.com/blog/tour-virtual-con-movil-sin-camara-360#article",
         "headline": "Tour virtual con móvil: cómo enseñar tu negocio sin cámara 360",
-        "description": "Comparativa honesta para negocios locales que quieren crear una visita virtual con móvil.",
+        "description": "Guía para crear una visita virtual con fotos y panorámicas del móvil, zonas y flechas.",
         "datePublished": "2026-05-22",
         "dateModified": "2026-05-22",
         "author": { "@type": "Organization", "name": "Oxphyre" },
@@ -84,7 +84,7 @@
     <header class="mvp-hero mvp-container">
       <p class="mvp-eyebrow">Comparativa honesta</p>
       <h1 class="mvp-title">Tour virtual con móvil: cómo enseñar tu negocio sin cámara 360</h1>
-      <p class="mvp-lead">Un móvil puede servir para enseñar un local de forma clara si el objetivo es orientar al cliente, no vender una producción de alto presupuesto. La clave está en explicar bien el alcance.</p>
+      <p class="mvp-lead">Un móvil puede servir para enseñar un local de forma clara si el objetivo es orientar al cliente, no vender una producción de alto presupuesto. Oxphyre no intenta convertir cada foto en un tour 360 profesional completo. La idea es crear un recorrido por zonas con fotos y panorámicas del móvil, conectadas con flechas.</p>
     </header>
 
     <section class="mvp-section">

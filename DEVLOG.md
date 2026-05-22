@@ -3658,6 +3658,27 @@ Tipo: SEO publico / pagina pilar.
 - No se tocaron dashboard, BD, auth, tours, QR, R2, watermark, limites ni pipeline.
 - No se hizo commit ni push.
 
+## 2026-05-22 - Microoptimizacion SEO de contenido del silo publico
+
+Tipo: SEO publico / copy fino.
+
+### Que se hizo
+
+- `backend/views/tour-virtual-para-negocios.php`: se reforzo en el primer parrafo que Oxphyre no es una agencia de tours virtuales, sino una herramienta para crear recorrido propio con fotos, zonas, flechas, QR y enlace publico.
+- `backend/views/tour-virtual-para-restaurantes.php`: se ajusto la meta description, H1 y copy para centrar la intencion en ambiente/restaurantes y diferenciar Oxphyre de una agencia sin prometer integraciones automaticas.
+- `backend/views/blog/como-hacer-fotos-para-tour-virtual.php`: se reenfoco H1, title, description y metas hacia fotos/panoramicas con movil; se anadio bloque "Panoramica con iPhone o Android" y se hizo mas visible evitar WhatsApp antes de subir fotos.
+- `backend/views/blog/tour-virtual-con-movil-sin-camara-360.php`: se ajusto meta description y parrafo inicial para explicar recorrido por zonas con fotos/panoramicas del movil y flechas, sin prometer tour 360 profesional completo.
+- `backend/views/blog/como-usar-qr-para-ensenar-tu-local.php`: se reenfoco H1, title, description, metas y H2 hacia el QR del tour virtual, no QR generico.
+
+### Decision
+
+- No se cambian URLs, sitemap ni estructura. La optimizacion es de contenido y orientacion semantica, manteniendo los posts como apoyo informativo del silo.
+
+### Que NO se hizo
+
+- No se tocaron rutas, sitemap, CSS, dashboard, BD, auth, tours, QR backend, R2, watermark, planes, limites, mapas ni pipeline.
+- No se hizo commit ni push.
+
 ## 2026-05-22 - Microfix FAQ sectorial y matiz SEO MVP
 
 Tipo: microfix preventivo / documentacion.

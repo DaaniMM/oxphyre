@@ -347,7 +347,7 @@
     <header class="seo-hero">
       <p class="seo-kicker">Tour virtual para negocios</p>
       <h1 class="seo-h1">Crea la visita virtual de tu negocio con tu móvil — tú mismo, sin agencias ni cámaras 360</h1>
-      <p class="seo-subtitle">Oxphyre te ayuda a convertir las fotos de tu local en una experiencia inmersiva y navegable. Tus clientes pueden explorar zona a zona antes de llegar, entender mejor el ambiente y decidir con más confianza si quieren reservar, comprar o visitarte.</p>
+      <p class="seo-subtitle">Oxphyre no es una agencia de tours virtuales: es una herramienta para que prepares tu propio recorrido con fotos, zonas, flechas, QR y enlace público. Tus clientes pueden explorar zona a zona antes de llegar, entender mejor el ambiente y decidir con más confianza si quieren reservar, comprar o visitarte.</p>
       <div class="seo-actions" aria-label="Acciones principales">
         <a class="seo-primary" href="/registro?plan=free">Crear mi tour gratis →</a>
         <a class="seo-secondary" href="/precios">Ver planes y precios →</a>

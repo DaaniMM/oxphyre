@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cómo hacer fotos para tu tour virtual | Oxphyre</title>
-  <meta name="description" content="Guía práctica para hacer fotos de tu local antes de crear un tour virtual: luz, encuadre, orden, panorámicas, errores comunes y checklist final.">
+  <title>Fotos para Tour Virtual con Móvil | Guía para Negocios</title>
+  <meta name="description" content="Aprende a hacer fotos y panorámicas de tu local con el móvil: luz, encuadre, orden, errores comunes y checklist para crear un tour virtual claro.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/blog/como-hacer-fotos-para-tour-virtual">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#FEB354">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://oxphyre.com/blog/como-hacer-fotos-para-tour-virtual">
-  <meta property="og:title" content="Cómo hacer fotos para tu tour virtual y que tu negocio se vea mejor">
-  <meta property="og:description" content="Checklist de preparación, luz, encuadre y errores comunes para negocios locales.">
+  <meta property="og:title" content="Fotos para Tour Virtual con Móvil | Guía para Negocios">
+  <meta property="og:description" content="Aprende a hacer fotos y panorámicas de tu local con el móvil antes de crear un tour virtual claro.">
   <meta property="og:image" content="https://oxphyre.com/assets/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Cómo hacer fotos para tu tour virtual">
-  <meta name="twitter:description" content="Guía práctica de fotos para tours virtuales de negocios locales.">
+  <meta name="twitter:title" content="Fotos para Tour Virtual con Móvil">
+  <meta name="twitter:description" content="Guía práctica para hacer fotos y panorámicas de tu local con el móvil.">
   <meta name="twitter:image" content="https://oxphyre.com/assets/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,8 +29,8 @@
       {
         "@type": "BlogPosting",
         "@id": "https://oxphyre.com/blog/como-hacer-fotos-para-tour-virtual#article",
-        "headline": "Cómo hacer fotos para tu tour virtual y que tu negocio se vea mejor",
-        "description": "Guía práctica para preparar y fotografiar un local antes de crear un tour virtual.",
+        "headline": "Cómo hacer fotos para un tour virtual con el móvil y que tu negocio se vea mejor",
+        "description": "Guía práctica para preparar y fotografiar un local con el móvil antes de crear un tour virtual.",
         "datePublished": "2026-05-22",
         "dateModified": "2026-05-22",
         "author": { "@type": "Organization", "name": "Oxphyre" },
@@ -83,7 +83,7 @@
   <main class="mvp-public-page">
     <header class="mvp-hero mvp-narrow">
       <p class="mvp-eyebrow">Guía práctica</p>
-      <h1 class="mvp-title">Cómo hacer fotos para tu tour virtual y que tu negocio se vea mejor</h1>
+      <h1 class="mvp-title">Cómo hacer fotos para un tour virtual con el móvil y que tu negocio se vea mejor</h1>
       <p class="mvp-lead">Una buena visita empieza antes de subir imágenes. Esta guía te ayuda a preparar el local, elegir luz y decidir el encuadre para que un cliente entienda el espacio sin estar allí.</p>
     </header>
 
@@ -112,6 +112,8 @@
 
           <h2>Fotos horizontales y panorámicas</h2>
           <p>El formato horizontal suele funcionar mejor para enseñar espacios. Si tu móvil permite panorámica, úsala con movimiento lento, sin girar el cuerpo demasiado rápido y sin capturar personas reconocibles sin permiso. No hace falta prometer cobertura total: una panorámica parcial bien hecha puede orientar mejor que varias fotos sueltas.</p>
+          <h3>Panorámica con iPhone o Android</h3>
+          <p>Activa el modo panorámica y mueve el móvil despacio, manteniendo una altura estable desde el inicio hasta el final. Al terminar, revisa si las líneas de paredes, mesas o puertas salen torcidas; si la imagen queda deformada, repítela antes de subirla.</p>
 
           <h2>Mejor / Evitar</h2>
           <table class="mvp-table">
@@ -131,7 +133,7 @@
             <li>Hacer la foto justo al cerrar, cuando el local ya está a medio recoger.</li>
             <li>Enseñar zonas irrelevantes como almacenes abiertos o pasillos técnicos.</li>
             <li>Usar zoom digital, que reduce nitidez y hace más difícil leer el espacio.</li>
-            <li>Mandar la foto por WhatsApp antes de subirla y perder calidad por compresión.</li>
+            <li>Enviar la foto por WhatsApp antes de subirla. Es uno de los errores más habituales: comprime la imagen, reduce nitidez y puede hacer que el tour se vea peor aunque el local esté bien fotografiado.</li>
           </ul>
 
           <h2>Checklist final</h2>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tour virtual para restaurantes | Oxphyre</title>
-  <meta name="description" content="Tour virtual para restaurantes: enseña comedor, barra, terraza y ambiente antes de que el cliente reserve. Crea y comparte tu visita con enlace o QR.">
+  <meta name="description" content="Muestra comedor, barra y terraza con una visita virtual sencilla. Crea zonas, comparte enlace o QR y ayuda al cliente antes de reservar.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/tour-virtual-para-restaurantes">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -81,7 +81,7 @@
     <header class="mvp-hero mvp-container mvp-restaurant-hero">
       <div>
         <p class="mvp-eyebrow">Para restaurantes, bares y cafeterías</p>
-        <h1 class="mvp-title">Tour virtual para restaurantes: enseña tu local antes de que reserven</h1>
+        <h1 class="mvp-title">Tour virtual para restaurantes: enseña tu ambiente antes de que reserven</h1>
         <p class="mvp-lead">Convierte la entrada, la barra, el comedor o la terraza en un recorrido fácil de abrir desde móvil. Una visita virtual restaurante ayuda a que el cliente entienda el ambiente antes de decidir.</p>
         <div class="mvp-actions">
           <a class="mvp-btn mvp-btn-primary" href="/registro?plan=free">Crear mi tour gratis</a>
@@ -136,7 +136,7 @@
     <section class="mvp-section">
       <div class="mvp-container">
         <h2>Cómo encaja Oxphyre</h2>
-        <p>Oxphyre está pensado para enseñar restaurante online sin depender de una producción grande. Subes fotos, creas zonas, conectas el recorrido con flechas, compartes enlace o QR y añades la ubicación del negocio.</p>
+        <p>Oxphyre está pensado para enseñar restaurante online sin depender de una producción grande. Subes fotos, creas zonas, conectas el recorrido con flechas, compartes enlace o QR y añades la ubicación del negocio. A diferencia de una agencia, Oxphyre está pensado para que puedas crear y actualizar tu recorrido tú mismo cuando cambie la terraza, el comedor o la distribución.</p>
         <div class="mvp-start-strip">
           <div><h3>Subir fotos</h3><p>Usa fotos del comedor, barra, entrada y terraza cuando estén ordenados.</p></div>
           <div><h3>Crear zonas</h3><p>Convierte cada parte importante del restaurante en un punto del recorrido.</p></div>

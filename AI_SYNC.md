@@ -489,6 +489,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Ultima sesion de implementacion/documentacion (2026-05-22):
+- Microoptimizacion SEO de contenido aplicada al silo publico: pilar diferenciada de agencias, sectorial de restaurantes centrada en ambiente, post de fotos reforzado con movil/panoramicas, post de movil aclarado como recorrido por zonas y post de QR reenfocado a QR del tour virtual. Sigue pendiente validacion final de contenido/keywords/visual y comparacion con auditoria SEO externa.
 - Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual: `/blog` como hub de recursos, 3 posts informativos y `/tour-virtual-para-restaurantes` como primera pagina sectorial hija/comercial.
 - `/tour-virtual-para-negocios` se mantiene como pilar core del silo y se le anadio bloque de recursos relacionados hacia restaurantes, fotos, movil y QR.
 - Footer publico vuelve a enlazar `/blog` porque ya existe contenido real; `/novedades` sigue sin existir y no debe enlazarse.

@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cómo usar un QR para enseñar tu local | Oxphyre</title>
-  <meta name="description" content="Ideas comerciales para usar un QR y enseñar tu local antes de que el cliente entre: escaparate, mesas, tarjetas, redes, carteles y mini casos.">
+  <title>QR para Tour Virtual | Escaparate, Carta y Tarjetas</title>
+  <meta name="description" content="Usa el QR de tu tour virtual en escaparate, carta, mesa o tarjeta. Un escaneo permite ver tu local antes de entrar o reservar.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/blog/como-usar-qr-para-ensenar-tu-local">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#FEB354">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://oxphyre.com/blog/como-usar-qr-para-ensenar-tu-local">
-  <meta property="og:title" content="Cómo usar un QR para enseñar tu local antes de que el cliente entre">
-  <meta property="og:description" content="Casos de uso de QR para restaurantes, barberías y tiendas que quieren enseñar su espacio.">
+  <meta property="og:title" content="QR para Tour Virtual | Escaparate, Carta y Tarjetas">
+  <meta property="og:description" content="Usa el QR de tu tour virtual en escaparate, carta, mesa o tarjeta para enseñar tu local antes de entrar.">
   <meta property="og:image" content="https://oxphyre.com/assets/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="QR para enseñar local">
-  <meta name="twitter:description" content="Ideas para llevar tu tour virtual a escaparate, mesas, tarjetas y cartelería.">
+  <meta name="twitter:title" content="QR para Tour Virtual">
+  <meta name="twitter:description" content="Ideas para usar el QR de tu tour virtual en escaparate, carta y tarjetas.">
   <meta name="twitter:image" content="https://oxphyre.com/assets/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,8 +29,8 @@
       {
         "@type": "BlogPosting",
         "@id": "https://oxphyre.com/blog/como-usar-qr-para-ensenar-tu-local#article",
-        "headline": "Cómo usar un QR para enseñar tu local antes de que el cliente entre",
-        "description": "Guía de casos de uso para compartir un tour virtual con QR.",
+        "headline": "Cómo usar el QR de tu tour virtual para enseñar tu local antes de que el cliente entre",
+        "description": "Guía de casos de uso para compartir el QR del tour virtual de un negocio.",
         "datePublished": "2026-05-22",
         "dateModified": "2026-05-22",
         "author": { "@type": "Organization", "name": "Oxphyre" },
@@ -83,13 +83,13 @@
   <main class="mvp-public-page">
     <header class="mvp-hero mvp-container">
       <p class="mvp-eyebrow">Ideas comerciales</p>
-      <h1 class="mvp-title">Cómo usar un QR para enseñar tu local antes de que el cliente entre</h1>
-      <p class="mvp-lead">Un QR para enseñar local funciona mejor cuando tiene un contexto claro: no es un adorno, es una puerta rápida a tu tour virtual desde escaparate, mesa, tarjeta o cartel.</p>
+      <h1 class="mvp-title">Cómo usar el QR de tu tour virtual para enseñar tu local antes de que el cliente entre</h1>
+      <p class="mvp-lead">No hablamos de crear un QR genérico, sino de usar el QR del tour público de tu negocio. Funciona mejor cuando tiene un contexto claro: no es un adorno, es una puerta rápida a tu visita virtual desde escaparate, mesa, tarjeta o cartel.</p>
     </header>
 
     <section class="mvp-section">
       <div class="mvp-container mvp-post-body">
-        <h2>Dónde colocar el QR</h2>
+        <h2>Dónde colocar el QR de tu tour virtual</h2>
         <p>El lugar cambia la intención. Un QR en el escaparate habla con quien pasa por la calle. Un QR en mesa ayuda a descubrir otras zonas del restaurante. En una tarjeta, sirve para que alguien recuerde el local después de una conversación.</p>
         <div class="mvp-qr-locations">
           <article class="mvp-card"><h3>Escaparate</h3><p>Útil cuando el local está cerrado o la persona duda si entrar.</p></article>
