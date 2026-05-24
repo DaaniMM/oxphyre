@@ -33,6 +33,12 @@ const ROOM_PANEL_ANGLES = {
   O: -Math.PI / 2,
 };
 const ROOM_PITCH_LIMIT_DEG = 24;
+const ROOM_DYNAMIC_LAYOUT_DEG = {
+  1: [0],
+  2: [-40, 40],
+  3: [-55, 0, 55],
+  4: [-90, -30, 30, 90],
+};
 
 function configureNeutralRenderer(renderer) {
   if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) {
@@ -73,6 +79,25 @@ function getDetailSlots(position) {
       label: DETAIL_LABELS[dir],
       url: position.photos[dir].url,
     }));
+}
+
+// El Room ya no reserva paredes N/S/E/O: reparte solo las fotos reales para
+// que 1, 2 o 3 detalles se lean como una galeria completa, no como huecos.
+function getRoomLayout(detailSlots) {
+  const count = Math.min(detailSlots.length, 4);
+  const angles = ROOM_DYNAMIC_LAYOUT_DEG[count] || ROOM_DYNAMIC_LAYOUT_DEG[4];
+
+  return detailSlots.map((slot, index) => {
+    const fallbackAngle = THREE.MathUtils.radToDeg(ROOM_PANEL_ANGLES[slot.dir] ?? 0);
+    const panelAngle = THREE.MathUtils.degToRad(angles[index] ?? fallbackAngle);
+
+    return {
+      ...slot,
+      panelAngle,
+      targetYaw: -panelAngle,
+      visualIndex: index + 1,
+    };
+  });
 }
 
 function getInitialPositionIndex(positions) {
@@ -655,6 +680,42 @@ function createCurvedPanelGeometry(centerAngle, radius = 4.6, widthAngle = THREE
   return geometry;
 }
 
+// Cada textura define el tamano fisico del panel. Asi una foto vertical crea
+// una tarjeta alta y estrecha, mientras que una horizontal conserva presencia.
+function getRoomPanelDimensions(aspect) {
+  const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1.5;
+  const radius = 4.6;
+  const widthSegments = safeAspect < 0.85 ? 24 : 36;
+  const heightSegments = safeAspect < 0.85 ? 14 : 10;
+  let height = 3.05;
+  let maxWidthDeg = 70;
+
+  if (safeAspect > 1.2) {
+    height = 2.85;
+    maxWidthDeg = 82;
+  } else if (safeAspect < 0.85) {
+    height = 3.35;
+    maxWidthDeg = 46;
+  }
+
+  let widthAngle = height * safeAspect / radius;
+  const maxWidthAngle = THREE.MathUtils.degToRad(maxWidthDeg);
+
+  if (widthAngle > maxWidthAngle) {
+    widthAngle = maxWidthAngle;
+    height = (radius * widthAngle) / safeAspect;
+  }
+
+  return {
+    radius,
+    widthAngle,
+    height,
+    widthSegments,
+    heightSegments,
+    kind: safeAspect > 1.2 ? 'horizontal' : (safeAspect < 0.85 ? 'vertical' : 'neutral'),
+  };
+}
+
 function createRoomMaterial(texture) {
   return new THREE.ShaderMaterial({
     uniforms: {
@@ -719,13 +780,14 @@ function createRoomCompass(room) {
   const compass = document.createElement('div');
   compass.className = 'room-compass';
   compass.setAttribute('aria-label', 'Fotos detalle Oxphyre Room');
+  compass.style.gridTemplateColumns = `repeat(${roomState?.detailSlots?.length || 1}, 40px)`;
 
   (roomState?.detailSlots || []).forEach(slot => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'room-compass-btn';
     btn.dataset.dir = slot.dir;
-    btn.textContent = slot.label.replace('Foto detalle ', '');
+    btn.textContent = String(slot.visualIndex);
     btn.title = slot.label;
     btn.setAttribute('aria-label', slot.label);
     btn.addEventListener('click', () => rotateRoomTo(slot.dir));
@@ -741,6 +803,30 @@ function addRoomListener(target, type, handler, options) {
   roomState.listeners.push({ target, type, handler, options });
 }
 
+function startRoomRenderIfReady(state) {
+  if (!state || state.disposed || roomState !== state || state.roomStarted) return;
+  if (!state.setupComplete || state.loadedPanels < 1) return;
+
+  state.roomStarted = true;
+  animateRoom();
+}
+
+function handleRoomTextureFailure(state, slot, error) {
+  if (!state || state.disposed || roomState !== state) return;
+
+  state.failedPanels += 1;
+  console.warn('[Oxphyre Room] No se pudo cargar una foto detalle; se continua con las demas.', {
+    detail: slot.label,
+    url: slot.url,
+    error,
+  });
+
+  if (state.setupComplete && state.loadedPanels === 0 && state.failedPanels >= state.expectedPanels) {
+    console.warn('[Oxphyre Room] No se pudo cargar ninguna foto detalle. Se vuelve a la panoramica principal.');
+    closeRoom();
+  }
+}
+
 function initRoomScene(room) {
   disposeRoomScene();
 
@@ -748,7 +834,7 @@ function initRoomScene(room) {
   if (!container || typeof THREE === 'undefined') return false;
 
   container.innerHTML = '';
-  const detailSlots = getDetailSlots(currentPosition);
+  const detailSlots = getRoomLayout(getDetailSlots(currentPosition));
   if (detailSlots.length === 0) return false;
 
   roomState = {
@@ -764,6 +850,11 @@ function initRoomScene(room) {
     geometries: [],
     listeners: [],
     compass: null,
+    expectedPanels: detailSlots.length,
+    loadedPanels: 0,
+    failedPanels: 0,
+    roomStarted: false,
+    setupComplete: false,
     yaw: 0,
     targetYaw: 0,
     pitch: 0,
@@ -805,28 +896,54 @@ function initRoomScene(room) {
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin('anonymous');
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy?.() || 1;
+  const state = roomState;
 
-  roomState.detailSlots.forEach(slot => {
-    const texture = loader.load(slot.url, loadedTexture => {
-      if (!roomState || roomState.disposed) {
-        loadedTexture.dispose();
+  state.detailSlots.forEach(slot => {
+    loader.load(slot.url, texture => {
+      if (!state || state.disposed || roomState !== state) {
+        texture.dispose();
         return;
       }
-      loadedTexture.needsUpdate = true;
+
+      configureNeutralTexture(texture);
+      texture.anisotropy = maxAnisotropy;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.needsUpdate = true;
+      state.textures.push(texture);
+
+      const image = texture.image || {};
+      const aspect = image.width && image.height ? image.width / image.height : 1.5;
+      const dimensions = getRoomPanelDimensions(aspect);
+      const geometry = createCurvedPanelGeometry(
+        slot.panelAngle,
+        dimensions.radius,
+        dimensions.widthAngle,
+        dimensions.height,
+        dimensions.widthSegments,
+        dimensions.heightSegments
+      );
+      const material = createRoomMaterial(texture);
+      state.geometries.push(geometry);
+      state.materials.push(material);
+
+      const panel = new THREE.Mesh(geometry, material);
+      panel.name = `room-panel-${slot.dir}`;
+      panel.userData.aspect = aspect;
+      panel.userData.kind = dimensions.kind;
+      state.scene.add(panel);
+
+      if (state.loadedPanels === 0) {
+        state.yaw = slot.targetYaw ?? state.yaw;
+        state.targetYaw = state.yaw;
+        updateRoomCompass(slot.dir);
+      }
+
+      state.loadedPanels += 1;
+      startRoomRenderIfReady(state);
+    }, undefined, error => {
+      handleRoomTextureFailure(state, slot, error);
     });
-
-    configureNeutralTexture(texture);
-    texture.anisotropy = maxAnisotropy;
-    roomState.textures.push(texture);
-
-    const geometry = createCurvedPanelGeometry(ROOM_PANEL_ANGLES[slot.dir] ?? 0);
-    const material = createRoomMaterial(texture);
-    roomState.geometries.push(geometry);
-    roomState.materials.push(material);
-
-    const panel = new THREE.Mesh(geometry, material);
-    panel.name = `room-panel-${slot.dir}`;
-    scene.add(panel);
   });
 
   const particles = createRoomParticles();
@@ -851,11 +968,11 @@ function initRoomScene(room) {
   roomState.materials.push(ringMaterial);
 
   roomState.compass = createRoomCompass(room);
-  const initialDetailDir = roomState.detailSlots[0]?.dir || null;
-  if (initialDetailDir) {
-    roomState.yaw = ROOM_TARGET_YAW[initialDetailDir] ?? 0;
+  const initialDetailSlot = roomState.detailSlots[0] || null;
+  if (initialDetailSlot) {
+    roomState.yaw = initialDetailSlot.targetYaw ?? 0;
     roomState.targetYaw = roomState.yaw;
-    updateRoomCompass(initialDetailDir);
+    updateRoomCompass(initialDetailSlot.dir);
   }
 
   const resize = () => resizeRoomRenderer();
@@ -863,7 +980,13 @@ function initRoomScene(room) {
   resizeRoomRenderer();
 
   addRoomPointerListeners(room);
-  animateRoom();
+  roomState.setupComplete = true;
+  startRoomRenderIfReady(roomState);
+
+  if (roomState.loadedPanels === 0 && roomState.failedPanels >= roomState.expectedPanels) {
+    closeRoom();
+  }
+
   return true;
 }
 
@@ -921,9 +1044,12 @@ function addRoomPointerListeners(room) {
 }
 
 function rotateRoomTo(dir) {
-  if (!roomState || !(dir in ROOM_TARGET_YAW)) return;
+  if (!roomState) return;
 
-  const desired = ROOM_TARGET_YAW[dir];
+  const slot = roomState.detailSlots.find(detailSlot => detailSlot.dir === dir);
+  if (!slot) return;
+
+  const desired = slot.targetYaw ?? ROOM_TARGET_YAW[dir] ?? 0;
   roomState.targetYaw += shortestAngleDelta(roomState.targetYaw, desired);
   roomState.targetPitch = 0;
 }
@@ -939,7 +1065,7 @@ function getActiveRoomDirection(yaw) {
   let nearestDistance = Infinity;
 
   roomState.detailSlots.forEach(slot => {
-    const targetYaw = ROOM_TARGET_YAW[slot.dir] ?? 0;
+    const targetYaw = slot.targetYaw ?? ROOM_TARGET_YAW[slot.dir] ?? 0;
     const distance = Math.abs(shortestAngleDelta(yaw, targetYaw));
     if (distance < nearestDistance) {
       nearest = slot;

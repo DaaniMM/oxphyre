@@ -3976,3 +3976,17 @@ Jerarquia final de procesado:
 - No se hizo commit ni push.
 
 ---
+
+## 2026-05-24 - Oxphyre Room dinamico Fase 1
+
+- `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
+- `public/js/tour-viewer.js`: cada slot conserva `dir`, `label` y `url`, pero anade `panelAngle`, `targetYaw` y `visualIndex`; el compass y `rotateRoomTo()` usan el layout real en lugar de depender de `ROOM_TARGET_YAW` como fuente principal.
+- `public/js/tour-viewer.js`: los paneles se crean dentro del callback de `TextureLoader.load()`, cuando ya existen `texture.image.width` y `texture.image.height`. Con ese aspect ratio se ajusta la geometria: horizontales como panel amplio, verticales como tarjeta alta/estrecha y ratios neutros como panel intermedio.
+- `public/js/tour-viewer.js`: revision pre-push de carga asincrona. El loop `animateRoom()` ya no arranca hasta que al menos un panel detalle ha cargado; el primer panel cargado fija la camara inicial para no mirar a un slot fallido o pendiente; si una textura falla se registra `console.warn` y el Room continua con las demas. Si fallan todas, se cierra el Room y se vuelve a la panoramica principal para evitar una escena vacia indefinida.
+- Se mantiene `loader.setCrossOrigin('anonymous')` en el Room para conservar la compatibilidad con texturas R2/media.
+- No se toco CSS porque el compass se ajusta desde JS con `gridTemplateColumns` segun el numero real de fotos.
+- No se tocaron backend, BD, R2, subida de imagenes, `ImageProcessingService`, SEO, rutas, sitemap ni Cloudflare.
+- Pendiente validar visualmente en navegador con casos 1/2/3/4 fotos y mezcla vertical/horizontal.
+- No se hizo commit ni push.
+
+---

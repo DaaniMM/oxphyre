@@ -466,7 +466,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
 - Revisar PageSpeed final.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
-- Visor público: CORS de texturas WebGL con R2/media validado en producción. Pendiente pulir Oxphyre Room para ratios/fotos verticales y distribución según número real de fotos detalle subidas.
+- Visor público: CORS de texturas WebGL con R2/media validado en producción. Oxphyre Room dinámico Fase 1 implementado localmente: layout según número real de fotos detalle y paneles con geometría adaptada al aspect ratio de cada textura. Pendiente validación visual en navegador/deploy con casos 1/2/3/4 fotos y mezcla vertical/horizontal.
 
 ### Prioridad media
 - QR 1 descargable y QR 2A estan validados en servidor real. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug sin contar escaneo. QR 2A registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. La incidencia de deduplicacion por `REMOTE_ADDR` variable detras de Cloudflare quedo resuelta pasando `HTTP_CF_CONNECTING_IP` desde Nginx a PHP.
@@ -479,7 +479,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Legal/RGPD: privacidad, términos, cookies.
 - PWA: manifest y service worker.
 - UX dashboard: bloquear/desactivar "Ver posición" si falta panorámica `360` en listado/card y pantalla de gestión/subida.
-- UX Oxphyre Room: revisar adaptación visual de fotos detalle verticales para evitar sensación de estirado y adaptar la sala al número real de fotos detalle, evitando huecos si hay menos de 4.
+- UX Oxphyre Room: Fase 1 implementada localmente para ratios/fotos verticales y distribución por número real de fotos detalle. Pendiente validar visualmente si hace falta Fase 2 con límites de yaw para 1-2 fotos o fondo ambiente/blur para verticales.
 - Limpieza física de archivos asociados a fotos con soft delete.
 - Reducir ruido/granulado residual en panorámica si sobra tiempo tras tareas críticas.
 
@@ -495,7 +495,13 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
-Ultima sesion de validacion/documentacion (2026-05-24):
+Ultima sesion de implementacion local (2026-05-24):
+- Oxphyre Room dinamico Fase 1 implementado en `public/js/tour-viewer.js`: layout 1/2/3/4 fotos, compass dinamico y geometria de panel adaptada por `texture.image.width / texture.image.height`.
+- Revision pre-push aplicada: `animateRoom()` espera a que cargue al menos un panel detalle; el primer panel cargado fija la camara inicial; cada textura detalle tiene callback de error con `console.warn`; si fallan todas, el Room se cierra y vuelve a la panoramica principal.
+- No se tocaron backend, BD, R2, subida de imagenes, `ImageProcessingService`, SEO, rutas, sitemap ni Cloudflare.
+- Pendiente validacion visual real en navegador/deploy con 1, 2, 3, 4 fotos y mezcla vertical/horizontal.
+
+Sesion anterior de validacion/documentacion (2026-05-24):
 - Subida movil real validada en produccion con fotos detalle desde iPhone: imagenes 4032x3024 recibidas como `image/jpeg`, GD insuficiente por memoria y fallback libvips activado para N/S/E. Logs confirmados en `/var/log/nginx/error.log`.
 - Visor publico validado tras CORS explicito en Three.js: `loader.setCrossOrigin('anonymous')` en panoramica principal y Oxphyre Room permite usar texturas desde `media.oxphyre.com` sin bloqueo CORS.
 - URL validada tras push/pull y hard refresh: `https://oxphyre.com/tour/negocioofree/gym-free?position=4`. Carga panoramica, abre Oxphyre Room y carga fotos detalle R2/media.
@@ -547,7 +553,7 @@ Siguiente orden recomendado para cerrar antes del TFG:
 1. **Roles documentados en memoria:** documentar `admin`, `business_owner` y `viewer`, diferenciando permisos reales en frontend/backend y estado actual de uso.
 2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
    **Hotspots 1E**: pulido UX mobile/labels/limites.
-3. Pulir Oxphyre Room antes del TFG: ratios/fotos verticales y distribucion segun numero real de fotos detalle subidas.
+3. Validar Oxphyre Room dinamico Fase 1 en navegador/deploy: casos 1/2/3/4 fotos y mezcla vertical/horizontal; decidir despues si hace falta Fase 2 con limites de yaw o fondo ambiente para verticales.
 4. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
 5. Responsive: verificar todas las secciones en movil y tablet.
 6. SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
