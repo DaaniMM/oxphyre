@@ -3868,3 +3868,78 @@ Tipo: validacion funcional / cierre de bloque.
 - No se toco codigo funcional en este cierre.
 - No se hizo commit ni push.
 
+---
+
+## 2026-05-22 — Fix procesamiento de imagenes moviles: fallback libvips para fotos detalle
+
+### Bug raiz
+
+`ImageProcessingService::processUpload()` rechazaba fotos detalle (N/S/E/O) de alta
+resolucion con el mensaje "Esta imagen es demasiado grande para procesarla ahora" cuando
+`canProcessWithGd()` devolvia false, aunque libvips 8.12.1 si podia procesarlas.
+
+El guard en las antiguas lineas 55-58 actuaba como barrera de rechazo anticipada en lugar
+de decision de enrutamiento. Para una foto de iPhone 4032x3024 con memory_limit=128M:
+- Estimado GD: 4032x3024x6 + 32MB = ~101.8 MB
+- Umbral 75% de 128M = 96 MB → `canUseGd = false` → rechazo inmediato
+
+Safari (iOS) convierte HEIC → JPEG al adjuntar archivos en formularios web. El servidor
+recibe `image/jpeg`, `isHeifMime()` devuelve false, y el guard antiguo disparaba el
+rechazo sin intentar libvips. El usuario veia un error incorrecto con una foto valida.
+
+Las panoramicas no fallaban porque el guard tenia `$direction !== '360'`. Las fotos HEIC
+tampoco fallaban porque `isHeifMime()` cortocircuitaba el guard.
+
+### Fix implementado
+
+**`backend/services/ImageProcessingService.php`** — dos cambios:
+
+**Cambio 1 — `processUpload()`:** el guard de rechazo anticipado se convierte en log de
+diagnostico. `$canUseGd` se sigue calculando porque `convertImage()` lo usa para enrutar.
+
+**Cambio 2 — `convertImage()`:** nueva rama 2 entre HEIC y la rama de panoramicas anchas.
+Si `!$canUseGd`, se intenta libvips antes de llegar a GD. Si libvips no esta disponible,
+`convertImage()` retorna false y el caller genera el mensaje de fallo de conversion
+apropiado. La rama 360 se simplifica eliminando la condicion `!$canUseGd` redundante.
+
+Jerarquia final de procesado:
+1. HEIC/HEIF → libvips (sin cambio)
+2. `!$canUseGd` (cualquier MIME, cualquier direction) → libvips fallback (NUEVO)
+3. 360 + width > 8192 → libvips con resize (simplificado)
+4. Todo lo demas → GD
+
+### Verificacion de calidad para fotos detalle via vips
+
+`convertWithVips()` para direction='N'/'S'/'E'/'O':
+- `$shouldResize = ($direction === '360' && ...)` → false → usa `vips copy`, no `thumbnail`
+- Sin redimensionado accidental
+- Calidad WebP: `webpQualityForDirection('N')` = 92 (WEBP_QUALITY_NORMAL) — identico a GD
+- Temporal MiDaS JPG: quality 92 (MIDAS_JPEG_QUALITY) — identico a GD
+- Mismas rutas de salida que el path GD
+- Sin efectos en storage, R2, BD ni PositionController
+
+### Caso real cubierto (iPhone — Safari convierte HEIC a JPEG)
+
+- Formato almacenado en movil: HEIC · 12 Mpx · 4032x3024 · 2.3 MB
+- MIME recibido en servidor: `image/jpeg` (conversion automatica iOS/Safari)
+- Resultado anterior: rechazado con mensaje incorrecto
+- Resultado tras fix: procesado por libvips → WebP quality 92 → tour visible ✓
+
+### Restricciones respetadas
+
+- Solo se modifico `ImageProcessingService.php` (y esta entrada DEVLOG)
+- No se toco: PositionController, PhotoModel, R2StorageService, vistas, server config
+- Calidades WebP: NORMAL=92, PANORAMA=96 — sin cambio
+- Limites de tamano de subida (bytes) — sin cambio
+- Originales de usuario: nunca guardados permanentemente — sin cambio
+- Flujo R2/local/BD: sin cambio
+- Nginx / PHP memory_limit / upload_max_filesize: no se toco
+
+### Recomendaciones futuras (no urgentes para TFG)
+
+- Si memory_limit sube a 256M, el umbral GD pasa a 192 MB, cubriendo hasta ~20 Mpx sin
+  necesitar vips. El fix es agnostico: si GD puede, lo usa; si no, vips.
+- Evaluar `storage_used_bytes` por usuario/plan y cuotas de almacenamiento cuando el
+  producto escale a usuarios reales pagando.
+- Limpieza fisica de archivos de posiciones/fotos con soft delete (Fase 3 R2/EC2).
+

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(php -l \"c:\\\\Users\\\\12dan\\\\OneDrive\\\\Escritorio\\\\Desarrollo_Web\\\\DAW\\\\oxphyre\\\\backend\\\\services\\\\ImageProcessingService.php\")"
+    ]
+  }
+}

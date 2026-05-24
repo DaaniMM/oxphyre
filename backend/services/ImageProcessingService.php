@@ -52,9 +52,8 @@ class ImageProcessingService
 
         [$width, $height] = $dimensions;
         $canUseGd = $this->canProcessWithGd($width, $height);
-        if ($direction !== '360' && !$canUseGd && !$this->isHeifMime($mime)) {
-            error_log("ImageProcessingService: imagen demasiado grande para GD en {$direction}: {$width}x{$height}");
-            return $this->result(false, 'Esta imagen es demasiado grande para procesarla ahora. Prueba con una versión más ligera.');
+        if (!$canUseGd) {
+            error_log("ImageProcessingService: GD insuficiente para {$direction} {$width}x{$height} ({$mime}); se intentará con libvips");
         }
 
         $baseName = uniqid($filenamePrefix, true);
@@ -126,6 +125,7 @@ class ImageProcessingService
         int $height,
         bool $canUseGd
     ): bool {
+        // 1. HEIC/HEIF → vips siempre
         if ($this->isHeifMime($mime)) {
             $vipsPath = $this->vipsPath();
             if ($vipsPath === '') {
@@ -136,7 +136,22 @@ class ImageProcessingService
             return $this->convertWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $direction, $width, $height);
         }
 
-        if ($direction === '360' && (!$canUseGd || $width > self::PANORAMA_MAX_FINAL_WIDTH)) {
+        // 2. Cualquier MIME que GD no puede procesar por memoria/resolución → vips fallback.
+        // Cubre JPEG/PNG/WebP de alta resolución desde iPhone, Android o PC.
+        // Para fotos detalle (N/S/E/O), convertWithVips usa vips copy sin redimensionar,
+        // manteniendo calidad WebP=92 y temporal MiDaS JPG=92, idéntico al path GD.
+        if (!$canUseGd) {
+            $vipsPath = $this->vipsPath();
+            if ($vipsPath === '') {
+                error_log("ImageProcessingService: libvips no disponible como fallback para {$mime} {$direction} {$width}x{$height}");
+                return false;
+            }
+            error_log("ImageProcessingService: libvips fallback activado para {$mime} {$direction} {$width}x{$height}");
+            return $this->convertWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $direction, $width, $height);
+        }
+
+        // 3. Panorámica demasiado ancha → vips con redimensionado (simplificado: !$canUseGd cubierto arriba)
+        if ($direction === '360' && $width > self::PANORAMA_MAX_FINAL_WIDTH) {
             $vipsPath = $this->vipsPath();
             if ($vipsPath === '') {
                 error_log("ImageProcessingService: libvips no disponible para panoramica grande {$width}x{$height}");
@@ -146,6 +161,7 @@ class ImageProcessingService
             return $this->convertWithVips($vipsPath, $sourcePath, $webpPath, $midasTempPath, $direction, $width, $height);
         }
 
+        // 4. Imagen compatible con GD → conversión estándar
         return $this->convertToWebp($sourcePath, $mime, $webpPath, $midasTempPath, $this->webpQualityForDirection($direction));
     }
 
