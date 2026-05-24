@@ -684,23 +684,23 @@ function createCurvedPanelGeometry(centerAngle, radius = 4.6, widthAngle = THREE
 // una tarjeta alta y estrecha, mientras que una horizontal conserva presencia.
 function getRoomPanelDimensions(aspect, detailCount = 4) {
   const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1.5;
-  const radius = 4.35;
+  const radius = 4.05;
   const widthSegments = safeAspect < 0.85 ? 24 : 36;
   const heightSegments = safeAspect < 0.85 ? 14 : 10;
-  let height = 3.25;
-  let maxWidthDeg = 76;
+  let height = 3.45;
+  let maxWidthDeg = 82;
 
   if (safeAspect > 1.2) {
-    height = 3.05;
-    maxWidthDeg = 92;
+    height = 3.25;
+    maxWidthDeg = 100;
   } else if (safeAspect < 0.85) {
-    height = 3.65;
-    maxWidthDeg = 52;
+    height = 3.95;
+    maxWidthDeg = 56;
   }
 
   if (detailCount === 1) {
-    height *= 1.08;
-    maxWidthDeg += 6;
+    height *= 1.1;
+    maxWidthDeg += 8;
   }
 
   let widthAngle = height * safeAspect / radius;
