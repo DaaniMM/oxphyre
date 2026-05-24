@@ -35,9 +35,9 @@ const ROOM_PANEL_ANGLES = {
 const ROOM_PITCH_LIMIT_DEG = 24;
 const ROOM_DYNAMIC_LAYOUT_DEG = {
   1: [0],
-  2: [-40, 40],
-  3: [-55, 0, 55],
-  4: [-90, -30, 30, 90],
+  2: [-75, 75],
+  3: [0, 120, 240],
+  4: [0, 90, 180, 270],
 };
 
 function configureNeutralRenderer(renderer) {
@@ -682,20 +682,25 @@ function createCurvedPanelGeometry(centerAngle, radius = 4.6, widthAngle = THREE
 
 // Cada textura define el tamano fisico del panel. Asi una foto vertical crea
 // una tarjeta alta y estrecha, mientras que una horizontal conserva presencia.
-function getRoomPanelDimensions(aspect) {
+function getRoomPanelDimensions(aspect, detailCount = 4) {
   const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1.5;
-  const radius = 4.6;
+  const radius = 4.35;
   const widthSegments = safeAspect < 0.85 ? 24 : 36;
   const heightSegments = safeAspect < 0.85 ? 14 : 10;
-  let height = 3.05;
-  let maxWidthDeg = 70;
+  let height = 3.25;
+  let maxWidthDeg = 76;
 
   if (safeAspect > 1.2) {
-    height = 2.85;
-    maxWidthDeg = 82;
+    height = 3.05;
+    maxWidthDeg = 92;
   } else if (safeAspect < 0.85) {
-    height = 3.35;
-    maxWidthDeg = 46;
+    height = 3.65;
+    maxWidthDeg = 52;
+  }
+
+  if (detailCount === 1) {
+    height *= 1.08;
+    maxWidthDeg += 6;
   }
 
   let widthAngle = height * safeAspect / radius;
@@ -914,7 +919,7 @@ function initRoomScene(room) {
 
       const image = texture.image || {};
       const aspect = image.width && image.height ? image.width / image.height : 1.5;
-      const dimensions = getRoomPanelDimensions(aspect);
+      const dimensions = getRoomPanelDimensions(aspect, state.detailSlots.length);
       const geometry = createCurvedPanelGeometry(
         slot.panelAngle,
         dimensions.radius,

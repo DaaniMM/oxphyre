@@ -496,10 +496,10 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ## Última sesión de trabajo
 
 Ultima sesion de implementacion local (2026-05-24):
-- Oxphyre Room dinamico Fase 1 implementado en `public/js/tour-viewer.js`: layout 1/2/3/4 fotos, compass dinamico y geometria de panel adaptada por `texture.image.width / texture.image.height`.
+- Oxphyre Room dinamico Fase 1.1 implementado localmente en `public/js/tour-viewer.js`: layout 1 foto centrada, 2 fotos a -75/+75 grados, 3 fotos repartidas en 360 a 0/120/240 y 4 fotos a 0/90/180/270. Compass dinamico y geometria de panel adaptada por `texture.image.width / texture.image.height`, con paneles ligeramente mas presentes sin deformar ratios.
 - Revision pre-push aplicada: `animateRoom()` espera a que cargue al menos un panel detalle; el primer panel cargado fija la camara inicial; cada textura detalle tiene callback de error con `console.warn`; si fallan todas, el Room se cierra y vuelve a la panoramica principal.
 - No se tocaron backend, BD, R2, subida de imagenes, `ImageProcessingService`, SEO, rutas, sitemap ni Cloudflare.
-- Pendiente validacion visual real en navegador/deploy con 1, 2, 3, 4 fotos y mezcla vertical/horizontal.
+- Pendiente validacion visual real en navegador/deploy con 1, 2, 3, 4 fotos y mezcla vertical/horizontal tras el ajuste Fase 1.1.
 
 Sesion anterior de validacion/documentacion (2026-05-24):
 - Subida movil real validada en produccion con fotos detalle desde iPhone: imagenes 4032x3024 recibidas como `image/jpeg`, GD insuficiente por memoria y fallback libvips activado para N/S/E. Logs confirmados en `/var/log/nginx/error.log`.
