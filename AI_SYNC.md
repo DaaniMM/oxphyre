@@ -63,6 +63,7 @@ Estado implementado:
 - Visor público Sprint 1 sin Photo Sphere Viewer: panorámica parcial horizontal con pitch limitado.
 - Sprint 1 Oxphyre Room Free/base implementado, con decisión UX posterior: Oxphyre Room pasa a ser la experiencia completa de posición. Panorámica `360` obligatoria para que la posición sea visitable; fotos detalle 1-4 opcionales.
 - Visor público `gym-free` validado en producción tras CORS explícito en Three.js: `https://oxphyre.com/tour/negocioofree/gym-free?position=4` carga panorámica y Oxphyre Room con imágenes R2/media tras hard refresh, sin bloqueo CORS.
+- Favicon 404 corregido localmente: `public/favicon.ico` existe como fallback y el visor/dashboard enlazan favicon SVG principal + ICO alternativo. Pendiente verificar `https://oxphyre.com/favicon.ico` tras deploy.
 - Soft delete en businesses, tours, positions y photos.
 - QR 1 descargable y QR 2A validados en servidor real: `/qr/{token}` redirige a tour publico, `GET` valido registra escaneo pseudonimizado en `qr_scans`, `HEAD` y bots no cuentan, y el contador simple se calcula con `COUNT(*)`.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
@@ -466,7 +467,6 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar PageSpeed final.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
 - Visor público: CORS de texturas WebGL con R2/media validado en producción. Pendiente pulir Oxphyre Room para ratios/fotos verticales y distribución según número real de fotos detalle subidas.
-- Arreglar `favicon.ico` 404.
 
 ### Prioridad media
 - QR 1 descargable y QR 2A estan validados en servidor real. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug sin contar escaneo. QR 2A registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. La incidencia de deduplicacion por `REMOTE_ADDR` variable detras de Cloudflare quedo resuelta pasando `HTTP_CF_CONNECTING_IP` desde Nginx a PHP.
@@ -499,7 +499,7 @@ Ultima sesion de validacion/documentacion (2026-05-24):
 - Subida movil real validada en produccion con fotos detalle desde iPhone: imagenes 4032x3024 recibidas como `image/jpeg`, GD insuficiente por memoria y fallback libvips activado para N/S/E. Logs confirmados en `/var/log/nginx/error.log`.
 - Visor publico validado tras CORS explicito en Three.js: `loader.setCrossOrigin('anonymous')` en panoramica principal y Oxphyre Room permite usar texturas desde `media.oxphyre.com` sin bloqueo CORS.
 - URL validada tras push/pull y hard refresh: `https://oxphyre.com/tour/negocioofree/gym-free?position=4`. Carga panoramica, abre Oxphyre Room y carga fotos detalle R2/media.
-- Pendientes detectados antes de TFG: pulir ratios/fotos verticales en Oxphyre Room, adaptar distribucion al numero real de fotos detalle subidas y corregir `favicon.ico` 404.
+- Pendientes detectados antes de TFG: pulir ratios/fotos verticales en Oxphyre Room y adaptar distribucion al numero real de fotos detalle subidas. `favicon.ico` 404 queda corregido localmente y pendiente de verificacion tras deploy.
 
 Ultima sesion de implementacion/documentacion (2026-05-22):
 - Bloque SEO publico/silos implementado, desplegado, sitemap actualizado e indexacion manual solicitada en Search Console para `/blog`, los 3 posts, `/tour-virtual-para-restaurantes` y `/tour-virtual-para-negocios`. `SEO_MATRIX.md` queda como matriz viva de seguimiento tactico SEO. Pendiente revisar datos reales en Search Console en 24-72h y 7-14 dias.
@@ -548,13 +548,12 @@ Siguiente orden recomendado para cerrar antes del TFG:
 2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
    **Hotspots 1E**: pulido UX mobile/labels/limites.
 3. Pulir Oxphyre Room antes del TFG: ratios/fotos verticales y distribucion segun numero real de fotos detalle subidas.
-4. Arreglar `favicon.ico` 404.
-5. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
-6. Responsive: verificar todas las secciones en movil y tablet.
-7. SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
-8. PageSpeed final.
-9. Limpieza fisica de soft delete: borrar WebP/depth asociados cuando proceda. Esperar a tener R2 como fuente validada (ya lo es en Fase 2B). No es bloqueante para el TFG.
-10. Pulido opcional de ruido/granulado. No bloqueante.
+4. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
+5. Responsive: verificar todas las secciones en movil y tablet.
+6. SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
+7. PageSpeed final.
+8. Limpieza fisica de soft delete: borrar WebP/depth asociados cuando proceda. Esperar a tener R2 como fuente validada (ya lo es en Fase 2B). No es bloqueante para el TFG.
+9. Pulido opcional de ruido/granulado. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversion automatica de iOS/Safari para confirmar el path HEIC del pipeline.
 

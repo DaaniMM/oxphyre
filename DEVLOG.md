@@ -3965,3 +3965,14 @@ Jerarquia final de procesado:
 - No se hizo commit ni push.
 
 ---
+
+## 2026-05-24 - Fix favicon.ico 404
+
+- Causa: existia `public/favicon.svg`, pero no existia `public/favicon.ico`; algunos navegadores pedian automaticamente `/favicon.ico` y el visor publico lo registraba como 404.
+- Se creo `public/favicon.ico` real a partir del simbolo existente del favicon SVG para que `/favicon.ico` responda como fallback.
+- Se anadieron enlaces de favicon en `backend/views/tour.php` y en las vistas dashboard con `<head>` propio que no tenian favicon: SVG principal + ICO alternativo.
+- Las paginas publicas principales, blog, posts, auth y legales ya enlazaban `favicon.svg`; se mantuvo ese SVG como favicon principal.
+- No se toco JS, backend funcional, BD, R2, Cloudflare, SEO copy, rutas, sitemap ni CSS.
+- No se hizo commit ni push.
+
+---

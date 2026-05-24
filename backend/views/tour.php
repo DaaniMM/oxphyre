@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title><?= htmlspecialchars($tour['title']) ?> — <?= htmlspecialchars($business['name']) ?></title>
   <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico">
   <!-- Estilos base del visor — versión automática vía filemtime para evitar caché vieja -->
   <link rel="stylesheet" href="<?= asset('/css/tour.css') ?>">
 <?php if ($businessLocation['hasCoords']): ?>
