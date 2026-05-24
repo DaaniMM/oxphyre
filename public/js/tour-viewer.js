@@ -264,6 +264,7 @@ function initMainPanorama(url) {
 
   const state = mainState;
   const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
   loader.load(
     url,
     texture => {
@@ -802,6 +803,7 @@ function initRoomScene(room) {
   scene.add(warmLight);
 
   const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
   const maxAnisotropy = renderer.capabilities.getMaxAnisotropy?.() || 1;
 
   roomState.detailSlots.forEach(slot => {

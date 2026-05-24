@@ -57,10 +57,12 @@ Estado implementado:
   - Temporales internos se limpian tras procesado.
   - Subida conjunta de 5 imágenes por posición funciona: N/S/E/O + `photo_360`.
   - Imágenes de baja resolución/compresión tipo WhatsApp se detectan y muestran aviso friendly con recomendación secundaria.
+  - Subida móvil real validada en producción con fotos detalle iPhone 4032x3024 recibidas como `image/jpeg`: GD fue insuficiente por memoria y el fallback libvips procesó N/S/E correctamente. Logs confirmados en `/var/log/nginx/error.log`.
 - Procesado MiDaS en servidor mediante microservicio Flask.
 - CLAHE disponible en el microservicio, pero no aplicado a la imagen visible en Sprint 1.
 - Visor público Sprint 1 sin Photo Sphere Viewer: panorámica parcial horizontal con pitch limitado.
 - Sprint 1 Oxphyre Room Free/base implementado, con decisión UX posterior: Oxphyre Room pasa a ser la experiencia completa de posición. Panorámica `360` obligatoria para que la posición sea visitable; fotos detalle 1-4 opcionales.
+- Visor público `gym-free` validado en producción tras CORS explícito en Three.js: `https://oxphyre.com/tour/negocioofree/gym-free?position=4` carga panorámica y Oxphyre Room con imágenes R2/media tras hard refresh, sin bloqueo CORS.
 - Soft delete en businesses, tours, positions y photos.
 - QR 1 descargable y QR 2A validados en servidor real: `/qr/{token}` redirige a tour publico, `GET` valido registra escaneo pseudonimizado en `qr_scans`, `HEAD` y bots no cuentan, y el contador simple se calcula con `COUNT(*)`.
 - Roadmap post-TFG de 3D Gaussian Splatting documentado.
@@ -115,6 +117,7 @@ Estado implementado:
 - La panorámica principal no debe tratarse como esfera/equirectangular 360 completa: se renderiza como vista cilíndrica parcial, con arrastre horizontal y pitch muy limitado.
 - Photo Sphere Viewer v4 queda retirado del visor público Sprint 1 porque deformaba panorámicas parciales de móvil al forzarlas como esfera completa.
 - La imagen visible siempre debe ser el WebP final optimizado y fiel a la imagen subida; MiDaS/CLAHE quedan como procesado interno o futuro, no como textura pública en Sprint 1.
+- Las texturas WebGL servidas desde `media.oxphyre.com` requieren CORS explícito en Three.js. Estado validado: los dos `TextureLoader()` de `public/js/tour-viewer.js` usan `setCrossOrigin('anonymous')`, y el tour público `gym-free` carga panorámica y fotos detalle R2/media sin error CORS bloqueante tras hard refresh.
 
 ### Hotspots de navegacion
 - Hotspots 1A esta implementado, pusheado y validado en servidor real. La migracion `docs/sql/2026-05-19_hotspots_navigation_coordinates.sql` se ejecuto correctamente en EC2.
@@ -177,6 +180,7 @@ Estado implementado:
 - El ancho final máximo de panorámica es 8192px, manteniendo proporción.
 - MiDaS recibe un JPG temporal quality 92 separado; CLAHE/MiDaS no sobrescriben la imagen visible.
 - Prueba real validada en servidor: panorámica iPhone original 16248x3832 procesada con libvips a WebP final aprox. 8192x1932, ~2.9MB, `processed=1` en BD.
+- Fallback libvips para fotos detalle validado en producción: iPhone envió N/S/E 4032x3024 como `image/jpeg`, GD fue insuficiente por memoria y libvips procesó las imágenes. Las fotos aparecen en dashboard.
 - Subida conjunta de 5 imágenes validada: `photo_360` + N/S/E/O en un solo envío.
 - Delete de fotos validado.
 - Panorámica WhatsApp 1600x377 detectada como baja calidad/compresión con mensaje friendly.
@@ -461,6 +465,8 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Revisar SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
 - Revisar PageSpeed final.
 - Pipeline de imágenes: JPG/PNG/WebP + HEIC/HEIF implementados en el pipeline WebP/libvips; flujo iPhone normal validado en servidor; queda pendiente prueba con archivo `.heic` puro sin conversión automática.
+- Visor público: CORS de texturas WebGL con R2/media validado en producción. Pendiente pulir Oxphyre Room para ratios/fotos verticales y distribución según número real de fotos detalle subidas.
+- Arreglar `favicon.ico` 404.
 
 ### Prioridad media
 - QR 1 descargable y QR 2A estan validados en servidor real. `/qr/{token}` redirige con 302 a `/tour/{businessSlug}/{tourSlug}?src=qr` por GET y soporta HEAD para debug sin contar escaneo. QR 2A registra solo GET validos no bot en `qr_scans`, guarda `ip_hash` y `device_type`, deja IP/User-Agent/pais en NULL, deduplica 30 minutos y muestra contador simple en `manage.php`. La incidencia de deduplicacion por `REMOTE_ADDR` variable detras de Cloudflare quedo resuelta pasando `HTTP_CF_CONNECTING_IP` desde Nginx a PHP.
@@ -473,6 +479,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - Legal/RGPD: privacidad, términos, cookies.
 - PWA: manifest y service worker.
 - UX dashboard: bloquear/desactivar "Ver posición" si falta panorámica `360` en listado/card y pantalla de gestión/subida.
+- UX Oxphyre Room: revisar adaptación visual de fotos detalle verticales para evitar sensación de estirado y adaptar la sala al número real de fotos detalle, evitando huecos si hay menos de 4.
 - Limpieza física de archivos asociados a fotos con soft delete.
 - Reducir ruido/granulado residual en panorámica si sobra tiempo tras tareas críticas.
 
@@ -487,6 +494,12 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 ---
 
 ## Última sesión de trabajo
+
+Ultima sesion de validacion/documentacion (2026-05-24):
+- Subida movil real validada en produccion con fotos detalle desde iPhone: imagenes 4032x3024 recibidas como `image/jpeg`, GD insuficiente por memoria y fallback libvips activado para N/S/E. Logs confirmados en `/var/log/nginx/error.log`.
+- Visor publico validado tras CORS explicito en Three.js: `loader.setCrossOrigin('anonymous')` en panoramica principal y Oxphyre Room permite usar texturas desde `media.oxphyre.com` sin bloqueo CORS.
+- URL validada tras push/pull y hard refresh: `https://oxphyre.com/tour/negocioofree/gym-free?position=4`. Carga panoramica, abre Oxphyre Room y carga fotos detalle R2/media.
+- Pendientes detectados antes de TFG: pulir ratios/fotos verticales en Oxphyre Room, adaptar distribucion al numero real de fotos detalle subidas y corregir `favicon.ico` 404.
 
 Ultima sesion de implementacion/documentacion (2026-05-22):
 - Bloque SEO publico/silos implementado, desplegado, sitemap actualizado e indexacion manual solicitada en Search Console para `/blog`, los 3 posts, `/tour-virtual-para-restaurantes` y `/tour-virtual-para-negocios`. `SEO_MATRIX.md` queda como matriz viva de seguimiento tactico SEO. Pendiente revisar datos reales en Search Console en 24-72h y 7-14 dias.
@@ -534,12 +547,14 @@ Siguiente orden recomendado para cerrar antes del TFG:
 1. **Roles documentados en memoria:** documentar `admin`, `business_owner` y `viewer`, diferenciando permisos reales en frontend/backend y estado actual de uso.
 2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
    **Hotspots 1E**: pulido UX mobile/labels/limites.
-3. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
-4. Responsive: verificar todas las secciones en movil y tablet.
-5. SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
-6. PageSpeed final.
-7. Limpieza fisica de soft delete: borrar WebP/depth asociados cuando proceda. Esperar a tener R2 como fuente validada (ya lo es en Fase 2B). No es bloqueante para el TFG.
-8. Pulido opcional de ruido/granulado. No bloqueante.
+3. Pulir Oxphyre Room antes del TFG: ratios/fotos verticales y distribucion segun numero real de fotos detalle subidas.
+4. Arreglar `favicon.ico` 404.
+5. Preparar 1-2 tours demo visualmente impecables antes de la exposicion.
+6. Responsive: verificar todas las secciones en movil y tablet.
+7. SEO tecnico final: schema, metas, Open Graph y seguimiento en Search Console.
+8. PageSpeed final.
+9. Limpieza fisica de soft delete: borrar WebP/depth asociados cuando proceda. Esperar a tener R2 como fuente validada (ya lo es en Fase 2B). No es bloqueante para el TFG.
+10. Pulido opcional de ruido/granulado. No bloqueante.
 
 Micro-pendiente (no bloqueante): probar archivo `.heic` puro de iPhone sin conversion automatica de iOS/Safari para confirmar el path HEIC del pipeline.
 

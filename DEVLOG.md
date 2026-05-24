@@ -3943,3 +3943,25 @@ Jerarquia final de procesado:
   producto escale a usuarios reales pagando.
 - Limpieza fisica de archivos de posiciones/fotos con soft delete (Fase 3 R2/EC2).
 
+## 2026-05-24 - Fix CORS explicito en texturas WebGL del visor publico
+
+- `public/js/tour-viewer.js`: se anadio `setCrossOrigin('anonymous')` a los dos `THREE.TextureLoader()` del visor publico: panoramica principal y fotos detalle de Oxphyre Room.
+- Motivo: las imagenes publicas servidas desde `media.oxphyre.com` necesitan peticion CORS explicita para poder usarse como texturas WebGL en Three.js desde `oxphyre.com`.
+- No se tocaron backend, BD, R2, Cloudflare, SEO, rutas ni CSS.
+- No se hizo commit ni push.
+
+---
+
+## 2026-05-24 - Cierre validacion visor publico: subida movil + CORS R2/media
+
+- Subida movil validada en produccion con fotos detalle reales desde iPhone: las imagenes 4032x3024 llegaron como `image/jpeg`, GD no pudo procesarlas por memoria y el fallback libvips se activo correctamente.
+- Logs confirmados en `/var/log/nginx/error.log`: `GD insuficiente para N/S/E 4032x3024 (image/jpeg); se intentara con libvips` y `libvips fallback activado para image/jpeg N/S/E 4032x3024`.
+- Las fotos detalle se subieron correctamente y aparecen en dashboard.
+- Visor publico validado tras anadir `loader.setCrossOrigin('anonymous')` en los dos `TextureLoader()` de `public/js/tour-viewer.js`: panoramica principal y Oxphyre Room.
+- URL probada tras push/pull y hard refresh: `https://oxphyre.com/tour/negocioofree/gym-free?position=4`.
+- Resultado: la panoramica carga, Oxphyre Room abre, las fotos detalle cargan desde `media.oxphyre.com` y ya no aparece error CORS bloqueante.
+- Pendientes UX detectados: revisar adaptacion visual de fotos detalle verticales para evitar sensacion de estirado; adaptar Oxphyre Room al numero real de fotos detalle subidas para evitar huecos si hay menos de 4; arreglar `favicon.ico` 404.
+- No se tocaron backend, BD, R2, Cloudflare, SEO, rutas, sitemap, CSS ni codigo funcional en esta documentacion.
+- No se hizo commit ni push.
+
+---
