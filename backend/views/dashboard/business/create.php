@@ -109,12 +109,18 @@ $wizardPlanName = $wizardPlan['name'];
         <i data-lucide="settings"        width="18" height="18" aria-hidden="true"></i>
         <span>Configuración</span>
       </a>
+      <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
+      <a href="/dashboard/admin"         class="db-nav-item">
+        <i data-lucide="shield"          width="18" height="18" aria-hidden="true"></i>
+        <span>Admin</span>
+      </a>
+      <?php endif; ?>
     </nav>
     <div class="db-sidebar-footer">
       <div class="db-plan-badge">
         <span class="db-plan-label">Plan</span>
         <span class="db-plan-name"><?= htmlspecialchars($planLabel) ?></span>
-        <?php if ($planLabel !== 'Business'): ?>
+        <?php if ($planLabel !== 'Business' && $planLabel !== 'Admin'): ?>
           <a href="/precios" class="db-upgrade-link">Mejorar →</a>
         <?php endif; ?>
       </div>

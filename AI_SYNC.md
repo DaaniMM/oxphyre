@@ -459,7 +459,7 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 - `/precios` cerrado: implementado y validado en produccion con Free, Pro y Business.
 - API externa para tribunal: **implementada y validada**. Nominatim/OpenStreetMap (geocodificacion server-side, Mapa 1B) + Leaflet/OSM (mapa publico en visor, Mapa 1C). Cubre el requisito sin Google Maps ni Mapbox (sin API key, sin cuotas, open source).
 - SEO tecnico inicial: **implementado y validado tecnicamente**. Sitemap actualizado con paginas publicas principales y `/tour-virtual-para-negocios` enviada a indexacion; pendiente que Google procese/reintente y revision final de copy/SEO/UX antes de entrega/lanzamiento.
-- Documentar roles en la memoria: admin, business_owner, viewer.
+- Documentar roles en la memoria: auditoria de roles completada (2026-05-25). Admin MVP solo lectura implementado: `GET /dashboard/admin` con doble verificacion de rol, 7 metricas globales y 3 tablas de supervision. El rol `admin` ya no es solo reservado: tiene panel funcional. Texto listo para memoria del TFG documentado en la sesion de auditoria. Pendiente: copiar el texto de la auditoria de roles a la memoria del TFG.
 - Revisar contraste en dashboard y wizard: inputs, labels y textos secundarios.
 - Preparar 1-2 tours demo visualmente impecables antes de la exposición.
 - Grabar o sustituir el placeholder del video demo en la landing.

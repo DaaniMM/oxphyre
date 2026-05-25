@@ -4088,3 +4088,32 @@ Jerarquia final de procesado:
 - No se hizo commit ni push.
 
 ---
+
+## 2026-05-25 - Admin MVP solo lectura
+
+### Objetivo
+Dar al rol `admin` una primera vista funcional de supervisión de la plataforma, cubriendo el requisito de 4 tipos de usuario con accesos diferenciados para el TFG.
+
+### Archivos creados
+- `backend/models/AdminModel.php`: modelo con 7 contadores globales (`countUsers`, `countBusinesses`, `countTours`, `countPositions`, `countPhotos`, `countQrCodes`, `countQrScans`) y 3 métodos de listado de los últimos 10 registros (`getLatestUsers`, `getLatestBusinesses`, `getLatestTours`). Prepared statements en todos. Solo SELECT, sin datos sensibles (sin contraseñas ni tokens).
+- `backend/controllers/AdminController.php`: controller con doble verificación de acceso. El guard `auth` de `web.php` valida sesión activa; el controller añade `$_SESSION['user_role'] === 'admin'`. Si el usuario tiene sesión pero no es admin, redirige a `/dashboard` con flash de error. Si no hay sesión, el middleware redirige a `/login` antes de entrar.
+- `backend/views/dashboard/admin/index.php`: vista solo lectura con sidebar estándar del dashboard. Muestra 7 tarjetas de métricas globales (usuarios, negocios, tours, posiciones, fotos, QR generados, escaneos QR) y 3 tablas de los últimos registros (usuarios con rol/verificación, negocios con propietario y plan, tours con estado publicado). Sin acciones de edición ni borrado. Usa clases `db-metrics`, `db-metric-card`, `db-badge`, `db-badge--published`, `db-badge--draft` existentes. No añade CSS nuevo.
+
+### Archivos modificados
+- `backend/routes/web.php`: añadida ruta `GET /dashboard/admin => ['AdminController', 'index', 'auth']`.
+- `backend/views/dashboard/index.php` y las 9 vistas restantes del dashboard (`negocios/index.php`, `negocios/manage.php`, `tours/index.php`, `tours/create.php`, `tours/manage.php`, `position/create.php`, `position/upload.php`, `business/create.php`, `business/success.php`): añadido enlace "Admin" con icono `shield` en el sidebar, visible solo cuando `$userRole === 'admin'`. Corregida la condición del badge "Mejorar →" de `$planLabel !== 'Business'` a `$planLabel !== 'Business' && $planLabel !== 'Admin'` para que el admin no vea el enlace de upgrade.
+
+### Seguridad
+- Doble capa: middleware `auth` verifica sesión + controller verifica rol `'admin'` explícitamente.
+- Un usuario `business_free/pro/business` con sesión válida recibe redirect a `/dashboard` + flash de error al intentar acceder a `/dashboard/admin`.
+- Sin sesión → redirect a `/login` (gestionado por el middleware existente).
+- La vista no expone contraseñas, tokens, datos de pago ni información privada de usuarios.
+
+### Alcance cerrado
+- Sin acciones de edición, borrado ni modificación en esta fase.
+- No se toco CSS, JS, frontend público, visor, R2, subida de imágenes, rutas públicas ni landing.
+- Fase futura posible (post-TFG): ocultar/restaurar negocios o tours desde el panel admin, ver detalles de un usuario, filtros por plan, exportación de métricas.
+
+### No se hizo commit ni push.
+
+---
