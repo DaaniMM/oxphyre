@@ -266,7 +266,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/hotel_360.png">
         <img src="/assets/img/carousel/hotel_card.webp" alt="Habitación de hotel de lujo" loading="lazy">
         <div class="carousel-card-overlay">
-          <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business / Gaussian</span>
+          <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business</span>
           <p class="carousel-card-title" data-i18n="carousel.c4_title">Hotel</p>
           <p class="carousel-card-text"  data-i18n="carousel.c4_text">Nadie reserva una habitación sin verla. Una experiencia inmersiva para una reserva premium.</p>
         </div>
@@ -284,7 +284,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/immobiliaria_360.jpg">
         <img src="/assets/img/carousel/immobiliaria_card.webp" alt="Salón de piso luminoso" loading="lazy">
         <div class="carousel-card-overlay">
-          <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business / Gaussian</span>
+          <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business</span>
           <p class="carousel-card-title" data-i18n="carousel.c6_title">Inmobiliaria</p>
           <p class="carousel-card-text"  data-i18n="carousel.c6_text">Capta la esencia de cada propiedad ofreciendo a los vendedores la tecnología de marketing más avanzada del mercado.</p>
         </div>

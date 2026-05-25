@@ -3990,6 +3990,16 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Microfix visual tags carrusel negocios
+
+- `backend/views/home.php` y `public/js/i18n.js`: el tag visible "Business / Gaussian" pasa a "Business" en ES/EN para simplificar la lectura de la card.
+- `public/css/main.css`: los tags del carrusel pasan a posicion absoluta en la esquina superior izquierda de cada card (`top: 14px`, `left: 14px`) para separarlos del bloque de titulo/copy.
+- Se diferencian visualmente los tags por color: Free verde/mint, Pro ambar Oxphyre, Business azul/cyan petroleo y Legacy gris slate.
+- No se cambio `main.js`, `data-modal-src`, comportamiento del carrusel/modal, backend funcional, BD, R2, dashboard, visor publico, rutas, sitemap ni Cloudflare.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
