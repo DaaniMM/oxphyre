@@ -241,7 +241,7 @@ class AuthController extends BaseController
         }
         session_destroy();
 
-        $this->redirect('/');
+        $this->redirect('/login');
     }
 
     // ── Helpers privados ──────────────────────────────────────────────────────

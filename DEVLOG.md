@@ -4049,6 +4049,15 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Logout redirige a login
+
+- `backend/controllers/AuthController.php`: `logout()` mantiene la limpieza actual de `$_SESSION`, cookie de sesion y `session_destroy()`, pero la redireccion final pasa de `/` a `/login`.
+- Objetivo: que al cerrar sesion el usuario termine directamente en la pantalla de inicio de sesion.
+- No se tocaron login, registro, roles, dashboard, permisos ni seguridad.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
