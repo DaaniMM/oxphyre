@@ -4029,6 +4029,16 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Fix cache HTML visor publico TOUR_DATA
+
+- Diagnostico: el visor publico genera `TOUR_DATA` inline desde `TourController::showPublic()` y `backend/views/tour.php`; si el HTML dinamico de `/tour/...` queda cacheado, el navegador puede conservar una version antigua sin las fotos detalle nuevas aunque las imagenes ya existan.
+- `backend/controllers/TourController.php`: `showPublic()` envia `Cache-Control: no-store, no-cache, must-revalidate, max-age=0`, `Pragma: no-cache` y `Expires: 0` antes de renderizar el visor publico.
+- Alcance: la politica se aplica solo al HTML dinamico del visor `/tour/...`; no se aplica a assets estaticos, JS/CSS versionados con `asset()`, imagenes locales ni media/R2.
+- No se tocaron subida de imagenes, BD, R2, `ImageProcessingService`, visor JS, rutas, sitemap, SEO global ni Cloudflare.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.

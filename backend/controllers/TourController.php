@@ -326,6 +326,12 @@ class TourController extends BaseController
         $bizSlug  = preg_replace('/[^a-z0-9-]/', '', $routeParams['biz']  ?? '');
         $tourSlug = preg_replace('/[^a-z0-9-]/', '', $routeParams['tour'] ?? '');
 
+        // El visor publico inyecta TOUR_DATA dentro del HTML. No debe cachearse,
+        // porque las fotos detalle pueden cambiar justo despues de subirlas.
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
         require_once BACKEND_PATH . '/models/BusinessModel.php';
         require_once BACKEND_PATH . '/models/TourModel.php';
         require_once BACKEND_PATH . '/models/PositionModel.php';
