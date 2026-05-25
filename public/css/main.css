@@ -815,6 +815,12 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   transform: rotateY(-40deg) translateZ(-360px) translateX(400px) scale(0.7);
   opacity: 0.15; z-index: 1;
 }
+.carousel-card.back-1 {
+  transform: rotateY(0deg) translateZ(-420px) scale(0.62);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 .carousel-card.c-hidden { opacity: 0; pointer-events: none; z-index: 0; }
 
 /* Hover preview: ventana circular con placeholder oscuro */

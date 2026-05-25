@@ -608,8 +608,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setCarousel(index) {
     cards.forEach((card, i) => {
-      card.classList.remove('active', 'next-1', 'next-2', 'prev-1', 'prev-2', 'c-hidden');
+      card.classList.remove('active', 'next-1', 'next-2', 'prev-1', 'prev-2', 'back-1', 'c-hidden');
       const rel = ((i - index) % TOTAL + TOTAL) % TOTAL;
+      if (TOTAL === 4) {
+        if      (rel === 0) card.classList.add('active');
+        else if (rel === 1) card.classList.add('next-1');
+        else if (rel === 3) card.classList.add('prev-1');
+        else                card.classList.add('back-1');
+        return;
+      }
       if      (rel === 0)           card.classList.add('active');
       else if (rel === 1)           card.classList.add('next-1');
       else if (rel === 2)           card.classList.add('next-2');

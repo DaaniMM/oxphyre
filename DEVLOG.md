@@ -4011,6 +4011,15 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Microfix carrusel negocios 4 cards en rombo
+
+- `public/js/main.js`: `setCarousel()` ahora tiene un caso especifico para `TOTAL === 4`: activa centrada, `next-1` a la derecha, `prev-1` a la izquierda y la cuarta card como `back-1`.
+- `public/css/main.css`: se anadio `.carousel-card.back-1` detras de la activa, escalada, opacidad 0 y `pointer-events: none` para que no bloquee hover/click del centro.
+- Se mantiene la logica previa para otros tamanos de carrusel, las 4 cards visibles actuales, las 4 cards ocultas, los tags y los `data-modal-src`.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
