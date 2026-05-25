@@ -768,6 +768,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openCarouselModal(card) {
+      const demoUrl = card.dataset.demoUrl || '';
+      if (card.dataset.demoType === 'public-tour' && demoUrl !== '') {
+        window.location.href = demoUrl;
+        return;
+      }
+
       const title = card.querySelector('.carousel-card-title');
       const desc  = card.querySelector('.carousel-card-text');
       if (modalTitle) modalTitle.textContent = title?.textContent || '';

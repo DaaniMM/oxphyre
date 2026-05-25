@@ -236,7 +236,10 @@
 
     <div id="carousel" role="region" aria-label="Carrusel de negocios" aria-live="polite">
 
-      <article class="carousel-card active" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/restaurante_360.png">
+      <article class="carousel-card active"
+               data-demo-type="public-tour"
+               data-demo-url="https://oxphyre.com/tour/restaurante-carrusel-free/tour-restaurante-free"
+               data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/restaurante_360.png">
         <img src="/assets/img/carousel/restaurante_card.webp" alt="Interior de restaurante atmosférico" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--free" data-i18n="carousel.tag_free">Free</span>

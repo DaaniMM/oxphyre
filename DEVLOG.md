@@ -4020,6 +4020,15 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Carrusel negocios: Restaurante Free enlaza visor real
+
+- `backend/views/home.php`: la card visible Restaurante / Free del carrusel incorpora `data-demo-type="public-tour"` y `data-demo-url="https://oxphyre.com/tour/restaurante-carrusel-free/tour-restaurante-free"`.
+- `public/js/main.js`: `openCarouselModal()` abre `data-demo-url` en la misma pestana cuando `data-demo-type` es `public-tour`; si falta URL o no es ese tipo, mantiene el modal legacy con `data-modal-src`.
+- El resto de cards visibles siguen usando el modal legacy actual. Las cards ocultas siguen ocultas y no se tocaron `data-modal-src`, backend funcional, BD, R2, dashboard, visor publico, rutas, sitemap, SEO global ni Cloudflare.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
