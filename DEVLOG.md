@@ -3977,6 +3977,19 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Landing negocios Fase 1: tags de plan sin cambiar modal
+
+- `backend/views/home.php`: la seccion "Tu negocio, en primera persona" mantiene las 8 cards actuales del carrusel y se anadieron tags visibles por tipo: Free, Pro, Business / Gaussian y Legacy.
+- `backend/views/home.php` y `public/js/i18n.js`: se cambio el hint "Click para ver el tour 360°" por "Click para ver el tour del negocio" para no prometer una experiencia equirectangular 360 como si fuera el producto actual.
+- `public/css/main.css`: se anadieron estilos minimos para `.carousel-plan-tag`, respetando la estetica oscura/ambar del carrusel.
+- `public/js/i18n.js`: se anadieron traducciones ES/EN para los tags y el nuevo hint.
+- Decision: Legacy queda visible como referencia de la propuesta inicial y posible linea futura de captura 360 profesional. No se borran assets antiguos ni se ocultan cards Legacy.
+- No se cambio todavia `data-modal-src`, la logica de apertura del modal, `createModalViewer()`, el visor Three.js del modal ni enlaces a tours reales.
+- No se tocaron backend funcional, BD, R2, dashboard, visor publico, subida de imagenes, `ImageProcessingService`, rutas, sitemap, Cloudflare ni SEO global.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.

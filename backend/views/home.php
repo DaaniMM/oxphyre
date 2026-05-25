@@ -232,13 +232,14 @@
       Descubre cómo Oxphyre puede transformar la forma en que los clientes conocen tu negocio.
     </p>
 
-    <p class="carousel-tour-hint animate-on-scroll" data-i18n="carousel.tour_hint">Click para ver el tour 360°</p>
+    <p class="carousel-tour-hint animate-on-scroll" data-i18n="carousel.tour_hint">Click para ver el tour del negocio</p>
 
     <div id="carousel" role="region" aria-label="Carrusel de negocios" aria-live="polite">
 
       <article class="carousel-card active" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/restaurante_360.png">
         <img src="/assets/img/carousel/restaurante_card.webp" alt="Interior de restaurante atmosférico" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--free" data-i18n="carousel.tag_free">Free</span>
           <p class="carousel-card-title" data-i18n="carousel.c1_title">Restaurante</p>
           <p class="carousel-card-text"  data-i18n="carousel.c1_text">Tus platos son increíbles, pero tu ambiente es lo que te diferencia. Es hora de que lo vean.</p>
         </div>
@@ -247,6 +248,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/gym_360.png">
         <img src="/assets/img/carousel/gym_card.webp" alt="Gimnasio moderno con equipamiento" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--free" data-i18n="carousel.tag_free">Free</span>
           <p class="carousel-card-title" data-i18n="carousel.c2_title">Gimnasio</p>
           <p class="carousel-card-text"  data-i18n="carousel.c2_text">Muchos no se apuntan por miedo a no saber qué se van a encontrar. Abre tus puertas y rompe esa barrera.</p>
         </div>
@@ -255,6 +257,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/peluqueria_360.png">
         <img src="/assets/img/carousel/peluqueria_card.webp" alt="Peluquería estilosa y moderna" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--pro" data-i18n="carousel.tag_pro">Pro</span>
           <p class="carousel-card-title" data-i18n="carousel.c3_title">Peluquería</p>
           <p class="carousel-card-text"  data-i18n="carousel.c3_text">En imágenes muestras el antes/después. Con Oxphyre muestras el dónde, el lugar donde ocurre la magia.</p>
         </div>
@@ -263,6 +266,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/hotel_360.png">
         <img src="/assets/img/carousel/hotel_card.webp" alt="Habitación de hotel de lujo" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business / Gaussian</span>
           <p class="carousel-card-title" data-i18n="carousel.c4_title">Hotel</p>
           <p class="carousel-card-text"  data-i18n="carousel.c4_text">Nadie reserva una habitación sin verla. Una experiencia inmersiva para una reserva premium.</p>
         </div>
@@ -271,6 +275,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/tienda_360.png">
         <img src="/assets/img/carousel/tienda_card.webp" alt="Tienda boutique con iluminación cálida" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--pro" data-i18n="carousel.tag_pro">Pro</span>
           <p class="carousel-card-title" data-i18n="carousel.c5_title">Tienda</p>
           <p class="carousel-card-text"  data-i18n="carousel.c5_text">Tu escaparate es tu mejor vendedor, pero solo para los que pasan por delante. Con Oxphyre, tu escaparate es el mundo entero.</p>
         </div>
@@ -279,6 +284,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/immobiliaria_360.jpg">
         <img src="/assets/img/carousel/immobiliaria_card.webp" alt="Salón de piso luminoso" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business / Gaussian</span>
           <p class="carousel-card-title" data-i18n="carousel.c6_title">Inmobiliaria</p>
           <p class="carousel-card-text"  data-i18n="carousel.c6_text">Capta la esencia de cada propiedad ofreciendo a los vendedores la tecnología de marketing más avanzada del mercado.</p>
         </div>
@@ -287,6 +293,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/clinica_360.png">
         <img src="/assets/img/carousel/clinica_card.webp" alt="Consulta médica limpia y moderna" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--legacy" data-i18n="carousel.tag_legacy">Legacy</span>
           <p class="carousel-card-title" data-i18n="carousel.c7_title">Clínica</p>
           <p class="carousel-card-text"  data-i18n="carousel.c7_text">Permite a tus pacientes recorrer tus instalaciones. Que conozcan tu consulta antes de entrar cambia todo.</p>
         </div>
@@ -295,6 +302,7 @@
       <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/coworking_360.png">
         <img src="/assets/img/carousel/coworking_card.webp" alt="Espacio de coworking luminoso" loading="lazy">
         <div class="carousel-card-overlay">
+          <span class="carousel-plan-tag carousel-plan-tag--legacy" data-i18n="carousel.tag_legacy">Legacy</span>
           <p class="carousel-card-title" data-i18n="carousel.c8_title">Coworking</p>
           <p class="carousel-card-text"  data-i18n="carousel.c8_text">El espacio vende solo — si la gente lo ve. Deja que vean dónde va a crecer su próximo proyecto.</p>
         </div>

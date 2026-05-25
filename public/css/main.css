@@ -728,6 +728,37 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   z-index: 1;
 }
 
+.carousel-plan-tag {
+  align-self: flex-start;
+  border: 1px solid rgba(254, 179, 84, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.48);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 9px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.carousel-plan-tag--pro {
+  border-color: rgba(255, 255, 255, 0.24);
+  color: var(--text-1);
+}
+
+.carousel-plan-tag--business {
+  border-color: rgba(254, 179, 84, 0.45);
+  background: rgba(254, 179, 84, 0.12);
+}
+
+.carousel-plan-tag--legacy {
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--text-2);
+}
+
 .carousel-card-title {
   font-family: var(--font-display);
   font-size: 12px;
