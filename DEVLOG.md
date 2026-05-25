@@ -4058,6 +4058,20 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Cierre validado bloque demos carrusel Free/Pro y logout
+
+- Carrusel demo TFG validado con 4 cards visibles y 4 cards ocultas conservadas en HTML; dots y flechas funcionan solo con las 4 visibles.
+- Restaurante / Free abre el visor publico real `https://oxphyre.com/tour/restaurante-carrusel-free/tour-restaurante-free` y el visor carga correctamente.
+- Peluqueria / Pro abre el visor publico real `https://oxphyre.com/tour/peluqueria-carrusel-pro/peluqueria-pro`; demo validada con 2 posiciones, fotos detalle y hotspots entre posiciones.
+- Hotel / Business y Clinica / Legacy quedan temporalmente con modal legacy/equirectangular; Business/Gaussian queda como posible siguiente demo si da tiempo.
+- Logout validado manualmente: tras cerrar sesion redirige a `/login` y el login posterior funciona normal.
+- Cache del visor publico corregida: `/tour/...` no cachea el HTML dinamico ni `TOUR_DATA`.
+- Pendiente futuro: decidir si avanzar con Business/Gaussian, responsive final, revision de copy/pricing y checklist TFG.
+- No se tocaron codigo funcional, CSS, JS, backend, BD, R2, rutas, sitemap ni SEO en esta documentacion.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.

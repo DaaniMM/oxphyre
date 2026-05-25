@@ -32,6 +32,7 @@ Stack activo:
 
 Estado implementado:
 - Landing completa y desplegada.
+- Carrusel negocios demo TFG validado: 4 cards visibles y 4 ocultas conservadas en HTML. Restaurante / Free y Peluqueria / Pro enlazan a visores publicos reales; Hotel / Business y Clinica / Legacy siguen temporalmente con modal legacy/equirectangular. Free carga correctamente. Pro carga correctamente con 2 posiciones, fotos detalle y hotspots entre posiciones. `/tour/...` ya no cachea HTML dinamico/`TOUR_DATA`.
 - `/precios` implementada y validada en produccion: ruta publica `GET /precios`, pagina autocontenida con cards Free/Pro/Business, Pro destacado, toggle mensual/anual, tabla comparativa, FAQ de planes y CTA final. No carga `main.js` ni Three.js; usa `main.css` e `i18n.js` versionados con `asset()`.
 - `/tour-virtual-para-negocios` implementada como pagina pilar SEO publica para posicionamiento self-service: crear visita virtual con movil, sin agencia, sin fotografo y sin camara 360. No carga Three.js ni `main.js`; usa `main.css` con `asset()`, metas completas, OG image PNG, canonical, `SoftwareApplication`, `FAQPage`, `BreadcrumbList` y sitemap actualizado. Sigue siendo pilar core y no debe moverse a `/blog`.
 - Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual: `/blog` como hub de recursos, 3 posts informativos de apoyo (`/blog/como-hacer-fotos-para-tour-virtual`, `/blog/tour-virtual-con-movil-sin-camara-360`, `/blog/como-usar-qr-para-ensenar-tu-local`) y `/tour-virtual-para-restaurantes` como primera pagina sectorial hija/comercial del silo de `/tour-virtual-para-negocios`.
@@ -39,7 +40,7 @@ Estado implementado:
 - Footer publico actualizado: `/blog` vuelve a estar enlazado porque ya existe contenido real. `/novedades` no existe y no debe enlazarse.
 - Bloque publico/SEO reciente aprobado provisionalmente para avanzar en MVP/TFG. Pendiente revision final de copy, microcopy, SEO fino, legal y UX antes de entrega/lanzamiento comercial; no retocar estas paginas sin motivo salvo tarea especifica de revision futura.
 - Enforcement minimo de limites publicado en `/precios` aplicado en backend: Free = 1 negocio, 1 tour por negocio y 3 posiciones por tour; Pro = 5 negocios, tours ilimitados y 20 posiciones por tour; Business = ilimitado. Falta todavia centralizar estos limites en un helper unico.
-- Auth completo: registro, verificación email, login, logout y recuperación de contraseña.
+- Auth completo: registro, verificación email, login, logout y recuperación de contraseña. Logout validado: destruye sesion y redirige a `/login`.
 - Dashboard base con navegación, métricas y layout.
 - Wizard de creación de negocio.
 - Listado y gestión de negocios.
@@ -495,6 +496,13 @@ Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
 ## Última sesión de trabajo
 
+Ultima sesion de cierre/validacion (2026-05-25):
+- Carrusel negocios demo TFG cerrado para Free/Pro: Restaurante / Free y Peluqueria / Pro enlazan a visores publicos reales y cargan correctamente.
+- Demo Pro validada con 2 posiciones, fotos detalle y hotspots entre posiciones. Hotel / Business y Clinica / Legacy siguen como modal legacy/equirectangular temporal.
+- Carrusel validado con 4 cards visibles, 4 ocultas conservadas en HTML y dots/flechas funcionando sobre las visibles.
+- Logout validado hacia `/login`; cache de `/tour/...` corregida para no servir HTML dinamico/`TOUR_DATA` antiguo.
+- Siguiente bloque a elegir segun prioridad: Business/Gaussian si da tiempo, responsive final, revision copy/pricing o checklist TFG.
+
 Ultima sesion de implementacion local (2026-05-24):
 - Oxphyre Room dinamico Fase 1.2b implementado localmente en `public/js/tour-viewer.js`: layout 1 foto centrada, 2 fotos a -75/+75 grados, 3 fotos repartidas en 360 a 0/120/240 y 4 fotos a 0/90/180/270. Compass dinamico y geometria de panel adaptada por `texture.image.width / texture.image.height`. Fase 1.2b deja valores intermedios tras prueba visual: mas presencia que Fase 1.1, pero menor tamano/radio menos agresivo que Fase 1.2 para no invadir el aro inferior.
 - Revision pre-push aplicada: `animateRoom()` espera a que cargue al menos un panel detalle; el primer panel cargado fija la camara inicial; cada textura detalle tiene callback de error con `console.warn`; si fallan todas, el Room se cierra y vuelve a la panoramica principal.
@@ -549,6 +557,8 @@ Siguiente orden recomendado para cerrar antes del TFG:
 **Requisitos tribunal ya cubiertos:**
 - API externa: Nominatim/OpenStreetMap (Mapa 1B) + Leaflet/OSM (Mapa 1C). **Validado.**
 - Roles documentados: pendiente documentar en la memoria (admin, business_owner, viewer).
+
+Bloque demos carrusel Free/Pro y logout: cerrado y validado. Siguiente decision practica: elegir entre Business/Gaussian si da tiempo, responsive final, revision copy/pricing o checklist TFG.
 
 1. **Roles documentados en memoria:** documentar `admin`, `business_owner` y `viewer`, diferenciando permisos reales en frontend/backend y estado actual de uso.
 2. **Hotspots 1D**: confirmar ciclo completo con borrado de panoramica (no solo sustitucion). La deuda P1 de estilos inline de avisos esta cerrada en `dashboard.css`.
