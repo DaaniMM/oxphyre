@@ -257,7 +257,10 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/peluqueria_360.png">
+      <article class="carousel-card"
+               data-demo-type="public-tour"
+               data-demo-url="https://oxphyre.com/tour/peluqueria-carrusel-pro/peluqueria-pro"
+               data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/peluqueria_360.png">
         <img src="/assets/img/carousel/peluqueria_card.webp" alt="Peluquería estilosa y moderna" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--pro" data-i18n="carousel.tag_pro">Pro</span>

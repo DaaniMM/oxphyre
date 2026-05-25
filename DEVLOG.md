@@ -4039,6 +4039,16 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Carrusel negocios: Peluqueria Pro enlaza visor real
+
+- `backend/views/home.php`: la card visible Peluqueria / Pro del carrusel incorpora `data-demo-type="public-tour"` y `data-demo-url="https://oxphyre.com/tour/peluqueria-carrusel-pro/peluqueria-pro"`, manteniendo `data-modal-src` como fallback legacy.
+- Restaurante / Free ya seguia enlazando a su visor publico real mediante la logica existente de `public/js/main.js`.
+- Hotel / Business y Clinica / Legacy siguen usando el modal legacy actual.
+- No se tocaron `main.js`, CSS, backend funcional, BD, R2, dashboard, visor publico, `tour-viewer.js`, rutas, sitemap, SEO global ni Cloudflare.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
