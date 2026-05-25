@@ -245,7 +245,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/gym_360.png">
+      <article class="carousel-card is-hidden-demo-card" hidden aria-hidden="true" data-demo-hidden="true" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/gym_360.png">
         <img src="/assets/img/carousel/gym_card.webp" alt="Gimnasio moderno con equipamiento" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--free" data-i18n="carousel.tag_free">Free</span>
@@ -272,7 +272,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/tienda_360.png">
+      <article class="carousel-card is-hidden-demo-card" hidden aria-hidden="true" data-demo-hidden="true" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/tienda_360.png">
         <img src="/assets/img/carousel/tienda_card.webp" alt="Tienda boutique con iluminación cálida" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--pro" data-i18n="carousel.tag_pro">Pro</span>
@@ -281,7 +281,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/immobiliaria_360.jpg">
+      <article class="carousel-card is-hidden-demo-card" hidden aria-hidden="true" data-demo-hidden="true" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/immobiliaria_360.jpg">
         <img src="/assets/img/carousel/immobiliaria_card.webp" alt="Salón de piso luminoso" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business</span>
@@ -299,7 +299,7 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/coworking_360.png">
+      <article class="carousel-card is-hidden-demo-card" hidden aria-hidden="true" data-demo-hidden="true" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/coworking_360.png">
         <img src="/assets/img/carousel/coworking_card.webp" alt="Espacio de coworking luminoso" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--legacy" data-i18n="carousel.tag_legacy">Legacy</span>
@@ -314,16 +314,7 @@
       <button id="carousel-prev" class="carousel-btn" aria-label="Anterior">
         <i data-lucide="chevron-left" width="20" height="20"></i>
       </button>
-      <div class="carousel-dots" aria-hidden="true">
-        <span class="carousel-dot active"></span>
-        <span class="carousel-dot"></span>
-        <span class="carousel-dot"></span>
-        <span class="carousel-dot"></span>
-        <span class="carousel-dot"></span>
-        <span class="carousel-dot"></span>
-        <span class="carousel-dot"></span>
-        <span class="carousel-dot"></span>
-      </div>
+      <div class="carousel-dots" aria-hidden="true"></div>
       <button id="carousel-next" class="carousel-btn" aria-label="Siguiente">
         <i data-lucide="chevron-right" width="20" height="20"></i>
       </button>

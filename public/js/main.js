@@ -586,17 +586,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── 11. CARRUSEL NEGOCIOS ────────────────────────────────────────────────
   const carousel = document.getElementById('carousel');
-  const cards    = carousel ? Array.from(carousel.querySelectorAll('.carousel-card')) : [];
-  const dots     = document.querySelectorAll('.carousel-dot');
+  const cards    = carousel ? Array.from(carousel.querySelectorAll('.carousel-card:not(.is-hidden-demo-card):not([hidden])')) : [];
+  const dotsWrap = document.querySelector('.carousel-dots');
   const prevBtn  = document.getElementById('carousel-prev');
   const nextBtn  = document.getElementById('carousel-next');
   const TOTAL    = cards.length;
   let   current  = 0;
   let   autoTimer = null;
+  let   dots      = [];
+
+  function buildCarouselDots() {
+    if (!dotsWrap) return;
+    dotsWrap.replaceChildren();
+    cards.forEach((_, i) => {
+      const dot = document.createElement('span');
+      dot.className = `carousel-dot${i === 0 ? ' active' : ''}`;
+      dotsWrap.appendChild(dot);
+    });
+    dots = Array.from(dotsWrap.querySelectorAll('.carousel-dot'));
+  }
 
   function setCarousel(index) {
     cards.forEach((card, i) => {
-      card.className = 'carousel-card';
+      card.classList.remove('active', 'next-1', 'next-2', 'prev-1', 'prev-2', 'c-hidden');
       const rel = ((i - index) % TOTAL + TOTAL) % TOTAL;
       if      (rel === 0)           card.classList.add('active');
       else if (rel === 1)           card.classList.add('next-1');
@@ -619,6 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (TOTAL > 0) {
+    buildCarouselDots();
     setCarousel(0);
     resetAuto();
 
@@ -782,12 +795,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Click en card activa → modal; click en card lateral → prev/next
       carousel.addEventListener('click', e => {
         const card = e.target.closest('.carousel-card');
-        if (!card) return;
+        if (!card || !cards.includes(card)) return;
         if (card.classList.contains('active')) {
           openCarouselModal(card);
         } else {
-          const allCards = [...carousel.querySelectorAll('.carousel-card')];
-          const clickIdx = allCards.indexOf(card);
+          const clickIdx = cards.indexOf(card);
           if (clickIdx !== -1) { setCarousel(clickIdx); resetAuto(); }
         }
       });

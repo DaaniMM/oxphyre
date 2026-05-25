@@ -4000,6 +4000,17 @@ Jerarquia final de procesado:
 
 ---
 
+## 2026-05-25 - Landing negocios demo TFG: 4 cards visibles
+
+- `backend/views/home.php`: el carrusel "Tu negocio, en primera persona" queda reducido temporalmente a 4 cards visibles para demo TFG: Restaurante (Free), Peluqueria (Pro), Hotel (Business) y Clinica (Legacy).
+- Las 8 cards siguen en el HTML/codigo; Gimnasio, Tienda, Inmobiliaria y Coworking quedan ocultas con `is-hidden-demo-card`, `hidden`, `aria-hidden="true"` y `data-demo-hidden="true"` para poder recuperarlas facilmente.
+- `public/js/main.js`: el carrusel ahora solo inicializa cards no ocultas y genera los indicadores desde esas cards visibles, por lo que flechas, dots y click/modal ignoran las cards ocultas.
+- `public/css/main.css`: se anadio una regla defensiva para que `.carousel-card.is-hidden-demo-card` no aparezca visualmente.
+- No se cambio `data-modal-src`, el visor Three.js del modal, enlaces a tours reales, backend funcional, BD, R2, dashboard, visor publico, rutas, sitemap, SEO global ni Cloudflare.
+- No se hizo commit ni push.
+
+---
+
 ## 2026-05-24 - Oxphyre Room dinamico Fase 1
 
 - `public/js/tour-viewer.js`: Oxphyre Room deja de colocar las fotos detalle con paredes fijas heredadas N/S/E/O y ahora calcula un layout dinamico segun el numero real de fotos disponibles: 1 centrada, 2 equilibradas, 3 en triptico y 4 distribuidas en arco completo.
