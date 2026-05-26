@@ -4453,3 +4453,28 @@ No se tocó el texto plano; los datos mostrados son idénticos.
 ### Verificación pendiente tras deploy
 
 Enviar prueba desde `/contacto` y confirmar fondo negro/oscuro en Gmail y Apple Mail.
+
+---
+
+## 2026-05-26 — Microfix visual /soporte: unificar formato de cards
+
+### Problema
+
+Las cards de `.support-card` (secciones "Primeros pasos" y "Compartir el tour") mostraban `<h3>Título</h3>` + `<p>descripción</p>` separados, mientras que los ítems de `.support-list` (secciones "Crear una visita virtual" y "Dudas habituales") usaban `<strong>Título:</strong> descripción` en la misma línea inline, generando inconsistencia visual.
+
+### Fix aplicado
+
+- **8 ítems `<li>` en `.support-list`** reestructurados: `<strong>Título</strong>` separado como bloque + `<p>descripción</p>` debajo.
+- Eliminados los dos puntos al final de los títulos de pasos (eran artefacto del formato inline).
+- Añadidas 2 reglas CSS mínimas al `<style>` inline de `soporte.php` (no se tocó `main.css`):
+  - `.support-list li strong { display: block; margin-bottom: 6px; color: var(--text-1); }` — título en blanco como las `h3` de `.support-card`.
+  - `.support-list li p { margin: 0; }` — descripción sin margen extra, ya hereda `var(--text-2)` de `.support-section p`.
+
+### Qué NO se tocó
+
+Header/footer, rutas, controllers, models, JS, dashboard, auth, visor, otras páginas públicas, contenido SEO, `main.css`.
+
+### Archivos modificados
+
+- `backend/views/soporte.php`
+- `DEVLOG.md`

@@ -168,6 +168,16 @@
       background: rgba(255, 255, 255, 0.04);
     }
 
+    .support-list li strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-1);
+    }
+
+    .support-list li p {
+      margin: 0;
+    }
+
     .support-contact {
       margin-top: 22px;
       padding: 24px;
@@ -252,10 +262,22 @@
         <p>Oxphyre organiza el recorrido por posiciones o zonas. Cada zona representa una parte del local: entrada, barra, comedor, sala, recepción, escaparate o cualquier punto que ayude al cliente a entender el espacio.</p>
         <p>Si estás preparando tu primer recorrido, revisa la guía de <a href="/blog/como-hacer-fotos-para-tour-virtual">cómo hacer fotos para tour virtual</a> antes de subir imágenes.</p>
         <ul class="support-list">
-          <li><strong>Subir fotos:</strong> añade imágenes claras del local, preferiblemente horizontales, luminosas y sin elementos sensibles a la vista.</li>
-          <li><strong>Crear posiciones o zonas:</strong> separa el recorrido en puntos concretos para que la visita tenga orden.</li>
-          <li><strong>Conectar con flechas:</strong> enlaza las zonas para que el visitante avance de forma natural dentro del tour.</li>
-          <li><strong>Revisar la vista pública:</strong> comprueba que el recorrido se entiende antes de compartirlo con clientes.</li>
+          <li>
+            <strong>Subir fotos</strong>
+            <p>Añade imágenes claras del local, preferiblemente horizontales, luminosas y sin elementos sensibles a la vista.</p>
+          </li>
+          <li>
+            <strong>Crear posiciones o zonas</strong>
+            <p>Separa el recorrido en puntos concretos para que la visita tenga orden.</p>
+          </li>
+          <li>
+            <strong>Conectar con flechas</strong>
+            <p>Enlaza las zonas para que el visitante avance de forma natural dentro del tour.</p>
+          </li>
+          <li>
+            <strong>Revisar la vista pública</strong>
+            <p>Comprueba que el recorrido se entiende antes de compartirlo con clientes.</p>
+          </li>
         </ul>
       </section>
 
@@ -285,10 +307,22 @@
       <section class="support-section">
         <h2>Dudas habituales</h2>
         <ul class="support-list">
-          <li><strong>¿Necesito cámara especial?</strong> No para empezar. Oxphyre está pensado para crear visitas con fotos del local.</li>
-          <li><strong>¿Puedo actualizar fotos?</strong> La idea es que puedas mantener el tour alineado con el estado real del negocio desde tu panel.</li>
-          <li><strong>¿Qué fotos funcionan mejor?</strong> Imágenes nítidas, bien iluminadas y tomadas desde puntos donde un cliente se colocaría al entrar o moverse por el local.</li>
-          <li><strong>¿Dónde pido ayuda?</strong> Escríbenos a <a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a> con el correo de tu cuenta y una explicación breve.</li>
+          <li>
+            <strong>¿Necesito cámara especial?</strong>
+            <p>No para empezar. Oxphyre está pensado para crear visitas con fotos del local.</p>
+          </li>
+          <li>
+            <strong>¿Puedo actualizar fotos?</strong>
+            <p>La idea es que puedas mantener el tour alineado con el estado real del negocio desde tu panel.</p>
+          </li>
+          <li>
+            <strong>¿Qué fotos funcionan mejor?</strong>
+            <p>Imágenes nítidas, bien iluminadas y tomadas desde puntos donde un cliente se colocaría al entrar o moverse por el local.</p>
+          </li>
+          <li>
+            <strong>¿Dónde pido ayuda?</strong>
+            <p>Escríbenos a <a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a> con el correo de tu cuenta y una explicación breve.</p>
+          </li>
         </ul>
         <div class="support-contact">
           <h2>¿Necesitas ayuda directa?</h2>
