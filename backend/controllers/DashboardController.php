@@ -46,6 +46,35 @@ class DashboardController extends BaseController
         require_once VIEWS_PATH . '/dashboard/index.php';
     }
 
+    public function showAnalytics(): void
+    {
+        $this->ensureCsrfToken();
+
+        $userId      = (int) ($_SESSION['user_id'] ?? 0);
+        $userName    = htmlspecialchars($_SESSION['user_name']  ?? '');
+        $userEmail   = htmlspecialchars($_SESSION['user_email'] ?? '');
+        $userRole    = $_SESSION['user_role'] ?? 'business_free';
+        $planLabel   = self::$planLabels[$userRole] ?? 'Free';
+        $userInitial = mb_strtoupper(mb_substr($userName, 0, 1));
+        $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+
+        require_once BACKEND_PATH . '/models/DashboardModel.php';
+        $model = new DashboardModel();
+
+        $totalScans     = $model->countTotalQrScans($userId);
+        $lastScanAt     = $model->getLastQrScanAt($userId);
+        $totalTours     = $model->countTours($userId);
+        $publishedTours = $model->countPublishedTours($userId);
+        $totalPositions = $model->countPositions($userId);
+        $scansByDay     = $model->getQrScansByDay($userId, 7);
+
+        // Límites plan Free (constantes de producto)
+        $limitTours     = 1;
+        $limitPositions = 3;
+
+        require_once VIEWS_PATH . '/dashboard/analiticas.php';
+    }
+
     public function showSettings(): void
     {
         $this->ensureCsrfToken();

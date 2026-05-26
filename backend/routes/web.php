@@ -52,7 +52,8 @@ $routes = [
         '/dashboard/posicion/nueva'    => ['PositionController', 'showCreate',  'auth'],
         '/dashboard/posicion/upload'   => ['PositionController', 'showUpload',  'auth'],
         '/dashboard/hotspots/list'     => ['HotspotController',  'showList',    'auth'],
-        '/dashboard/configuracion'     => ['DashboardController', 'showSettings', 'auth'],
+        '/dashboard/analiticas'        => ['DashboardController', 'showAnalytics', 'auth'],
+        '/dashboard/configuracion'     => ['DashboardController', 'showSettings',  'auth'],
         '/dashboard/admin'             => ['AdminController',    'index',       'auth'],
     ],
     'POST' => [

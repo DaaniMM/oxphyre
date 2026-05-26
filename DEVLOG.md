@@ -4549,3 +4549,63 @@ BD, tablas, auth, login, registro, visor público, QR, R2, analíticas, páginas
 - `backend/routes/web.php` (1 línea)
 - `backend/controllers/DashboardController.php` (+14 líneas)
 - `backend/views/dashboard/configuracion.php` (nueva vista)
+
+---
+
+## 2026-05-26 — Dashboard: página MVP /dashboard/analiticas (fase Free)
+
+### Contexto
+
+El sidebar tenía enlace a `/dashboard/analiticas` sin ruta implementada. Se crea la página MVP inicial orientada al plan Free.
+
+### Qué se implementó
+
+**Ruta y controlador:**
+- Ruta `GET /dashboard/analiticas` protegida con guard `auth` en `web.php`. Sin sesión redirige igual que el resto del dashboard.
+- Método `DashboardController::showAnalytics()`: extrae variables de sesión, instancia `DashboardModel`, obtiene 5 métricas reales de BD y pasa `$scansByDay` para el gráfico. Límites Free (`$limitTours=1`, `$limitPositions=3`) definidos en el controller como constantes de producto.
+
+**Modelo — 5 métodos nuevos en `DashboardModel`:**
+- `countTotalQrScans(userId)` — escaneos QR acumulados all-time del usuario.
+- `getLastQrScanAt(userId)` — timestamp del último escaneo QR (`MAX(scanned_at)`).
+- `countPublishedTours(userId)` — tours con `is_published=1`.
+- `countPositions(userId)` — posiciones activas sumadas en todos sus tours.
+- `getQrScansByDay(userId, 7)` — conteo por día calendario (últimos 7 días), devuelve array `['Y-m-d' => count]`.
+- Todos con prepared statements. Todos filtran `deleted_at IS NULL`. Ninguno inventa datos.
+
+**Vista `backend/views/dashboard/analiticas.php`:**
+- Sidebar con "Analíticas" como item activo.
+- **Encabezado**: título, subtítulo, badge "Plan Free", CTA "Mejorar a Pro" hacia `/precios`.
+- **4 KPIs** (reutiliza `.db-metrics` / `.db-metric-card` del dashboard): Escaneos QR totales, Último escaneo (con estado vacío honesto), Tours publicados (3 estados: publicado / creado sin publicar / sin tour), Uso del plan (X/1 tour · X/3 posiciones).
+- **Gráfico barras CSS-only** (sin librerías): 7 días con gaps cubiertos en PHP, barras proporcionales en CSS `height`, estado vacío honesto si no hay datos.
+- **Embudo visual** de 3 pasos: "QR escaneado" disponible en Free con conteo real, "Tour abierto" bloqueado Pro, "Cliente interesado" bloqueado Pro.
+- **6 cards Pro bloqueadas** con overlay, icono candado, badge Pro y CTA a `/precios`.
+- **Nota de privacidad** al pie.
+- Para planes no-Free: aviso "Vista Free activa, analíticas Pro en fase siguiente."
+
+### Qué NO se inventó
+
+Ningún número es inventado. Si no hay escaneos, el KPI muestra 0. Si no hay último escaneo, muestra "Sin escaneos todavía". El gráfico vacío muestra estado honesto. Las cards Pro bloqueadas tienen barras decorativas claramente ficticias y desenfocadas para contextualizar la propuesta, no datos de usuario.
+
+### Qué queda para la siguiente fase
+
+Analíticas específicas de plan Pro/Business: visitas por día, dispositivos, evolución semanal, rendimiento por tour, comparativa y exportación.
+
+### Qué NO se tocó
+
+BD, tablas, QR tracking, visor público, R2, auth, login, registro, páginas públicas, `/dashboard/configuracion`, `main.css`, `dashboard.css`.
+
+### Archivos modificados/creados
+
+- `backend/routes/web.php` (+1 línea)
+- `backend/controllers/DashboardController.php` (+29 líneas)
+- `backend/models/DashboardModel.php` (+93 líneas, 5 métodos nuevos)
+- `backend/views/dashboard/analiticas.php` (nueva vista)
+
+---
+
+## 2026-05-26 — Microfix /dashboard/analiticas: copy honesto en embudo bloqueado
+
+Dos textos del embudo prometían métricas no implementadas. Ajuste mínimo de copy sin tocar diseño, modelo, controller ni rutas:
+
+- **"Tour abierto"** → nota: "Medición de aperturas y actividad del tour disponible en Pro." (eliminado "cuánto tiempo estuvieron").
+- **"Cliente interesado"** → nota: "Señales comerciales avanzadas como clics en zonas destacadas o CTAs." (eliminado "intención de reserva"). Badge cambiado de `Pro` a `Roadmap` (`db-badge--draft`) para reflejar que es evolución futura, no Pro actual.
