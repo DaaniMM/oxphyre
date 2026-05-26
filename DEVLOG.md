@@ -4504,3 +4504,9 @@ H1, metas, schema, textos, FAQ, rutas, controllers, models, JS, dashboard, auth,
 
 - `backend/views/tour-virtual-para-restaurantes.php` (2 líneas)
 - `DEVLOG.md`
+
+---
+
+## 2026-05-26 — Microfix visual /tour-virtual-para-restaurantes: alinear FAQ
+
+Sección FAQ también usaba `mvp-narrow`; se cambió a `mvp-container` para alinearla con el resto de la página. 1 línea modificada en la vista, sin tocar CSS ni contenido.

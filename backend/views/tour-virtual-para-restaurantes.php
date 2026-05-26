@@ -152,7 +152,7 @@
     </section>
 
     <section class="mvp-section" id="restaurant-faq">
-      <div class="mvp-narrow">
+      <div class="mvp-container">
         <h2>Preguntas frecuentes</h2>
         <div class="mvp-faq">
           <article><h3>¿Necesito cámara 360?</h3><p>No. Puedes empezar con fotos o panorámicas de móvil y organizar el recorrido por zonas del restaurante.</p></article>
