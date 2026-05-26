@@ -4510,3 +4510,9 @@ H1, metas, schema, textos, FAQ, rutas, controllers, models, JS, dashboard, auth,
 ## 2026-05-26 — Microfix visual /tour-virtual-para-restaurantes: alinear FAQ
 
 Sección FAQ también usaba `mvp-narrow`; se cambió a `mvp-container` para alinearla con el resto de la página. 1 línea modificada en la vista, sin tocar CSS ni contenido.
+
+---
+
+## 2026-05-26 — Microfix visual /blog: alinear FAQ y CTA final
+
+FAQ (`#blog-faq`) y CTA final (`.mvp-final`) usaban `mvp-narrow` (820px) mientras el resto de la página usaba `mvp-container` (1120px). Cambiadas las 2 líneas a `mvp-container`. Sin CSS nuevo ni cambios de contenido.
