@@ -4628,3 +4628,144 @@ Pulido de copy/UX/UI de la vista Free para comunicar valor de negocio, sin tocar
 - **Nota privacidad**: mantenida sin cambios — "No se registran IP completas ni user agents" es correcto (el modelo pasa `NULL` explícito a `ip_address` y `user_agent`).
 
 **Qué NO se tocó:** modelo, controller, rutas, BD, QR tracking, visor, R2, auth, páginas públicas, `dashboard.css`, `main.css`.
+
+---
+
+## 2026-05-26 — /dashboard/analiticas: experiencia Pro completa
+
+### Contexto
+
+La vista `/dashboard/analiticas` ya tenía una experiencia Free validada.
+Usuarios con `business_pro`, `business_business` y `admin` recibían un aviso
+"Vista Free activa" sin valor real. Este bloque implementa la experiencia Pro completa.
+
+### Auditoría de datos disponibles (FASE 1)
+
+Revisados `DashboardModel`, `QrScanModel`, `QrController` y tablas antes de tocar la vista:
+
+**Datos reales disponibles en BD:**
+- `qr_scans.device_type` — `'mobile'|'tablet'|'desktop'|'unknown'`, registrado por `QrController::detectDeviceType()` en cada escaneo.
+- Escaneos agrupados por día — ya existía `getQrScansByDay()`. Se extiende a 14 días para Pro.
+- Escaneos agrupados por tour — nuevo `getTourScanRanking()` via `qr_scans → qr_codes → tours`.
+- Comparativa semanal — nuevo `getWeekComparison()`: cuenta last 7 días y prev 7 días por separado.
+
+**Sin tracking real todavía:**
+- Aperturas directas del tour (visitas): no existe tabla ni registro para esto.
+- Interacciones con hotspots dentro del visor.
+- QRs diferenciados por canal o campaña.
+- Conversión QR → Tour (requiere tracking de apertura del tour).
+
+### Qué se implementó
+
+**`backend/models/DashboardModel.php` (3 métodos nuevos Pro):**
+- `getDeviceTypeCounts(int $userId): array` — count por device_type con prepared statement. Vacío si no hay escaneos.
+- `getTourScanRanking(int $userId, int $limit = 5): array` — tours ordenados por escaneos con LEFT JOIN. Incluye tours con 0 escaneos.
+- `getWeekComparison(int $userId): array` — dos queries: last 7 días y prev 7 días. Retorna `['last7' => int, 'prev7' => int]`.
+- Todos con prepared statements, todos filtran `deleted_at IS NULL`.
+
+**`backend/controllers/DashboardController.php` — `showAnalytics()`:**
+- Añadido `$isPro = in_array($userRole, ['business_pro', 'business_business', 'admin'])`.
+- Añadido `$isBusinessPlan = ($userRole === 'business_business')`.
+- Para `$isPro = true`: carga `getQrScansByDay($userId, 14)`, `getDeviceTypeCounts()`, `getTourScanRanking()`, `getWeekComparison()`.
+- Para `$isPro = false`: arrays vacíos + weekComparison = `['last7'=>0,'prev7'=>0]`.
+- Datos comunes (Free) se cargan siempre.
+- Admin recibe la vista Pro con datos vacíos si no tiene negocios — estado vacío elegante.
+
+**`backend/views/dashboard/analiticas.php` — nueva experiencia Pro:**
+
+Añadido bloque `@var` PHPDoc al inicio del archivo para suprimir avisos P1008 de Intelephense sobre variables inyectadas por el controller.
+
+Estructura de la vista:
+- `if ($isPro):` → experiencia Pro completa.
+- `else:` → experiencia Free intacta (sin cambios).
+- `endif;` — Free queda completamente aislada.
+
+**A) Cabecera Pro:**
+- Subtítulo: "Mide el rendimiento real de tus QRs, tours y puntos de contacto."
+- Badges: "Plan Pro", "QR profesional", "Analíticas básicas".
+- CTA arriba-derecha: "Mejorar a Business →" hacia `/precios` (oculto para Business y Admin).
+
+**B) 4 KPI cards Pro (`.atl-pro-kpi-card`):**
+1. Escaneos QR totales — dato real, valor grande con JetBrains Mono.
+2. Escaneos últimos 7 días — dato real + trend badge: `up/down/flat` calculado con `weekComparison`. Badge "↑ Primeros datos" si hay escaneos esta semana pero 0 la anterior.
+3. Tours publicados / total creados — datos reales.
+4. Último escaneo — fecha formateada o "—".
+- Sin datos fake. Estado vacío con "—" y nota accionable.
+
+**C) Gráfica principal 14 días:**
+- CSS-only bar chart, 14 barras, etiquetas con inicial del día (L/M/X/J/V/S/D).
+- Datos reales de `getQrScansByDay($userId, 14)`.
+- Leyenda con "Escaneos QR · datos reales" + "Aperturas del tour · pendiente de tracking" (sin fakedata).
+- Nota honesta al pie: "Los datos reflejan únicamente escaneos QR. El tracking de aperturas directas se activará en una próxima versión."
+- Si no hay escaneos: empty state con copy Pro específico.
+
+**D) Embudo Pro:**
+- Paso 1: QR scan → Disponible (dato real).
+- Paso 2: Tour visit → Badge "Pendiente" (sin tracking real).
+- Paso 3: Interacción → Badge "Roadmap Pro".
+- Nota pie: "Pro mide el rendimiento básico. Business desbloquea intención comercial, atribución y recomendaciones avanzadas."
+
+**E) Grid 6 analíticas Pro desbloqueadas (`.atl-pro-grid-card`, sin blur, sin candado):**
+1. Visitas por día — mini bar chart CSS de 7 días (datos reales) + badge "Aperturas del tour: pendiente".
+2. Dispositivos — barras reales por mobile/desktop/tablet/unknown si `$totalDeviceScans > 0`; si 0: empty state honesto.
+3. Rendimiento por tour — ranking real por escaneos; si tours tienen 0 escaneos, los muestra con barra 0 + nota; si sin tours, empty state.
+4. Puntos de contacto QR — siempre empty state: "Disponible cuando se creen QRs diferenciados por canal."
+5. Evolución semanal — comparativa real last7 vs prev7 con números. Si ambos 0: empty state.
+6. Exportación — botón disabled con badge "Próximamente". No funcional, no hay export real.
+
+**F) Sección Business aspiracional:**
+- Card grande con borde y gradiente dorado premium (oklch ~83% 0.14 78, distinto del ámbar Pro).
+- Eyebrow "Business" + título + subtítulo + highlight text.
+- Grid de 6 módulos teaser: Heatmaps, Scoring de intención, Atribución, Embudo comercial, Recomendaciones automáticas, Segmentación avanzada.
+- Cada módulo con badge "Business" y descripción real (roadmap, no fake).
+- Footer: si `$isBusinessPlan` → "Estas funcionalidades están en desarrollo para tu plan Business"; si Pro → CTA "Explorar Business →" a `/precios`.
+
+### Principios honrados
+
+- No se inventó ningún número ni porcentaje.
+- Las métricas sin tracking dicen explícitamente "Sin datos reales todavía", "Pendiente de tracking" o "Próximamente".
+- No se crearon tablas nuevas ni se tocó la BD.
+- No se tocó el QR tracking real existente.
+- No se implementaron formularios POST nuevos.
+- La exportación aparece deshabilitada (no hay export real implementado).
+- Free queda completamente intacta — código del `else:` es el original sin cambios.
+
+### Qué NO se tocó
+
+BD, migraciones, QR tracking, visor público, R2, Cloudflare, auth, login, register, dashboard/configuracion, páginas públicas, rutas, `main.css`, `dashboard.css` (solo se añadió CSS inline en el `<style>` de la vista).
+
+### Archivos modificados
+
+- `backend/models/DashboardModel.php` (+95 líneas, 3 métodos Pro nuevos)
+- `backend/controllers/DashboardController.php` (+17 líneas, carga condicional de datos Pro)
+- `backend/views/dashboard/analiticas.php` (+1165 líneas netas, vista Pro completa + @var declarations)
+
+---
+
+## 2026-05-26 — Microfix /dashboard/analiticas Pro: ajustes de producto antes de commit
+
+Correcciones de copy, jerarquía de KPIs y un blindaje técnico en `DashboardModel`.
+
+### Cambios aplicados
+
+**KPI 3 Pro — Conversión QR → Tour:**
+Sustituido el KPI "Tours publicados" por "Conversión QR → Tour". La conversión es la métrica Pro más relevante de este bloque. Al no existir tracking de apertura del tour, la card muestra valor `—`, nota "Necesitamos tracking de apertura del tour para calcular esta métrica." y badge "Pendiente de tracking". Es honesta y comunica que la métrica es Pro aunque no tenga datos todavía.
+
+**Renombrar "Visitas por día" → "Actividad por día":**
+La card usaba datos de escaneos QR, no de aperturas reales del tour. Llamarla "Visitas" prometía algo que no estaba midiendo. Se cambia a "Actividad por día" con copy "Detecta qué días generan más interés en tus QRs." — exacto, sin promesas.
+
+**Embudo Pro — eliminar "tiempo" del paso 3:**
+`"Señales de interacción dentro del visor: clics, zonas y tiempo."` → `"Señales futuras de interacción dentro del visor: clics en hotspots y zonas destacadas."` — sin prometer tracking de tiempo ni datos activos no existentes. Mantiene badge "Roadmap Pro".
+
+**Typo corregido:**
+`"Pending de tracking por canal"` → `"Pendiente de tracking por canal"` (mezcla inglés/español en el original).
+
+**`getTourScanRanking()` — blindaje de LIMIT:**
+PDO con `LIMIT ?` puede dar problemas de tipo en algunos drivers MySQL/PDO cuando el parámetro llega como integer de PHP. El valor ya estaba forzado con `max(1, min($limit, 20))`. Se concatena `(int) $limit` directamente en el SQL y se ejecuta solo con `[$userId]`. No hay riesgo de SQL injection: el valor es un entero forzado antes de la concatenación.
+
+**Admin en `$isPro`:**
+Se mantiene sin cambio. Admin sin negocios ve la experiencia Pro con estados vacíos — correcto y seguro. Mostrarle "Mejorar a Pro" sería incorrecto para ese rol.
+
+### Qué NO se tocó
+
+BD, migraciones, QR tracking, visor, R2, auth, páginas públicas, rutas, `main.css`, `dashboard.css`. No se hizo commit ni push. Free sigue intacta en el bloque `else:`.

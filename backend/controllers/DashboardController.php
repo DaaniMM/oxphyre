@@ -61,6 +61,7 @@ class DashboardController extends BaseController
         require_once BACKEND_PATH . '/models/DashboardModel.php';
         $model = new DashboardModel();
 
+        // ── Datos comunes (Free y Pro) ──────────────────────────────────────
         $totalScans     = $model->countTotalQrScans($userId);
         $lastScanAt     = $model->getLastQrScanAt($userId);
         $totalTours     = $model->countTours($userId);
@@ -71,6 +72,22 @@ class DashboardController extends BaseController
         // Límites plan Free (constantes de producto)
         $limitTours     = 1;
         $limitPositions = 3;
+
+        // ── Datos adicionales Pro / Business / Admin ────────────────────────
+        $isPro         = in_array($userRole, ['business_pro', 'business_business', 'admin'], true);
+        $isBusinessPlan = ($userRole === 'business_business');
+
+        $scansByDay14   = [];
+        $deviceCounts   = [];
+        $tourRanking    = [];
+        $weekComparison = ['last7' => 0, 'prev7' => 0];
+
+        if ($isPro) {
+            $scansByDay14   = $model->getQrScansByDay($userId, 14);
+            $deviceCounts   = $model->getDeviceTypeCounts($userId);
+            $tourRanking    = $model->getTourScanRanking($userId, 5);
+            $weekComparison = $model->getWeekComparison($userId);
+        }
 
         require_once VIEWS_PATH . '/dashboard/analiticas.php';
     }
