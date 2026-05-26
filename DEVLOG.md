@@ -4259,3 +4259,28 @@ Las reglas `cursor: pointer/text/not-allowed` se ponen dentro de `@media (pointe
 
 - No se tocaron footer, controllers, models, routes, SQL, dashboard, auth, visor publico, cursor, BD, R2, QR, hotspots ni contenido SEO.
 - No se hizo commit ni push.
+
+---
+
+## 2026-05-26 - Microfix cursor accent sobre CTAs ámbar
+
+### Que se hizo
+
+- En `public/js/public-cursor.js` se añadio la constante `ACCENT_TARGETS` con los 9 selectores de CTAs con fondo ambar auditados: `.btn-primary`, `.plan-cta.featured-cta`, `.cta-final-btn`, `.mvp-btn-primary`, `.contact-submit`, `.seo-primary`, `.support-button-primary`, `.pricing-cta-section .cta-btn`, `.info-button-primary`.
+- La funcion `bindHover()` usa un unico loop sobre `INTERACTIVE`. Dentro del mouseenter se comprueba `el.matches(ACCENT_TARGETS)` y, si coincide, se añade tambien `.cursor-accent` al anillo. En el mouseleave se eliminan `cursor-hover` y `cursor-accent` con un unico `classList.remove()` para evitar estado residual.
+- En `public/css/main.css` se añadio la regla `#cursor-ring.cursor-accent` con `border-color: #050505`, `background: rgba(0,0,0,0.06)` y `box-shadow` de halo ámbar exterior. Se extendio la `transition` del `#cursor-ring` base para incluir `background` y `box-shadow`, de modo que el cambio de estado sea animado.
+- No se tocaron elementos HTML ni se añadieron clases al markup.
+
+### Que NO se hizo
+
+- No se toco `home.php`, `dashboard/`, `auth/`, `tour.php`, `tour-viewer.js`, `main.js`, navegacion, footer, controllers, models, routes, SQL/BD, R2, QR ni hotspots.
+- No se hizo commit ni push.
+
+### Logica de doble clase
+
+`cursor-hover` gestiona el tamaño (32px). `cursor-accent` gestiona solo el color de borde y fondo. Se añaden juntas en hover sobre CTA ambar; en cualquier otro interactivo solo se añade `cursor-hover`. El mouseleave quita ambas incondicionalmente para evitar que el anillo quede en estado oscuro al salir rapido de un CTA ambar.
+
+### Archivos modificados
+
+- `public/css/main.css` — transicion extendida + regla `cursor-accent`
+- `public/js/public-cursor.js` — `ACCENT_TARGETS` + logica de doble clase

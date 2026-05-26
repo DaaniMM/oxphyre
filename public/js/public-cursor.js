@@ -6,6 +6,7 @@
  *  - Cancela si #cursor-ring no existe en el DOM.
  *  - Mueve el anillo con mousemove.
  *  - Añade/quita .cursor-hover al pasar por elementos interactivos.
+ *  - Añade .cursor-accent (borde oscuro) sobre CTAs con fondo ámbar.
  * ----------------------------------------------------------------- */
 (function () {
   'use strict';
@@ -22,7 +23,7 @@
       'translate(' + e.clientX + 'px, ' + e.clientY + 'px) translate(-50%, -50%)';
   }, { passive: true });
 
-  /* Selector de elementos interactivos que amplían el anillo */
+  /* ── Selector de elementos interactivos que amplían el anillo ── */
   var INTERACTIVE = [
     'a',
     'button',
@@ -40,13 +41,31 @@
     '.feature-card'
   ].join(', ');
 
+  /* ── CTAs con fondo ámbar: el anillo cambia a oscuro sobre ellos ── */
+  var ACCENT_TARGETS = [
+    '.btn-primary',
+    '.plan-cta.featured-cta',
+    '.cta-final-btn',
+    '.mvp-btn-primary',
+    '.contact-submit',
+    '.seo-primary',
+    '.support-button-primary',
+    '.pricing-cta-section .cta-btn',
+    '.info-button-primary'
+  ].join(', ');
+
   function bindHover() {
     document.querySelectorAll(INTERACTIVE).forEach(function (el) {
       el.addEventListener('mouseenter', function () {
         ring.classList.add('cursor-hover');
+        /* Si el elemento coincide con un CTA ámbar, añadir estado oscuro */
+        if (el.matches(ACCENT_TARGETS)) {
+          ring.classList.add('cursor-accent');
+        }
       });
       el.addEventListener('mouseleave', function () {
-        ring.classList.remove('cursor-hover');
+        /* Quitar ambas clases en un único remove para no dejar estado residual */
+        ring.classList.remove('cursor-hover', 'cursor-accent');
       });
     });
   }
