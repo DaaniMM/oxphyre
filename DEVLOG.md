@@ -4478,3 +4478,29 @@ Header/footer, rutas, controllers, models, JS, dashboard, auth, visor, otras pá
 
 - `backend/views/soporte.php`
 - `DEVLOG.md`
+
+---
+
+## 2026-05-26 — Microfix visual /tour-virtual-para-restaurantes: unificar ancho de secciones
+
+### Problema
+
+Dos secciones usaban `mvp-narrow` (ancho máx. 820px) como contenedor interior mientras el resto de la página usaba `mvp-container` (ancho máx. 1120px), generando un aspecto descuadrado:
+
+- Sección "Diferencia frente a agencia o cámara 360"
+- CTA final "Empieza con un recorrido sencillo de tu restaurante"
+
+La sección FAQ también usa `mvp-narrow` pero queda intencional para contenido de lectura larga.
+
+### Fix aplicado
+
+Cambio de `mvp-narrow` → `mvp-container` en el `<div>` interior de las dos secciones indicadas. Sin CSS nuevo; ambas clases ya existían en `main.css`.
+
+### Qué NO se tocó
+
+H1, metas, schema, textos, FAQ, rutas, controllers, models, JS, dashboard, auth, visor, otras páginas, `main.css`.
+
+### Archivos modificados
+
+- `backend/views/tour-virtual-para-restaurantes.php` (2 líneas)
+- `DEVLOG.md`

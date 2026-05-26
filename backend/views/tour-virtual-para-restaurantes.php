@@ -145,7 +145,7 @@
     </section>
 
     <section class="mvp-section">
-      <div class="mvp-narrow">
+      <div class="mvp-container">
         <h2>Diferencia frente a agencia o cámara 360</h2>
         <p>Una agencia o una cámara 360 pueden tener sentido si buscas una producción de alto presupuesto. Oxphyre cubre otro momento: crear una solución sencilla, asequible y autogestionable para que un restaurante local pueda empezar a enseñar su espacio sin bloquearse por coste, agenda o equipo.</p>
       </div>
@@ -176,7 +176,7 @@
     </section>
 
     <section class="mvp-section mvp-final">
-      <div class="mvp-narrow">
+      <div class="mvp-container">
         <h2>Empieza con un recorrido sencillo de tu restaurante</h2>
         <p>Elige entrada, comedor y terraza como primeras zonas. Cuando tengas el recorrido claro, compártelo con enlace o QR y comprueba cómo lo ve un cliente desde el móvil.</p>
         <div class="mvp-actions">
