@@ -813,3 +813,15 @@ Soft delete activo en `businesses`, `tours`, `positions`, `photos`, `hotspots`.
 **Nota histórica:** La lista original mezclaba tareas críticas, deuda técnica y mejoras futuras. Se conserva todo el contenido útil, pero queda separado para priorizar mejor la entrega del TFG.
 
 **Decision vigente:** Para el TFG, priorizar requisitos visibles del tribunal y estabilidad: roles, demo, responsive, SEO/PageSpeed y seguridad. `/precios`, API externa y SEO tecnico inicial ya estan cerrados y validados tecnicamente; no ampliar alcance grande si pone en riesgo la entrega.
+
+## Roles y accesos diferenciados
+
+Para el TFG, Oxphyre diferencia estos perfiles:
+
+- Visitante anónimo: accede a páginas públicas y tours publicados.
+- Usuario Free: gestiona un negocio/tour limitado con watermark.
+- Usuario Pro: gestiona más negocios/tours y publica sin watermark.
+- Usuario Business: tier premium con límites ampliados y roadmap avanzado.
+- Administrador: supervisión global solo lectura mediante `/dashboard/admin`.
+
+El rol administrador se limita deliberadamente a lectura en esta versión TFG para evitar acciones destructivas o cambios sensibles de datos. Funciones como cambio de plan, suspensión, restauración de entidades o gestión avanzada quedan como evolución posterior.

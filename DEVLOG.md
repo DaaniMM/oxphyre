@@ -4114,6 +4114,18 @@ Dar al rol `admin` una primera vista funcional de supervisión de la plataforma,
 - No se toco CSS, JS, frontend público, visor, R2, subida de imágenes, rutas públicas ni landing.
 - Fase futura posible (post-TFG): ocultar/restaurar negocios o tours desde el panel admin, ver detalles de un usuario, filtros por plan, exportación de métricas.
 
-### No se hizo commit ni push.
 
----
+## 2026-05-26 - Cierre decisión roles y Admin MVP
+
+- Se revisó el sistema actual de roles para defensa TFG.
+- Se define Oxphyre con cinco perfiles defendibles:
+  - visitante anónimo;
+  - usuario Free;
+  - usuario Pro;
+  - usuario Business;
+  - administrador.
+- Se confirma que el panel Admin MVP queda como supervisión solo lectura para el TFG.
+- Decisión: no añadir todavía acciones de escritura como cambiar plan, suspender, borrar o restaurar entidades desde Admin.
+- Motivo: esas acciones son útiles para producto real, pero aumentan riesgo técnico, permisos, CSRF, soft delete y pruebas justo antes de la entrega.
+- La administración avanzada queda documentada como evolución post-TFG.
+- No se tocaron código, BD, rutas ni permisos.
