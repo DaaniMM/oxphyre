@@ -4359,3 +4359,48 @@ El subject final se construye como `"Contacto Oxphyre - " . $label` y se limita 
 ### Archivos modificados
 
 - `backend/models/ContactMessageModel.php` — añadido `buildSubject()`, `subject` en INSERT y en `execute()`
+
+---
+
+## 2026-05-26 - Microfix: destinatario de contacto configurable por .env
+
+### Contexto
+
+`EmailService::sendContactNotification()` tenía el destinatario hardcodeado como `hola@oxphyre.com`. Cloudflare Email Routing está configurado para reenviar `support@oxphyre.com` al buzón real; es el alias operativo para el canal de soporte/contacto.
+
+### Fix aplicado
+
+Se reemplazó la línea con dirección hardcodeada por lectura desde `$_ENV`:
+
+```php
+$toEmail = $_ENV['CONTACT_TO_EMAIL'] ?? 'support@oxphyre.com';
+$toName  = $_ENV['CONTACT_TO_NAME']  ?? 'Oxphyre Support';
+$mail->addAddress($toEmail, $toName);
+```
+
+El `addReplyTo` con el email/nombre del usuario que rellena el formulario queda sin cambios — permite responder directamente desde el cliente de correo sin copiar la dirección manualmente.
+
+### Variables de entorno añadidas a `.env.example`
+
+```
+CONTACT_TO_EMAIL=support@oxphyre.com
+CONTACT_TO_NAME="Oxphyre Support"
+```
+
+Deben añadirse al `.env` real en servidor para sobreescribir el fallback, aunque el fallback ya apunta al valor correcto.
+
+### Por qué Cloudflare Email Routing
+
+`support@oxphyre.com` no tiene buzón propio; Cloudflare Email Routing intercepta el correo entrante y lo reenvía al buzón real sin coste adicional. No requiere servidor de correo propio ni MX propios: el MX de Cloudflare recibe y reenvía. El remitente y el `Reply-To` del formulario quedan intactos para el destinatario final.
+
+### Qué NO se tocó
+
+- `ContactController.php`, `ContactMessageModel.php` — sin cambios.
+- Vistas, rutas, CSS/JS, SQL/BD, dashboard, auth, visor, footer/nav — sin cambios.
+- `.env` real (ignorado por git) — no modificado.
+- No se hizo commit ni push.
+
+### Archivos modificados
+
+- `backend/services/EmailService.php` — `sendContactNotification()`: destinatario leído desde `$_ENV` con fallback `support@oxphyre.com`
+- `.env.example` — añadidas `CONTACT_TO_EMAIL` y `CONTACT_TO_NAME` con comentario explicativo

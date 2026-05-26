@@ -72,7 +72,9 @@ class EmailService
     {
         try {
             $mail = $this->buildMailer();
-            $mail->addAddress('hola@oxphyre.com', 'Oxphyre');
+            $toEmail = $_ENV['CONTACT_TO_EMAIL'] ?? 'support@oxphyre.com';
+            $toName  = $_ENV['CONTACT_TO_NAME']  ?? 'Oxphyre Support';
+            $mail->addAddress($toEmail, $toName);
             $mail->addReplyTo((string) $data['email'], (string) $data['name']);
             $mail->isHTML(true);
             $mail->Subject = 'Nuevo mensaje de contacto en Oxphyre #' . $messageId;
