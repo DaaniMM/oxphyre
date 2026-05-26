@@ -4284,3 +4284,43 @@ Las reglas `cursor: pointer/text/not-allowed` se ponen dentro de `@media (pointe
 
 - `public/css/main.css` — transicion extendida + regla `cursor-accent`
 - `public/js/public-cursor.js` — `ACCENT_TARGETS` + logica de doble clase
+
+---
+
+## 2026-05-26 - Cierre decision i18n ES/EN: landing bilingüe, secundarias en español
+
+### Decision tomada
+
+Tras auditoría completa de internacionalización se cierra la estrategia de i18n para el TFG:
+
+- **La landing `/` es la unica pagina publica con selector ES/EN funcional.** Tiene `lang-btn` en nav desktop, menú movil y footer. Carga `i18n.js` + `main.js` con `initLang()`. Cada texto tiene `data-i18n`. Sistema validado y demostrable en la exposicion.
+- **Todas las paginas secundarias quedan fijadas en español.** No hay `lang-btn`, no se carga `i18n.js` y no se llama a `initLang()`. El footer de secundarias tiene atributos `data-i18n` residuales (heredados al unificar el componente) que no producen ningun efecto sin el script cargado. No se modifican.
+- **i18n completo queda como roadmap post-TFG.** El diccionario en `i18n.js` cubre landing + auth. Para secundarias faltarian claves de soporte, sobre-nosotros, contacto (con errores PHP), blog y legales. Las paginas SEO (`/tour-virtual-para-negocios`, `/tour-virtual-para-restaurantes`, blog) son contenido editorial en español orientado al mercado local; traducirlas sin hreflang comprometeria el posicionamiento.
+- **Paginas auth** (`/login`, `/registro`, `/recuperar`, `/reset`) cargan `i18n.js` e `initLang()` porque comparten el diccionario `auth.*` de la landing. Se mantienen sin cambios.
+
+### Microfix en `/precios`
+
+`/precios` cargaba `i18n.js` y llamaba a `initLang()` desde su inline script. Eso significaba que si el usuario habia elegido EN en la landing (guardado en `localStorage['oxphyre-lang']`), al llegar a `/precios` las cards de planes se mostraban en ingles pero el H1, la tabla comparativa, el FAQ y el CTA final quedaban en español: mezcla parcial involuntaria.
+
+**Fix:** se elimino el `<script src=".../i18n.js">` y la llamada `window.i18n.initLang()` del inline script de `/precios`. La pagina queda completamente en español independientemente de lo que haya en localStorage. Los atributos `data-i18n` que quedaron en el HTML son inofensivos sin el script cargado.
+
+### Estado resultante verificado
+
+| Punto | Estado |
+|---|---|
+| `home.php` tiene `lang-btn` en nav, menú movil y footer | ✅ sin tocar |
+| Ninguna pagina secundaria muestra selector ES/EN | ✅ confirmado |
+| `/precios` no aplica traduccion parcial aunque localStorage tenga `en` | ✅ fix aplicado |
+| `i18n.js` y `main.js` no modificados | ✅ sin tocar |
+| No se toco contenido SEO, H1, metas, nav ni footer de secundarias | ✅ |
+
+### Que NO se hizo
+
+- No se implemento i18n en secundarias.
+- No se crearon archivos de traduccion.
+- No se toco dashboard, auth, visor publico, controllers, models, routes, SQL, BD, R2, QR ni hotspots.
+- No se hizo commit ni push.
+
+### Archivos modificados
+
+- `backend/views/precios.php` — eliminada carga de `i18n.js` y llamada a `initLang()`; añadido comentario explicativo

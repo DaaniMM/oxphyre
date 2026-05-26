@@ -653,8 +653,12 @@
   </main>
 
 
-  <!-- Scripts: Lucide + i18n + inline JS (sin Three.js, sin main.js) -->
-  <script src="<?= asset('/js/i18n.js') ?>" defer></script>
+  <!-- Scripts: Lucide + inline JS (sin Three.js, sin main.js, sin i18n.js) -->
+  <!-- i18n.js NO se carga aquí: /precios queda fijada en español.            -->
+  <!-- Si localStorage tuviera oxphyre-lang=en (por la landing), esta página  -->
+  <!-- no lo aplica y evita mezcla parcial ES/EN. Bilingüismo completo queda  -->
+  <!-- como roadmap post-TFG. La landing / sigue siendo la única página con   -->
+  <!-- selector ES/EN funcional.                                               -->
 
   <script>
   (function () {
@@ -663,9 +667,6 @@
     document.addEventListener('DOMContentLoaded', function () {
       // ── Lucide icons ──
       if (typeof lucide !== 'undefined') lucide.createIcons();
-
-      // ── i18n ──
-      if (window.i18n) window.i18n.initLang();
 
       // ── Nav glassmorphism al hacer scroll ──
       var nav = document.getElementById('nav');
