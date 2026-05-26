@@ -418,6 +418,40 @@ Nunca usar `DELETE FROM` en esos modelos. Usar:
 
 Todos los SELECT de esos modelos deben filtrar `deleted_at IS NULL`.
 
+### Roles y permisos — decisión vigente TFG
+
+Oxphyre diferencia cinco perfiles defendibles para el TFG:
+
+1. Visitante anónimo/invitado:
+   - Puede ver landing, precios, blog, páginas públicas y tours publicados mediante enlace público o QR.
+   - No accede al dashboard ni a rutas privadas.
+
+2. Usuario dueño de negocio Free:
+   - Rol `business_free`.
+   - Puede gestionar su dashboard, negocios, tours, posiciones, fotos, QR básico, mapa y flechas básicas.
+   - Límites vigentes: 1 negocio, 1 tour por negocio y hasta 3 posiciones por tour.
+   - Sus tours públicos muestran watermark Oxphyre.
+
+3. Usuario dueño de negocio Pro:
+   - Rol `business_pro`.
+   - Puede gestionar su dashboard con límites ampliados.
+   - Límites vigentes: hasta 5 negocios, tours ilimitados y hasta 20 posiciones por tour.
+   - Sus tours públicos no muestran watermark.
+
+4. Usuario dueño de negocio Business:
+   - Rol `business_business`.
+   - Representa el tier premium/avanzado.
+   - Límites ilimitados en el MVP actual.
+   - Varias funciones premium como marca blanca, dominio personalizado, API avanzada o Gaussian quedan como roadmap, no como disponibles completas.
+
+5. Administrador:
+   - Rol `admin`.
+   - Accede a `/dashboard/admin`.
+   - En el TFG queda definido como panel de supervisión global solo lectura.
+   - Ve métricas globales y listados recientes de usuarios, negocios y tours.
+   - No modifica tiers, no elimina, no restaura y no realiza acciones destructivas en esta versión.
+   - La administración avanzada queda como evolución post-TFG para reducir riesgo y mantener seguridad antes de la entrega.
+
 ---
 
 ## Ideas en debate
