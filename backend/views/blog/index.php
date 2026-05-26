@@ -137,7 +137,7 @@
     </section>
 
     <section class="mvp-section" aria-labelledby="blog-faq">
-      <div class="mvp-narrow">
+      <div class="mvp-container">
         <h2 id="blog-faq">Preguntas frecuentes</h2>
         <div class="mvp-faq">
           <article>
@@ -157,7 +157,7 @@
     </section>
 
     <section class="mvp-section mvp-final">
-      <div class="mvp-narrow">
+      <div class="mvp-container">
         <h2>Crea tu primer recorrido y compártelo donde ya están tus clientes</h2>
         <p>Prueba Oxphyre con un primer tour sencillo, mejora las fotos cuando lo necesites y usa el blog como apoyo para hacerlo más claro.</p>
         <div class="mvp-actions">
