@@ -4204,3 +4204,42 @@ Dar al rol `admin` una primera vista funcional de supervisión de la plataforma,
 ### Decision tecnica
 
 Las reglas `cursor: pointer/text/not-allowed` se ponen dentro de `@media (pointer: coarse)` (no globales) porque: en `pointer: fine`, `* { cursor: none; }` es el comportamiento correcto (el anillo reemplaza al cursor del sistema) y una regla global `a { cursor: pointer; }` tiene mas especificidad que `*` y romperia el cursor oculto de la landing. En movil/tablet (`pointer: coarse`) el anillo esta oculto y el sistema debe mostrar cursores semanticos correctos.
+
+---
+
+## 2026-05-26 - Unificacion de navegacion publica y footer
+
+### Que se hizo
+
+- Se mantuvo la landing `/` como pagina especial con su header/nav de scroll interno.
+- Se unifico el header de paginas publicas secundarias con enlaces a `/tour-virtual-para-negocios`, `/blog`, `/precios`, `/soporte`, `/contacto`, `/login` y `/registro?plan=free`.
+- Se unifico el footer publico en landing y paginas secundarias con columnas Marca, Producto, Legal, Contacto y Redes.
+- Se dejaron los enlaces de footer a secciones de landing como `/#caracteristicas` y `/#demo` para que funcionen desde paginas secundarias.
+- Se anadio el enlace `Volver al blog` al inicio de cada post del blog.
+- Se anadio CSS minimo para `.blog-back-link`.
+
+### Que NO se hizo
+
+- No se creo sistema de layouts ni includes compartidos.
+- No se tocaron dashboard, auth, visor publico de tours, backend funcional, BD, R2, QR, hotspots ni planes.
+- No se cambiaron URLs, H1, metas ni copy SEO de contenido.
+- No se hizo commit ni push.
+
+### Pendiente
+
+- Validar visualmente en produccion la navegacion publica completa despues del deploy, especialmente responsive y footer en landing/secundarias.
+
+---
+
+## 2026-05-26 - Microfix navegacion movil y selector de idioma en footers
+
+### Que se hizo
+
+- Se restauro el boton `#menu-toggle` en `/precios` porque la pagina mantiene `#mobile-menu` y su JS asociado.
+- Se retiraron los controles ES/EN del footer de paginas publicas secundarias para evitar botones muertos.
+- Se mantuvo `footer-lang` solo en la landing, donde ya funciona con `main.js`/`i18n.js`.
+
+### Que NO se hizo
+
+- No se tocaron controllers, models, routes, SQL, dashboard, auth, visor publico, cursor ni contenido SEO.
+- No se hizo commit ni push.

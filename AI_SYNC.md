@@ -38,7 +38,7 @@ Estado implementado:
 - Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual: `/blog` como hub de recursos, 3 posts informativos de apoyo (`/blog/como-hacer-fotos-para-tour-virtual`, `/blog/tour-virtual-con-movil-sin-camara-360`, `/blog/como-usar-qr-para-ensenar-tu-local`) y `/tour-virtual-para-restaurantes` como primera pagina sectorial hija/comercial del silo de `/tour-virtual-para-negocios`.
 - `/sobre-nosotros` y `/soporte` implementadas como paginas publicas ligeras, indexables y en estado MVP validado. Sirven para confianza, arquitectura publica y evitar enlaces de footer muertos; no cargan Three.js ni `main.js`.
 - `/contacto` implementada como pagina publica real con formulario POST clasico, CSRF, honeypot, validacion backend, sanitizacion, persistencia en `contact_messages` mediante modelo con prepared statements y notificacion por EmailService si SMTP esta disponible. La migracion defensiva `docs/sql/2026-05-26_contact_messages.sql` queda pendiente de ejecutar en servidor antes de validar el envio completo en produccion.
-- Footer publico actualizado: `/blog` vuelve a estar enlazado porque ya existe contenido real. `/novedades` no existe y no debe enlazarse.
+- Navegacion publica unificada: la landing `/` mantiene su nav especial de scroll interno; las paginas publicas secundarias usan header comun con `/tour-virtual-para-negocios`, `/blog`, `/precios`, `/soporte`, `/contacto`, login y registro Free. El footer publico queda unificado en landing y secundarias con columnas Marca, Producto, Legal, Contacto y Redes. `/novedades` no existe y no debe enlazarse.
 - Bloque publico/SEO reciente aprobado provisionalmente para avanzar en MVP/TFG. Pendiente revision final de copy, microcopy, SEO fino, legal y UX antes de entrega/lanzamiento comercial; no retocar estas paginas sin motivo salvo tarea especifica de revision futura.
 - Enforcement minimo de limites publicado en `/precios` aplicado en backend: Free = 1 negocio, 1 tour por negocio y 3 posiciones por tour; Pro = 5 negocios, tours ilimitados y 20 posiciones por tour; Business = ilimitado. Falta todavia centralizar estos limites en un helper unico.
 - Auth completo: registro, verificación email, login, logout y recuperación de contraseña. Logout validado: destruye sesion y redirige a `/login`.
@@ -91,6 +91,7 @@ Estado implementado:
 - `/tour-virtual-para-negocios` es la pagina pilar core para "crear tour virtual para mi negocio" y "tour virtual para negocios".
 - `/tour-virtual-para-restaurantes` es la primera pagina sectorial hija del silo principal y ataca intencion comercial de restaurantes.
 - `/blog` es hub de recursos; sus 3 posts actuales son informativos/de apoyo y no deben canibalizar la pilar.
+- La landing `/` conserva navegacion interna por secciones. Las paginas secundarias deben enlazar entre URLs publicas principales para sostener SEO y UX: pilar, blog, precios, soporte y contacto.
 - No crear mas posts ni mas sectoriales sin estrategia, validacion posterior o un prompt especifico de expansion SEO.
 - No prometer Matterport, digital twin, escaneo 3D, Gaussian, tour 360 profesional completo ni features roadmap como disponibles.
 

@@ -292,30 +292,20 @@
 <body class="phase-2">
 
   <!-- ── NAV ─────────────────────────────────────────────────────────── -->
-  <nav id="nav" role="navigation" aria-label="Navegación principal">
+  <nav id="nav" role="navigation" aria-label="Navegacion principal">
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
-
     <div class="nav-links">
-      <a href="/#carousel-section" data-i18n="nav.carousel">Negocios</a>
-      <a href="/#como-funciona"    data-i18n="nav.how">Cómo funciona</a>
-      <a href="/#demo"             data-i18n="nav.demo">Demo</a>
-      <a href="/#caracteristicas"  data-i18n="nav.features">Características</a>
-      <a href="/precios" class="nav-link-active" data-i18n="nav.pricing">Precios</a>
-      <a href="/#faq"              data-i18n="nav.faq">FAQ</a>
+      <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+      <a href="/blog">Blog</a>
+      <a href="/precios">Precios</a>
+      <a href="/soporte">Soporte</a>
+      <a href="/contacto">Contacto</a>
     </div>
-
     <div class="nav-actions">
-      <button id="theme-toggle" aria-label="Activar modo claro" data-theme="dark">
-        <i data-lucide="sun" width="18" height="18"></i>
-      </button>
-      <button class="lang-btn active" data-lang="es" aria-label="Español">ES</button>
-      <span class="lang-divider">/</span>
-      <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
-      <a href="/login"    class="btn-ghost"   data-i18n="nav.login">Iniciar sesión</a>
-      <a href="/registro?plan=free" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
+      <a href="/login" class="btn-ghost">Iniciar sesi&oacute;n</a>
+      <a href="/registro?plan=free" class="btn-primary">Empezar gratis</a>
     </div>
-
-    <button id="menu-toggle" aria-label="Abrir menú" aria-expanded="false" style="margin-left:auto;">
+    <button id="menu-toggle" aria-label="Abrir men&uacute;" aria-expanded="false" style="margin-left:auto;">
       <i data-lucide="menu" width="24" height="24"></i>
     </button>
   </nav>
@@ -325,19 +315,13 @@
     <button id="mobile-menu-close" aria-label="Cerrar menú" style="position:absolute;top:24px;right:24px;color:var(--text-2);">
       <i data-lucide="x" width="28" height="28"></i>
     </button>
-    <a href="/#carousel-section" data-i18n="nav.carousel">Negocios</a>
-    <a href="/#como-funciona"    data-i18n="nav.how">Cómo funciona</a>
-    <a href="/#demo"             data-i18n="nav.demo">Demo</a>
-    <a href="/#caracteristicas"  data-i18n="nav.features">Características</a>
-    <a href="/precios" data-i18n="nav.pricing">Precios</a>
-    <a href="/#faq"              data-i18n="nav.faq">FAQ</a>
-    <a href="/login"             data-i18n="nav.login">Iniciar sesión</a>
-    <a href="/registro?plan=free" class="btn-primary" data-i18n="nav.cta">Empezar gratis</a>
-    <div class="mobile-menu-footer">
-      <button class="lang-btn active" data-lang="es">ES</button>
-      <span class="lang-divider">/</span>
-      <button class="lang-btn" data-lang="en">EN</button>
-    </div>
+    <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+    <a href="/blog">Blog</a>
+    <a href="/precios">Precios</a>
+    <a href="/soporte">Soporte</a>
+    <a href="/contacto">Contacto</a>
+    <a href="/login">Iniciar sesi&oacute;n</a>
+    <a href="/registro?plan=free" class="btn-primary">Empezar gratis</a>
   </div>
 
 
@@ -609,66 +593,62 @@
 
     <!-- ── FOOTER ────────────────────────────────────────────────────── -->
     <footer id="footer" role="contentinfo">
-      <div class="footer-inner">
-        <div class="footer-top">
+    <div class="footer-inner">
+      <div class="footer-top">
 
-          <div class="footer-brand footer-col">
-            <a href="/" class="footer-logo">Oxphyre</a>
-            <p class="footer-tagline" data-i18n="footer.tagline">Tours virtuales 3D para negocios locales.</p>
-          </div>
-
-          <div class="footer-col">
-            <p class="footer-col-title" data-i18n="footer.product">Producto</p>
-            <ul>
-              <li><a href="/#caracteristicas" data-i18n="footer.features">Características</a></li>
-              <li><a href="/blog">Blog</a></li>
-              <li><a href="/precios"           data-i18n="footer.pricing">Precios</a></li>
-              <li><a href="/#demo"             data-i18n="footer.demo">Demo</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <p class="footer-col-title" data-i18n="footer.legal">Legal</p>
-            <ul>
-              <li><a href="/privacidad" data-i18n="footer.privacy">Privacidad</a></li>
-              <li><a href="/terminos"   data-i18n="footer.terms">Términos</a></li>
-              <li><a href="/cookies"    data-i18n="footer.cookies">Cookies</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <p class="footer-col-title" data-i18n="footer.contact">Contacto</p>
-            <ul>
-              <li><a href="/contacto">Contacto</a></li>
-              <li><a href="/sobre-nosotros" data-i18n="footer.about">Sobre nosotros</a></li>
-              <li><a href="/soporte"        data-i18n="footer.support">Soporte</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <p class="footer-col-title" data-i18n="footer.social">Redes</p>
-            <ul>
-              <li><a href="https://instagram.com/oxphyre" rel="noopener noreferrer" target="_blank">Instagram</a></li>
-              <li><a href="https://twitter.com/oxphyre"   rel="noopener noreferrer" target="_blank">Twitter / X</a></li>
-              <li><a href="https://linkedin.com/company/oxphyre" rel="noopener noreferrer" target="_blank">LinkedIn</a></li>
-            </ul>
-          </div>
-
+        <div class="footer-brand footer-col">
+          <a href="/" class="footer-logo">Oxphyre</a>
+          <p class="footer-tagline" data-i18n="footer.tagline">Tours virtuales 3D para negocios locales.</p>
         </div>
 
-        <div class="footer-bottom">
-          <p class="footer-copyright" data-i18n="footer.copyright">
-            © <?= date('Y') ?> Oxphyre. Todos los derechos reservados.
-          </p>
-          <div class="footer-lang">
-            <button class="lang-btn active" data-lang="es" aria-label="Español">ES</button>
-            <span class="lang-divider">/</span>
-            <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
-          </div>
+        <div class="footer-col">
+          <p class="footer-col-title" data-i18n="footer.product">Producto</p>
+          <ul>
+            <li><a href="/#caracteristicas" data-i18n="footer.features">Caracter&iacute;sticas</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/precios" data-i18n="footer.pricing">Precios</a></li>
+            <li><a href="/#demo" data-i18n="footer.demo">Demo</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <p class="footer-col-title" data-i18n="footer.legal">Legal</p>
+          <ul>
+            <li><a href="/privacidad" data-i18n="footer.privacy">Privacidad</a></li>
+            <li><a href="/terminos" data-i18n="footer.terms">T&eacute;rminos</a></li>
+            <li><a href="/cookies" data-i18n="footer.cookies">Cookies</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <p class="footer-col-title" data-i18n="footer.contact">Contacto</p>
+          <ul>
+            <li><a href="/contacto">Contacto</a></li>
+            <li><a href="/sobre-nosotros" data-i18n="footer.about">Sobre nosotros</a></li>
+            <li><a href="/soporte" data-i18n="footer.support">Soporte</a></li>
+            <li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <p class="footer-col-title" data-i18n="footer.social">Redes</p>
+          <ul>
+            <li><a href="https://instagram.com/oxphyre" rel="noopener noreferrer" target="_blank">Instagram</a></li>
+            <li><a href="https://twitter.com/oxphyre" rel="noopener noreferrer" target="_blank">Twitter / X</a></li>
+            <li><a href="https://linkedin.com/company/oxphyre" rel="noopener noreferrer" target="_blank">LinkedIn</a></li>
+          </ul>
         </div>
 
       </div>
-    </footer>
+
+      <div class="footer-bottom">
+        <p class="footer-copyright" data-i18n="footer.copyright">
+          &copy; <?= date('Y') ?> Oxphyre. Todos los derechos reservados.
+        </p>
+      </div>
+
+    </div>
+  </footer>
 
   </main>
 
@@ -751,14 +731,6 @@
             answer.style.maxHeight = answer.scrollHeight + 'px';
             question.setAttribute('aria-expanded', 'true');
           }
-        });
-      });
-
-      // ── ES/EN toggle (mismo patrón que main.js) ──
-      document.querySelectorAll('.lang-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          if (window.i18n) window.i18n.applyLang(btn.dataset.lang);
-          localStorage.setItem('oxphyre-lang', btn.dataset.lang);
         });
       });
 

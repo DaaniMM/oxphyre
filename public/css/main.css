@@ -2063,6 +2063,14 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
 .mvp-container { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
 .mvp-narrow { width: min(820px, calc(100% - 48px)); margin: 0 auto; }
 .mvp-hero { padding: 88px 0 54px; }
+.blog-back-link {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.blog-back-link:hover { text-decoration: underline; }
 .mvp-eyebrow {
   margin-bottom: 16px;
   font-family: var(--font-mono);

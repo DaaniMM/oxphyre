@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -666,10 +666,10 @@
         <div class="footer-col">
           <p class="footer-col-title" data-i18n="footer.product">Producto</p>
           <ul>
-            <li><a href="#caracteristicas" data-i18n="footer.features">Características</a></li>
+            <li><a href="/#caracteristicas" data-i18n="footer.features">Caracter&iacute;sticas</a></li>
             <li><a href="/blog">Blog</a></li>
-            <li><a href="#precios"         data-i18n="footer.pricing">Precios</a></li>
-            <li><a href="#demo"            data-i18n="footer.demo">Demo</a></li>
+            <li><a href="/precios" data-i18n="footer.pricing">Precios</a></li>
+            <li><a href="/#demo" data-i18n="footer.demo">Demo</a></li>
           </ul>
         </div>
 
@@ -677,8 +677,8 @@
           <p class="footer-col-title" data-i18n="footer.legal">Legal</p>
           <ul>
             <li><a href="/privacidad" data-i18n="footer.privacy">Privacidad</a></li>
-            <li><a href="/terminos"   data-i18n="footer.terms">Términos</a></li>
-            <li><a href="/cookies"    data-i18n="footer.cookies">Cookies</a></li>
+            <li><a href="/terminos" data-i18n="footer.terms">T&eacute;rminos</a></li>
+            <li><a href="/cookies" data-i18n="footer.cookies">Cookies</a></li>
           </ul>
         </div>
 
@@ -687,7 +687,8 @@
           <ul>
             <li><a href="/contacto">Contacto</a></li>
             <li><a href="/sobre-nosotros" data-i18n="footer.about">Sobre nosotros</a></li>
-            <li><a href="/soporte"        data-i18n="footer.support">Soporte</a></li>
+            <li><a href="/soporte" data-i18n="footer.support">Soporte</a></li>
+            <li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li>
           </ul>
         </div>
 
@@ -695,7 +696,7 @@
           <p class="footer-col-title" data-i18n="footer.social">Redes</p>
           <ul>
             <li><a href="https://instagram.com/oxphyre" rel="noopener noreferrer" target="_blank">Instagram</a></li>
-            <li><a href="https://twitter.com/oxphyre"   rel="noopener noreferrer" target="_blank">Twitter / X</a></li>
+            <li><a href="https://twitter.com/oxphyre" rel="noopener noreferrer" target="_blank">Twitter / X</a></li>
             <li><a href="https://linkedin.com/company/oxphyre" rel="noopener noreferrer" target="_blank">LinkedIn</a></li>
           </ul>
         </div>
@@ -704,10 +705,10 @@
 
       <div class="footer-bottom">
         <p class="footer-copyright" data-i18n="footer.copyright">
-          © <?= date('Y') ?> Oxphyre. Todos los derechos reservados.
+          &copy; <?= date('Y') ?> Oxphyre. Todos los derechos reservados.
         </p>
         <div class="footer-lang">
-          <button class="lang-btn active" data-lang="es" aria-label="Español">ES</button>
+          <button class="lang-btn active" data-lang="es" aria-label="Espanol">ES</button>
           <span class="lang-divider">/</span>
           <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
         </div>

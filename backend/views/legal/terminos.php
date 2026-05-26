@@ -99,17 +99,17 @@
   </style>
 </head>
 <body>
-  <nav id="nav" role="navigation" aria-label="Navegación principal">
+  <nav id="nav" role="navigation" aria-label="Navegacion principal">
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
     <div class="nav-links">
-      <a href="/#como-funciona">Cómo funciona</a>
-      <a href="/#demo">Demo</a>
-      <a href="/#caracteristicas">Características</a>
+      <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+      <a href="/blog">Blog</a>
       <a href="/precios">Precios</a>
-      <a href="/#faq">FAQ</a>
+      <a href="/soporte">Soporte</a>
+      <a href="/contacto">Contacto</a>
     </div>
     <div class="nav-actions">
-      <a href="/login" class="btn-ghost">Iniciar sesión</a>
+      <a href="/login" class="btn-ghost">Iniciar sesi&oacute;n</a>
       <a href="/registro?plan=free" class="btn-primary">Empezar gratis</a>
     </div>
   </nav>
@@ -179,37 +179,58 @@
   <footer id="footer" role="contentinfo">
     <div class="footer-inner">
       <div class="footer-top">
+
         <div class="footer-brand footer-col">
           <a href="/" class="footer-logo">Oxphyre</a>
-          <p class="footer-tagline">Tours virtuales 3D para negocios locales.</p>
+          <p class="footer-tagline" data-i18n="footer.tagline">Tours virtuales 3D para negocios locales.</p>
         </div>
+
         <div class="footer-col">
-          <p class="footer-col-title">Producto</p>
+          <p class="footer-col-title" data-i18n="footer.product">Producto</p>
           <ul>
-            <li><a href="/#caracteristicas">Características</a></li>
-            <li><a href="/precios">Precios</a></li>
-            <li><a href="/#demo">Demo</a></li>
+            <li><a href="/#caracteristicas" data-i18n="footer.features">Caracter&iacute;sticas</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/precios" data-i18n="footer.pricing">Precios</a></li>
+            <li><a href="/#demo" data-i18n="footer.demo">Demo</a></li>
           </ul>
         </div>
+
         <div class="footer-col">
-          <p class="footer-col-title">Legal</p>
+          <p class="footer-col-title" data-i18n="footer.legal">Legal</p>
           <ul>
-            <li><a href="/privacidad">Privacidad</a></li>
-            <li><a href="/terminos">Términos</a></li>
-            <li><a href="/cookies">Cookies</a></li>
+            <li><a href="/privacidad" data-i18n="footer.privacy">Privacidad</a></li>
+            <li><a href="/terminos" data-i18n="footer.terms">T&eacute;rminos</a></li>
+            <li><a href="/cookies" data-i18n="footer.cookies">Cookies</a></li>
           </ul>
         </div>
+
         <div class="footer-col">
-          <p class="footer-col-title">Contacto</p>
+          <p class="footer-col-title" data-i18n="footer.contact">Contacto</p>
           <ul>
             <li><a href="/contacto">Contacto</a></li>
+            <li><a href="/sobre-nosotros" data-i18n="footer.about">Sobre nosotros</a></li>
+            <li><a href="/soporte" data-i18n="footer.support">Soporte</a></li>
             <li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li>
           </ul>
         </div>
+
+        <div class="footer-col">
+          <p class="footer-col-title" data-i18n="footer.social">Redes</p>
+          <ul>
+            <li><a href="https://instagram.com/oxphyre" rel="noopener noreferrer" target="_blank">Instagram</a></li>
+            <li><a href="https://twitter.com/oxphyre" rel="noopener noreferrer" target="_blank">Twitter / X</a></li>
+            <li><a href="https://linkedin.com/company/oxphyre" rel="noopener noreferrer" target="_blank">LinkedIn</a></li>
+          </ul>
+        </div>
+
       </div>
+
       <div class="footer-bottom">
-        <p class="footer-copyright">© <?= date('Y') ?> Oxphyre. Todos los derechos reservados.</p>
+        <p class="footer-copyright" data-i18n="footer.copyright">
+          &copy; <?= date('Y') ?> Oxphyre. Todos los derechos reservados.
+        </p>
       </div>
+
     </div>
   </footer>
   <div id="cursor-ring" aria-hidden="true"></div>

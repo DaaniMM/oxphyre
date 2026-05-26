@@ -160,6 +160,8 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 
 **Arquitectura SEO publica vigente:** mantener `/tour-virtual-para-negocios` como propietaria de la intencion general "tour virtual para negocios". Usar `/tour-virtual-para-restaurantes` para intencion sectorial de restaurantes y los posts de `/blog` solo como apoyo informativo. No crear mas posts ni mas sectoriales sin estrategia o validacion posterior para evitar contenido fino o canibalizacion.
 
+**Navegacion publica vigente:** la landing `/` es una pagina especial y conserva su header de scroll interno. Las paginas publicas secundarias usan un header comun hacia `/tour-virtual-para-negocios`, `/blog`, `/precios`, `/soporte` y `/contacto`, con acciones de login y registro Free. El footer publico queda unificado en landing y secundarias con columnas Marca, Producto, Legal, Contacto y Redes; los enlaces a secciones de landing se escriben como `/#caracteristicas` y `/#demo`.
+
 ### Formulario publico de contacto
 
 **Estado actual:** `/contacto` es el canal directo publico de Oxphyre. Se separa de `/soporte`: soporte queda como centro de ayuda y dudas frecuentes; contacto queda como formulario real con POST clasico.
