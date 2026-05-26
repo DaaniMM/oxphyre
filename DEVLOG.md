@@ -4324,3 +4324,38 @@ Tras auditoría completa de internacionalización se cierra la estrategia de i18
 ### Archivos modificados
 
 - `backend/views/precios.php` — eliminada carga de `i18n.js` y llamada a `initLang()`; añadido comentario explicativo
+
+---
+
+## 2026-05-26 - Microfix: columna legacy `subject` en ContactMessageModel
+
+### Problema
+
+La tabla `contact_messages` en producción tiene una columna `subject VARCHAR(200) NOT NULL` heredada de un diseño anterior. `ContactMessageModel::create()` no incluía `subject` en el INSERT, lo que causaba un error de BD al enviar el formulario `/contacto` (columna NOT NULL sin valor por defecto).
+
+El formulario no tiene campo "asunto" visible; el equivalente funcional es `inquiry_type`.
+
+### Fix aplicado
+
+Se añadió el método privado `buildSubject(string $inquiryType): string` en `ContactMessageModel`. Mapea cada código de tipo de consulta a texto legible en español:
+
+| Código | Texto generado |
+|---|---|
+| `trial` | Quiero probar Oxphyre |
+| `local_business` | Soy un negocio local |
+| `support` | Soporte o problema de acceso |
+| `collaboration` | Colaboración |
+| `other` | Otro |
+| (desconocido) | Consulta general |
+
+El subject final se construye como `"Contacto Oxphyre - " . $label` y se limita a 200 caracteres con `mb_substr`. Se añadió `subject` al INSERT y al array de `execute()`.
+
+### Qué NO se tocó
+
+- `ContactController.php` — sin cambios.
+- Vistas, rutas, CSS/JS, SQL/BD, dashboard, auth, visor, footer/nav — sin cambios.
+- No se hizo commit ni push.
+
+### Archivos modificados
+
+- `backend/models/ContactMessageModel.php` — añadido `buildSubject()`, `subject` en INSERT y en `execute()`
