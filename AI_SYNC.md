@@ -37,6 +37,7 @@ Estado implementado:
 - `/tour-virtual-para-negocios` implementada como pagina pilar SEO publica para posicionamiento self-service: crear visita virtual con movil, sin agencia, sin fotografo y sin camara 360. No carga Three.js ni `main.js`; usa `main.css` con `asset()`, metas completas, OG image PNG, canonical, `SoftwareApplication`, `FAQPage`, `BreadcrumbList` y sitemap actualizado. Sigue siendo pilar core y no debe moverse a `/blog`.
 - Bloque SEO MVP de arquitectura silo implementado, pendiente de revision final de contenido/keywords/visual: `/blog` como hub de recursos, 3 posts informativos de apoyo (`/blog/como-hacer-fotos-para-tour-virtual`, `/blog/tour-virtual-con-movil-sin-camara-360`, `/blog/como-usar-qr-para-ensenar-tu-local`) y `/tour-virtual-para-restaurantes` como primera pagina sectorial hija/comercial del silo de `/tour-virtual-para-negocios`.
 - `/sobre-nosotros` y `/soporte` implementadas como paginas publicas ligeras, indexables y en estado MVP validado. Sirven para confianza, arquitectura publica y evitar enlaces de footer muertos; no cargan Three.js ni `main.js`.
+- `/contacto` implementada como pagina publica real con formulario POST clasico, CSRF, honeypot, validacion backend, sanitizacion, persistencia en `contact_messages` mediante modelo con prepared statements y notificacion por EmailService si SMTP esta disponible. La migracion defensiva `docs/sql/2026-05-26_contact_messages.sql` queda pendiente de ejecutar en servidor antes de validar el envio completo en produccion.
 - Footer publico actualizado: `/blog` vuelve a estar enlazado porque ya existe contenido real. `/novedades` no existe y no debe enlazarse.
 - Bloque publico/SEO reciente aprobado provisionalmente para avanzar en MVP/TFG. Pendiente revision final de copy, microcopy, SEO fino, legal y UX antes de entrega/lanzamiento comercial; no retocar estas paginas sin motivo salvo tarea especifica de revision futura.
 - Enforcement minimo de limites publicado en `/precios` aplicado en backend: Free = 1 negocio, 1 tour por negocio y 3 posiciones por tour; Pro = 5 negocios, tours ilimitados y 20 posiciones por tour; Business = ilimitado. Falta todavia centralizar estos limites en un helper unico.
@@ -102,6 +103,18 @@ Estado implementado:
 - Escapar salida con htmlspecialchars().
 - Sanitizar entrada con strip_tags() cuando corresponda.
 - Credenciales siempre en .env, nunca en código ni GitHub.
+
+### API externa, AJAX y hotspots — decisión vigente TFG
+
+Este bloque queda cerrado como MVP defendible para el TFG.
+
+- API externa publica: Oxphyre usa Nominatim/OpenStreetMap para geocodificar server-side la ubicacion de un negocio desde el dashboard. El backend construye la consulta con la direccion introducida por el propietario, llama a Nominatim con `curl`, valida la respuesta y guarda `latitude`, `longitude`, `geocoded_at` y `geocoding_provider='nominatim'` en `businesses`.
+- Mapa publico: el visor publico usa Leaflet/OpenStreetMap para mostrar la ubicacion del negocio cuando existen coordenadas. El boton "Donde estamos" abre un bottom sheet con mapa, pin, direccion textual y enlace externo a OpenStreetMap para llegar al local.
+- AJAX/fetch: la geocodificacion del negocio usa `fetch()` desde `business-location.js` contra el endpoint privado `POST /dashboard/negocios/{slug}/geocode`, con respuesta JSON, CSRF y ownership usuario -> negocio.
+- Endpoints JSON internos: el editor de flechas/hotspots usa endpoints privados de dashboard para listar datos, crear flechas, recolocarlas, cambiar estado logico y eliminarlas mediante soft delete. No existe ni se promete una API REST publica versionada.
+- Editor visual de flechas/hotspots: el propietario puede listar destinos disponibles, abrir un modal sobre la panoramica principal, colocar una flecha con click/tap, guardar coordenadas relativas `texture_x`/`texture_y`, recolocar flechas existentes y eliminarlas. El visor publico proyecta esas flechas sobre la panoramica y permite navegar entre posiciones.
+- Seguridad: los endpoints privados validan sesion, CSRF y cadena de propiedad usuario -> negocio -> tour -> posicion. Los modelos implicados usan prepared statements y filtros `deleted_at IS NULL` cuando aplica.
+- Mejora futura opcional: `is_active` existe a nivel de modelo/backend, pero no hay toggle visible de activar/desactivar en la UI del editor. No implementarlo antes del TFG salvo necesidad clara; para el MVP actual basta crear, recolocar y eliminar flechas.
 
 ### QR y analitica basica
 - QR 2A esta cerrado y validado en servidor real.

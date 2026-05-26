@@ -4129,3 +4129,44 @@ Dar al rol `admin` una primera vista funcional de supervisión de la plataforma,
 - Motivo: esas acciones son útiles para producto real, pero aumentan riesgo técnico, permisos, CSRF, soft delete y pruebas justo antes de la entrega.
 - La administración avanzada queda documentada como evolución post-TFG.
 - No se tocaron código, BD, rutas ni permisos.
+
+---
+
+## 2026-05-26 - Cierre auditoría API externa, AJAX y hotspots
+
+- Se reviso la auditoria de Codex sobre los minimos tecnicos P0 de API externa, AJAX/fetch y editor visual de hotspots/flechas.
+- API externa publica cubierta: Nominatim/OpenStreetMap geocodifica server-side la ubicacion del negocio y Leaflet/OpenStreetMap muestra el mapa en el visor publico cuando hay coordenadas.
+- AJAX/fetch cubierto: geocodificacion del negocio desde dashboard y endpoints JSON internos del editor de flechas/hotspots.
+- Editor visual de hotspots cubierto como MVP: listar destinos, colocar flecha sobre panoramica, guardar `texture_x`/`texture_y`, recolocar, eliminar y reflejar la navegacion en el visor publico.
+- Decision: no se implementa ahora un toggle visible de activar/desactivar flechas; queda como mejora opcional futura.
+- Pendiente real: validacion manual final en produccion durante la ronda general de pruebas antes de la entrega.
+- No se toco codigo funcional, JS, CSS, backend, BD, rutas, SQL ni R2.
+- No se hizo commit ni push.
+
+---
+
+## 2026-05-26 - Formulario publico de contacto
+
+### Que se hizo
+
+- Se implemento la pagina publica `GET /contacto` con formulario real de contacto para Oxphyre.
+- Se implemento `POST /contacto` con validacion backend: CSRF, honeypot, nombre obligatorio, email valido, whitelists para tipo de consulta y plan, mensaje obligatorio, privacidad obligatoria, limites de longitud y sanitizacion.
+- Se creo `backend/controllers/ContactController.php` para separar el canal de contacto del `HomeController`.
+- Se creo `backend/views/contacto.php` con meta title, description, canonical, robots index/follow, Open Graph, favicon SVG/ICO y POST clasico sin AJAX.
+- Se creo `backend/models/ContactMessageModel.php` para guardar mensajes con prepared statements en `contact_messages`.
+- Se creo la migracion defensiva `docs/sql/2026-05-26_contact_messages.sql` porque no existia modelo ni migracion local para `contact_messages`.
+- Se amplio `EmailService.php` con `sendContactNotification()` para intentar notificar a `hola@oxphyre.com`; si SMTP falla tras guardar en BD, se registra en `error_log` sin romper la experiencia.
+- Se actualizo `/soporte`: el bloque final deja de empujar principalmente a registro/precios y ahora lleva al formulario de `/contacto`.
+- Se anadio enlace a `/contacto` en los footers publicos principales y en `public/sitemap.xml`.
+
+### Que NO se hizo
+
+- No se ejecuto la migracion contra BD real.
+- No se tocaron dashboard, visor publico, R2, QR, hotspots, auth funcional, planes, limites, Composer ni `.env`.
+- No se prometio respuesta inmediata, soporte 24/7, API publica versionada ni analiticas avanzadas.
+- No se hizo commit ni push.
+
+### Pendiente
+
+- Ejecutar `docs/sql/2026-05-26_contact_messages.sql` en servidor antes de validar un POST valido completo en produccion.
+- Validar en produccion que SMTP envia la notificacion real; si falla, el mensaje queda persistido y el fallo se registra en logs.

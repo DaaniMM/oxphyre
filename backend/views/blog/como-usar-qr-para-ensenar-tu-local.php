@@ -171,7 +171,7 @@
         <div class="footer-brand footer-col"><a href="/" class="footer-logo">Oxphyre</a><p class="footer-tagline">Tours virtuales para negocios locales.</p></div>
         <div class="footer-col"><p class="footer-col-title">Producto</p><ul><li><a href="/tour-virtual-para-negocios">Tour para negocios</a></li><li><a href="/blog">Blog</a></li><li><a href="/precios">Precios</a></li></ul></div>
         <div class="footer-col"><p class="footer-col-title">Legal</p><ul><li><a href="/privacidad">Privacidad</a></li><li><a href="/terminos">Términos</a></li><li><a href="/cookies">Cookies</a></li></ul></div>
-        <div class="footer-col"><p class="footer-col-title">Contacto</p><ul><li><a href="/sobre-nosotros">Sobre nosotros</a></li><li><a href="/soporte">Soporte</a></li><li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li></ul></div>
+        <div class="footer-col"><p class="footer-col-title">Contacto</p><ul><li><a href="/contacto">Contacto</a></li><li><a href="/sobre-nosotros">Sobre nosotros</a></li><li><a href="/soporte">Soporte</a></li><li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li></ul></div>
       </div>
       <div class="footer-bottom"><p class="footer-copyright">© <?= date('Y') ?> Oxphyre. Todos los derechos reservados.</p></div>
     </div>

@@ -9,6 +9,7 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://oxphyre.com/soporte">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico">
   <meta name="theme-color" content="#FEB354">
 
   <meta property="og:type" content="website">
@@ -290,11 +291,11 @@
           <li><strong>¿Dónde pido ayuda?</strong> Escríbenos a <a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a> con el correo de tu cuenta y una explicación breve.</li>
         </ul>
         <div class="support-contact">
-          <h2>Contacto</h2>
-          <p>Para soporte, dudas comerciales o problemas de acceso, escribe a <a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a>. Intentaremos ayudarte con una respuesta clara y práctica.</p>
+          <h2>¿Necesitas ayuda directa?</h2>
+          <p>Cuéntanos tu caso desde el formulario de contacto y podremos responderte con más contexto. También puedes escribirnos a <a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a> si lo prefieres.</p>
           <div class="support-actions">
-            <a class="support-button support-button-primary" href="/registro?plan=free">Empezar gratis</a>
-            <a class="support-button support-button-secondary" href="/precios">Ver planes y precios</a>
+            <a class="support-button support-button-primary" href="/contacto">Ir al formulario de contacto</a>
+            <a class="support-button support-button-secondary" href="/precios">Ver planes</a>
           </div>
         </div>
       </section>
@@ -328,6 +329,7 @@
         <div class="footer-col">
           <p class="footer-col-title">Contacto</p>
           <ul>
+            <li><a href="/contacto">Contacto</a></li>
             <li><a href="/sobre-nosotros">Sobre nosotros</a></li>
             <li><a href="/soporte">Soporte</a></li>
             <li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li>

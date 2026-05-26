@@ -189,6 +189,7 @@
         <div class="footer-col">
           <p class="footer-col-title">Contacto</p>
           <ul>
+            <li><a href="/contacto">Contacto</a></li>
             <li><a href="mailto:hola@oxphyre.com">hola@oxphyre.com</a></li>
           </ul>
         </div>

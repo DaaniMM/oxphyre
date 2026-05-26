@@ -642,6 +642,7 @@
           <div class="footer-col">
             <p class="footer-col-title" data-i18n="footer.contact">Contacto</p>
             <ul>
+              <li><a href="/contacto">Contacto</a></li>
               <li><a href="/sobre-nosotros" data-i18n="footer.about">Sobre nosotros</a></li>
               <li><a href="/soporte"        data-i18n="footer.support">Soporte</a></li>
             </ul>

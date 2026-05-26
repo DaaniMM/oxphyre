@@ -120,6 +120,17 @@ CLAUDE.md            → este archivo
 
 **Decision vigente:** La ubicacion pertenece al negocio, no al tour. `address` sigue siendo el campo principal visible. No hay todavia card publica de ubicacion fuera del tour (Mapa 1D queda pendiente si se decide). No usar Google Maps ni Mapbox para esta funcionalidad: Nominatim/OSM/Leaflet cubre el requisito sin API key ni cuotas. Leaflet se carga desde CDN jsdelivr (ya en allowlist CSP); no se descarga localmente. El token CSRF del geocoding se valida sin consumir porque el formulario de edicion normal tambien lo necesita en la misma sesion.
 
+### Mínimos técnicos DAW: API externa, AJAX y editor visual
+
+**Estado actual:** El bloque de minimos tecnicos P0 queda cubierto para la defensa del TFG con tres piezas reales e integradas en el producto:
+
+- **API externa publica con sentido de proyecto:** Nominatim/OpenStreetMap geocodifica server-side la ubicacion del negocio desde el dashboard. Oxphyre no acepta coordenadas arbitrarias desde cliente: el backend consulta el servicio externo, valida latitud/longitud y persiste la ubicacion coherente en BD.
+- **Visualizacion publica de la API externa:** Leaflet/OpenStreetMap muestra esa ubicacion dentro del visor publico del tour mediante el boton "Donde estamos", mapa con pin, direccion textual y enlace a OpenStreetMap.
+- **AJAX/fetch y endpoints JSON internos:** el dashboard usa `fetch()` para geocodificacion y para el editor de flechas/hotspots. Son endpoints internos protegidos por sesion, CSRF y ownership; no se debe presentar como API REST publica versionada.
+- **Editor visual diferenciador:** el propietario puede listar destinos de navegacion, colocar una flecha sobre la panoramica principal, guardar `texture_x`/`texture_y`, recolocar y eliminar flechas. El visor publico proyecta esas flechas sobre la panoramica y permite navegar entre posiciones del tour.
+
+**Decision vigente:** Para el TFG, este bloque queda cerrado como MVP. El toggle visible de activar/desactivar flechas no esta en la UI y queda como mejora opcional futura; no implementarlo ahora ni documentarlo como funcionalidad disponible.
+
 ## Rutas importantes del servidor
 - Proyecto: `/var/www/oxphyre`
 - Nginx config: `/etc/nginx/sites-available/oxphyre`
@@ -148,6 +159,17 @@ fastcgi_param HTTP_CF_CONNECTING_IP $http_cf_connecting_ip;
 **Nota publica/SEO:** Paginas publicas MVP aprobadas para avanzar; pendientes de revision final de copy, microcopy, SEO fino y UX antes de entrega/lanzamiento comercial. `/tour-virtual-para-negocios` es la pagina pilar core del silo SEO. `/blog` existe como hub de recursos con 3 posts informativos y `/tour-virtual-para-restaurantes` existe como primera pagina sectorial hija/comercial. `/novedades` no existe todavia y no debe aparecer enlazada.
 
 **Arquitectura SEO publica vigente:** mantener `/tour-virtual-para-negocios` como propietaria de la intencion general "tour virtual para negocios". Usar `/tour-virtual-para-restaurantes` para intencion sectorial de restaurantes y los posts de `/blog` solo como apoyo informativo. No crear mas posts ni mas sectoriales sin estrategia o validacion posterior para evitar contenido fino o canibalizacion.
+
+### Formulario publico de contacto
+
+**Estado actual:** `/contacto` es el canal directo publico de Oxphyre. Se separa de `/soporte`: soporte queda como centro de ayuda y dudas frecuentes; contacto queda como formulario real con POST clasico.
+
+- Incluye nombre, apellidos o negocio, email, telefono, tipo de consulta, plan de interes, mensaje, aceptacion obligatoria de privacidad, consentimiento comercial opcional y honeypot anti-spam.
+- Backend: `ContactController` valida CSRF, honeypot, whitelists, longitudes, email con `filter_var`, privacidad obligatoria y sanitizacion con `trim`/`strip_tags`.
+- Persistencia: `ContactMessageModel` guarda en `contact_messages` con prepared statements. La migracion defensiva vive en `docs/sql/2026-05-26_contact_messages.sql`.
+- Email: `EmailService::sendContactNotification()` intenta notificar a `hola@oxphyre.com`; si SMTP falla pero BD guarda el mensaje, la experiencia del usuario sigue como recibida y el fallo queda en `error_log`.
+
+**Decision vigente:** No tocar `.env` para este bloque. Ejecutar la migracion en servidor antes de validar el flujo completo de POST valido en produccion.
 
 **Nota histórica:** Estas piezas se construyeron incrementalmente entre abril y mayo de 2026. El detalle de fechas, archivos tocados, bugs y motivos está en `DEVLOG.md`; `CLAUDE.md` no debe duplicar todo el historial, pero sí conservar el contexto suficiente para que una IA no actúe como si el proyecto empezara de cero.
 

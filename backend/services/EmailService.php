@@ -68,6 +68,24 @@ class EmailService
         }
     }
 
+    public function sendContactNotification(array $data, int $messageId): bool
+    {
+        try {
+            $mail = $this->buildMailer();
+            $mail->addAddress('hola@oxphyre.com', 'Oxphyre');
+            $mail->addReplyTo((string) $data['email'], (string) $data['name']);
+            $mail->isHTML(true);
+            $mail->Subject = 'Nuevo mensaje de contacto en Oxphyre #' . $messageId;
+            $mail->Body    = $this->templateContactNotification($data, $messageId);
+            $mail->AltBody = $this->plainContactNotification($data, $messageId);
+            $mail->send();
+            return true;
+        } catch (\Exception $e) {
+            error_log('EmailService::sendContactNotification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     private function templateVerification(string $name, string $url): string
     {
         $name = htmlspecialchars($name);
@@ -101,6 +119,56 @@ class EmailService
 </body>
 </html>
 HTML;
+    }
+
+    private function templateContactNotification(array $data, int $messageId): string
+    {
+        $safe = [];
+        foreach ($data as $key => $value) {
+            $safe[$key] = nl2br(htmlspecialchars((string) $value));
+        }
+        $privacy = !empty($data['privacy_accepted']) ? 'Si' : 'No';
+        $commercial = !empty($data['commercial_contact']) ? 'Si' : 'No';
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0800;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0800;padding:32px 18px;">
+    <tr><td align="center">
+      <table width="620" cellpadding="0" cellspacing="0" style="background:#111009;border:1px solid rgba(254,179,84,0.18);border-radius:12px;overflow:hidden;">
+        <tr><td style="padding:34px 40px;">
+          <p style="font-family:'Courier New',monospace;font-size:11px;color:#FEB354;letter-spacing:0.3em;text-transform:uppercase;margin:0 0 24px;">OXPHYRE CONTACTO</p>
+          <h1 style="color:#ffffff;font-size:24px;font-weight:700;margin:0 0 20px;line-height:1.25;">Nuevo mensaje #{$messageId}</h1>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Nombre:</strong> {$safe['name']}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Apellidos/negocio:</strong> {$safe['business_or_lastname']}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Email:</strong> {$safe['email']}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Telefono:</strong> {$safe['phone']}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Tipo:</strong> {$safe['inquiry_type']}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Plan:</strong> {$safe['plan_interest']}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Privacidad:</strong> {$privacy}</p>
+          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 24px;"><strong>Contacto comercial:</strong> {$commercial}</p>
+          <div style="padding:18px;border:1px solid rgba(254,179,84,0.16);border-radius:8px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.84);font-size:15px;line-height:1.65;">{$safe['message']}</div>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+HTML;
+    }
+
+    private function plainContactNotification(array $data, int $messageId): string
+    {
+        return "Nuevo mensaje de contacto #{$messageId}\n"
+            . "Nombre: {$data['name']}\n"
+            . "Apellidos/negocio: {$data['business_or_lastname']}\n"
+            . "Email: {$data['email']}\n"
+            . "Telefono: {$data['phone']}\n"
+            . "Tipo: {$data['inquiry_type']}\n"
+            . "Plan: {$data['plan_interest']}\n\n"
+            . $data['message'];
     }
 
     private function templatePasswordReset(string $name, string $url): string
