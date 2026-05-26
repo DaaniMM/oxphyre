@@ -289,13 +289,13 @@
   </style>
 </head>
 
-<body class="phase-2">
+<body class="phase-2 public-secondary">
 
   <!-- ── NAV ─────────────────────────────────────────────────────────── -->
   <nav id="nav" role="navigation" aria-label="Navegacion principal">
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
     <div class="nav-links">
-      <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+      <a href="/tour-virtual-para-negocios">Producto</a>
       <a href="/blog">Blog</a>
       <a href="/precios">Precios</a>
       <a href="/soporte">Soporte</a>
@@ -315,7 +315,7 @@
     <button id="mobile-menu-close" aria-label="Cerrar menú" style="position:absolute;top:24px;right:24px;color:var(--text-2);">
       <i data-lucide="x" width="28" height="28"></i>
     </button>
-    <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+    <a href="/tour-virtual-para-negocios">Producto</a>
     <a href="/blog">Blog</a>
     <a href="/precios">Precios</a>
     <a href="/soporte">Soporte</a>

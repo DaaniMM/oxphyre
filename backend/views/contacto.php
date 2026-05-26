@@ -48,11 +48,11 @@ $checked = static fn(string $key): string => !empty($old[$key]) ? ' checked' : '
   <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= asset('/css/main.css') ?>">
 </head>
-<body class="phase-2">
+<body class="phase-2 public-secondary">
   <nav id="nav" role="navigation" aria-label="Navegacion principal">
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
     <div class="nav-links">
-      <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+      <a href="/tour-virtual-para-negocios">Producto</a>
       <a href="/blog">Blog</a>
       <a href="/precios">Precios</a>
       <a href="/soporte">Soporte</a>

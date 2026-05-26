@@ -499,6 +499,16 @@ body.phase-2 #nav {
   pointer-events: auto;
 }
 
+body.public-secondary #nav {
+  z-index: 1100;
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 #nav-logo-solo {
   position: fixed;
   top: 20px; left: 32px;

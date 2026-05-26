@@ -4243,3 +4243,19 @@ Las reglas `cursor: pointer/text/not-allowed` se ponen dentro de `@media (pointe
 
 - No se tocaron controllers, models, routes, SQL, dashboard, auth, visor publico, cursor ni contenido SEO.
 - No se hizo commit ni push.
+
+---
+
+## 2026-05-26 - Microfix header visual secundario
+
+### Que se hizo
+
+- Se cambio el texto visible del primer enlace del nav secundario de "Tour para negocios" a "Producto", manteniendo la URL `/tour-virtual-para-negocios`.
+- Se marco el body de paginas publicas secundarias con `public-secondary`.
+- Se anadio una regla CSS especifica para `body.public-secondary #nav` con fondo oscuro, blur, borde inferior, z-index y visibilidad consistente.
+- Se mantuvo intacto el header/nav especial de la landing `/`.
+
+### Que NO se hizo
+
+- No se tocaron footer, controllers, models, routes, SQL, dashboard, auth, visor publico, cursor, BD, R2, QR, hotspots ni contenido SEO.
+- No se hizo commit ni push.

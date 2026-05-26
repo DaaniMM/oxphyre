@@ -59,11 +59,11 @@
     #nav { opacity: 1 !important; pointer-events: auto !important; }
   </style>
 </head>
-<body>
+<body class="public-secondary">
   <nav id="nav" role="navigation" aria-label="Navegacion principal">
     <a href="/" class="nav-logo" aria-label="Oxphyre inicio">Oxphyre</a>
     <div class="nav-links">
-      <a href="/tour-virtual-para-negocios">Tour para negocios</a>
+      <a href="/tour-virtual-para-negocios">Producto</a>
       <a href="/blog">Blog</a>
       <a href="/precios">Precios</a>
       <a href="/soporte">Soporte</a>
