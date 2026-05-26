@@ -186,7 +186,7 @@ class DashboardModel
         // concatenar el entero ya validado es la forma más segura y estándar.
         $limit = max(1, min((int) $limit, 20));
         $stmt  = $this->db->prepare(
-            'SELECT t.name AS tour_name, COUNT(qs.id) AS scan_count
+            'SELECT t.title AS tour_name, COUNT(qs.id) AS scan_count
              FROM tours t
              JOIN businesses b  ON t.business_id = b.id
              LEFT JOIN qr_codes qc ON qc.tour_id = t.id
@@ -194,7 +194,7 @@ class DashboardModel
              WHERE b.user_id = ?
                AND t.deleted_at IS NULL
                AND b.deleted_at IS NULL
-             GROUP BY t.id, t.name
+             GROUP BY t.id, t.title
              ORDER BY scan_count DESC
              LIMIT ' . (int) $limit
         );

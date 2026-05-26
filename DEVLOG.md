@@ -4769,3 +4769,27 @@ Se mantiene sin cambio. Admin sin negocios ve la experiencia Pro con estados vac
 ### Qué NO se tocó
 
 BD, migraciones, QR tracking, visor, R2, auth, páginas públicas, rutas, `main.css`, `dashboard.css`. No se hizo commit ni push. Free sigue intacta en el bloque `else:`.
+
+---
+
+## 2026-05-26 — Hotfix error 500 en /dashboard/analiticas para usuarios Pro
+
+### Causa
+
+`DashboardModel::getTourScanRanking()` referenciaba la columna `t.name` en el `SELECT` y en el `GROUP BY`. La tabla `tours` no tiene columna `name`; la columna real es `title`. MySQL devolvía `ERROR 1054 (42S22): Unknown column 't.name' in 'field list'`, lo que provocaba un error 500 en la vista de analíticas Pro. Free no estaba afectado porque no ejecuta esta query.
+
+### Fix
+
+En `backend/models/DashboardModel.php`, dentro de `getTourScanRanking()`:
+- `SELECT t.name AS tour_name` → `SELECT t.title AS tour_name`
+- `GROUP BY t.id, t.name` → `GROUP BY t.id, t.title`
+
+El alias `tour_name` se mantiene intacto; la vista y el controlador no requieren ningún cambio.
+
+### Archivos modificados
+
+- `backend/models/DashboardModel.php` (2 líneas corregidas en `getTourScanRanking()`)
+
+### Qué NO se tocó
+
+BD, migraciones, controladores, vistas, visor, R2, auth, rutas, páginas públicas, `main.css`, `dashboard.css`. No se hizo commit ni push.
