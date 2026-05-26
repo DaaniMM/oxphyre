@@ -4516,3 +4516,36 @@ Sección FAQ también usaba `mvp-narrow`; se cambió a `mvp-container` para alin
 ## 2026-05-26 — Microfix visual /blog: alinear FAQ y CTA final
 
 FAQ (`#blog-faq`) y CTA final (`.mvp-final`) usaban `mvp-narrow` (820px) mientras el resto de la página usaba `mvp-container` (1120px). Cambiadas las 2 líneas a `mvp-container`. Sin CSS nuevo ni cambios de contenido.
+
+---
+
+## 2026-05-26 — Dashboard: página MVP /dashboard/configuracion
+
+### Problema
+
+El sidebar del dashboard tenía enlace a `/dashboard/configuracion` pero la ruta no existía, generando 404 y enlace muerto antes de la demo TFG.
+
+### Qué se implementó
+
+- **Ruta GET** `/dashboard/configuracion` protegida con guard `auth` en `web.php`. Sin sesión redirige igual que el resto del dashboard.
+- **Método** `DashboardController::showSettings()` siguiendo el patrón exacto de `index()`: `ensureCsrfToken()`, extracción de variables de sesión (`user_name`, `user_email`, `user_role`), `planLabel`, `userInitial`, `csrfToken`, y carga de vista.
+- **Vista** `backend/views/dashboard/configuracion.php`: mismo layout sidebar/topbar/main que el dashboard. Sidebar marca `configuracion` como `active`. Muestra 4 bloques:
+  - **Resumen de cuenta**: nombre, email y plan (badge ámbar).
+  - **Perfil**: acciones "Cambiar nombre" y "Cambiar email", botones `disabled` con badge "Próximamente".
+  - **Seguridad**: acción "Cambiar contraseña", botón `disabled` con badge "Próximamente".
+  - **Zona sensible**: acción "Eliminar cuenta", botón `disabled` con badge "Próximamente" y borde rojo tenue.
+  - Nota explicativa + enlace "Volver al dashboard".
+
+### Qué NO se implementó (post-TFG)
+
+Cambio real de nombre, email, contraseña y eliminación de cuenta. Estas acciones requieren flujos de confirmación seguros (verificación de contraseña actual, token por email, doble confirmación) y se dejan como evolución post-lanzamiento.
+
+### Qué NO se tocó
+
+BD, tablas, auth, login, registro, visor público, QR, R2, analíticas, páginas públicas, `main.css`, `dashboard.css`.
+
+### Archivos modificados/creados
+
+- `backend/routes/web.php` (1 línea)
+- `backend/controllers/DashboardController.php` (+14 líneas)
+- `backend/views/dashboard/configuracion.php` (nueva vista)

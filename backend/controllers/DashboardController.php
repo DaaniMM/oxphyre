@@ -45,4 +45,18 @@ class DashboardController extends BaseController
 
         require_once VIEWS_PATH . '/dashboard/index.php';
     }
+
+    public function showSettings(): void
+    {
+        $this->ensureCsrfToken();
+
+        $userName    = htmlspecialchars($_SESSION['user_name']  ?? '');
+        $userEmail   = htmlspecialchars($_SESSION['user_email'] ?? '');
+        $userRole    = $_SESSION['user_role'] ?? 'business_free';
+        $planLabel   = self::$planLabels[$userRole] ?? 'Free';
+        $userInitial = mb_strtoupper(mb_substr($userName, 0, 1));
+        $csrfToken   = htmlspecialchars($_SESSION['csrf_token'] ?? '');
+
+        require_once VIEWS_PATH . '/dashboard/configuracion.php';
+    }
 }
