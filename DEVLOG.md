@@ -4609,3 +4609,22 @@ Dos textos del embudo prometían métricas no implementadas. Ajuste mínimo de c
 
 - **"Tour abierto"** → nota: "Medición de aperturas y actividad del tour disponible en Pro." (eliminado "cuánto tiempo estuvieron").
 - **"Cliente interesado"** → nota: "Señales comerciales avanzadas como clics en zonas destacadas o CTAs." (eliminado "intención de reserva"). Badge cambiado de `Pro` a `Roadmap` (`db-badge--draft`) para reflejar que es evolución futura, no Pro actual.
+
+---
+
+## 2026-05-26 — Microfix UX/UI /dashboard/analiticas Free: cerrar experiencia SaaS básica
+
+Pulido de copy/UX/UI de la vista Free para comunicar valor de negocio, sin tocar modelo, controller, rutas ni BD.
+
+**Cambios aplicados (solo `analiticas.php`):**
+
+- **Header subtítulo** → "Comprueba si tu QR y tu tour empiezan a generar interés."
+- **KPI escaneos**: nota condicional — si hay escaneos: "Tu QR ya está generando aperturas del tour."; si no: "Comparte tu QR para empezar a medir interés."
+- **KPI tour sin publicar**: "Publica el tour para poder medir actividad." (más accionable).
+- **Empty state gráfico**: título "Aún no hay escaneos.", descripción con instrucción de dónde poner el QR, y 3 mini pasos visuales sin enlaces (CSS propio `atl-empty-*`).
+- **Embudo renombrado**: "Cliente escanea el QR" / "Cliente visita el tour" / "Cliente toma una decisión" — lenguaje de negocio, no técnico.
+- **Blur cards Pro**: reducido de `3px` a `2px` — más legible, sigue claramente bloqueado.
+- **Bloque Pro**: añadido texto de valor "Mejora a Pro para ver visitas por día, dispositivos, evolución y rendimiento de tus tours."
+- **Nota privacidad**: mantenida sin cambios — "No se registran IP completas ni user agents" es correcto (el modelo pasa `NULL` explícito a `ip_address` y `user_agent`).
+
+**Qué NO se tocó:** modelo, controller, rutas, BD, QR tracking, visor, R2, auth, páginas públicas, `dashboard.css`, `main.css`.

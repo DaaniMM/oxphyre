@@ -93,11 +93,63 @@
       margin-top: 5px;
     }
     .atl-chart-empty {
+      text-align: center;
+      padding: 18px 0 8px;
+    }
+    .atl-empty-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--ox-text-muted);
+      margin-bottom: 6px;
+    }
+    .atl-empty-desc {
       font-size: 0.8125rem;
       color: var(--ox-text-dim);
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0 auto 20px;
+    }
+    .atl-empty-steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .atl-empty-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 120px;
+      padding: 0 8px;
+      position: relative;
+    }
+    .atl-empty-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -6px;
+      top: 10px;
+      color: var(--ox-text-dim);
+      font-size: 0.75rem;
+    }
+    .atl-empty-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: oklch(0.18 0.005 60);
+      border: 1px solid var(--ox-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--ox-text-dim);
+    }
+    .atl-empty-step-text {
+      font-size: 0.6875rem;
+      color: var(--ox-text-dim);
       text-align: center;
-      padding: 28px 0 10px;
-      font-style: italic;
+      line-height: 1.4;
     }
 
     /* ── Embudo ── */
@@ -167,7 +219,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      filter: blur(3px);
+      filter: blur(2px);
       pointer-events: none;
       user-select: none;
     }
@@ -340,7 +392,7 @@ $hasAnyScans = array_sum($chartDays) > 0;
       <div class="atl-page-header">
         <div class="atl-page-header-left">
           <h2 class="atl-page-title">Analíticas</h2>
-          <p class="atl-page-sub">Señales básicas para saber si tu tour empieza a generar interés.</p>
+          <p class="atl-page-sub">Comprueba si tu QR y tu tour empiezan a generar interés.</p>
           <div class="atl-page-badges">
             <span class="db-badge db-badge--plan">Plan <?= htmlspecialchars($planLabel) ?></span>
             <?php if ($planLabel === 'Free'): ?>
@@ -373,7 +425,11 @@ $hasAnyScans = array_sum($chartDays) > 0;
           </div>
           <div class="db-metric-value"><?= $totalScans ?></div>
           <div class="db-metric-label">Escaneos QR totales</div>
-          <div class="db-metric-note">Veces que se abrió el tour desde el QR.</div>
+          <div class="db-metric-note">
+            <?= $totalScans > 0
+              ? 'Tu QR ya está generando aperturas del tour.'
+              : 'Comparte tu QR para empezar a medir interés.' ?>
+          </div>
         </div>
 
         <!-- KPI 2: Último escaneo -->
@@ -402,7 +458,7 @@ $hasAnyScans = array_sum($chartDays) > 0;
           <?php elseif ($totalTours > 0): ?>
             <div class="db-metric-value" style="font-size:1.05rem;color:var(--ox-text-muted);">Creado</div>
             <div class="db-metric-label">Tour sin publicar</div>
-            <div class="db-metric-note">Publica el tour para empezar a recibir visitas.</div>
+            <div class="db-metric-note">Publica el tour para poder medir actividad.</div>
           <?php else: ?>
             <div class="db-metric-value" style="font-size:1.5rem;color:var(--ox-text-dim);">—</div>
             <div class="db-metric-label">Sin tour todavía</div>
@@ -434,10 +490,24 @@ $hasAnyScans = array_sum($chartDays) > 0;
         </p>
 
         <?php if (!$hasAnyScans): ?>
-          <p class="atl-chart-empty">
-            Aún no hay escaneos suficientes.<br>
-            Comparte tu QR para empezar a medir el interés de tus clientes.
-          </p>
+          <div class="atl-chart-empty">
+            <p class="atl-empty-title">Aún no hay escaneos.</p>
+            <p class="atl-empty-desc">Descarga tu QR y colócalo donde tus clientes lo vean: escaparate, mesa, tarjeta o redes sociales.</p>
+            <div class="atl-empty-steps" aria-label="Pasos para empezar a medir">
+              <div class="atl-empty-step">
+                <div class="atl-empty-step-num">1</div>
+                <span class="atl-empty-step-text">Comparte el QR</span>
+              </div>
+              <div class="atl-empty-step">
+                <div class="atl-empty-step-num">2</div>
+                <span class="atl-empty-step-text">El cliente abre el tour</span>
+              </div>
+              <div class="atl-empty-step">
+                <div class="atl-empty-step-num">3</div>
+                <span class="atl-empty-step-text">Vuelve aquí para ver actividad</span>
+              </div>
+            </div>
+          </div>
         <?php else: ?>
 
           <!-- Conteos encima de las barras -->
@@ -483,7 +553,7 @@ $hasAnyScans = array_sum($chartDays) > 0;
               <i data-lucide="qr-code" width="18" height="18"></i>
             </div>
             <div class="atl-funnel-body">
-              <div class="atl-funnel-label">QR escaneado</div>
+              <div class="atl-funnel-label">Cliente escanea el QR</div>
               <div class="atl-funnel-note">
                 Medido en Free —
                 <?= $totalScans ?> escaneo<?= $totalScans !== 1 ? 's' : '' ?> acumulado<?= $totalScans !== 1 ? 's' : '' ?>
@@ -501,7 +571,7 @@ $hasAnyScans = array_sum($chartDays) > 0;
               <i data-lucide="eye" width="18" height="18"></i>
             </div>
             <div class="atl-funnel-body">
-              <div class="atl-funnel-label">Tour abierto</div>
+              <div class="atl-funnel-label">Cliente visita el tour</div>
               <div class="atl-funnel-note">Medición de aperturas y actividad del tour disponible en Pro.</div>
             </div>
             <span class="db-badge db-badge--plan">Pro</span>
@@ -513,7 +583,7 @@ $hasAnyScans = array_sum($chartDays) > 0;
               <i data-lucide="heart" width="18" height="18"></i>
             </div>
             <div class="atl-funnel-body">
-              <div class="atl-funnel-label">Cliente interesado</div>
+              <div class="atl-funnel-label">Cliente toma una decisión</div>
               <div class="atl-funnel-note">Señales comerciales avanzadas como clics en zonas destacadas o CTAs.</div>
             </div>
             <span class="db-badge db-badge--draft">Roadmap</span>
@@ -528,6 +598,9 @@ $hasAnyScans = array_sum($chartDays) > 0;
           <i data-lucide="lock" width="15" height="15" aria-hidden="true"></i>
           Desbloquea analíticas Pro
           <a href="/precios" class="db-btn-brand-outline" style="font-size:0.75rem;padding:3px 10px;margin-left:auto;">Ver planes →</a>
+        </p>
+        <p style="font-size:0.8125rem;color:var(--ox-text-muted);margin-bottom:1rem;margin-top:-0.5rem;">
+          Mejora a Pro para ver visitas por día, dispositivos, evolución y rendimiento de tus tours.
         </p>
 
         <div class="atl-locked-grid">
