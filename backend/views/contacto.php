@@ -215,5 +215,7 @@ $checked = static fn(string $key): string => !empty($old[$key]) ? ' checked' : '
       </div>
     </div>
   </footer>
+  <div id="cursor-ring" aria-hidden="true"></div>
+  <script src="<?= asset('/js/public-cursor.js') ?>" defer></script>
 </body>
 </html>

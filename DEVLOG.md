@@ -4170,3 +4170,37 @@ Dar al rol `admin` una primera vista funcional de supervisión de la plataforma,
 
 - Ejecutar `docs/sql/2026-05-26_contact_messages.sql` en servidor antes de validar un POST valido completo en produccion.
 - Validar en produccion que SMTP envia la notificacion real; si falla, el mensaje queda persistido y el fallo se registra en logs.
+
+---
+
+## 2026-05-26 - Microfix visual/UX cursor personalizado en páginas públicas
+
+### Que se hizo
+
+- Se creo `public/js/public-cursor.js`: script ligero (sin Three.js) que activa el cursor anillo Oxphyre en paginas publicas. Solo se activa con `pointer: fine`; no hace nada si `#cursor-ring` no existe; mueve el anillo con `mousemove`; añade/quita `.cursor-hover` en elementos interactivos. Patron IIFE con `'use strict'`.
+- En `public/css/main.css`, se amplio el bloque `@media (pointer: coarse)` existente con reglas semanticas seguras: `cursor: pointer` en `a, button, [role="button"], input[type=submit/button/reset], label[for], select`; `cursor: text` en inputs de texto y `textarea`; `cursor: not-allowed` en `:disabled / [disabled] / [aria-disabled="true"]`. Se ponen solo en `pointer: coarse` porque en `pointer: fine` el cursor del sistema siempre es `none` (anillo lo reemplaza) y añadirlas globalmente romperia el cursor de la landing al tener `a` mas especificidad que `*`.
+- Se elimino `* { cursor: auto !important; }` y `#cursor-ring { display: none !important; }` del inline style de 13 paginas publicas:
+  - `precios`, `soporte`, `sobre-nosotros`, `contacto` (solo ring+script, no tenia inline cursor)
+  - `tour-virtual-para-negocios`, `tour-virtual-para-restaurantes`
+  - `blog/index`, 3 posts del blog
+  - `legal/privacidad`, `legal/terminos`, `legal/cookies`
+- Se añadio `<div id="cursor-ring" aria-hidden="true"></div>` y `<script src="<?= asset('/js/public-cursor.js') ?>" defer></script>` antes de `</body>` en las 13 paginas anteriores.
+- `contacto.php` tenia el cursor invisible (sin override ni ring): ahora tiene el anillo como el resto.
+
+### Que NO se hizo
+
+- No se toco `home.php` (landing ya gestiona su cursor via `main.js`).
+- No se toco ninguna vista de `dashboard/`, `auth/` ni `tour.php`.
+- No se toco `public/js/tour-viewer.js` ni `public/js/main.js`.
+- No se toco nada funcional: controllers, models, routes, SQL/BD, R2, QR, hotspots, auth.
+- No se hizo commit ni push.
+
+### Archivos modificados
+
+- `public/css/main.css` — ampliacion bloque `@media (pointer: coarse)` con cursor semanticos
+- `public/js/public-cursor.js` — nuevo archivo
+- 13 vistas publicas — eliminacion overrides cursor + añadido ring div + script
+
+### Decision tecnica
+
+Las reglas `cursor: pointer/text/not-allowed` se ponen dentro de `@media (pointer: coarse)` (no globales) porque: en `pointer: fine`, `* { cursor: none; }` es el comportamiento correcto (el anillo reemplaza al cursor del sistema) y una regla global `a { cursor: pointer; }` tiene mas especificidad que `*` y romperia el cursor oculto de la landing. En movil/tablet (`pointer: coarse`) el anillo esta oculto y el sistema debe mostrar cursores semanticos correctos.

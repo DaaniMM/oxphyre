@@ -23,8 +23,6 @@
   <link rel="stylesheet" href="<?= asset('/css/main.css') ?>">
 
   <style>
-    * { cursor: auto !important; }
-    #cursor-ring { display: none !important; }
     #nav { opacity: 1 !important; pointer-events: auto !important; }
     .legal-page {
       min-height: 100vh;
@@ -206,5 +204,7 @@
       </div>
     </div>
   </footer>
+  <div id="cursor-ring" aria-hidden="true"></div>
+  <script src="<?= asset('/js/public-cursor.js') ?>" defer></script>
 </body>
 </html>

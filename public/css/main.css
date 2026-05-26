@@ -375,6 +375,29 @@ body.light {
 @media (pointer: coarse) {
   * { cursor: auto; }
   #cursor-ring { display: none; }
+
+  /* Cursores semánticos: activos en móvil/tablet (anillo oculto, sistema visible) */
+  a,
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  label[for],
+  select { cursor: pointer; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  textarea { cursor: text; }
+
+  :disabled,
+  [disabled],
+  [aria-disabled="true"] { cursor: not-allowed; }
 }
 
 

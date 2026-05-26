@@ -48,9 +48,6 @@
 
   <style>
     /* ── Overrides específicos para /precios ── */
-    * { cursor: auto !important; }
-    #cursor-ring { display: none !important; }
-
     /* Nav siempre visible (sin Three.js / phase-2) */
     #nav { opacity: 1 !important; pointer-events: auto !important; }
 
@@ -769,5 +766,7 @@
   })();
   </script>
 
+  <div id="cursor-ring" aria-hidden="true"></div>
+  <script src="<?= asset('/js/public-cursor.js') ?>" defer></script>
 </body>
 </html>
