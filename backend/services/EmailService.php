@@ -129,29 +129,40 @@ HTML;
         foreach ($data as $key => $value) {
             $safe[$key] = nl2br(htmlspecialchars((string) $value));
         }
-        $privacy = !empty($data['privacy_accepted']) ? 'Si' : 'No';
-        $commercial = !empty($data['commercial_contact']) ? 'Si' : 'No';
+        $privacy    = !empty($data['privacy_accepted'])  ? 'Sí' : 'No';
+        $commercial = !empty($data['commercial_contact']) ? 'Sí' : 'No';
 
+        // Nota de compatibilidad email:
+        // - bgcolor en <body> y <td> cubre Outlook/Gmail que ignoran background CSS en body.
+        // - Todos los colores son hexadecimales sólidos; rgba() no se renderiza en Gmail/Outlook.
+        //   Equivalentes computados sobre fondo #111009:
+        //   rgba(255,255,255,0.78) → #c8c8c8   rgba(255,255,255,0.84) → #d6d6d6
+        //   rgba(254,179,84,0.18)  → #2c2210   rgba(254,179,84,0.16)  → #272010
+        //   rgba(255,255,255,0.04) → #161410   (bloque mensaje, antes se veía gris)
         return <<<HTML
 <!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0a0800;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0800;padding:32px 18px;">
-    <tr><td align="center">
-      <table width="620" cellpadding="0" cellspacing="0" style="background:#111009;border:1px solid rgba(254,179,84,0.18);border-radius:12px;overflow:hidden;">
-        <tr><td style="padding:34px 40px;">
+<body bgcolor="#0a0800" style="margin:0;padding:0;background:#0a0800;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#0a0800" style="background:#0a0800;padding:32px 18px;">
+    <tr><td align="center" bgcolor="#0a0800" style="background:#0a0800;">
+      <table width="620" cellpadding="0" cellspacing="0" bgcolor="#111009" style="background:#111009;border:1px solid #2c2210;border-radius:12px;overflow:hidden;">
+        <tr><td bgcolor="#111009" style="padding:34px 40px;background:#111009;">
           <p style="font-family:'Courier New',monospace;font-size:11px;color:#FEB354;letter-spacing:0.3em;text-transform:uppercase;margin:0 0 24px;">OXPHYRE CONTACTO</p>
           <h1 style="color:#ffffff;font-size:24px;font-weight:700;margin:0 0 20px;line-height:1.25;">Nuevo mensaje #{$messageId}</h1>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Nombre:</strong> {$safe['name']}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Apellidos/negocio:</strong> {$safe['business_or_lastname']}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Email:</strong> {$safe['email']}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Telefono:</strong> {$safe['phone']}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Tipo:</strong> {$safe['inquiry_type']}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Plan:</strong> {$safe['plan_interest']}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 8px;"><strong>Privacidad:</strong> {$privacy}</p>
-          <p style="color:rgba(255,255,255,0.78);font-size:15px;line-height:1.6;margin:0 0 24px;"><strong>Contacto comercial:</strong> {$commercial}</p>
-          <div style="padding:18px;border:1px solid rgba(254,179,84,0.16);border-radius:8px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.84);font-size:15px;line-height:1.65;">{$safe['message']}</div>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Nombre:</strong> {$safe['name']}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Apellidos/negocio:</strong> {$safe['business_or_lastname']}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Email:</strong> {$safe['email']}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Teléfono:</strong> {$safe['phone']}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Tipo:</strong> {$safe['inquiry_type']}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Plan:</strong> {$safe['plan_interest']}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 8px;"><strong style="color:#e0e0e0;">Privacidad:</strong> {$privacy}</p>
+          <p style="color:#c8c8c8;font-size:15px;line-height:1.6;margin:0 0 20px;"><strong style="color:#e0e0e0;">Contacto comercial:</strong> {$commercial}</p>
+          <hr style="border:none;border-top:1px solid #2c2210;margin:0 0 20px;">
+          <p style="font-family:'Courier New',monospace;font-size:11px;color:#FEB354;letter-spacing:0.2em;text-transform:uppercase;margin:0 0 10px;">Mensaje</p>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td bgcolor="#161410" style="padding:18px;border:1px solid #272010;border-radius:8px;background:#161410;color:#d6d6d6;font-size:15px;line-height:1.65;">{$safe['message']}</td></tr>
+          </table>
         </td></tr>
       </table>
     </td></tr>

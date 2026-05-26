@@ -4404,3 +4404,52 @@ Deben añadirse al `.env` real en servidor para sobreescribir el fallback, aunqu
 
 - `backend/services/EmailService.php` — `sendContactNotification()`: destinatario leído desde `$_ENV` con fallback `support@oxphyre.com`
 - `.env.example` — añadidas `CONTACT_TO_EMAIL` y `CONTACT_TO_NAME` con comentario explicativo
+
+---
+
+## 2026-05-26 - Microfix: plantilla email contacto — fondo oscuro coherente
+
+### Problema
+
+El email de notificación de contacto llegaba con fondo gris en Gmail y otros clientes de correo, rompiendo la coherencia visual de Oxphyre.
+
+**Causa raíz:** Los clientes de correo (Gmail especialmente) ignoran `background` CSS en el `<body>` y no soportan `rgba()`. Esto tenía dos consecuencias:
+
+1. El fondo exterior perdía el color `#0a0800` al no tener atributo `bgcolor` HTML.
+2. El bloque del mensaje usaba `rgba(255,255,255,0.04)` como fondo — al caer el soporte rgba, el cliente aplicaba blanco/gris propio y el texto oscuro desaparecía o el contraste se rompía.
+
+### Fix aplicado en `templateContactNotification()`
+
+| Elemento | Antes | Después |
+|---|---|---|
+| `<body>` | solo `style="background:#0a0800"` | + atributo `bgcolor="#0a0800"` |
+| Outer `<table>` | solo `style="background:#0a0800"` | + `bgcolor="#0a0800"` |
+| Outer `<td>` | sin bgcolor | `bgcolor="#0a0800"` y `style="background:#0a0800"` |
+| Card `<table>` | solo `style="background:#111009"` | + `bgcolor="#111009"` |
+| Card `<td>` | sin bgcolor | `bgcolor="#111009"` y `style="background:#111009"` |
+| Border de card | `rgba(254,179,84,0.18)` | `#2c2210` (sólido equivalente) |
+| Texto campos | `rgba(255,255,255,0.78)` | `#c8c8c8` (sólido) |
+| Texto negrita | sin estilo propio | `color:#e0e0e0` (sólido) |
+| Bloque mensaje bg | `rgba(255,255,255,0.04)` → gris en Gmail | `#161410` (sólido oscuro) vía `<table>` con `bgcolor` |
+| Bloque mensaje borde | `rgba(254,179,84,0.16)` | `#272010` (sólido) |
+| Texto mensaje | `rgba(255,255,255,0.84)` | `#d6d6d6` (sólido) |
+
+El bloque del mensaje pasó de `<div>` con `background:rgba()` a `<table><tr><td bgcolor>` para máxima compatibilidad con Outlook.
+
+Se añadió separador `<hr>` y etiqueta "Mensaje" encima del bloque para mejorar escaneabilidad interna.
+
+Se corrigió "Si" → "Sí" con tilde en los campos de privacidad y contacto comercial.
+
+### `plainContactNotification()` — sin cambios
+
+No se tocó el texto plano; los datos mostrados son idénticos.
+
+### Qué NO se tocó
+
+- `sendContactNotification()`, `ContactController.php`, `ContactMessageModel.php` — sin cambios.
+- `.env` / `.env.example`, vistas, rutas, CSS/JS, SQL/BD, dashboard, auth, visor, footer/nav — sin cambios.
+- No se hizo commit ni push.
+
+### Verificación pendiente tras deploy
+
+Enviar prueba desde `/contacto` y confirmar fondo negro/oscuro en Gmail y Apple Mail.
