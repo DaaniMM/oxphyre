@@ -159,17 +159,20 @@ document.addEventListener('DOMContentLoaded', () => {
     menuBtn.addEventListener('click', () => {
       const open = mobileMenu.classList.toggle('open');
       menuBtn.setAttribute('aria-expanded', open);
+      document.body.classList.toggle('mobile-menu-open', open);
     });
     if (menuClose) {
       menuClose.addEventListener('click', () => {
         mobileMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('mobile-menu-open');
       });
     }
     mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         mobileMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('mobile-menu-open');
       });
     });
   }

@@ -332,6 +332,22 @@ body.light {
   --text-3: rgba(26, 20, 16, 0.40);
 }
 
+/* bloquea el scroll del body mientras el menú móvil está abierto */
+body.mobile-menu-open { overflow: hidden; }
+
+/* logo posicionado en la esquina superior izquierda del overlay */
+.mobile-menu-logo {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  line-height: 1;
+}
+
 
 /* ── 1. CANVAS THREE.JS FIXED ─────────────────────────────────────────── */
 /* Un único canvas que permanece activo durante todo el scroll.
@@ -622,12 +638,14 @@ body.phase-2 #nav-logo-solo {
   display: none;
   position: fixed;
   inset: 0;
-  background: #000000;
-  z-index: 999;
+  background: #050505;
+  z-index: 9998;               /* encima del nav (1000) y debajo del grain (9999) */
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 40px;
+  justify-content: flex-start; /* empieza desde arriba, predecible */
+  padding: 76px 32px 40px;    /* 76px top = espacio para logo + botón cerrar */
+  gap: clamp(20px, 4vh, 36px);
+  overflow-y: auto;            /* safety net en pantallas muy cortas */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -635,8 +653,8 @@ body.phase-2 #nav-logo-solo {
 #mobile-menu.open { opacity: 1; pointer-events: auto; }
 #mobile-menu a {
   font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 700;
+  font-size: clamp(1.5rem, 7vw, 2.1rem); /* ~24-33px razonable en 390px */
+  font-weight: 600;
   color: var(--text-1);
   transition: color var(--transition);
 }

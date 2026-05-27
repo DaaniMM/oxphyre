@@ -4843,3 +4843,33 @@ La detección de dispositivo para saltar la experiencia inmersiva de la esfera s
 ### Qué NO se tocó
 
 CSS, HTML, dashboard, visor, auth, backend, rutas, BD. No se hizo commit ni push.
+
+---
+
+## 2026-05-27 — Hotfix UX móvil: menú hamburguesa landing
+
+### Causa
+
+`#mobile-menu` tenía `z-index: 999` inferior al `z-index: 1000` del `#nav`. El header tapaba el overlay del menú y el primer enlace quedaba oculto. Además no había bloqueo de scroll en body, por lo que la página seguía siendo scrollable detrás del menú abierto.
+
+### Fix
+
+- `public/css/main.css`:
+  - `#mobile-menu`: z-index 999→9998 (encima del nav y debajo del grain), background `#000`→`#050505`, justify-content center→flex-start, padding `76px 32px 40px`, gap `clamp(20px,4vh,36px)`, overflow-y auto.
+  - `#mobile-menu a`: font-size 32px→`clamp(1.5rem,7vw,2.1rem)`, font-weight 700→600.
+  - Añadido `body.mobile-menu-open { overflow: hidden; }`.
+  - Añadido `.mobile-menu-logo` para logo Oxphyre ámbar posicionado absoluto arriba-izquierda del overlay.
+- `public/js/main.js`:
+  - Añadido `document.body.classList.toggle/remove('mobile-menu-open')` en los 3 handlers del menú (abrir, cerrar con X, cerrar al pulsar link).
+- `backend/views/home.php`:
+  - Logo `<a class="nav-logo mobile-menu-logo">Oxphyre</a>` añadido como primer hijo de `#mobile-menu`.
+
+### Archivos modificados
+
+- `public/css/main.css` (2 ediciones en bloques existentes + 2 bloques nuevos)
+- `public/js/main.js` (3 líneas añadidas en handlers existentes)
+- `backend/views/home.php` (1 línea añadida en `#mobile-menu`)
+
+### Qué NO se tocó
+
+Dashboard, visor, auth, backend, BD, Three.js, esfera desktop. No se hizo commit ni push.

@@ -141,6 +141,7 @@
 
   <!-- Menú móvil -->
   <div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menú">
+    <a href="/" class="nav-logo mobile-menu-logo" aria-label="Inicio Oxphyre">Oxphyre</a>
     <button id="mobile-menu-close" aria-label="Cerrar menú" style="position:absolute;top:24px;right:24px;color:var(--text-2);">
       <i data-lucide="x" width="28" height="28"></i>
     </button>
