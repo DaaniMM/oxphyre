@@ -4796,6 +4796,31 @@ BD, migraciones, controladores, vistas, visor, R2, auth, rutas, páginas públic
 
 ---
 
+## 2026-05-27 — Microfix visual landing responsive: glow ámbar CSS en móvil/tablet
+
+### Motivo
+
+Al saltar la esfera Three.js en móvil/tablet, el fondo quedaba negro puro. Las secciones de la landing son `background: transparent`; el body es la única capa de color visible. Se añade un glow ámbar sutil mediante `radial-gradient` en el body para mejorar la experiencia visual sin Three.js, canvas ni JS adicional.
+
+### Cambio
+
+`public/css/main.css`, al final del fichero:
+- Nuevo bloque `@media (hover: none), (pointer: coarse), (max-width: 1023px), (max-width: 1200px) and (max-height: 900px)` que aplica tres `radial-gradient` ámbar (opacidades 0.18/0.08/0.06) sobre `body.phase-2`, distribuidos en hero, zona media y CTA/FAQ.
+- La condición `(max-width: 1200px) and (max-height: 900px)` cubre tablets landscape simuladas en herramientas como ResponsivelyApp (p. ej. Galaxy Tab S4 = 1138×712) donde `pointer: coarse` no se reporta correctamente.
+- Base `#050505` en lugar de `#000000` puro.
+- Desktop intacto: el media query no coincide con `hover: hover / pointer: fine` ni con pantallas > 1200 px de ancho.
+- El grain global existente (`body::before`) se mantiene sin cambios y actúa sobre el nuevo fondo.
+
+### Archivos modificados
+
+- `public/css/main.css` (bloque comentado de ~12 líneas al final)
+
+### Qué NO se tocó
+
+HTML, JS, dashboard, visor, auth, backend, rutas, BD. No se hizo commit ni push.
+
+---
+
 ## 2026-05-27 — Microfix responsive landing: saltar esfera en táctil/tablet
 
 ### Motivo
