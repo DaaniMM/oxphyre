@@ -4873,3 +4873,41 @@ CSS, HTML, dashboard, visor, auth, backend, rutas, BD. No se hizo commit ni push
 ### Qué NO se tocó
 
 Dashboard, visor, auth, backend, BD, Three.js, esfera desktop. No se hizo commit ni push.
+
+---
+
+## 2026-05-27 — Hotfix visor móvil: giroscopio desactivado temporalmente
+
+### Motivo
+
+El giroscopio en móvil no funciona de forma fiable (permisos iOS, deriva de sensores,
+comportamiento inestable). Para la entrega/demo se desactiva sin eliminar el código.
+
+### Cambio
+
+`public/js/tour-viewer.js`:
+- Añadida constante `const ENABLE_GYROSCOPE = false;` al inicio del fichero,
+  junto a las otras constantes, con comentario explicativo.
+- `setupGyro()`: early return cuando `!ENABLE_GYROSCOPE` → oculta el botón
+  (`btn.hidden = true`) y no registra listeners de `DeviceOrientation`.
+- `restoreViewerChrome()`: cambiado `gyroBtn.hidden = false` por
+  `gyroBtn.hidden = !ENABLE_GYROSCOPE` para que al navegar entre posiciones
+  el botón no reaparezca.
+- Todo el código de `handleGyro()`, `setupGyro()` y `DeviceOrientationEvent`
+  se conserva intacto. Para reactivar: cambiar `ENABLE_GYROSCOPE = true`.
+
+### Comportamiento resultante
+
+- Visor móvil carga sin solicitar permisos de sensores.
+- Botón de giroscopio no aparece.
+- Navegación táctil drag/swipe sigue activa.
+- Desktop sin cambios.
+
+### Archivos modificados
+
+- `public/js/tour-viewer.js` (constante + 2 ediciones mínimas)
+
+### Qué NO se tocó
+
+CSS, HTML del visor, hotspots, FOV, cámara, mapa, carga de imágenes, landing,
+dashboard, auth, backend, BD. No se hizo commit ni push.

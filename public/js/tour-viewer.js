@@ -11,6 +11,10 @@ let roomState = null;
 
 const MAIN_PITCH_LIMIT_DEG = 6;
 const MAIN_DEFAULT_FOV = 62;
+// ── FEATURE FLAGS ────────────────────────────────────────────────────────────
+// Giroscopio desactivado temporalmente: inestable en móvil para demo/TFG.
+// Poner true para retomarlo post-TFG.
+const ENABLE_GYROSCOPE = false;
 // La BD conserva N/S/E/O por compatibilidad. En el visor se traducen a
 // fotos detalle 1-4 y se renderizan solo las que existan para cada posición.
 const DETAIL_DIRECTIONS = ['N', 'S', 'E', 'O'];
@@ -149,7 +153,7 @@ function restoreViewerChrome() {
   const bar = document.getElementById('tour-positions-bar');
 
   if (viewerEl) viewerEl.style.display = '';
-  if (gyroBtn) gyroBtn.hidden = false;
+  if (gyroBtn) gyroBtn.hidden = !ENABLE_GYROSCOPE; // respeta el feature flag
   if (bar && positions.length > 1) bar.hidden = false;
 }
 
@@ -1166,6 +1170,9 @@ function closeRoom() {
 function setupGyro() {
   const btn = document.getElementById('tour-gyro-btn');
   if (!btn) return;
+
+  // Feature flag: ocultar y no inicializar cuando está desactivado
+  if (!ENABLE_GYROSCOPE) { btn.hidden = true; return; }
 
   if (typeof DeviceOrientationEvent === 'undefined') {
     btn.style.display = 'none';
