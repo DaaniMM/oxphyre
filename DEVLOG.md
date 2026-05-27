@@ -4793,3 +4793,28 @@ El alias `tour_name` se mantiene intacto; la vista y el controlador no requieren
 ### Qué NO se tocó
 
 BD, migraciones, controladores, vistas, visor, R2, auth, rutas, páginas públicas, `main.css`, `dashboard.css`. No se hizo commit ni push.
+
+---
+
+## 2026-05-27 — Microfix responsive landing: saltar esfera en táctil/tablet
+
+### Motivo
+
+La detección de dispositivo para saltar la experiencia inmersiva de la esfera solo cubría `innerWidth <= 768`. Tablets y pantallas táctiles > 768 px entraban en la fase de esfera, que usa wheel scroll y no tiene soporte de touch nativo.
+
+### Cambio
+
+`public/js/main.js`, función `startThreeJS()`:
+- Sustituida la condición `window.innerWidth <= 768` por una constante `skipSphere` que combina tres criterios con `||`:
+  1. `window.innerWidth <= 768` — móvil (igual que antes).
+  2. `window.matchMedia('(hover: none), (pointer: coarse)').matches` — cualquier dispositivo táctil sin ratón (media query estándar W3C).
+  3. `window.innerWidth < 1024` — tablet en portrait que escape al media query.
+- Comportamiento resultante: desktop con ratón → esfera intacta; móvil/tablet/touch → `phase-2` directa.
+
+### Archivos modificados
+
+- `public/js/main.js` (4 líneas → 5 líneas en `startThreeJS()`, diff mínimo)
+
+### Qué NO se tocó
+
+CSS, HTML, dashboard, visor, auth, backend, rutas, BD. No se hizo commit ni push.

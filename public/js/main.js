@@ -186,7 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
     document.body.style.overflow = 'hidden';
 
-    if (window.innerWidth <= 768) {
+    const skipSphere = window.innerWidth <= 768
+      || window.matchMedia('(hover: none), (pointer: coarse)').matches
+      || window.innerWidth < 1024;
+    if (skipSphere) {
       document.body.style.overflow = '';
       document.body.classList.add('phase-2');
       return;
