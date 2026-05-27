@@ -153,7 +153,7 @@ function restoreViewerChrome() {
   const bar = document.getElementById('tour-positions-bar');
 
   if (viewerEl) viewerEl.style.display = '';
-  if (gyroBtn) gyroBtn.hidden = !ENABLE_GYROSCOPE; // respeta el feature flag
+  setGyroButtonVisible(gyroBtn, ENABLE_GYROSCOPE);
   if (bar && positions.length > 1) bar.hidden = false;
 }
 
@@ -1167,12 +1167,22 @@ function closeRoom() {
   updateDetailsButton();
 }
 
+// Centraliza la visibilidad del botón de giroscopio.
+// hidden+display+aria-hidden porque algunas reglas CSS sobrescriben el atributo hidden.
+function setGyroButtonVisible(btn, isVisible) {
+  if (!btn) return;
+  btn.hidden        = !isVisible;
+  btn.style.display = isVisible ? '' : 'none';
+  if (isVisible) btn.removeAttribute('aria-hidden');
+  else           btn.setAttribute('aria-hidden', 'true');
+}
+
 function setupGyro() {
   const btn = document.getElementById('tour-gyro-btn');
   if (!btn) return;
 
-  // Feature flag: ocultar y no inicializar cuando está desactivado
-  if (!ENABLE_GYROSCOPE) { btn.hidden = true; return; }
+  // Feature flag: ocultar forzosamente y no inicializar cuando está desactivado
+  if (!ENABLE_GYROSCOPE) { setGyroButtonVisible(btn, false); return; }
 
   if (typeof DeviceOrientationEvent === 'undefined') {
     btn.style.display = 'none';

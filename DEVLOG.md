@@ -4911,3 +4911,32 @@ comportamiento inestable). Para la entrega/demo se desactiva sin eliminar el có
 
 CSS, HTML del visor, hotspots, FOV, cámara, mapa, carga de imágenes, landing,
 dashboard, auth, backend, BD. No se hizo commit ni push.
+
+---
+
+## 2026-05-27 — Hotfix visor móvil: refuerzo ocultación botón giroscopio
+
+### Causa
+
+El atributo `hidden` no bastaba para ocultar visualmente `#tour-gyro-btn` en
+móvil: alguna regla CSS sobrescribía el comportamiento, y el botón seguía
+visible aunque el inspector mostrara `hidden` presente.
+
+### Fix
+
+`public/js/tour-viewer.js`:
+- Añadida función auxiliar `setGyroButtonVisible(btn, isVisible)` que combina
+  `hidden`, `style.display` y `aria-hidden` para garantizar ocultación real
+  independientemente de reglas CSS externas.
+- `setupGyro()` y `restoreViewerChrome()` usan ahora `setGyroButtonVisible`
+  en lugar de asignar `hidden` directamente.
+- `ENABLE_GYROSCOPE = false` sigue siendo el único flag a cambiar para reactivar.
+
+### Archivos modificados
+
+- `public/js/tour-viewer.js` (helper nuevo + 2 llamadas)
+
+### Qué NO se tocó
+
+CSS, HTML del visor, hotspots, FOV, cámara, mapa, carga de imágenes, landing,
+dashboard, auth, backend, BD. No se hizo commit ni push.
