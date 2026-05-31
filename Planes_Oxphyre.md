@@ -151,18 +151,77 @@ Plan premium para negocios con necesidades avanzadas, marca blanca, mayor person
 - Integraciones futuras.
 
 ### Gaussian Splatting
-Business será el plan natural para la evolución post-TFG:
 
-- Oxphyre 3D Capture.
-- Cliente graba vídeo del local.
-- Oxphyre procesa el vídeo con Gaussian Splatting.
-- Resultado: recorrido 3D fotorrealista navegable.
-- Stack previsto:
-  - OpenSplat como herramienta externa sin modificar.
-  - SuperSplat Viewer para visualización.
-- No forma parte del core obligatorio del TFG.
-- Para TFG puede mostrarse como demo pregenerada si da tiempo.
-- En producción comercial se procesaría con GPU bajo demanda.
+Business será el plan natural para la evolución avanzada de Oxphyre hacia reconstrucciones 3D fotorrealistas.
+
+La idea comercial es que un negocio pueda pasar de un tour panorámico tradicional a una experiencia más inmersiva, navegable y premium, especialmente útil para alojamientos, restaurantes, espacios turísticos, showrooms, clínicas, gimnasios o locales con alto valor visual.
+
+#### Demo experimental para TFG
+
+Para la exposición del TFG, Gaussian Splatting no forma parte del core obligatorio ni del flujo productivo principal.
+
+Se tratará únicamente como una demo experimental Business si se cumplen estas condiciones:
+
+- El resultado debe ser visualmente espectacular y estable.
+- No debe afectar al dashboard, base de datos, rutas críticas ni visor Free/Pro.
+- Debe mostrarse como escena pregenerada, página aislada o iframe externo.
+- No debe venderse como funcionalidad completamente productiva.
+- Si el resultado no mejora claramente la percepción del plan Business, no se enseña.
+
+Posible flujo de demo:
+
+1. Grabar un vídeo corto del espacio.
+2. Procesarlo con una herramienta externa gratuita si permite uso manual.
+3. Generar una escena Gaussian Splatting.
+4. Mostrarla como demo Business mediante enlace, iframe o página aislada.
+5. Explicar que representa una línea de evolución premium, no el MVP principal.
+
+#### Posible pipeline real de producción
+
+En una versión comercial futura, Oxphyre podría integrar Gaussian Splatting de forma más completa mediante dos caminos:
+
+**Opción A — Proveedor externo / API Enterprise**
+
+- El cliente Business graba o envía un vídeo siguiendo una guía de captura.
+- Oxphyre sube el vídeo a un proveedor especializado mediante API.
+- El sistema consulta el estado del procesado.
+- Al finalizar, descarga o enlaza el resultado generado.
+- La escena se almacena o sirve desde infraestructura controlada por Oxphyre.
+- El visor Business carga la escena final desde la web pública del tour.
+
+Ventaja: menor complejidad técnica inicial y salida al mercado más rápida.
+Riesgo: dependencia del proveedor, coste por uso, privacidad y límites de API.
+
+**Opción B — Pipeline propio con GPU**
+
+- El cliente Business sube el vídeo desde el dashboard.
+- Oxphyre crea un trabajo de procesado en cola.
+- Un worker con GPU procesa el vídeo mediante herramientas de Gaussian Splatting.
+- El resultado se exporta como `.ply`, `.spz`, `.splat`, `.ksplat` o formato compatible.
+- El archivo optimizado se guarda en Cloudflare R2/CDN.
+- El visor Business lo carga desde Oxphyre como experiencia premium.
+- El dashboard muestra estados como pendiente, procesando, listo o error de captura.
+
+Ventaja: mayor control técnico, privacidad y diferenciación de producto.
+Riesgo: más coste, más mantenimiento, necesidad de GPU, colas de trabajo y control de calidad.
+
+#### Criterio de producto
+
+Oxphyre no necesita inventar desde cero el algoritmo de Gaussian Splatting para aportar valor comercial.
+
+El valor de Oxphyre Business estaría en:
+
+- guía de captura para el cliente;
+- procesado controlado;
+- alojamiento del resultado;
+- visor web integrado;
+- QR, enlace público y embed;
+- analíticas;
+- soporte;
+- marca blanca;
+- experiencia final lista para negocio local.
+
+Por tanto, Gaussian queda como evolución premium post-TFG, no como sustituto del MVP Free/Pro ya funcional.
 
 ### Posicionamiento comercial
 Business vende:

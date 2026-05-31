@@ -76,6 +76,9 @@ Estado implementado:
 - Cuentas demo Free/Pro/Business creadas y verificadas sin documentar contrasenas: `demo_free@oxphyre.com` (`business_free`), `demo_pro@oxphyre.com` (`business_pro`) y `demo_business@oxphyre.com` (`business_business`). Login validado en las tres. Creacion de negocio verificada con `plan_id=1`, `plan_id=2` y `plan_id=3` respectivamente.
 - Slug soft delete de negocios corregido y validado: al borrar un negocio, su slug activo se libera renombrando el registro soft deleted con sufijo interno `-deleted-{id}`. Caso validado: `negocioofree` paso a `negocioofree-deleted-2` y un nuevo negocio pudo reutilizar `negocioofree` sin error 500.
 - SEO tecnico inicial validado: `public/sitemap.xml` desplegado y accesible en `https://oxphyre.com/sitemap.xml` con HTTP/2 200 y `content-type: text/xml`; incluye home, `/precios`, `/tour-virtual-para-negocios`, `/blog`, 3 posts, `/tour-virtual-para-restaurantes`, `/sobre-nosotros` y `/soporte`. `/tour-virtual-para-negocios` es la primera pagina pilar SEO y fue enviada a indexacion. Search Console tiene la home indexada, HTTPS valido, FAQ valida y sitemap enviado. El estado inicial "No se ha podido obtener" se interpreta como pendiente de procesamiento/reintento de Google porque el sitemap responde 200. `robots.txt` existe en produccion y lo gestiona Cloudflare Managed robots.txt; se mantiene sin tocar.
+- Entrega digital final del TFG subida al campus DIGITECH el 2026-05-29 dentro del plazo habilitado. El paquete incluye base de datos, capturas, documentación, material extra, enlaces de demo y repositorio.
+- README.md actualizado el 2026-05-31 para presentar mejor el proyecto en GitHub: descripción, stack, funcionalidades, planes SaaS, seguridad y autoría.
+- Demo experimental Business/Gaussian para exposición: se intentará preparar solo como página aislada o embed externo. Regla vigente: si no queda visualmente espectacular y estable, no se enseña.
 
 ---
 
@@ -543,6 +546,14 @@ Oxphyre diferencia cinco perfiles defendibles para el TFG:
 ---
 
 ## Última sesión de trabajo
+
+Ultima sesion documental/entrega (2026-05-31):
+- Entrega digital final del TFG ya subida al campus DIGITECH dentro del plazo.
+- Paquete final organizado con `Base_de_datos`, `Capturas_de_pantalla`, `Documentacion`, `Extra` y `Repositorio`.
+- `README.md` actualizado para que GitHub muestre una presentación profesional del proyecto, stack, funcionalidades, planes y seguridad.
+- Se define la demo Business/Gaussian como experimento opcional para la exposición: no tocar dashboard, BD, visor Free/Pro ni rutas críticas; como máximo página aislada o iframe externo.
+- Criterio obligatorio: debe ser espectacular y estable; si no, no se enseña.
+
 
 Ultima sesion de cierre/validacion (2026-05-25):
 - Carrusel negocios demo TFG cerrado para Free/Pro: Restaurante / Free y Peluqueria / Pro enlazan a visores publicos reales y cargan correctamente.

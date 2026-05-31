@@ -4940,3 +4940,43 @@ visible aunque el inspector mostrara `hidden` presente.
 
 CSS, HTML del visor, hotspots, FOV, cámara, mapa, carga de imágenes, landing,
 dashboard, auth, backend, BD. No se hizo commit ni push.
+
+---
+
+## 2026-05-31 — Entrega digital final y planificación demo Business Gaussian
+
+### Entrega TFG
+
+Se ha subido al campus DIGITECH la entrega digital final del proyecto Oxphyre dentro del plazo habilitado.
+
+La entrega incluye:
+- paquete `.zip` organizado con `Base_de_datos`, `Capturas_de_pantalla`, `Documentacion`, `Extra` y `Repositorio`;
+- memoria actualizada final en PDF;
+- entregas de fases anteriores como histórico académico;
+- dump SQL de estructura de base de datos;
+- diagrama E/R actualizado;
+- capturas desktop, tablet y móvil;
+- enlaces de demo, QR de demostración, roadmap y documentación de repositorio.
+
+### README del repositorio
+
+Se actualiza `README.md` para que el repositorio público de GitHub no muestre únicamente una descripción mínima, sino una presentación clara del proyecto, stack técnico, funcionalidades principales, planes SaaS, seguridad y autoría.
+
+### Línea experimental Business / Gaussian Splatting
+
+Se define como línea de trabajo previa a la exposición una posible demo experimental para el plan Business basada en Gaussian Splatting.
+
+Criterio de decisión:
+- la demo solo se enseñará si el resultado es visualmente espectacular y estable;
+- no se integrará en el dashboard ni en la base de datos antes de la exposición;
+- no afectará al visor Free/Pro ni al flujo principal ya entregado;
+- se tratará como demostración de evolución premium/roadmap Business.
+
+Plan inicial:
+- probar generación de escena 3D desde vídeo mediante herramienta web externa gratuita si permite uso manual;
+- valorar embed mediante iframe o página aislada tipo `/business-demo`;
+- explicar que una integración real futura podría hacerse mediante API Enterprise de proveedor externo o mediante pipeline propio con GPU.
+
+### Qué NO se tocó
+
+No se modificó lógica de producción, base de datos, dashboard, visor Free/Pro, autenticación, rutas críticas ni despliegue funcional del proyecto.
