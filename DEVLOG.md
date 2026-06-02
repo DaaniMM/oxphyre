@@ -5009,3 +5009,27 @@ La demo Business/Gaussian se muestra como experimento premium para la exposició
 ### Qué NO se tocó
 
 No se tocó Free, Pro, Legacy salvo añadir una rama previa para Business, ni `setCarousel()`, dots, flechas, drag/swipe, autoplay, dashboard, BD, auth, uploads, `public/js/tour-viewer.js`, rutas críticas, controllers, modelos ni GitHub remoto. No se hizo commit ni push.
+
+---
+
+## 2026-06-02 — Ajuste responsive móvil del modal Business Gaussian
+
+### Qué se hizo
+
+Se aplicó un ajuste fino de UX móvil solo sobre el modo `carousel-modal--gaussian` del modal del carrusel.
+
+- `public/css/main.css`: en `@media (max-width: 768px)`, el modal Business/Gaussian mantiene scroll interno, separa el contenido del header, alinea visualmente el badge "BUSINESS" con el botón X en la parte superior del panel, compacta textos/selector y aumenta la altura visible del iframe Vid2Scene para facilitar el uso de los controles internos del visor externo.
+
+### Por qué
+
+En viewport móvil estrecho, especialmente 320x568, el modal quedaba alto, con la cabecera incómoda y el iframe demasiado pequeño para los controles del visor externo. El fix evita tocar JS, Free, Pro, Legacy, carrusel, rutas o cualquier flujo estable.
+
+### Verificación
+
+- `git diff --check`: OK.
+- No se ejecutó `node --check` porque no se tocó JS.
+- Prueba manual responsive pendiente en navegador: 320x568, 390x844 y 768x1024.
+
+### Qué NO se tocó
+
+No se tocó `public/js/main.js`, `backend/views/home.php`, `public/index.php`, Free, Pro, Legacy, `setCarousel()`, dots, flechas, drag/swipe, autoplay, dashboard, BD, auth, uploads, visor Free/Pro, `tour-viewer.js`, rutas ni GitHub remoto. No se hizo commit ni push.
