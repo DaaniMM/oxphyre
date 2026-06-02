@@ -5033,3 +5033,27 @@ En viewport móvil estrecho, especialmente 320x568, el modal quedaba alto, con l
 ### Qué NO se tocó
 
 No se tocó `public/js/main.js`, `backend/views/home.php`, `public/index.php`, Free, Pro, Legacy, `setCarousel()`, dots, flechas, drag/swipe, autoplay, dashboard, BD, auth, uploads, visor Free/Pro, `tour-viewer.js`, rutas ni GitHub remoto. No se hizo commit ni push.
+
+---
+
+## 2026-06-02 — Ajuste responsive móvil del modal Legacy del carrusel
+
+### Qué se hizo
+
+Se aplicó un fix mínimo de responsive móvil al modal Legacy del carrusel, sin tocar JS ni markup.
+
+- `public/css/main.css`: dentro de `@media (max-width: 768px)`, se añadieron reglas específicas para `#carousel-modal:not(.carousel-modal--gaussian)`. El modal normal ahora respeta el header con padding superior, permite scroll interno, mantiene la X visible dentro del panel y limita el canvas legacy a una altura razonable para viewports estrechos.
+
+### Por qué
+
+El modal Legacy seguía usando el layout móvil base a pantalla completa y podía quedar incómodo en 320x568. El ajuste mejora usabilidad sin afectar al modo Business/Gaussian, que ya estaba validado, ni a Free/Pro.
+
+### Verificación
+
+- `git diff --check`: OK.
+- No se ejecutó `node --check` porque no se tocó JS.
+- Prueba manual responsive pendiente en navegador: Legacy en 320x568, 390x844 y 768x1024; Business Gaussian, Free y Pro como regresión.
+
+### Qué NO se tocó
+
+No se tocó `public/js/main.js`, `backend/views/home.php`, `public/index.php`, Business Gaussian, Free, Pro, dashboard, BD, auth, uploads, visor Free/Pro, rutas, `setCarousel()`, dots, flechas, drag/swipe, autoplay ni GitHub remoto. No se hizo commit ni push.

@@ -1045,6 +1045,36 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
     min-height: 58vh;
     max-height: 62vh;
   }
+  #carousel-modal:not(.carousel-modal--gaussian) {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: calc(var(--nav-h) + 8px) 10px 18px;
+  }
+  #carousel-modal:not(.carousel-modal--gaussian) #carousel-modal-content {
+    width: min(100%, 640px);
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  #carousel-modal:not(.carousel-modal--gaussian) #carousel-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 2200;
+    width: 34px;
+    height: 34px;
+  }
+  #carousel-modal:not(.carousel-modal--gaussian) #carousel-modal-canvas {
+    aspect-ratio: auto;
+    height: min(50vh, 340px);
+    min-height: 260px;
+    max-height: none;
+  }
+  #carousel-modal:not(.carousel-modal--gaussian) #carousel-modal-text {
+    padding: 14px 18px 18px;
+  }
   #carousel-modal.carousel-modal--gaussian {
     align-items: flex-start;
     overflow-y: auto;
