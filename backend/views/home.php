@@ -225,6 +225,19 @@
           <p id="carousel-modal-title"></p>
           <p id="carousel-modal-desc"></p>
         </div>
+        <div id="carousel-gaussian-panel" hidden>
+          <p id="carousel-gaussian-active-label"></p>
+          <p id="carousel-gaussian-note">Demo experimental generada desde vídeos reales de prueba. En producción se requeriría captura guiada y control de calidad.</p>
+          <div id="carousel-gaussian-selector" aria-label="Seleccionar demo Business Gaussian">
+            <button type="button" data-gaussian-demo="main">Demo principal</button>
+            <button type="button" data-gaussian-demo="gym_rack">Gym rack</button>
+            <button type="button" data-gaussian-demo="gym_cardio">Gym cardio</button>
+            <button type="button" data-gaussian-demo="salon_navidad">Salón Navidad</button>
+            <button type="button" data-gaussian-demo="ruta_rio">Ruta río</button>
+          </div>
+          <iframe id="carousel-gaussian-iframe" title="Demo Business Gaussian Splatting" allowfullscreen loading="lazy"></iframe>
+          <a id="carousel-gaussian-fullscreen" href="#" target="_blank" rel="noopener noreferrer">Abrir en pantalla completa</a>
+        </div>
       </div>
     </div>
 
@@ -270,7 +283,9 @@
         </div>
       </article>
 
-      <article class="carousel-card" data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/hotel_360.png">
+      <article class="carousel-card"
+               data-demo-type="business-gaussian"
+               data-modal-src="https://pub-b9106d772d3349409c0b98f07f931aa0.r2.dev/hotel_360.png">
         <img src="/assets/img/carousel/hotel_card.webp" alt="Habitación de hotel de lujo" loading="lazy">
         <div class="carousel-card-overlay">
           <span class="carousel-plan-tag carousel-plan-tag--business" data-i18n="carousel.tag_business">Business</span>

@@ -670,8 +670,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalDesc    = document.getElementById('carousel-modal-desc');
     const modalClose   = document.getElementById('carousel-modal-close');
     const modalOverlay = document.getElementById('carousel-modal-overlay');
+    const gaussianPanel      = document.getElementById('carousel-gaussian-panel');
+    const gaussianIframe     = document.getElementById('carousel-gaussian-iframe');
+    const gaussianSelector   = document.getElementById('carousel-gaussian-selector');
+    const gaussianFullscreen = document.getElementById('carousel-gaussian-fullscreen');
+    const gaussianActiveLabel = document.getElementById('carousel-gaussian-active-label');
+
+    const BUSINESS_GAUSSIAN_DEMOS = {
+      main: {
+        label: 'Demo principal',
+        url: 'https://vid2scene.com/viewer/50de3e74-782b-4f57-ab1e-f5991f3fc720/',
+        description: 'Demo principal provisional para el plan Business.'
+      },
+      gym_rack: {
+        label: 'Gym rack',
+        url: 'https://vid2scene.com/viewer/50de3e74-782b-4f57-ab1e-f5991f3fc720/',
+        description: 'Prueba técnica generada desde un vídeo real corto en zona de entrenamiento.'
+      },
+      gym_cardio: {
+        label: 'Gym cardio',
+        url: 'https://vid2scene.com/viewer/9690cdbd-4873-4859-8def-4cd3b267baee/',
+        description: 'Prueba técnica generada desde un vídeo real corto en zona cardio.'
+      },
+      salon_navidad: {
+        label: 'Salón Navidad',
+        url: 'https://vid2scene.com/viewer/b1726aae-a366-4cb5-ac24-b7a9c5092649/',
+        description: 'Prueba interior generada desde un vídeo corto.'
+      },
+      ruta_rio: {
+        label: 'Ruta río',
+        url: 'https://vid2scene.com/viewer/61d4f86c-aa00-4f72-8011-1f841baa00fa/',
+        description: 'Prueba exterior generada desde un vídeo en movimiento.'
+      }
+    };
+
+    const DEFAULT_BUSINESS_GAUSSIAN_DEMO = 'gym_rack';
 
     let modalViewer = null;
+    let activeGaussianDemo = DEFAULT_BUSINESS_GAUSSIAN_DEMO;
 
     function createModalViewer(src) {
       if (!modalCanvas) return null;
@@ -773,10 +809,57 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
+    function getBusinessGaussianDemo(key) {
+      return BUSINESS_GAUSSIAN_DEMOS[key] || BUSINESS_GAUSSIAN_DEMOS[DEFAULT_BUSINESS_GAUSSIAN_DEMO];
+    }
+
+    function setBusinessGaussianDemo(key) {
+      const nextKey = BUSINESS_GAUSSIAN_DEMOS[key] ? key : DEFAULT_BUSINESS_GAUSSIAN_DEMO;
+      const demo = getBusinessGaussianDemo(nextKey);
+      activeGaussianDemo = nextKey;
+
+      if (modalDesc) modalDesc.textContent = demo.description;
+      if (gaussianActiveLabel) gaussianActiveLabel.textContent = `Demo activa: ${demo.label}`;
+      if (gaussianIframe) gaussianIframe.src = demo.url;
+      if (gaussianFullscreen) gaussianFullscreen.href = demo.url;
+
+      gaussianSelector?.querySelectorAll('[data-gaussian-demo]').forEach(button => {
+        const isActive = button.dataset.gaussianDemo === activeGaussianDemo;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+
+    function resetBusinessGaussianModal() {
+      activeGaussianDemo = DEFAULT_BUSINESS_GAUSSIAN_DEMO;
+      if (gaussianIframe) gaussianIframe.src = '';
+      if (gaussianFullscreen) gaussianFullscreen.href = '#';
+      gaussianPanel?.setAttribute('hidden', '');
+      modalCanvas?.removeAttribute('hidden');
+      modal?.classList.remove('carousel-modal--gaussian');
+    }
+
+    function openBusinessGaussianModal() {
+      if (modalViewer) { modalViewer.dispose(); modalViewer = null; }
+      if (modalTitle) modalTitle.textContent = 'Business — Gaussian Splatting';
+      modalCanvas?.setAttribute('hidden', '');
+      gaussianPanel?.removeAttribute('hidden');
+      modal?.classList.add('carousel-modal--gaussian', 'open');
+      modal?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      clearInterval(autoTimer);
+      setBusinessGaussianDemo(DEFAULT_BUSINESS_GAUSSIAN_DEMO);
+    }
+
     function openCarouselModal(card) {
       const demoUrl = card.dataset.demoUrl || '';
       if (card.dataset.demoType === 'public-tour' && demoUrl !== '') {
         window.location.href = demoUrl;
+        return;
+      }
+
+      if (card.dataset.demoType === 'business-gaussian') {
+        openBusinessGaussianModal();
         return;
       }
 
@@ -798,6 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeCarouselModal() {
       if (modalViewer) { modalViewer.dispose(); modalViewer = null; }
+      resetBusinessGaussianModal();
       modal?.classList.remove('open');
       modal?.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
@@ -809,6 +893,11 @@ document.addEventListener('DOMContentLoaded', () => {
       modalOverlay?.addEventListener('click', closeCarouselModal);
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && modal.classList.contains('open')) closeCarouselModal();
+      });
+      gaussianSelector?.addEventListener('click', e => {
+        const button = e.target.closest('[data-gaussian-demo]');
+        if (!button) return;
+        setBusinessGaussianDemo(button.dataset.gaussianDemo);
       });
 
       // Click en card activa → modal; click en card lateral → prev/next

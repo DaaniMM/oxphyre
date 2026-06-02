@@ -4980,3 +4980,32 @@ Plan inicial:
 ### Qué NO se tocó
 
 No se modificó lógica de producción, base de datos, dashboard, visor Free/Pro, autenticación, rutas críticas ni despliegue funcional del proyecto.
+
+---
+
+## 2026-06-02 — Fase 1 demo Business Gaussian en carrusel landing
+
+### Qué se hizo
+
+Se implementó una primera integración contenida de la demo experimental Business/Gaussian dentro del carrusel de la landing.
+
+- `backend/views/home.php`: la card visible Hotel / Business queda marcada con `data-demo-type="business-gaussian"`. Se reutiliza el modal existente y se añade un panel oculto específico para Gaussian con iframe Vid2Scene, selector de demos y enlace "Abrir en pantalla completa".
+- `public/js/main.js`: se añade una rama aislada para `business-gaussian` antes del flujo legacy. Las demos quedan en un objeto controlado (`BUSINESS_GAUSSIAN_DEMOS`), sin aceptar URLs libres desde input. La demo por defecto es `gym_rack`; `main` queda preparado como alias provisional.
+- `public/css/main.css`: estilos específicos para el panel Gaussian, selector, iframe responsive y CTA de pantalla completa.
+- `public/index.php`: CSP ampliada solo con `frame-src 'self' https://vid2scene.com;` para permitir el iframe de Vid2Scene sin relajar otras directivas.
+
+### Por qué
+
+La demo Business/Gaussian se muestra como experimento premium para la exposición sin tocar dashboard, base de datos, auth, uploads, visor Free/Pro, rutas, controllers ni modelos. Free y Pro siguen abriendo sus tours reales mediante `data-demo-type="public-tour"`. Legacy sigue usando el modal Three.js legacy con `data-modal-src`.
+
+### Verificación
+
+- `git diff --check`: OK.
+- `node --check public/js/main.js`: OK.
+- `curl.exe -I` contra las 4 URLs Vid2Scene: HTTP 200 y sin `X-Frame-Options` visible en cabeceras HEAD.
+- `php -l backend/views/home.php` y `php -l public/index.php`: no ejecutados porque `php` no está disponible en el PATH local de Windows.
+- Prueba manual en navegador pendiente: en este entorno no hay PHP local ni herramienta de navegador disponible para servir y comprobar la landing modificada.
+
+### Qué NO se tocó
+
+No se tocó Free, Pro, Legacy salvo añadir una rama previa para Business, ni `setCarousel()`, dots, flechas, drag/swipe, autoplay, dashboard, BD, auth, uploads, `public/js/tour-viewer.js`, rutas críticas, controllers, modelos ni GitHub remoto. No se hizo commit ni push.

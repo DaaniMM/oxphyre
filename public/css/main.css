@@ -919,6 +919,11 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   touch-action: none;
 }
 
+#carousel-modal-canvas[hidden],
+#carousel-gaussian-panel[hidden] {
+  display: none;
+}
+
 #carousel-modal-text {
   padding: 24px 28px 28px;
 }
@@ -941,6 +946,78 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
   line-height: 1.35;
 }
 
+#carousel-gaussian-panel {
+  padding: 0 28px 28px;
+}
+
+#carousel-modal.carousel-modal--gaussian #carousel-modal-content {
+  width: min(94vw, 1500px);
+}
+
+#carousel-modal.carousel-modal--gaussian #carousel-modal-text {
+  padding-bottom: 14px;
+}
+
+#carousel-gaussian-note {
+  max-width: 980px;
+  margin-bottom: 16px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+#carousel-gaussian-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#carousel-gaussian-selector button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+#carousel-gaussian-selector button:hover,
+#carousel-gaussian-selector button.active {
+  color: var(--accent);
+  border-color: rgba(254, 179, 84, 0.55);
+  background: rgba(254, 179, 84, 0.12);
+}
+
+#carousel-gaussian-iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 520px;
+  max-height: 66vh;
+  display: block;
+  border: 1px solid rgba(254, 179, 84, 0.18);
+  border-radius: 12px;
+  background: #000;
+}
+
+#carousel-gaussian-fullscreen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  border: 1px solid rgba(254, 179, 84, 0.45);
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: var(--accent);
+  background: rgba(254, 179, 84, 0.1);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 @media (max-width: 768px) {
   #carousel-modal { align-items: flex-start; }
   #carousel-modal-content {
@@ -949,6 +1026,15 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
     max-height: 100%;
     border-radius: 0;
     border: none;
+  }
+  #carousel-modal-text,
+  #carousel-gaussian-panel {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  #carousel-gaussian-iframe {
+    min-height: 58vh;
+    max-height: 62vh;
   }
 }
 
