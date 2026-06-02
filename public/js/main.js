@@ -103,25 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── 3. TEMA DÍA/NOCHE ───────────────────────────────────────────────────
   const themeBtn    = document.getElementById('theme-toggle');
-  const saved       = localStorage.getItem('oxphyre-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initTheme   = saved ?? (prefersDark ? 'dark' : 'light');
-
-  function setTheme(theme) {
-    document.body.classList.toggle('light', theme === 'light');
-    localStorage.setItem('oxphyre-theme', theme);
-    if (themeBtn) {
-      themeBtn.setAttribute('aria-label', theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro');
-      themeBtn.dataset.theme = theme;
-    }
-  }
-
-  setTheme(initTheme);
+  document.body.classList.remove('light');
+  localStorage.removeItem('oxphyre-theme');
 
   if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
-      const current = localStorage.getItem('oxphyre-theme') || 'dark';
-      setTheme(current === 'dark' ? 'light' : 'dark');
+    themeBtn.dataset.theme = 'dark';
+    themeBtn.setAttribute('aria-label', 'Modo claro próximamente');
+    themeBtn.setAttribute('aria-disabled', 'true');
+    themeBtn.setAttribute('title', 'Próximamente');
+    themeBtn.addEventListener('click', event => {
+      event.preventDefault();
     });
   }
 

@@ -5083,3 +5083,29 @@ En viewports móviles tipo iPhone el menú abierto ocupaba más alto del necesar
 ### Qué NO se tocó
 
 No se tocó JS, Business Gaussian, modal Legacy, carrusel, Free/Pro, dashboard, BD, auth, uploads, visor público, rutas ni GitHub remoto. No se hizo commit ni push.
+
+---
+
+## 2026-06-02 — Toggle de tema marcado como próximamente
+
+### Qué se hizo
+
+Se desactivó funcionalmente el toggle claro/oscuro de la landing manteniéndolo visible como elemento de roadmap.
+
+- `backend/views/home.php`: el botón `#theme-toggle` mantiene el icono visible, pero ahora declara `aria-disabled="true"`, `title="Próximamente"` y `aria-label="Modo claro próximamente"`.
+- `public/js/main.js`: se elimina la aplicación del modo claro en carga, se borra la preferencia antigua `oxphyre-theme` de `localStorage`, se fuerza el estado visual `data-theme="dark"` y el click solo hace `preventDefault()` sin cambiar clases ni guardar estado.
+- `public/css/main.css`: se añade estilo de estado deshabilitado con cursor `not-allowed` y tooltip sencillo "Próximamente" en hover/focus.
+
+### Por qué
+
+El modo claro no tiene todavía una paleta completa y podía activar un estado visual incompleto. Se mantiene el toggle como señal de roadmap sin permitir que cambie el tema.
+
+### Verificación
+
+- `git diff --check`: OK.
+- `node --check public/js/main.js`: OK.
+- `php -l backend/views/home.php`: no ejecutado porque `php` no está disponible en el PATH local de Windows.
+
+### Qué NO se tocó
+
+No se tocó Business Gaussian, modal Legacy, Free/Pro, carrusel, dashboard, BD, auth, uploads, visor público, rutas ni GitHub remoto. No se hizo commit ni push.

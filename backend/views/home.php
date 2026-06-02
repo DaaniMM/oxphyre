@@ -124,7 +124,7 @@
     </div>
 
     <div class="nav-actions">
-      <button id="theme-toggle" aria-label="Activar modo claro" data-theme="dark">
+      <button id="theme-toggle" aria-label="Modo claro próximamente" aria-disabled="true" title="Próximamente" data-theme="dark">
         <i data-lucide="sun" width="18" height="18"></i>
       </button>
       <button class="lang-btn active" data-lang="es" aria-label="Español">ES</button>

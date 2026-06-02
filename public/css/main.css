@@ -576,6 +576,7 @@ body.phase-2 #nav-logo-solo {
 }
 
 #theme-toggle {
+  position: relative;
   width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
   color: var(--text-2);
@@ -583,6 +584,43 @@ body.phase-2 #nav-logo-solo {
   transition: color var(--transition), background var(--transition);
 }
 #theme-toggle:hover { color: var(--text-1); background: rgba(255,255,255,0.06); }
+
+#theme-toggle[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+#theme-toggle[aria-disabled="true"]:hover,
+#theme-toggle[aria-disabled="true"]:focus-visible {
+  color: var(--text-2);
+  background: rgba(255,255,255,0.04);
+}
+
+#theme-toggle[aria-disabled="true"]::after {
+  content: "Próximamente";
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  border: 1px solid rgba(254, 179, 84, 0.28);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--accent);
+  background: rgba(5, 5, 5, 0.92);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+#theme-toggle[aria-disabled="true"]:hover::after,
+#theme-toggle[aria-disabled="true"]:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .lang-btn {
   font-size: 12px;
