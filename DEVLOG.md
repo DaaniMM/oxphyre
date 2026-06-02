@@ -5057,3 +5057,29 @@ El modal Legacy seguía usando el layout móvil base a pantalla completa y podí
 ### Qué NO se tocó
 
 No se tocó `public/js/main.js`, `backend/views/home.php`, `public/index.php`, Business Gaussian, Free, Pro, dashboard, BD, auth, uploads, visor Free/Pro, rutas, `setCarousel()`, dots, flechas, drag/swipe, autoplay ni GitHub remoto. No se hizo commit ni push.
+
+---
+
+## 2026-06-02 — Ajuste compacto del menú burger móvil
+
+### Qué se hizo
+
+Se compactó el overlay del menú móvil de la landing sin tocar JS.
+
+- `public/css/main.css`: en `#mobile-menu` se añadió `max-height: 100svh`, se redujo padding vertical, gap y se mantuvo `overflow-y: auto` como fallback con `overscroll-behavior: contain`.
+- `#mobile-menu a`: se redujo ligeramente el tamaño responsive de los enlaces y se fijó `line-height` compacto.
+- `.mobile-menu-footer`: se redujo el gap interno.
+
+### Por qué
+
+En viewports móviles tipo iPhone el menú abierto ocupaba más alto del necesario y podía requerir scroll para ver todos los enlaces. El ajuste mantiene la estética actual y mejora que el menú quepa en 390x844, conservando scroll interno solo como fallback en pantallas más bajas.
+
+### Verificación
+
+- `git diff --check`: OK.
+- No se ejecutó `node --check` porque no se tocó JS.
+- Prueba manual responsive pendiente en navegador: 320x568, 390x844, 768x1024 y desktop.
+
+### Qué NO se tocó
+
+No se tocó JS, Business Gaussian, modal Legacy, carrusel, Free/Pro, dashboard, BD, auth, uploads, visor público, rutas ni GitHub remoto. No se hizo commit ni push.

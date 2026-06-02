@@ -643,9 +643,11 @@ body.phase-2 #nav-logo-solo {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start; /* empieza desde arriba, predecible */
-  padding: 76px 32px 40px;    /* 76px top = espacio para logo + botón cerrar */
-  gap: clamp(20px, 4vh, 36px);
+  max-height: 100svh;
+  padding: 72px 28px 28px;    /* 72px top = espacio para logo + botón cerrar */
+  gap: clamp(14px, 2.6vh, 24px);
   overflow-y: auto;            /* safety net en pantallas muy cortas */
+  overscroll-behavior: contain;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -653,16 +655,17 @@ body.phase-2 #nav-logo-solo {
 #mobile-menu.open { opacity: 1; pointer-events: auto; }
 #mobile-menu a {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 7vw, 2.1rem); /* ~24-33px razonable en 390px */
+  font-size: clamp(1.28rem, 5.4vw, 1.75rem);
   font-weight: 600;
   color: var(--text-1);
+  line-height: 1.12;
   transition: color var(--transition);
 }
 #mobile-menu a:hover { color: var(--accent); }
 
 .mobile-menu-footer {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
 }
 
