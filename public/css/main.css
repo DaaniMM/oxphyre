@@ -1036,6 +1036,48 @@ body.phase-2 #scroll-hint.hide { opacity: 0; }
     min-height: 58vh;
     max-height: 62vh;
   }
+  #carousel-modal.carousel-modal--gaussian {
+    align-items: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: calc(var(--nav-h) + 12px) 10px 18px;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-modal-content {
+    width: min(100%, 640px);
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: visible;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-modal-close {
+    position: fixed;
+    top: calc(var(--nav-h) + 10px);
+    right: 14px;
+    z-index: 2200;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-modal-text {
+    padding-top: 20px;
+    padding-bottom: 12px;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-gaussian-note {
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-gaussian-selector {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-gaussian-selector button {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+  #carousel-modal.carousel-modal--gaussian #carousel-gaussian-iframe {
+    aspect-ratio: auto;
+    height: min(42vh, 260px);
+    min-height: 220px;
+    max-height: none;
+  }
 }
 
 
