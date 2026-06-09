@@ -875,7 +875,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (openCarouselDemoInNewTab(card.dataset.modalSrc || '')) return;
+      const isLegacyCard = card.querySelector('.carousel-plan-tag--legacy');
+      if (!isLegacyCard && openCarouselDemoInNewTab(card.dataset.modalSrc || '')) return;
 
       const title = card.querySelector('.carousel-card-title');
       const desc  = card.querySelector('.carousel-card-text');
