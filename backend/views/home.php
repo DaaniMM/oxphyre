@@ -405,14 +405,44 @@
       </p>
     </div>
 
-    <div class="video-wrapper animate-on-scroll">
-      <div class="video-placeholder">
-        <button class="video-play-btn" aria-label="Reproducir vídeo demo">
-          <i data-lucide="play" width="32" height="32"></i>
-        </button>
-        <p>Demo disponible pronto</p>
-      </div>
+    <div class="video-wrapper gaussian-demo-wrapper animate-on-scroll" id="gaussian-demo-wrapper">
+      <iframe
+        id="gaussian-demo-viewer"
+        class="gaussian-demo-frame"
+        title="Demo externa Gaussian Splatting"
+        src="https://superspl.at/s?id=131894f2"
+        loading="lazy"
+        allow="fullscreen; xr-spatial-tracking"
+        allowfullscreen></iframe>
+
+      <button
+        type="button"
+        class="gaussian-demo-overlay"
+        id="gaussian-demo-overlay"
+        aria-label="Explorar demo experimental externa de Gaussian Splatting">
+        <span class="gaussian-demo-kicker">Demo externa experimental</span>
+        <span class="gaussian-demo-title">Explorar demo experimental</span>
+        <span class="gaussian-demo-hint">Gaussian Splatting · WASD / ratón</span>
+        <span class="gaussian-demo-note">Puede que necesites hacer click dentro del visor para activar los controles.</span>
+      </button>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const wrapper = document.getElementById('gaussian-demo-wrapper');
+        const overlay = document.getElementById('gaussian-demo-overlay');
+        const iframe = document.getElementById('gaussian-demo-viewer');
+
+        if (!wrapper || !overlay || !iframe) return;
+
+        overlay.addEventListener('click', () => {
+          wrapper.classList.add('is-active');
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.disabled = true;
+          iframe.focus({ preventScroll: true });
+        });
+      });
+    </script>
 
     <p class="demo-embed animate-on-scroll" data-i18n="demo.embed_text">
       ¿Tienes web propia? Embebe el tour directamente con un snippet de código.
