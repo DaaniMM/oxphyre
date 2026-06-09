@@ -869,8 +869,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (card.dataset.demoType === 'business-gaussian') {
-        const demo = getBusinessGaussianDemo(DEFAULT_BUSINESS_GAUSSIAN_DEMO);
-        if (openCarouselDemoInNewTab(demo.url)) return;
         openBusinessGaussianModal();
         return;
       }
