@@ -410,7 +410,7 @@
         id="gaussian-demo-viewer"
         class="gaussian-demo-frame"
         title="Demo externa Gaussian Splatting"
-        src="https://superspl.at/s?id=131894f2"
+        data-src="https://superspl.at/s?id=131894f2"
         loading="lazy"
         allow="fullscreen; xr-spatial-tracking"
         allowfullscreen></iframe>
@@ -436,6 +436,9 @@
         if (!wrapper || !overlay || !iframe) return;
 
         overlay.addEventListener('click', () => {
+          if (!iframe.getAttribute('src')) {
+            iframe.src = iframe.dataset.src || '';
+          }
           wrapper.classList.add('is-active');
           overlay.setAttribute('aria-hidden', 'true');
           overlay.disabled = true;
