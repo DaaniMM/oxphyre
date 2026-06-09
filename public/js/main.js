@@ -842,17 +842,27 @@ document.addEventListener('DOMContentLoaded', () => {
       setBusinessGaussianDemo(DEFAULT_BUSINESS_GAUSSIAN_DEMO);
     }
 
+    function openCarouselDemoInNewTab(url) {
+      if (!url) return false;
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return true;
+    }
+
     function openCarouselModal(card) {
       const demoUrl = card.dataset.demoUrl || '';
       if (card.dataset.demoType === 'public-tour' && demoUrl !== '') {
-        window.location.href = demoUrl;
+        openCarouselDemoInNewTab(demoUrl);
         return;
       }
 
       if (card.dataset.demoType === 'business-gaussian') {
+        const demo = getBusinessGaussianDemo(DEFAULT_BUSINESS_GAUSSIAN_DEMO);
+        if (openCarouselDemoInNewTab(demo.url)) return;
         openBusinessGaussianModal();
         return;
       }
+
+      if (openCarouselDemoInNewTab(card.dataset.modalSrc || '')) return;
 
       const title = card.querySelector('.carousel-card-title');
       const desc  = card.querySelector('.carousel-card-text');
