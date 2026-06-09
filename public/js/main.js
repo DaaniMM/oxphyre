@@ -51,6 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const skipInitialLoader = window.innerWidth <= 768
+      || window.matchMedia('(hover: none), (pointer: coarse)').matches
+      || window.innerWidth < 1024;
+
+    if (skipInitialLoader) {
+      loader.classList.add('hidden');
+      document.documentElement.style.scrollBehavior = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.scrollbarWidth = '';
+      document.body.classList.add('phase-2');
+      return;
+    }
+
     // BUG 12: beam recorre exactamente la anchura de OXPHYRE (de O a E)
     setTimeout(() => {
       const textEl    = document.getElementById('loader-text');
