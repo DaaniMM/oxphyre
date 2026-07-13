@@ -153,3 +153,6 @@ public/assets/img/carousel/originals/
 # archivos patch/diff locales
 *.patch
 *.diff
+
+# Local AI assistant config
+.claude/
