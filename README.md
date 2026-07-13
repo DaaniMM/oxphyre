@@ -24,13 +24,24 @@ The platform includes public marketing pages, user authentication, a private das
 
 ![Oxphyre Landing Hero Section](docs/screenshots/landing-hero.png)
 
-### SaaS Pricing Plans
-
-![Oxphyre Pricing Plans](docs/screenshots/pricing-plans.png)
-
 ### Dashboard — Business and Virtual Tour Management
 
 ![Oxphyre Dashboard Tour Management](docs/screenshots/dashboard-tour-management.png)
+
+### Oxphyre Room — Panoramic Viewer
+
+![Oxphyre Room Panoramic Viewer](docs/screenshots/oxphyre-room-viewer.png)
+
+### Roadmap — Gaussian Splatting Test
+
+![Oxphyre Gaussian Splatting Roadmap](docs/screenshots/gaussian-splatting-roadmap.png)
+
+<details>
+<summary>More screenshots</summary>
+
+### SaaS Pricing Plans
+
+![Oxphyre Pricing Plans](docs/screenshots/pricing-plans.png)
 
 ### Dashboard — Image Management
 
@@ -40,10 +51,6 @@ The platform includes public marketing pages, user authentication, a private das
 
 ![Oxphyre Dashboard Analytics](docs/screenshots/dashboard-analytics.png)
 
-### Oxphyre Room — Panoramic Viewer
-
-![Oxphyre Room Panoramic Viewer](docs/screenshots/oxphyre-room-viewer.png)
-
 ### Oxphyre Room — Business Location Map
 
 ![Oxphyre Room Business Location Map](docs/screenshots/oxphyre-room-map.png)
@@ -52,10 +59,7 @@ The platform includes public marketing pages, user authentication, a private das
 
 ![Oxphyre Room Detail View](docs/screenshots/oxphyre-room-detail.png)
 
-### Roadmap — Gaussian Splatting Test
-
-![Oxphyre Gaussian Splatting Roadmap](docs/screenshots/gaussian-splatting-roadmap.png)
-
+</details>
 ---
 
 ## Main Features
