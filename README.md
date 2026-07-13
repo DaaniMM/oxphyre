@@ -60,6 +60,7 @@ The platform includes public marketing pages, user authentication, a private das
 ![Oxphyre Room Detail View](docs/screenshots/oxphyre-room-detail.png)
 
 </details>
+
 ---
 
 ## Main Features
