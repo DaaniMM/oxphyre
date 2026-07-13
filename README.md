@@ -61,7 +61,7 @@ The platform includes public marketing pages, user authentication, a private das
 
 </details>
 
----
+
 
 ## Main Features
 
